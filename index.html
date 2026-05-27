@@ -1,0 +1,3933 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HereWork — Marketplace de Freelancers</title>
+<meta name="description" content="Encontre os melhores freelancers para o seu projeto. Rápido, seguro e sem complicações.">
+
+<style>
+/* ═══════════════════════════════════════════
+   VARIÁVEIS & RESET
+═══════════════════════════════════════════ */
+:root {
+  --green:        #2E7D32;
+  --green-dark:   #1B5E20;
+  --green-light:  #E8F5E9;
+  --green-mid:    #4CAF50;
+  --orange:       #F4511E;
+  --orange-light: #FFF3EF;
+  --orange-mid:   #FF7043;
+
+  --blue:         #1565C0;
+  --blue-light:   #E3F2FD;
+
+  --bg:           #FFFFFF;
+  --surface:      #F7F8FA;
+  --surface-2:    #EEF0F4;
+  --border:       #E0E4EA;
+  --border-2:     #C8CDD6;
+
+  --text:         #1C2B3A;
+  --text-2:       #4A5568;
+  --text-3:       #8A96A8;
+  --text-inv:     #FFFFFF;
+
+  --shadow-sm:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+  --shadow:       0 4px 16px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+  --shadow-md:    0 8px 30px rgba(0,0,0,0.10), 0 3px 10px rgba(0,0,0,0.06);
+  --shadow-lg:    0 20px 60px rgba(0,0,0,0.12);
+
+  --radius-sm:    6px;
+  --radius:       10px;
+  --radius-md:    14px;
+  --radius-lg:    20px;
+  --radius-full:  999px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', sans-serif;
+  --transition: 0.18s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: var(--font); }
+input, select, textarea { font-family: var(--font); }
+ul { list-style: none; }
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* ═══════════════════════════════════════════
+   UTILITÁRIOS
+═══════════════════════════════════════════ */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.container-wide { max-width: 1400px; margin: 0 auto; padding: 0 24px; }
+.flex   { display: flex; }
+.flex-c { display: flex; align-items: center; }
+.flex-cb{ display: flex; align-items: center; justify-content: space-between; }
+.grid   { display: grid; }
+.hidden { display: none !important; }
+.tag {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 600;
+}
+.tag-green { background: var(--green-light); color: var(--green-dark); }
+.tag-orange { background: var(--orange-light); color: #C62828; }
+.tag-gray { background: var(--surface-2); color: var(--text-2); }
+.tag-blue { background: var(--blue-light); color: var(--blue); }
+
+/* ═══════════════════════════════════════════
+   BOTÕES
+═══════════════════════════════════════════ */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--orange);
+  color: #fff;
+  border-color: var(--orange);
+}
+.btn-primary:hover {
+  background: #D84315;
+  border-color: #D84315;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(244,81,30,0.35);
+}
+.btn-green {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+.btn-green:hover {
+  background: var(--green-dark);
+  border-color: var(--green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(46,125,50,0.35);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-2);
+}
+.btn-outline:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-light);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text-2);
+  border-color: transparent;
+}
+.btn-ghost:hover { color: var(--green); background: var(--green-light); }
+.btn-sm  { padding: 7px 14px; font-size: 13px; border-radius: var(--radius-sm); }
+.btn-lg  { padding: 13px 28px; font-size: 15px; border-radius: var(--radius-md); }
+.btn-xl  { padding: 16px 36px; font-size: 16px; border-radius: var(--radius-md); }
+.btn-block { width: 100%; }
+
+/* ═══════════════════════════════════════════
+   BARRA DE IDIOMA (TOPO)
+═══════════════════════════════════════════ */
+.topbar {
+  background: var(--green-dark);
+  color: rgba(255,255,255,0.85);
+  font-size: 12.5px;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  padding: 0 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.topbar-link {
+  color: rgba(255,255,255,0.78);
+  transition: color var(--transition);
+}
+.topbar-link:hover { color: #fff; }
+.topbar-sep { color: rgba(255,255,255,0.25); }
+.lang-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: var(--radius-full);
+  padding: 3px;
+}
+.lang-btn {
+  padding: 3px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  transition: all var(--transition);
+  letter-spacing: 0.3px;
+}
+.lang-btn.active {
+  background: #fff;
+  color: var(--green-dark);
+}
+.lang-btn:not(.active):hover { color: #fff; }
+
+/* ═══════════════════════════════════════════
+   HEADER / NAVEGAÇÃO PRINCIPAL
+═══════════════════════════════════════════ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 500;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+.header-inner {
+  display: flex;
+  align-items: center;
+  height: 66px;
+  gap: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  text-decoration: none;
+}
+.logo-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+}
+.logo-text {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -0.5px;
+}
+.logo-text span { color: var(--orange); }
+
+/* Search bar no header */
+.header-search {
+  flex: 1;
+  max-width: 480px;
+  position: relative;
+}
+.header-search-input {
+  width: 100%;
+  height: 40px;
+  padding: 0 16px 0 42px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-full);
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  transition: border-color var(--transition), background var(--transition);
+  outline: none;
+}
+.header-search-input:focus {
+  border-color: var(--green);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
+}
+.header-search-input::placeholder { color: var(--text-3); }
+.header-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  font-size: 16px;
+  pointer-events: none;
+}
+.header-search-btn {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.header-search-btn:hover { background: var(--green-dark); }
+
+/* Nav links */
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+.nav-link {
+  padding: 7px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  border-radius: var(--radius);
+  transition: all var(--transition);
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+.nav-link:hover { color: var(--green); background: var(--green-light); }
+.nav-link.active { color: var(--green); font-weight: 700; }
+
+/* Auth area */
+.header-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.header-auth .btn-login {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: var(--radius);
+  transition: all var(--transition);
+}
+.header-auth .btn-login:hover { color: var(--green); background: var(--green-light); }
+
+/* ═══════════════════════════════════════════
+   PÁGINAS (SPA)
+═══════════════════════════════════════════ */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ═══════════════════════════════════════════
+   HERO SECTION
+═══════════════════════════════════════════ */
+.hero {
+  background: linear-gradient(135deg, #F0F7F1 0%, #EAF4FF 50%, #FFF8F5 100%);
+  padding: 72px 24px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(46,125,50,0.06) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(244,81,30,0.05) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--green-dark);
+  margin-bottom: 22px;
+  box-shadow: var(--shadow-sm);
+}
+.hero-label-dot {
+  width: 7px; height: 7px;
+  background: var(--green-mid);
+  border-radius: 50%;
+  animation: pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.7; }
+}
+.hero-title {
+  font-size: clamp(30px, 5vw, 52px);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  color: var(--text);
+  margin-bottom: 16px;
+  position: relative;
+}
+.hero-title .highlight { color: var(--green); }
+.hero-title .highlight-orange { color: var(--orange); }
+.hero-subtitle {
+  font-size: clamp(16px, 2vw, 19px);
+  color: var(--text-2);
+  margin-bottom: 40px;
+  max-width: 580px;
+  margin-left: auto;
+  margin-right: auto;
+  font-weight: 400;
+  position: relative;
+}
+
+/* Search box hero */
+.hero-search {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  position: relative;
+}
+.hero-search-box {
+  display: flex;
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.hero-search-box:focus-within {
+  border-color: var(--green);
+  box-shadow: 0 4px 24px rgba(46,125,50,0.15);
+}
+.hero-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 16px 22px;
+  font-size: 16px;
+  color: var(--text);
+  background: transparent;
+}
+.hero-search-input::placeholder { color: var(--text-3); }
+.hero-search-select {
+  border: none;
+  border-left: 1.5px solid var(--border);
+  outline: none;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-2);
+  background: var(--surface);
+  cursor: pointer;
+  min-width: 150px;
+}
+.hero-search-btn {
+  background: var(--orange);
+  color: #fff;
+  border: none;
+  padding: 0 28px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hero-search-btn:hover { background: #D84315; }
+
+/* Quick tags */
+.hero-tags {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  position: relative;
+}
+.hero-tags-label {
+  font-size: 13px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.hero-quick-tag {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  color: var(--text-2);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+.hero-quick-tag:hover {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-light);
+}
+
+/* Hero CTAs */
+.hero-cta-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  position: relative;
+}
+.hero-cta-divider {
+  font-size: 13px;
+  color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════
+   BARRA DE STATS
+═══════════════════════════════════════════ */
+.stats-bar {
+  background: #fff;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 22px 24px;
+}
+.stats-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  flex-wrap: wrap;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 40px;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-value {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -0.8px;
+  line-height: 1;
+}
+.stat-value .stat-accent { color: var(--green); }
+.stat-label {
+  font-size: 13px;
+  color: var(--text-3);
+  margin-top: 4px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* ═══════════════════════════════════════════
+   SECTION COMMONS
+═══════════════════════════════════════════ */
+section { padding: 64px 0; }
+.section-header { margin-bottom: 40px; }
+.section-label-tag {
+  display: inline-block;
+  background: var(--green-light);
+  color: var(--green-dark);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+}
+.section-title {
+  font-size: clamp(24px, 3.5vw, 36px);
+  font-weight: 800;
+  letter-spacing: -0.8px;
+  color: var(--text);
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+.section-subtitle {
+  font-size: 16px;
+  color: var(--text-2);
+  max-width: 500px;
+  line-height: 1.7;
+}
+.section-header.center { text-align: center; }
+.section-header.center .section-subtitle { margin: 0 auto; }
+
+/* ═══════════════════════════════════════════
+   CATEGORIAS
+═══════════════════════════════════════════ */
+.categories-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 16px;
+}
+.cat-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px 16px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+}
+.cat-card:hover {
+  border-color: var(--green);
+  background: var(--green-light);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.cat-card:hover .cat-icon { background: var(--green); }
+.cat-card:hover .cat-icon svg { stroke: #fff; }
+.cat-icon {
+  width: 52px; height: 52px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition);
+  flex-shrink: 0;
+}
+.cat-icon svg { width: 26px; height: 26px; stroke: var(--green); transition: stroke var(--transition); }
+.cat-name {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+.cat-count {
+  font-size: 12px;
+  color: var(--text-3);
+  margin-top: -4px;
+}
+
+/* ═══════════════════════════════════════════
+   COMO FUNCIONA
+═══════════════════════════════════════════ */
+.how-section { background: #fff; }
+.how-tabs {
+  display: flex;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 5px;
+  width: fit-content;
+  margin: 0 auto 48px;
+  gap: 4px;
+}
+.how-tab {
+  padding: 9px 28px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.how-tab.active {
+  background: var(--green);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(46,125,50,0.25);
+}
+.how-tab:not(.active):hover { color: var(--green); background: var(--green-light); }
+.how-content { display: none; }
+.how-content.active { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+.how-step {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px 32px;
+  text-align: center;
+  position: relative;
+  transition: all var(--transition);
+}
+.how-step:hover {
+  border-color: var(--green);
+  background: var(--green-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.how-step-num {
+  width: 36px; height: 36px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  box-shadow: 0 4px 12px rgba(46,125,50,0.3);
+}
+.how-step-icon { font-size: 44px; margin-bottom: 16px; line-height: 1; }
+.how-step-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+.how-step-desc {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.7;
+}
+.how-connector {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════
+   FREELANCERS EM DESTAQUE
+═══════════════════════════════════════════ */
+.freelancers-highlight { background: var(--surface); }
+.freelancers-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.fl-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px 20px;
+  transition: all var(--transition);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.fl-card:hover {
+  border-color: var(--green);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.fl-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.fl-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: #fff;
+  font-size: 18px;
+}
+.fl-info { flex: 1; min-width: 0; }
+.fl-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+.fl-role {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.fl-location {
+  font-size: 11.5px;
+  color: var(--text-3);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.fl-badges { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+.fl-badge-top {
+  background: var(--orange-light);
+  color: var(--orange);
+  border: 1px solid rgba(244,81,30,0.2);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.fl-badge-verified {
+  background: var(--blue-light);
+  color: var(--blue);
+  border: 1px solid rgba(21,101,192,0.2);
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+.fl-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.fl-stars { color: #F59E0B; font-size: 13px; letter-spacing: 1px; }
+.fl-rating-val { font-size: 13px; font-weight: 700; color: var(--text); }
+.fl-rating-count { font-size: 12px; color: var(--text-3); }
+.fl-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+.fl-skill {
+  background: var(--surface-2);
+  color: var(--text-2);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  font-size: 11.5px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+}
+.fl-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  margin-top: auto;
+}
+.fl-rate {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+.fl-rate span { font-size: 12px; font-weight: 400; color: var(--text-3); }
+.fl-stats { font-size: 12px; color: var(--text-3); text-align: right; }
+
+/* ═══════════════════════════════════════════
+   PROJETOS EM DESTAQUE
+═══════════════════════════════════════════ */
+.projects-highlight { background: #fff; }
+.projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.proj-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px;
+  cursor: pointer;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.proj-card:hover {
+  border-color: var(--green);
+  background: #fff;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.proj-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.proj-cat {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--green);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: var(--green-light);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+}
+.proj-budget {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  white-space: nowrap;
+}
+.proj-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+}
+.proj-desc {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.65;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.proj-skills { display: flex; flex-wrap: wrap; gap: 5px; }
+.proj-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+.proj-meta { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 12px; }
+.proj-proposals {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--orange);
+  background: var(--orange-light);
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+}
+
+/* ═══════════════════════════════════════════
+   DEPOIMENTOS
+═══════════════════════════════════════════ */
+.testimonials-section { background: var(--surface); border-top: 1px solid var(--border); }
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.testi-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 24px 22px;
+  transition: all var(--transition);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.testi-card:hover {
+  border-color: var(--green);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+.testi-stars { color: #F59E0B; font-size: 14px; letter-spacing: 2px; }
+.testi-text {
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.75;
+  font-style: italic;
+  flex: 1;
+}
+.testi-author { display: flex; align-items: center; gap: 12px; padding-top: 14px; border-top: 1px solid var(--border); }
+.testi-avatar {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  font-size: 15px;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.testi-name { font-size: 13.5px; font-weight: 700; color: var(--text); }
+.testi-role { font-size: 12px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════
+   SELOS DE CONFIANÇA
+═══════════════════════════════════════════ */
+.trust-section { background: #fff; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.trust-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+.trust-card {
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  transition: all var(--transition);
+}
+.trust-card:hover { border-color: var(--green); background: var(--green-light); transform: translateY(-3px); }
+.trust-icon { font-size: 38px; margin-bottom: 14px; display: block; }
+.trust-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.trust-desc { font-size: 13.5px; color: var(--text-2); line-height: 1.65; }
+
+/* ═══════════════════════════════════════════
+   CTA SECTION
+═══════════════════════════════════════════ */
+.cta-section {
+  background: linear-gradient(135deg, var(--green-dark) 0%, #1B5E20 50%, #2E7D32 100%);
+  color: #fff;
+  padding: 80px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(244,81,30,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+.cta-inner { position: relative; max-width: 700px; margin: 0 auto; }
+.cta-title { font-size: clamp(26px, 4vw, 42px); font-weight: 900; letter-spacing: -1px; margin-bottom: 14px; line-height: 1.15; }
+.cta-subtitle { font-size: 17px; color: rgba(255,255,255,0.8); margin-bottom: 36px; line-height: 1.6; }
+.cta-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.btn-white {
+  background: #fff;
+  color: var(--green-dark);
+  border: 2px solid #fff;
+  font-weight: 700;
+}
+.btn-white:hover { background: #F0F7F1; box-shadow: 0 4px 16px rgba(0,0,0,0.2); transform: translateY(-2px); }
+.btn-white-outline {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.5);
+  font-weight: 700;
+}
+.btn-white-outline:hover { border-color: #fff; background: rgba(255,255,255,0.1); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════════ */
+.footer {
+  background: #1C2B3A;
+  color: rgba(255,255,255,0.75);
+  padding: 60px 24px 0;
+}
+.footer-inner { max-width: 1200px; margin: 0 auto; }
+.footer-top {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  gap: 48px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.footer-brand-desc {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.75;
+  margin-top: 14px;
+  max-width: 280px;
+}
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+.footer-social {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.footer-social a {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: rgba(255,255,255,0.65);
+  transition: all var(--transition);
+}
+.footer-social a:hover { background: var(--green); border-color: var(--green); color: #fff; }
+.footer-col-title {
+  font-size: 11.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255,255,255,0.9);
+  margin-bottom: 16px;
+}
+.footer-links { display: flex; flex-direction: column; gap: 10px; }
+.footer-links a {
+  font-size: 13.5px;
+  color: rgba(255,255,255,0.55);
+  transition: color var(--transition);
+}
+.footer-links a:hover { color: #fff; }
+.footer-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  font-size: 12.5px;
+  color: rgba(255,255,255,0.35);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.footer-bottom-links { display: flex; gap: 20px; }
+.footer-bottom-links a { color: rgba(255,255,255,0.35); transition: color var(--transition); }
+.footer-bottom-links a:hover { color: rgba(255,255,255,0.7); }
+.footer-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 24px; }
+.footer-badge {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+/* ═══════════════════════════════════════════
+   PÁGINA INTERNA — HERO BANNER
+═══════════════════════════════════════════ */
+.page-banner {
+  background: linear-gradient(135deg, #F0F7F1 0%, #E8F5E9 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 40px 0;
+}
+.page-banner-title {
+  font-size: clamp(22px, 3.5vw, 34px);
+  font-weight: 900;
+  letter-spacing: -0.8px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.page-banner-sub {
+  font-size: 15px;
+  color: var(--text-2);
+}
+.page-banner-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.page-search-input {
+  flex: 1;
+  min-width: 240px;
+  height: 44px;
+  padding: 0 16px 0 42px;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius);
+  font-size: 14px;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color var(--transition);
+  position: relative;
+}
+.page-search-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,125,50,0.1); }
+.page-search-wrap { position: relative; flex:1; min-width: 240px; }
+.page-search-wrap .search-ico {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-3);
+  pointer-events: none;
+  font-size: 15px;
+}
+
+/* ═══════════════════════════════════════════
+   LAYOUT COM SIDEBAR (FILTROS)
+═══════════════════════════════════════════ */
+.layout-with-sidebar {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 28px;
+  align-items: start;
+  padding: 36px 0 60px;
+}
+.sidebar {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: sticky;
+  top: 80px;
+}
+.sidebar-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+}
+.sidebar-reset {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--green);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.sidebar-reset:hover { color: var(--green-dark); text-decoration: underline; }
+.filter-group {
+  border-bottom: 1px solid var(--border);
+  padding: 18px 20px;
+}
+.filter-group:last-child { border-bottom: none; }
+.filter-group-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+.filter-group-title svg {
+  width: 14px; height: 14px;
+  stroke: var(--text-3);
+  transition: transform var(--transition);
+}
+.filter-group-title.open svg { transform: rotate(180deg); }
+.filter-options { display: flex; flex-direction: column; gap: 9px; }
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  cursor: pointer;
+  transition: color var(--transition);
+  user-select: none;
+}
+.filter-option:hover { color: var(--green); }
+.filter-option input[type="checkbox"],
+.filter-option input[type="radio"] {
+  width: 16px; height: 16px;
+  accent-color: var(--green);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.filter-count {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--text-3);
+  background: var(--surface-2);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+.filter-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.filter-range input[type="number"] {
+  width: 90px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1.5px solid var(--border-2);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  transition: border-color var(--transition);
+}
+.filter-range input:focus { border-color: var(--green); }
+.filter-range-sep { color: var(--text-3); font-size: 13px; }
+.filter-search {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  margin-bottom: 10px;
+  transition: border-color var(--transition);
+}
+.filter-search:focus { border-color: var(--green); }
+.filter-apply-btn {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px;
+  background: var(--green);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.filter-apply-btn:hover { background: var(--green-dark); }
+
+/* ═══════════════════════════════════════════
+   ÁREA DE RESULTADOS
+═══════════════════════════════════════════ */
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.results-count {
+  font-size: 14.5px;
+  color: var(--text-2);
+  font-weight: 500;
+}
+.results-count strong { color: var(--text); font-weight: 800; }
+.results-sort {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13.5px;
+  color: var(--text-2);
+}
+.results-sort select {
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--text);
+  background: #fff;
+  cursor: pointer;
+  outline: none;
+}
+.results-sort select:focus { border-color: var(--green); }
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.active-filter-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--green-light);
+  border: 1px solid rgba(46,125,50,0.2);
+  color: var(--green-dark);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.active-filter-tag:hover { background: #C8E6C9; }
+.active-filter-tag .rm { font-size: 14px; font-weight: 700; line-height: 1; }
+
+/* Grid de freelancers na página de listagem */
+.fl-list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.fl-list-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: start;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.fl-list-card:hover {
+  border-color: var(--green);
+  box-shadow: var(--shadow-md);
+  transform: translateX(3px);
+}
+.fl-list-avatar {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  font-size: 22px;
+  font-weight: 900;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fl-list-body { flex: 1; min-width: 0; }
+.fl-list-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+.fl-list-name { font-size: 16px; font-weight: 800; color: var(--text); }
+.fl-list-role { font-size: 13.5px; color: var(--text-2); margin-bottom: 8px; }
+.fl-list-bio {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.fl-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.fl-list-meta span { display: flex; align-items: center; gap: 4px; }
+.fl-list-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+  min-width: 120px;
+}
+.fl-list-rate {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+}
+.fl-list-rate small { font-size: 12px; font-weight: 400; color: var(--text-3); }
+.fl-list-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+.fl-list-rating .stars { color: #F59E0B; }
+
+/* Grid de projetos na página de listagem */
+.proj-list-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.proj-list-card {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.proj-list-card:hover {
+  border-color: var(--green);
+  box-shadow: var(--shadow-md);
+  transform: translateX(3px);
+}
+.proj-list-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.proj-list-left { flex: 1; }
+.proj-list-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 5px; }
+.proj-list-desc {
+  font-size: 13.5px;
+  color: var(--text-2);
+  line-height: 1.65;
+  margin-bottom: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.proj-list-right {
+  text-align: right;
+  flex-shrink: 0;
+}
+.proj-list-budget {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.proj-list-type {
+  font-size: 12px;
+  color: var(--text-3);
+}
+.proj-list-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.proj-list-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: var(--text-3);
+}
+.proj-list-meta span { display: flex; align-items: center; gap: 4px; }
+.proj-list-actions { display: flex; align-items: center; gap: 8px; }
+
+/* Paginação */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 36px;
+  flex-wrap: wrap;
+}
+.page-btn {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  background: #fff;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.page-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+.page-btn.active { background: var(--green); border-color: var(--green); color: #fff; }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════
+   PÁGINA COMO FUNCIONA
+═══════════════════════════════════════════ */
+.hiw-page-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 2px solid var(--border);
+  margin-bottom: 56px;
+}
+.hiw-page-tab {
+  padding: 14px 32px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-2);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.hiw-page-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.hiw-page-tab:not(.active):hover { color: var(--text); }
+.hiw-tab-content { display: none; }
+.hiw-tab-content.active { display: block; }
+.hiw-steps-full {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-bottom: 56px;
+}
+.hiw-step-full {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  text-align: center;
+  transition: all var(--transition);
+  position: relative;
+}
+.hiw-step-full:hover { border-color: var(--green); transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.hiw-step-full::after {
+  content: '→';
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 22px;
+  color: var(--border-2);
+  font-weight: 300;
+}
+.hiw-step-full:last-child::after { display: none; }
+.hiw-step-num-big {
+  width: 44px; height: 44px;
+  background: var(--green);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  box-shadow: 0 4px 14px rgba(46,125,50,0.3);
+}
+.hiw-step-icon-big { font-size: 52px; margin-bottom: 16px; line-height: 1; }
+.hiw-step-title-big { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+.hiw-step-desc-big { font-size: 14px; color: var(--text-2); line-height: 1.75; }
+.hiw-faq { margin-top: 56px; }
+.faq-title { font-size: 24px; font-weight: 800; color: var(--text); margin-bottom: 24px; }
+.faq-item {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 10px;
+  background: #fff;
+  transition: border-color var(--transition);
+}
+.faq-item:hover { border-color: var(--green); }
+.faq-question {
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  transition: background var(--transition);
+}
+.faq-question:hover { background: var(--surface); }
+.faq-question.open { background: var(--green-light); color: var(--green-dark); }
+.faq-question svg { width: 18px; height: 18px; flex-shrink: 0; stroke: var(--text-3); transition: transform var(--transition); }
+.faq-question.open svg { transform: rotate(180deg); stroke: var(--green); }
+.faq-answer {
+  display: none;
+  padding: 0 20px 18px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.75;
+  border-top: 1px solid var(--border);
+}
+.faq-answer.open { display: block; }
+
+/* ═══════════════════════════════════════════
+   PÁGINA PLANOS / PRICING
+═══════════════════════════════════════════ */
+.pricing-section { background: var(--surface); }
+.pricing-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 48px;
+}
+.pricing-toggle-label { font-size: 14px; font-weight: 600; color: var(--text-2); }
+.toggle-switch {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  background: var(--green);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.toggle-knob {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch.annual .toggle-knob { transform: translateX(22px); }
+.pricing-badge-annual {
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+}
+.pricing-tabs {
+  display: flex;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 5px;
+  width: fit-content;
+  margin: 0 auto 48px;
+  gap: 4px;
+}
+.pricing-tab {
+  padding: 9px 28px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.pricing-tab.active { background: var(--green); color: #fff; box-shadow: 0 2px 10px rgba(46,125,50,0.25); }
+.pricing-tab:not(.active):hover { color: var(--green); background: var(--green-light); }
+.pricing-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.pricing-card {
+  background: #fff;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 36px 28px;
+  transition: all var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.pricing-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.pricing-card.featured {
+  border-color: var(--green);
+  box-shadow: 0 0 0 4px rgba(46,125,50,0.08), var(--shadow);
+}
+.pricing-card.featured::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--green), var(--orange));
+}
+.pricing-popular-badge {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+}
+.pricing-plan-name { font-size: 14px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+.pricing-plan-price {
+  font-size: 42px;
+  font-weight: 900;
+  color: var(--text);
+  letter-spacing: -1.5px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.pricing-plan-price sup { font-size: 18px; font-weight: 700; vertical-align: super; }
+.pricing-plan-period { font-size: 13px; color: var(--text-3); margin-bottom: 16px; }
+.pricing-plan-desc { font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 24px; }
+.pricing-divider { height: 1px; background: var(--border); margin-bottom: 24px; }
+.pricing-features-list { display: flex; flex-direction: column; gap: 11px; margin-bottom: 28px; }
+.pricing-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-2);
+  line-height: 1.5;
+}
+.pricing-check { color: var(--green); font-size: 15px; font-weight: 800; flex-shrink: 0; margin-top: 1px; }
+.pricing-cross { color: var(--border-2); font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.pricing-compare {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-top: 56px;
+}
+.pricing-compare-title {
+  padding: 20px 28px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th {
+  padding: 14px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+.compare-table th:first-child { text-align: left; width: 40%; }
+.compare-table td {
+  padding: 13px 20px;
+  font-size: 13.5px;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+  vertical-align: middle;
+}
+.compare-table td:first-child { text-align: left; font-weight: 600; color: var(--text); }
+.compare-table tr:last-child td { border-bottom: none; }
+.compare-table tr:hover td { background: var(--surface); }
+.compare-yes { color: var(--green); font-size: 17px; font-weight: 900; }
+.compare-no { color: var(--border-2); font-size: 17px; }
+.compare-val { color: var(--text); font-weight: 700; font-size: 13px; }
+.compare-section-row td {
+  background: var(--surface);
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-3);
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE BASE
+═══════════════════════════════════════════ */
+@media (max-width: 1100px) {
+  .categories-grid { grid-template-columns: repeat(4, 1fr); }
+  .freelancers-grid { grid-template-columns: repeat(3, 1fr); }
+  .footer-top { grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+  .trust-grid { grid-template-columns: repeat(2, 1fr); }
+  .testimonials-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 900px) {
+  .nav { display: none; }
+  .header-search { display: none; }
+  .hero-search-select { display: none; }
+  .stat-item { padding: 8px 20px; }
+  .how-content.active { grid-template-columns: 1fr; }
+  .categories-grid { grid-template-columns: repeat(3, 1fr); }
+  .freelancers-grid { grid-template-columns: repeat(2, 1fr); }
+  .projects-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .layout-with-sidebar { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .fl-list-card { grid-template-columns: auto 1fr; }
+  .fl-list-right { display: none; }
+}
+@media (max-width: 600px) {
+  .hero { padding: 48px 16px 56px; }
+  .hero-search-btn span { display: none; }
+  .stats-inner { gap: 0; }
+  .stat-item { padding: 6px 16px; }
+  .stat-value { font-size: 20px; }
+  .topbar-left { display: none; }
+  .categories-grid { grid-template-columns: repeat(2, 1fr); }
+  .freelancers-grid { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .trust-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr; gap: 24px; }
+  .footer-bottom { flex-direction: column; text-align: center; }
+  .cta-section { padding: 56px 16px; }
+  .hiw-steps-full { grid-template-columns: 1fr; }
+  .hiw-step-full::after { display: none; }
+  .pricing-grid-cards { grid-template-columns: 1fr; }
+  .compare-table { font-size: 12px; }
+  .compare-table th, .compare-table td { padding: 10px 10px; }
+  .hiw-page-tab { padding: 12px 16px; font-size: 14px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     BARRA DE IDIOMA (TOPO)
+════════════════════════════════════════ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <a href="#" class="topbar-link" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
+      <span class="topbar-sep">·</span>
+      <a href="#" class="topbar-link" data-pt="Blog" data-es="Blog">Blog</a>
+      <span class="topbar-sep">·</span>
+      <a href="#" class="topbar-link" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</a>
+    </div>
+    <div class="lang-switcher">
+      <button class="lang-btn active" id="btn-pt" onclick="setLang('pt')">PT</button>
+      <button class="lang-btn" id="btn-es" onclick="setLang('es')">ES</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HEADER / NAV
+════════════════════════════════════════ -->
+<header class="header" id="main-header">
+  <div class="header-inner">
+
+    <!-- Logo -->
+    <a href="#" class="logo" onclick="showPage('home')">
+      <div class="logo-icon">
+        <!-- Logo SVG baseado na identidade HereWork (círculos laranja/verde) -->
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="8" fill="#F4511E"/>
+          <circle cx="26" cy="12" r="8" fill="#F4511E" opacity="0.75"/>
+          <circle cx="19" cy="26" r="8" fill="#2E7D32"/>
+        </svg>
+      </div>
+      <span class="logo-text">Hero<span>work</span></span>
+    </a>
+
+    <!-- Search bar -->
+    <div class="header-search">
+      <span class="header-search-icon">🔍</span>
+      <input
+        class="header-search-input"
+        type="text"
+        data-placeholder-pt="Buscar freelancers ou serviços..."
+        data-placeholder-es="Buscar freelancers o servicios..."
+        placeholder="Buscar freelancers ou serviços..."
+      >
+      <button class="header-search-btn" data-pt="Buscar" data-es="Buscar">Buscar</button>
+    </div>
+
+    <!-- Nav links -->
+    <nav class="nav">
+      <button class="nav-link active" id="nav-home" onclick="showPage('home')"
+        data-pt="Início" data-es="Inicio">Início</button>
+      <button class="nav-link" id="nav-freelancers" onclick="showPage('freelancers')"
+        data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</button>
+      <button class="nav-link" id="nav-projects" onclick="showPage('projects')"
+        data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</button>
+      <button class="nav-link" id="nav-how" onclick="showPage('how')"
+        data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</button>
+      <button class="nav-link" id="nav-pricing" onclick="showPage('pricing')"
+        data-pt="Planos" data-es="Planes">Planos</button>
+    </nav>
+
+    <!-- Auth -->
+    <div class="header-auth">
+      <button class="btn-login" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+      <button class="btn btn-green btn-sm" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
+      <button class="btn btn-primary btn-sm" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+    </div>
+
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════
+     PÁGINAS (SPA — controladas por JS)
+════════════════════════════════════════ -->
+
+<!-- ── PÁGINA: HOME ── -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-label">
+      <span class="hero-label-dot"></span>
+      <span data-pt="Mais de 3,6 milhões de freelancers cadastrados" data-es="Más de 3,6 millones de freelancers registrados">
+        Mais de 3,6 milhões de freelancers cadastrados
+      </span>
+    </div>
+
+    <h1 class="hero-title">
+      <span data-pt="Encontre o profissional ideal" data-es="Encuentra al profesional ideal">
+        Encontre o profissional ideal
+      </span><br>
+      <span class="highlight" data-pt="para o seu projeto." data-es="para tu proyecto.">para o seu projeto.</span>
+    </h1>
+
+    <p class="hero-subtitle"
+      data-pt="Contrate freelancers qualificados com segurança, rapidez e zero burocracia. Do briefing ao pagamento, tudo em um só lugar."
+      data-es="Contrata freelancers calificados con seguridad, rapidez y sin burocracia. Del briefing al pago, todo en un solo lugar.">
+      Contrate freelancers qualificados com segurança, rapidez e zero burocracia. Do briefing ao pagamento, tudo em um só lugar.
+    </p>
+
+    <!-- Search box -->
+    <div class="hero-search">
+      <div class="hero-search-box">
+        <input
+          class="hero-search-input"
+          type="text"
+          data-placeholder-pt="O que você precisa? Ex: Logotipo, Site, Redação..."
+          data-placeholder-es="¿Qué necesitas? Ej: Logo, Sitio web, Redacción..."
+          placeholder="O que você precisa? Ex: Logotipo, Site, Redação..."
+        >
+        <select class="hero-search-select" id="hero-cat-select">
+          <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
+          <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
+          <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
+          <option data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</option>
+          <option data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</option>
+          <option data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</option>
+        </select>
+        <button class="hero-search-btn">
+          <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <span data-pt="Buscar" data-es="Buscar">Buscar</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tags rápidas -->
+    <div class="hero-tags">
+      <span class="hero-tags-label" data-pt="Popular:" data-es="Popular:">Popular:</span>
+      <button class="hero-quick-tag" onclick="searchTag(this)">Logo</button>
+      <button class="hero-quick-tag" onclick="searchTag(this)" data-pt="Site WordPress" data-es="Sitio WordPress">Site WordPress</button>
+      <button class="hero-quick-tag" onclick="searchTag(this)" data-pt="Aplicativo" data-es="Aplicación">Aplicativo</button>
+      <button class="hero-quick-tag" onclick="searchTag(this)" data-pt="Redação de conteúdo" data-es="Redacción de contenido">Redação de conteúdo</button>
+      <button class="hero-quick-tag" onclick="searchTag(this)">SEO</button>
+      <button class="hero-quick-tag" onclick="searchTag(this)" data-pt="Edição de vídeo" data-es="Edición de video">Edição de vídeo</button>
+    </div>
+
+    <!-- CTAs -->
+    <div class="hero-cta-row" style="margin-top:32px;">
+      <button class="btn btn-primary btn-xl" onclick="showPage('freelancers')" data-pt="🔍 Encontrar Freelancers" data-es="🔍 Encontrar Freelancers">🔍 Encontrar Freelancers</button>
+      <span class="hero-cta-divider" data-pt="ou" data-es="o">ou</span>
+      <button class="btn btn-green btn-xl" onclick="showPage('projects')" data-pt="💼 Quero Trabalhar" data-es="💼 Quiero Trabajar">💼 Quero Trabalhar</button>
+    </div>
+  </section>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stats-inner">
+      <div class="stat-item">
+        <div class="stat-value"><span class="stat-accent">140.313</span></div>
+        <div class="stat-label" data-pt="projetos concluídos" data-es="proyectos completados">projetos concluídos</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value"><span class="stat-accent">3,6M+</span></div>
+        <div class="stat-label" data-pt="freelancers cadastrados" data-es="freelancers registrados">freelancers cadastrados</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value"><span class="stat-accent">R$ 27,5M</span></div>
+        <div class="stat-label" data-pt="pagos aos profissionais" data-es="pagados a los profesionales">pagos aos profissionais</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value"><span class="stat-accent">4,8 ★</span></div>
+        <div class="stat-label" data-pt="avaliação média" data-es="calificación promedio">avaliação média</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CATEGORIAS ══ -->
+  <section class="categories-section">
+    <div class="container">
+      <div class="section-header center">
+        <div class="section-label-tag" data-pt="Categorias" data-es="Categorías">Categorias</div>
+        <h2 class="section-title" data-pt="Explore por área de serviço" data-es="Explora por área de servicio">Explore por área de serviço</h2>
+        <p class="section-subtitle"
+          data-pt="Mais de 200 subcategorias com profissionais prontos para iniciar"
+          data-es="Más de 200 subcategorías con profesionales listos para empezar">
+          Mais de 200 subcategorias com profissionais prontos para iniciar
+        </p>
+      </div>
+      <div class="categories-grid">
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</div>
+          <div class="cat-count" data-pt="184.320 profissionais" data-es="184.320 profesionales">184.320 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</div>
+          <div class="cat-count" data-pt="312.540 profissionais" data-es="312.540 profesionales">312.540 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</div>
+          <div class="cat-count" data-pt="97.810 profissionais" data-es="97.810 profesionales">97.810 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</div>
+          <div class="cat-count" data-pt="63.200 profissionais" data-es="63.200 profesionales">63.200 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</div>
+          <div class="cat-count" data-pt="48.670 profissionais" data-es="48.670 profesionales">48.670 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </div>
+          <div class="cat-name" data-pt="TI & Sistemas" data-es="TI & Sistemas">TI & Sistemas</div>
+          <div class="cat-count" data-pt="201.450 profissionais" data-es="201.450 profesionales">201.450 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Apps & Mobile" data-es="Apps & Mobile">Apps & Mobile</div>
+          <div class="cat-count" data-pt="89.340 profissionais" data-es="89.340 profesionales">89.340 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Dados & Analytics" data-es="Datos & Analytics">Dados & Analytics</div>
+          <div class="cat-count" data-pt="54.120 profissionais" data-es="54.120 profesionales">54.120 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Segurança & Infra" data-es="Seguridad & Infraest.">Segurança & Infra</div>
+          <div class="cat-count" data-pt="31.870 profissionais" data-es="31.870 profesionales">31.870 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div class="cat-name" data-pt="SEO & Conteúdo" data-es="SEO & Contenido">SEO & Conteúdo</div>
+          <div class="cat-count" data-pt="76.430 profissionais" data-es="76.430 profesionales">76.430 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Consultoria & Gestão" data-es="Consultoría & Gestión">Consultoria & Gestão</div>
+          <div class="cat-count" data-pt="42.900 profissionais" data-es="42.900 profesionales">42.900 profissionais</div>
+        </a>
+
+        <a class="cat-card" onclick="showPage('freelancers')">
+          <div class="cat-icon">
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <div class="cat-name" data-pt="Arquitetura & Interior" data-es="Arquitectura & Interior">Arquitetura & Interior</div>
+          <div class="cat-count" data-pt="18.560 profissionais" data-es="18.560 profesionales">18.560 profissionais</div>
+        </a>
+
+      </div>
+
+      <div style="text-align:center;margin-top:36px;">
+        <button class="btn btn-outline btn-lg" onclick="showPage('freelancers')"
+          data-pt="Ver todas as categorias →" data-es="Ver todas las categorías →">
+          Ver todas as categorias →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ COMO FUNCIONA ══ -->
+  <section class="how-section" id="how-home">
+    <div class="container">
+      <div class="section-header center">
+        <div class="section-label-tag" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</div>
+        <h2 class="section-title" data-pt="Simples, seguro e sem complicações" data-es="Simple, seguro y sin complicaciones">Simples, seguro e sem complicações</h2>
+      </div>
+
+      <!-- Tabs: Empresas / Freelancers -->
+      <div class="how-tabs">
+        <button class="how-tab active" onclick="switchHowTab('companies', this)"
+          data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</button>
+        <button class="how-tab" onclick="switchHowTab('freelancers', this)"
+          data-pt="Para Freelancers" data-es="Para Freelancers">Para Freelancers</button>
+      </div>
+
+      <!-- Conteúdo: Empresas -->
+      <div class="how-content active" id="how-companies">
+        <div class="how-step">
+          <div class="how-step-num">1</div>
+          <div class="how-step-icon">📋</div>
+          <div class="how-step-title" data-pt="Publique seu projeto" data-es="Publica tu proyecto">Publique seu projeto</div>
+          <div class="how-step-desc"
+            data-pt="Descreva o que você precisa em minutos. Nossa plataforma distribui seu projeto para milhares de profissionais qualificados."
+            data-es="Describe lo que necesitas en minutos. Nuestra plataforma distribuye tu proyecto a miles de profesionales calificados.">
+            Descreva o que você precisa em minutos. Nossa plataforma distribui seu projeto para milhares de profissionais qualificados.
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">2</div>
+          <div class="how-step-icon">🤝</div>
+          <div class="how-step-title" data-pt="Receba propostas e contrate" data-es="Recibe propuestas y contrata">Receba propostas e contrate</div>
+          <div class="how-step-desc"
+            data-pt="Analise portfólios, avaliações e propostas. Converse diretamente com os candidatos e escolha o ideal para o seu projeto."
+            data-es="Analiza portafolios, calificaciones y propuestas. Habla directamente con los candidatos y elige al ideal para tu proyecto.">
+            Analise portfólios, avaliações e propostas. Converse diretamente com os candidatos e escolha o ideal para o seu projeto.
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">3</div>
+          <div class="how-step-icon">🔒</div>
+          <div class="how-step-title" data-pt="Pague com segurança" data-es="Paga con seguridad">Pague com segurança</div>
+          <div class="how-step-desc"
+            data-pt="O pagamento fica retido em nossa plataforma e só é liberado ao freelancer após a entrega aprovada por você. Total segurança."
+            data-es="El pago queda retenido en nuestra plataforma y solo se libera al freelancer tras la entrega aprobada por ti. Total seguridad.">
+            O pagamento fica retido em nossa plataforma e só é liberado ao freelancer após a entrega aprovada por você. Total segurança.
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo: Freelancers -->
+      <div class="how-content" id="how-freelancers-tab">
+        <div class="how-step">
+          <div class="how-step-num">1</div>
+          <div class="how-step-icon">👤</div>
+          <div class="how-step-title" data-pt="Crie seu perfil grátis" data-es="Crea tu perfil gratis">Crie seu perfil grátis</div>
+          <div class="how-step-desc"
+            data-pt="Monte um perfil profissional com portfólio, habilidades e histórico. Quanto mais completo, mais visibilidade você terá."
+            data-es="Crea un perfil profesional con portafolio, habilidades e historial. Cuanto más completo, más visibilidad tendrás.">
+            Monte um perfil profissional com portfólio, habilidades e histórico. Quanto mais completo, mais visibilidade você terá.
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">2</div>
+          <div class="how-step-icon">🔍</div>
+          <div class="how-step-title" data-pt="Encontre projetos" data-es="Encuentra proyectos">Encontre projetos</div>
+          <div class="how-step-desc"
+            data-pt="Acesse centenas de projetos publicados diariamente. Filtre por categoria, orçamento e prazo e envie sua proposta."
+            data-es="Accede a cientos de proyectos publicados a diario. Filtra por categoría, presupuesto y plazo, y envía tu propuesta.">
+            Acesse centenas de projetos publicados diariamente. Filtre por categoria, orçamento e prazo e envie sua proposta.
+          </div>
+        </div>
+        <div class="how-step">
+          <div class="how-step-num">3</div>
+          <div class="how-step-icon">💳</div>
+          <div class="how-step-title" data-pt="Entregue e receba" data-es="Entrega y cobra">Entregue e receba</div>
+          <div class="how-step-desc"
+            data-pt="Entregue o projeto, receba a aprovação e o pagamento cai na sua carteira. Saque via Pix, TED ou transferência internacional."
+            data-es="Entrega el proyecto, recibe la aprobación y el pago llega a tu billetera. Retira vía Pix, transferencia bancaria o internacional.">
+            Entregue o projeto, receba a aprovação e o pagamento cai na sua carteira. Saque via Pix, TED ou transferência internacional.
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:44px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-primary btn-lg" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
+        <button class="btn btn-outline btn-lg" onclick="showPage('how')" data-pt="Saiba mais →" data-es="Saber más →">Saiba mais →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ FREELANCERS EM DESTAQUE ══ -->
+  <section class="freelancers-highlight">
+    <div class="container">
+      <div class="section-header flex-cb">
+        <div>
+          <div class="section-label-tag" data-pt="Top Profissionais" data-es="Top Profesionales">Top Profissionais</div>
+          <h2 class="section-title" data-pt="Freelancers em destaque" data-es="Freelancers destacados">Freelancers em destaque</h2>
+        </div>
+        <button class="btn btn-outline" onclick="showPage('freelancers')"
+          data-pt="Ver todos →" data-es="Ver todos →">Ver todos →</button>
+      </div>
+      <div class="freelancers-grid">
+
+        <!-- Card 1 -->
+        <div class="fl-card">
+          <div class="fl-card-header">
+            <div class="fl-avatar" style="background:linear-gradient(135deg,#2E7D32,#66BB6A);">CA</div>
+            <div class="fl-info">
+              <div class="fl-name">Carlos Almeida</div>
+              <div class="fl-role" data-pt="Desenvolvedor Full Stack" data-es="Desarrollador Full Stack">Desenvolvedor Full Stack</div>
+              <div class="fl-location">📍 <span data-pt="São Paulo, SP" data-es="São Paulo, SP">São Paulo, SP</span></div>
+            </div>
+          </div>
+          <div class="fl-badges">
+            <span class="fl-badge-top" data-pt="Top Freelancer" data-es="Top Freelancer">Top Freelancer</span>
+            <span class="fl-badge-verified" data-pt="Verificado" data-es="Verificado">✓ Verificado</span>
+          </div>
+          <div class="fl-rating">
+            <span class="fl-stars">★★★★★</span>
+            <span class="fl-rating-val">5,0</span>
+            <span class="fl-rating-count">(148 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+          </div>
+          <div class="fl-skills">
+            <span class="fl-skill">React</span>
+            <span class="fl-skill">Node.js</span>
+            <span class="fl-skill">PostgreSQL</span>
+            <span class="fl-skill">TypeScript</span>
+          </div>
+          <div class="fl-footer">
+            <div class="fl-rate">R$ 120<span data-pt="/hora" data-es="/hora">/hora</span></div>
+            <div class="fl-stats">312 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="fl-card">
+          <div class="fl-card-header">
+            <div class="fl-avatar" style="background:linear-gradient(135deg,#F4511E,#FF8A65);">ML</div>
+            <div class="fl-info">
+              <div class="fl-name">Marina Lima</div>
+              <div class="fl-role" data-pt="Designer UI/UX" data-es="Diseñadora UI/UX">Designer UI/UX</div>
+              <div class="fl-location">📍 <span data-pt="Rio de Janeiro, RJ" data-es="Río de Janeiro, RJ">Rio de Janeiro, RJ</span></div>
+            </div>
+          </div>
+          <div class="fl-badges">
+            <span class="fl-badge-top" data-pt="Top Freelancer" data-es="Top Freelancer">Top Freelancer</span>
+          </div>
+          <div class="fl-rating">
+            <span class="fl-stars">★★★★★</span>
+            <span class="fl-rating-val">4,9</span>
+            <span class="fl-rating-count">(203 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+          </div>
+          <div class="fl-skills">
+            <span class="fl-skill">Figma</span>
+            <span class="fl-skill">Adobe XD</span>
+            <span class="fl-skill">Prototyping</span>
+            <span class="fl-skill">Branding</span>
+          </div>
+          <div class="fl-footer">
+            <div class="fl-rate">R$ 95<span data-pt="/hora" data-es="/hora">/hora</span></div>
+            <div class="fl-stats">267 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="fl-card">
+          <div class="fl-card-header">
+            <div class="fl-avatar" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">RP</div>
+            <div class="fl-info">
+              <div class="fl-name">Rafael Pereira</div>
+              <div class="fl-role" data-pt="Especialista em SEO" data-es="Especialista en SEO">Especialista em SEO</div>
+              <div class="fl-location">📍 <span data-pt="Curitiba, PR" data-es="Curitiba, PR">Curitiba, PR</span></div>
+            </div>
+          </div>
+          <div class="fl-badges">
+            <span class="fl-badge-verified" data-pt="Verificado" data-es="Verificado">✓ Verificado</span>
+          </div>
+          <div class="fl-rating">
+            <span class="fl-stars">★★★★★</span>
+            <span class="fl-rating-val">4,8</span>
+            <span class="fl-rating-count">(89 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+          </div>
+          <div class="fl-skills">
+            <span class="fl-skill">SEO On-Page</span>
+            <span class="fl-skill">Google Ads</span>
+            <span class="fl-skill">Analytics</span>
+          </div>
+          <div class="fl-footer">
+            <div class="fl-rate">R$ 80<span data-pt="/hora" data-es="/hora">/hora</span></div>
+            <div class="fl-stats">178 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="fl-card">
+          <div class="fl-card-header">
+            <div class="fl-avatar" style="background:linear-gradient(135deg,#6A1B9A,#CE93D8);">JS</div>
+            <div class="fl-info">
+              <div class="fl-name">Juliana Santos</div>
+              <div class="fl-role" data-pt="Redatora & Copywriter" data-es="Redactora & Copywriter">Redatora & Copywriter</div>
+              <div class="fl-location">📍 <span data-pt="Belo Horizonte, MG" data-es="Belo Horizonte, MG">Belo Horizonte, MG</span></div>
+            </div>
+          </div>
+          <div class="fl-badges">
+            <span class="fl-badge-top" data-pt="Top Freelancer" data-es="Top Freelancer">Top Freelancer</span>
+            <span class="fl-badge-verified" data-pt="Verificado" data-es="Verificado">✓ Verificado</span>
+          </div>
+          <div class="fl-rating">
+            <span class="fl-stars">★★★★★</span>
+            <span class="fl-rating-val">4,9</span>
+            <span class="fl-rating-count">(321 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+          </div>
+          <div class="fl-skills">
+            <span class="fl-skill">Copywriting</span>
+            <span class="fl-skill">Blog</span>
+            <span class="fl-skill">E-mail Marketing</span>
+          </div>
+          <div class="fl-footer">
+            <div class="fl-rate">R$ 70<span data-pt="/hora" data-es="/hora">/hora</span></div>
+            <div class="fl-stats">445 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ DEPOIMENTOS ══ -->
+  <section class="testimonials-section">
+    <div class="container">
+      <div class="section-header center">
+        <div class="section-label-tag" data-pt="Depoimentos" data-es="Testimonios">Depoimentos</div>
+        <h2 class="section-title" data-pt="O que dizem nossos clientes" data-es="Lo que dicen nuestros clientes">O que dizem nossos clientes</h2>
+      </div>
+      <div class="testimonials-grid">
+
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text" data-pt='"Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de escrow me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."' data-es='"Encontré al desarrollador ideal en menos de 24 horas. El sistema de escrow me dio total seguridad para pagar. Sin duda lo usaré siempre."'>
+            "Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de escrow me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:linear-gradient(135deg,#2E7D32,#66BB6A);">FS</div>
+            <div>
+              <div class="testi-name">Felipe Souza</div>
+              <div class="testi-role" data-pt="CEO, AgênciaFly" data-es="CEO, AgênciaFly">CEO, AgênciaFly</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text" data-pt='"A plataforma é muito fácil de usar e os profissionais são altamente qualificados. Em 3 meses contratei 8 freelancers e todos entregaram com excelência."' data-es='"La plataforma es muy fácil de usar y los profesionales son altamente calificados. En 3 meses contraté 8 freelancers y todos entregaron con excelencia."'>
+            "A plataforma é muito fácil de usar e os profissionais são altamente qualificados. Em 3 meses contratei 8 freelancers e todos entregaram com excelência."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:linear-gradient(135deg,#F4511E,#FF8A65);">AC</div>
+            <div>
+              <div class="testi-name">Ana Costa</div>
+              <div class="testi-role" data-pt="Diretora de Marketing, TechBR" data-es="Directora de Marketing, TechBR">Diretora de Marketing, TechBR</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text" data-pt='"Como freelancer, a HereWork mudou minha carreira. Consigo projetos de qualidade, recebo em dia e tenho total suporte da plataforma quando preciso."' data-es='"Como freelancer, HereWork cambió mi carrera. Consigo proyectos de calidad, cobro a tiempo y tengo total soporte de la plataforma cuando lo necesito."'>
+            "Como freelancer, a HereWork mudou minha carreira. Consigo projetos de qualidade, recebo em dia e tenho total suporte da plataforma quando preciso."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">LM</div>
+            <div>
+              <div class="testi-name">Lucas Martins</div>
+              <div class="testi-role" data-pt="Desenvolvedor Freelancer" data-es="Desarrollador Freelancer">Desenvolvedor Freelancer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-text" data-pt='"Publiquei um projeto às 9h e às 14h já tinha 12 propostas. A qualidade dos candidatos me surpreendeu. Recomendo para qualquer empresa que precisa de talento."' data-es='"Publiqué un proyecto a las 9h y a las 14h ya tenía 12 propuestas. La calidad de los candidatos me sorprendió. Lo recomiendo a cualquier empresa."'>
+            "Publiquei um projeto às 9h e às 14h já tinha 12 propostas. A qualidade dos candidatos me surpreendeu. Recomendo para qualquer empresa que precisa de talento."
+          </p>
+          <div class="testi-author">
+            <div class="testi-avatar" style="background:linear-gradient(135deg,#6A1B9A,#CE93D8);">PO</div>
+            <div>
+              <div class="testi-name">Patricia Oliveira</div>
+              <div class="testi-role" data-pt="Fundadora, StartupHub" data-es="Fundadora, StartupHub">Fundadora, StartupHub</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ SELOS DE CONFIANÇA ══ -->
+  <section class="trust-section">
+    <div class="container">
+      <div class="section-header center">
+        <div class="section-label-tag" data-pt="Por que a HereWork?" data-es="¿Por qué HereWork?">Por que a HereWork?</div>
+        <h2 class="section-title" data-pt="Segurança e confiança em cada etapa" data-es="Seguridad y confianza en cada etapa">Segurança e confiança em cada etapa</h2>
+      </div>
+      <div class="trust-grid">
+        <div class="trust-card">
+          <span class="trust-icon">🔒</span>
+          <div class="trust-title" data-pt="Pagamento Seguro" data-es="Pago Seguro">Pagamento Seguro</div>
+          <div class="trust-desc"
+            data-pt="Seu pagamento fica protegido em escrow e só é liberado quando você aprovar a entrega do projeto."
+            data-es="Tu pago queda protegido en escrow y solo se libera cuando apruebas la entrega del proyecto.">
+            Seu pagamento fica protegido em escrow e só é liberado quando você aprovar a entrega do projeto.
+          </div>
+        </div>
+        <div class="trust-card">
+          <span class="trust-icon">✅</span>
+          <div class="trust-title" data-pt="Perfis Verificados" data-es="Perfiles Verificados">Perfis Verificados</div>
+          <div class="trust-desc"
+            data-pt="Todos os profissionais passam por verificação de identidade e análise de portfólio antes de serem aceitos."
+            data-es="Todos los profesionales pasan por verificación de identidad y análisis de portafolio antes de ser aceptados.">
+            Todos os profissionais passam por verificação de identidade e análise de portfólio antes de serem aceitos.
+          </div>
+        </div>
+        <div class="trust-card">
+          <span class="trust-icon">🏆</span>
+          <div class="trust-title" data-pt="Sistema de Reputação" data-es="Sistema de Reputación">Sistema de Reputação</div>
+          <div class="trust-desc"
+            data-pt="Avaliações reais de clientes e histórico de entregas criam um ranking transparente e meritocrático."
+            data-es="Calificaciones reales de clientes e historial de entregas crean un ranking transparente y meritocrático.">
+            Avaliações reais de clientes e histórico de entregas criam um ranking transparente e meritocrático.
+          </div>
+        </div>
+        <div class="trust-card">
+          <span class="trust-icon">🛡️</span>
+          <div class="trust-title" data-pt="Suporte Dedicado" data-es="Soporte Dedicado">Suporte Dedicado</div>
+          <div class="trust-desc"
+            data-pt="Equipe de suporte disponível para mediar disputas, tirar dúvidas e garantir que tudo corra bem."
+            data-es="Equipo de soporte disponible para mediar disputas, resolver dudas y garantizar que todo salga bien.">
+            Equipe de suporte disponível para mediar disputas, tirar dúvidas e garantir que tudo corra bem.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ PROJETOS EM DESTAQUE ══ -->
+  <section class="projects-highlight">
+    <div class="container">
+      <div class="section-header flex-cb">
+        <div>
+          <div class="section-label-tag" data-pt="Projetos Abertos" data-es="Proyectos Abiertos">Projetos Abertos</div>
+          <h2 class="section-title" data-pt="Oportunidades para freelancers" data-es="Oportunidades para freelancers">Oportunidades para freelancers</h2>
+        </div>
+        <button class="btn btn-outline" onclick="showPage('projects')"
+          data-pt="Ver todos →" data-es="Ver todos →">Ver todos →</button>
+      </div>
+      <div class="projects-grid">
+
+        <div class="proj-card">
+          <div class="proj-header">
+            <span class="proj-cat" data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</span>
+            <span class="proj-budget">R$ 2.000–4.000</span>
+          </div>
+          <div class="proj-title" data-pt="Desenvolvimento de e-commerce em WooCommerce" data-es="Desarrollo de e-commerce en WooCommerce">Desenvolvimento de e-commerce em WooCommerce</div>
+          <div class="proj-desc"
+            data-pt="Preciso criar uma loja virtual completa com integração de pagamento, gestão de estoque e layout responsivo personalizado."
+            data-es="Necesito crear una tienda virtual completa con integración de pago, gestión de inventario y diseño responsive personalizado.">
+            Preciso criar uma loja virtual completa com integração de pagamento, gestão de estoque e layout responsivo personalizado.
+          </div>
+          <div class="proj-skills">
+            <span class="fl-skill">WordPress</span>
+            <span class="fl-skill">WooCommerce</span>
+            <span class="fl-skill">PHP</span>
+          </div>
+          <div class="proj-footer">
+            <div class="proj-meta">
+              <span>🕐 <span data-pt="Publicado há 2h" data-es="Publicado hace 2h">Publicado há 2h</span></span>
+              <span>📅 <span data-pt="30 dias" data-es="30 días">30 dias</span></span>
+            </div>
+            <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+          </div>
+        </div>
+
+        <div class="proj-card">
+          <div class="proj-header">
+            <span class="proj-cat" data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</span>
+            <span class="proj-budget">R$ 800–1.500</span>
+          </div>
+          <div class="proj-title" data-pt="Criação de identidade visual completa para startup" data-es="Creación de identidad visual completa para startup">Criação de identidade visual completa para startup</div>
+          <div class="proj-desc"
+            data-pt="Startup de tecnologia busca designer para criação de logotipo, manual de marca, paleta de cores e aplicações básicas."
+            data-es="Startup de tecnología busca diseñador para creación de logo, manual de marca, paleta de colores y aplicaciones básicas.">
+            Startup de tecnologia busca designer para criação de logotipo, manual de marca, paleta de cores e aplicações básicas.
+          </div>
+          <div class="proj-skills">
+            <span class="fl-skill">Branding</span>
+            <span class="fl-skill">Illustrator</span>
+            <span class="fl-skill">Identidade Visual</span>
+          </div>
+          <div class="proj-footer">
+            <div class="proj-meta">
+              <span>🕐 <span data-pt="Publicado há 5h" data-es="Publicado hace 5h">Publicado há 5h</span></span>
+              <span>📅 <span data-pt="15 dias" data-es="15 días">15 dias</span></span>
+            </div>
+            <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+          </div>
+        </div>
+
+        <div class="proj-card">
+          <div class="proj-header">
+            <span class="proj-cat" data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</span>
+            <span class="proj-budget">R$ 1.200–2.000</span>
+          </div>
+          <div class="proj-title" data-pt="Gestão de redes sociais e produção de conteúdo" data-es="Gestión de redes sociales y producción de contenido">Gestão de redes sociais e produção de conteúdo</div>
+          <div class="proj-desc"
+            data-pt="Empresa do setor alimentício precisa de social media para gestão mensal de Instagram, Facebook e criação de conteúdo."
+            data-es="Empresa del sector alimenticio necesita social media para gestión mensual de Instagram, Facebook y creación de contenido.">
+            Empresa do setor alimentício precisa de social media para gestão mensal de Instagram, Facebook e criação de conteúdo.
+          </div>
+          <div class="proj-skills">
+            <span class="fl-skill">Instagram</span>
+            <span class="fl-skill">Canva</span>
+            <span class="fl-skill">Copywriting</span>
+          </div>
+          <div class="proj-footer">
+            <div class="proj-meta">
+              <span>🕐 <span data-pt="Publicado há 1 dia" data-es="Publicado hace 1 día">Publicado há 1 dia</span></span>
+              <span>📅 <span data-pt="Recorrente" data-es="Recurrente">Recorrente</span></span>
+            </div>
+            <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ CTA FINAL ══ -->
+  <section class="cta-section">
+    <div class="cta-inner">
+      <h2 class="cta-title"
+        data-pt="Pronto para encontrar o profissional ideal?"
+        data-es="¿Listo para encontrar al profesional ideal?">
+        Pronto para encontrar o profissional ideal?
+      </h2>
+      <p class="cta-subtitle"
+        data-pt="Publique seu projeto gratuitamente e receba propostas de profissionais qualificados em minutos."
+        data-es="Publica tu proyecto gratis y recibe propuestas de profesionales calificados en minutos.">
+        Publique seu projeto gratuitamente e receba propostas de profissionais qualificados em minutos.
+      </p>
+      <div class="cta-actions">
+        <button class="btn btn-white btn-xl"
+          data-pt="📋 Publicar Projeto Grátis" data-es="📋 Publicar Proyecto Gratis">
+          📋 Publicar Projeto Grátis
+        </button>
+        <button class="btn btn-white-outline btn-xl" onclick="showPage('freelancers')"
+          data-pt="🔍 Buscar Freelancers" data-es="🔍 Buscar Freelancers">
+          🔍 Buscar Freelancers
+        </button>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-home -->
+
+<!-- ══ OUTROS PAGES (serão preenchidos na etapa 4) ══ -->
+<!-- ══════════════════════════════════════════════
+     PÁGINA: FREELANCERS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-freelancers">
+
+  <!-- Banner -->
+  <div class="page-banner">
+    <div class="container">
+      <div class="page-banner-title" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</div>
+      <div class="page-banner-sub" data-pt="3.611.888 profissionais cadastrados prontos para o seu projeto" data-es="3.611.888 profesionales registrados listos para tu proyecto">3.611.888 profissionais cadastrados prontos para o seu projeto</div>
+      <div class="page-banner-search">
+        <div class="page-search-wrap" style="max-width:460px;">
+          <span class="search-ico">🔍</span>
+          <input class="page-search-input" style="padding-left:36px;" type="text"
+            data-placeholder-pt="Buscar por nome, habilidade ou serviço..."
+            data-placeholder-es="Buscar por nombre, habilidad o servicio..."
+            placeholder="Buscar por nome, habilidade ou serviço...">
+        </div>
+        <select style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+          <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
+          <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
+          <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
+          <option data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</option>
+          <option data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</option>
+          <option data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</option>
+          <option data-pt="TI & Sistemas" data-es="TI & Sistemas">TI & Sistemas</option>
+          <option data-pt="Dados & Analytics" data-es="Datos & Analytics">Dados & Analytics</option>
+        </select>
+        <button class="btn btn-green" data-pt="🔍 Buscar" data-es="🔍 Buscar">🔍 Buscar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Layout sidebar + resultados -->
+  <div class="container">
+    <div class="layout-with-sidebar">
+
+      <!-- SIDEBAR FILTROS -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title" data-pt="Filtros" data-es="Filtros">Filtros</span>
+          <button class="sidebar-reset" data-pt="Limpar tudo" data-es="Limpiar todo">Limpar tudo</button>
+        </div>
+
+        <!-- Categoria -->
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Área de atuação" data-es="Área de actuación">Área de atuação</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</span><span class="filter-count">184K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</span><span class="filter-count">312K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</span><span class="filter-count">97K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</span><span class="filter-count">63K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</span><span class="filter-count">48K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="TI & Sistemas" data-es="TI & Sistemas">TI & Sistemas</span><span class="filter-count">201K</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Apps & Mobile" data-es="Apps & Mobile">Apps & Mobile</span><span class="filter-count">89K</span></label>
+          </div>
+        </div>
+
+        <!-- Avaliação -->
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Avaliação mínima" data-es="Calificación mínima">Avaliação mínima</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="rating"> <span>★★★★★ 5,0</span></label>
+            <label class="filter-option"><input type="radio" name="rating"> <span>★★★★☆ <span data-pt="4,0 ou mais" data-es="4,0 o más">4,0 ou mais</span></span></label>
+            <label class="filter-option"><input type="radio" name="rating"> <span>★★★☆☆ <span data-pt="3,0 ou mais" data-es="3,0 o más">3,0 ou mais</span></span></label>
+            <label class="filter-option"><input type="radio" name="rating"> <span data-pt="Qualquer avaliação" data-es="Cualquier calificación">Qualquer avaliação</span></label>
+          </div>
+        </div>
+
+        <!-- Valor por hora -->
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Valor por hora (R$)" data-es="Valor por hora (R$)">Valor por hora (R$)</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-range">
+            <input type="number" placeholder="Min" min="0" value="">
+            <span class="filter-range-sep">—</span>
+            <input type="number" placeholder="Max" min="0" value="">
+          </div>
+        </div>
+
+        <!-- Recomendações -->
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Recomendações" data-es="Recomendaciones">Recomendações</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="recs"> <span data-pt="Pelo menos 5" data-es="Al menos 5">Pelo menos 5</span></label>
+            <label class="filter-option"><input type="radio" name="recs"> <span data-pt="Pelo menos 10" data-es="Al menos 10">Pelo menos 10</span></label>
+            <label class="filter-option"><input type="radio" name="recs"> <span data-pt="Pelo menos 15" data-es="Al menos 15">Pelo menos 15</span></label>
+          </div>
+        </div>
+
+        <!-- Outros -->
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Outros filtros" data-es="Otros filtros">Outros filtros</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Com foto de perfil" data-es="Con foto de perfil">Com foto de perfil</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Identidade verificada" data-es="Identidad verificada">Identidade verificada</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Disponível agora" data-es="Disponible ahora">Disponível agora</span></label>
+            <label class="filter-option"><input type="checkbox"> <span data-pt="Top Freelancer" data-es="Top Freelancer">Top Freelancer</span></label>
+          </div>
+        </div>
+
+        <div style="padding:16px 20px;">
+          <button class="filter-apply-btn" data-pt="Aplicar Filtros" data-es="Aplicar Filtros">Aplicar Filtros</button>
+        </div>
+      </aside>
+
+      <!-- ÁREA DE RESULTADOS -->
+      <div>
+        <div class="results-header">
+          <div class="results-count">
+            <strong>2.232.926</strong> <span data-pt="freelancers encontrados" data-es="freelancers encontrados">freelancers encontrados</span>
+          </div>
+          <div class="results-sort">
+            <span data-pt="Ordenar por:" data-es="Ordenar por:">Ordenar por:</span>
+            <select>
+              <option data-pt="Relevância" data-es="Relevancia">Relevância</option>
+              <option data-pt="Maior avaliação" data-es="Mayor calificación">Maior avaliação</option>
+              <option data-pt="Menor preço" data-es="Menor precio">Menor preço</option>
+              <option data-pt="Maior preço" data-es="Mayor precio">Maior preço</option>
+              <option data-pt="Mais projetos" data-es="Más proyectos">Mais projetos</option>
+              <option data-pt="Mais recomendações" data-es="Más recomendaciones">Mais recomendações</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="active-filters">
+          <span class="active-filter-tag">Web & Programação <span class="rm">×</span></span>
+          <span class="active-filter-tag">★ 4,0+ <span class="rm">×</span></span>
+          <span class="active-filter-tag">Top Freelancer <span class="rm">×</span></span>
+        </div>
+
+        <div class="fl-list-grid">
+
+          <!-- Card 1 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#2E7D32,#66BB6A);">CA</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Carlos Almeida</span>
+                <span class="fl-badge-top">Top Freelancer</span>
+                <span class="fl-badge-verified">✓ <span data-pt="Verificado" data-es="Verificado">Verificado</span></span>
+              </div>
+              <div class="fl-list-role" data-pt="Desenvolvedor Full Stack — São Paulo, SP" data-es="Desarrollador Full Stack — São Paulo, SP">Desenvolvedor Full Stack — São Paulo, SP</div>
+              <div class="fl-list-bio" data-pt="Mais de 8 anos de experiência em desenvolvimento web e mobile. Especialista em React, Node.js e arquitetura de microsserviços. Já trabalhei com startups e grandes empresas como Magazine Luiza e iFood." data-es="Más de 8 años de experiencia en desarrollo web y móvil. Especialista en React, Node.js y arquitectura de microservicios.">Mais de 8 anos de experiência em desenvolvimento web e mobile. Especialista em React, Node.js e arquitetura de microsserviços. Já trabalhei com startups e grandes empresas como Magazine Luiza e iFood.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">React</span><span class="fl-skill">Node.js</span><span class="fl-skill">TypeScript</span><span class="fl-skill">PostgreSQL</span><span class="fl-skill">AWS</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 5,0 (148 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 312 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 287 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2016" data-es="Desde 2016">Desde 2016</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 120<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#F4511E,#FF8A65);">ML</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Marina Lima</span>
+                <span class="fl-badge-top">Top Freelancer</span>
+              </div>
+              <div class="fl-list-role" data-pt="Designer UI/UX — Rio de Janeiro, RJ" data-es="Diseñadora UI/UX — Río de Janeiro, RJ">Designer UI/UX — Rio de Janeiro, RJ</div>
+              <div class="fl-list-bio" data-pt="Designer com foco em experiência do usuário e identidade visual. Atendo desde pequenas empresas até grandes marcas nacionais. Portfolio premiado internacionalmente." data-es="Diseñadora enfocada en experiencia de usuario e identidad visual. Atiendo desde pequeñas empresas hasta grandes marcas nacionales.">Designer com foco em experiência do usuário e identidade visual. Atendo desde pequenas empresas até grandes marcas nacionais. Portfolio premiado internacionalmente.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">Figma</span><span class="fl-skill">Adobe XD</span><span class="fl-skill">Branding</span><span class="fl-skill">Illustrator</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 4,9 (203 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 267 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 241 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2017" data-es="Desde 2017">Desde 2017</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 95<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#1565C0,#42A5F5);">RP</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Rafael Pereira</span>
+                <span class="fl-badge-verified">✓ <span data-pt="Verificado" data-es="Verificado">Verificado</span></span>
+              </div>
+              <div class="fl-list-role" data-pt="Especialista em SEO & Marketing Digital — Curitiba, PR" data-es="Especialista en SEO & Marketing Digital — Curitiba, PR">Especialista em SEO & Marketing Digital — Curitiba, PR</div>
+              <div class="fl-list-bio" data-pt="Especialista em otimização para mecanismos de busca e performance digital. Já gerenciei mais de R$ 2 milhões em verba de anúncios. Resultados comprovados e mensuráveis." data-es="Especialista en optimización para motores de búsqueda y performance digital. Ya gestioné más de R$ 2 millones en presupuesto de anuncios.">Especialista em otimização para mecanismos de busca e performance digital. Já gerenciei mais de R$ 2 milhões em verba de anúncios. Resultados comprovados e mensuráveis.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">SEO</span><span class="fl-skill">Google Ads</span><span class="fl-skill">Analytics</span><span class="fl-skill">Meta Ads</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 4,8 (89 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 178 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 156 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2018" data-es="Desde 2018">Desde 2018</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 80<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#6A1B9A,#CE93D8);">JS</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Juliana Santos</span>
+                <span class="fl-badge-top">Top Freelancer</span>
+                <span class="fl-badge-verified">✓ <span data-pt="Verificado" data-es="Verificado">Verificado</span></span>
+              </div>
+              <div class="fl-list-role" data-pt="Redatora & Copywriter — Belo Horizonte, MG" data-es="Redactora & Copywriter — Belo Horizonte, MG">Redatora & Copywriter — Belo Horizonte, MG</div>
+              <div class="fl-list-bio" data-pt="Especialista em copywriting persuasivo, redação de conteúdo para blog, email marketing e materiais institucionais. Mais de 500 projetos entregues com excelência." data-es="Especialista en copywriting persuasivo, redacción de contenido para blog, email marketing y materiales institucionales.">Especialista em copywriting persuasivo, redação de conteúdo para blog, email marketing e materiais institucionais. Mais de 500 projetos entregues com excelência.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">Copywriting</span><span class="fl-skill">Blog</span><span class="fl-skill">E-mail Mkt</span><span class="fl-skill">Roteiro</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 4,9 (321 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 445 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 398 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2015" data-es="Desde 2015">Desde 2015</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 70<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#00695C,#4DB6AC);">FM</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Fernando Melo</span>
+                <span class="fl-badge-verified">✓ <span data-pt="Verificado" data-es="Verificado">Verificado</span></span>
+              </div>
+              <div class="fl-list-role" data-pt="Desenvolvedor Mobile (iOS/Android) — Porto Alegre, RS" data-es="Desarrollador Mobile (iOS/Android) — Porto Alegre, RS">Desenvolvedor Mobile (iOS/Android) — Porto Alegre, RS</div>
+              <div class="fl-list-bio" data-pt="Desenvolvedor mobile com 6 anos de experiência em Flutter, React Native, Swift e Kotlin. Aplicativos publicados na App Store e Google Play com mais de 500K downloads." data-es="Desarrollador móvil con 6 años de experiencia en Flutter, React Native, Swift y Kotlin. Apps publicadas con más de 500K descargas.">Desenvolvedor mobile com 6 anos de experiência em Flutter, React Native, Swift e Kotlin. Aplicativos publicados na App Store e Google Play com mais de 500K downloads.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">Flutter</span><span class="fl-skill">React Native</span><span class="fl-skill">Swift</span><span class="fl-skill">Kotlin</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 4,8 (112 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 143 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 128 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2019" data-es="Desde 2019">Desde 2019</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 110<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="fl-list-card">
+            <div class="fl-list-avatar" style="background:linear-gradient(135deg,#BF360C,#FF7043);">TC</div>
+            <div class="fl-list-body">
+              <div class="fl-list-top">
+                <span class="fl-list-name">Tatiane Carvalho</span>
+                <span class="fl-badge-top">Top Freelancer</span>
+              </div>
+              <div class="fl-list-role" data-pt="Editora de Vídeo & Motion Design — Fortaleza, CE" data-es="Editora de Video & Motion Design — Fortaleza, CE">Editora de Vídeo & Motion Design — Fortaleza, CE</div>
+              <div class="fl-list-bio" data-pt="Especialista em edição de vídeo profissional, motion graphics e produção audiovisual para marcas e agências. Experiência em Premiere, After Effects e DaVinci Resolve." data-es="Especialista en edición de video, motion graphics y producción audiovisual para marcas y agencias.">Especialista em edição de vídeo profissional, motion graphics e produção audiovisual para marcas e agências. Experiência em Premiere, After Effects e DaVinci Resolve.</div>
+              <div class="fl-skills" style="margin-bottom:8px;">
+                <span class="fl-skill">Premiere</span><span class="fl-skill">After Effects</span><span class="fl-skill">Motion</span><span class="fl-skill">DaVinci</span>
+              </div>
+              <div class="fl-list-meta">
+                <span>⭐ 5,0 (77 <span data-pt="avaliações" data-es="valoraciones">avaliações</span>)</span>
+                <span>📁 98 <span data-pt="projetos" data-es="proyectos">projetos</span></span>
+                <span>👍 90 <span data-pt="recomendações" data-es="recomendaciones">recomendações</span></span>
+                <span>📅 <span data-pt="Desde 2020" data-es="Desde 2020">Desde 2020</span></span>
+              </div>
+            </div>
+            <div class="fl-list-right">
+              <div class="fl-list-rate">R$ 85<small data-pt="/hora" data-es="/hora">/hora</small></div>
+              <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
+              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+            </div>
+          </div>
+
+        </div><!-- /fl-list-grid -->
+
+        <!-- Paginação -->
+        <div class="pagination">
+          <button class="page-btn" disabled>←</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span style="color:var(--text-3);padding:0 6px;">...</span>
+          <button class="page-btn" data-pt="Último" data-es="Último">Último</button>
+          <button class="page-btn">→</button>
+        </div>
+
+      </div><!-- /results -->
+    </div><!-- /layout -->
+  </div><!-- /container -->
+</div><!-- /page-freelancers -->
+
+
+<!-- ══════════════════════════════════════════════
+     PÁGINA: PROJETOS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-projects">
+
+  <!-- Banner -->
+  <div class="page-banner">
+    <div class="container">
+      <div class="page-banner-title" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</div>
+      <div class="page-banner-sub" data-pt="Centenas de novos projetos publicados todos os dias" data-es="Cientos de nuevos proyectos publicados cada día">Centenas de novos projetos publicados todos os dias</div>
+      <div class="page-banner-search">
+        <div class="page-search-wrap" style="max-width:460px;">
+          <span class="search-ico">🔍</span>
+          <input class="page-search-input" style="padding-left:36px;" type="text"
+            data-placeholder-pt="Buscar projetos por palavra-chave..."
+            data-placeholder-es="Buscar proyectos por palabra clave..."
+            placeholder="Buscar projetos por palavra-chave...">
+        </div>
+        <select style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+          <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
+          <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
+          <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
+          <option data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</option>
+          <option data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</option>
+        </select>
+        <button class="btn btn-green" data-pt="🔍 Buscar" data-es="🔍 Buscar">🔍 Buscar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="layout-with-sidebar">
+
+      <!-- SIDEBAR FILTROS PROJETOS -->
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-title" data-pt="Filtros" data-es="Filtros">Filtros</span>
+          <button class="sidebar-reset" data-pt="Limpar tudo" data-es="Limpiar todo">Limpar tudo</button>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Categoria" data-es="Categoría">Categoria</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="checkbox"><span data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</span></label>
+            <label class="filter-option"><input type="checkbox"><span data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</span></label>
+            <label class="filter-option"><input type="checkbox"><span data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</span></label>
+            <label class="filter-option"><input type="checkbox"><span data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</span></label>
+            <label class="filter-option"><input type="checkbox"><span data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</span></label>
+            <label class="filter-option"><input type="checkbox"><span data-pt="TI & Sistemas" data-es="TI & Sistemas">TI & Sistemas</span></label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Orçamento (R$)" data-es="Presupuesto (R$)">Orçamento (R$)</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options" style="margin-bottom:10px;">
+            <label class="filter-option"><input type="radio" name="budget"><span data-pt="Até R$ 500" data-es="Hasta R$ 500">Até R$ 500</span></label>
+            <label class="filter-option"><input type="radio" name="budget"><span>R$ 500 – R$ 2.000</span></label>
+            <label class="filter-option"><input type="radio" name="budget"><span>R$ 2.000 – R$ 10.000</span></label>
+            <label class="filter-option"><input type="radio" name="budget"><span data-pt="Acima de R$ 10.000" data-es="Más de R$ 10.000">Acima de R$ 10.000</span></label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Tipo de projeto" data-es="Tipo de proyecto">Tipo de projeto</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="ptype"><span data-pt="Preço fixo" data-es="Precio fijo">Preço fixo</span></label>
+            <label class="filter-option"><input type="radio" name="ptype"><span data-pt="Por hora" data-es="Por hora">Por hora</span></label>
+            <label class="filter-option"><input type="radio" name="ptype"><span data-pt="Recorrente" data-es="Recurrente">Recorrente</span></label>
+          </div>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-group-title open" onclick="toggleFilter(this)">
+            <span data-pt="Prazo de entrega" data-es="Plazo de entrega">Prazo de entrega</span>
+            <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </div>
+          <div class="filter-options">
+            <label class="filter-option"><input type="radio" name="deadline"><span data-pt="Até 7 dias" data-es="Hasta 7 días">Até 7 dias</span></label>
+            <label class="filter-option"><input type="radio" name="deadline"><span data-pt="Até 15 dias" data-es="Hasta 15 días">Até 15 dias</span></label>
+            <label class="filter-option"><input type="radio" name="deadline"><span data-pt="Até 30 dias" data-es="Hasta 30 días">Até 30 dias</span></label>
+            <label class="filter-option"><input type="radio" name="deadline"><span data-pt="Mais de 30 dias" data-es="Más de 30 días">Mais de 30 dias</span></label>
+          </div>
+        </div>
+
+        <div style="padding:16px 20px;">
+          <button class="filter-apply-btn" data-pt="Aplicar Filtros" data-es="Aplicar Filtros">Aplicar Filtros</button>
+        </div>
+      </aside>
+
+      <!-- RESULTADOS PROJETOS -->
+      <div>
+        <div class="results-header">
+          <div class="results-count">
+            <strong>1.247</strong> <span data-pt="projetos encontrados" data-es="proyectos encontrados">projetos encontrados</span>
+          </div>
+          <div class="results-sort">
+            <span data-pt="Ordenar por:" data-es="Ordenar por:">Ordenar por:</span>
+            <select>
+              <option data-pt="Mais recentes" data-es="Más recientes">Mais recentes</option>
+              <option data-pt="Maior orçamento" data-es="Mayor presupuesto">Maior orçamento</option>
+              <option data-pt="Menor orçamento" data-es="Menor presupuesto">Menor orçamento</option>
+              <option data-pt="Prazo mais curto" data-es="Plazo más corto">Prazo mais curto</option>
+              <option data-pt="Mais propostas" data-es="Más propuestas">Mais propostas</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="proj-list-grid">
+
+          <div class="proj-list-card">
+            <div class="proj-list-header">
+              <div class="proj-list-left">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="proj-cat" data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</span>
+                  <span class="tag tag-green" data-pt="Preço Fixo" data-es="Precio Fijo">Preço Fixo</span>
+                  <span style="font-size:11px;color:var(--text-3);" data-pt="Publicado há 2h" data-es="Publicado hace 2h">Publicado há 2h</span>
+                </div>
+                <div class="proj-list-title" data-pt="Desenvolvimento de e-commerce completo com WooCommerce" data-es="Desarrollo de e-commerce completo con WooCommerce">Desenvolvimento de e-commerce completo com WooCommerce</div>
+              </div>
+              <div class="proj-list-right">
+                <div class="proj-list-budget">R$ 2.000 – 4.000</div>
+                <div class="proj-list-type" data-pt="Prazo: 30 dias" data-es="Plazo: 30 días">Prazo: 30 dias</div>
+              </div>
+            </div>
+            <div class="proj-list-desc" data-pt="Preciso criar uma loja virtual completa com integração de pagamento (Pix, cartão, boleto), gestão de estoque, painel administrativo e layout responsivo personalizado com identidade visual da marca." data-es="Necesito crear una tienda virtual completa con integración de pago, gestión de inventario, panel administrativo y diseño responsive personalizado.">Preciso criar uma loja virtual completa com integração de pagamento (Pix, cartão, boleto), gestão de estoque, painel administrativo e layout responsivo personalizado com identidade visual da marca.</div>
+            <div class="proj-skills">
+              <span class="fl-skill">WordPress</span><span class="fl-skill">WooCommerce</span><span class="fl-skill">PHP</span><span class="fl-skill">CSS</span>
+            </div>
+            <div class="proj-list-footer">
+              <div class="proj-list-meta">
+                <span>👁 <span data-pt="142 visualizações" data-es="142 visualizaciones">142 visualizações</span></span>
+                <span>📅 30 <span data-pt="dias" data-es="días">dias</span></span>
+                <span>🏢 <span data-pt="Cliente verificado" data-es="Cliente verificado">Cliente verificado</span></span>
+              </div>
+              <div class="proj-list-actions">
+                <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="proj-list-card">
+            <div class="proj-list-header">
+              <div class="proj-list-left">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="proj-cat" data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</span>
+                  <span class="tag tag-green" data-pt="Preço Fixo" data-es="Precio Fijo">Preço Fixo</span>
+                  <span style="font-size:11px;color:var(--text-3);" data-pt="Publicado há 5h" data-es="Publicado hace 5h">Publicado há 5h</span>
+                </div>
+                <div class="proj-list-title" data-pt="Criação de identidade visual completa para startup de tecnologia" data-es="Creación de identidad visual completa para startup de tecnología">Criação de identidade visual completa para startup de tecnologia</div>
+              </div>
+              <div class="proj-list-right">
+                <div class="proj-list-budget">R$ 800 – 1.500</div>
+                <div class="proj-list-type" data-pt="Prazo: 15 dias" data-es="Plazo: 15 días">Prazo: 15 dias</div>
+              </div>
+            </div>
+            <div class="proj-list-desc" data-pt="Startup de tecnologia fintech busca designer para criação de logotipo, manual de marca, paleta de cores, tipografia, papelaria e aplicações digitais (LinkedIn, Instagram, apresentações)." data-es="Startup de tecnología fintech busca diseñador para logo, manual de marca, paleta de colores, tipografía, papelería y aplicaciones digitales.">Startup de tecnologia fintech busca designer para criação de logotipo, manual de marca, paleta de cores, tipografia, papelaria e aplicações digitais (LinkedIn, Instagram, apresentações).</div>
+            <div class="proj-skills">
+              <span class="fl-skill">Branding</span><span class="fl-skill">Illustrator</span><span class="fl-skill">Figma</span>
+            </div>
+            <div class="proj-list-footer">
+              <div class="proj-list-meta">
+                <span>👁 <span data-pt="87 visualizações" data-es="87 visualizaciones">87 visualizações</span></span>
+                <span>📅 15 <span data-pt="dias" data-es="días">dias</span></span>
+                <span>🏢 <span data-pt="Cliente verificado" data-es="Cliente verificado">Cliente verificado</span></span>
+              </div>
+              <div class="proj-list-actions">
+                <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="proj-list-card">
+            <div class="proj-list-header">
+              <div class="proj-list-left">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="proj-cat" data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</span>
+                  <span class="tag tag-blue" data-pt="Recorrente" data-es="Recurrente">Recorrente</span>
+                  <span style="font-size:11px;color:var(--text-3);" data-pt="Publicado há 1 dia" data-es="Publicado hace 1 día">Publicado há 1 dia</span>
+                </div>
+                <div class="proj-list-title" data-pt="Gestão mensal de redes sociais — Instagram, Facebook e LinkedIn" data-es="Gestión mensual de redes sociales — Instagram, Facebook y LinkedIn">Gestão mensal de redes sociais — Instagram, Facebook e LinkedIn</div>
+              </div>
+              <div class="proj-list-right">
+                <div class="proj-list-budget">R$ 1.200 – 2.000</div>
+                <div class="proj-list-type" data-pt="Por mês" data-es="Por mes">Por mês</div>
+              </div>
+            </div>
+            <div class="proj-list-desc" data-pt="Empresa do setor alimentício precisa de social media para gestão mensal completa: planejamento de conteúdo, criação de artes no Canva, agendamento e relatório mensal de performance." data-es="Empresa del sector alimenticio necesita social media para gestión mensual completa: planificación de contenido, creación de artes, programación y reporte mensual.">Empresa do setor alimentício precisa de social media para gestão mensal completa: planejamento de conteúdo, criação de artes no Canva, agendamento e relatório mensal de performance.</div>
+            <div class="proj-skills">
+              <span class="fl-skill">Instagram</span><span class="fl-skill">Canva</span><span class="fl-skill">Facebook Ads</span><span class="fl-skill">Copywriting</span>
+            </div>
+            <div class="proj-list-footer">
+              <div class="proj-list-meta">
+                <span>👁 <span data-pt="203 visualizações" data-es="203 visualizaciones">203 visualizações</span></span>
+                <span>📅 <span data-pt="Recorrente" data-es="Recurrente">Recorrente</span></span>
+                <span>🏢 <span data-pt="Cliente verificado" data-es="Cliente verificado">Cliente verificado</span></span>
+              </div>
+              <div class="proj-list-actions">
+                <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="proj-list-card">
+            <div class="proj-list-header">
+              <div class="proj-list-left">
+                <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+                  <span class="proj-cat" data-pt="Apps & Mobile" data-es="Apps & Mobile">Apps & Mobile</span>
+                  <span class="tag tag-green" data-pt="Preço Fixo" data-es="Precio Fijo">Preço Fixo</span>
+                  <span style="font-size:11px;color:var(--text-3);" data-pt="Publicado há 3h" data-es="Publicado hace 3h">Publicado há 3h</span>
+                </div>
+                <div class="proj-list-title" data-pt="Aplicativo de delivery para restaurante (iOS e Android)" data-es="Aplicación de delivery para restaurante (iOS y Android)">Aplicativo de delivery para restaurante (iOS e Android)</div>
+              </div>
+              <div class="proj-list-right">
+                <div class="proj-list-budget">R$ 8.000 – 15.000</div>
+                <div class="proj-list-type" data-pt="Prazo: 60 dias" data-es="Plazo: 60 días">Prazo: 60 dias</div>
+              </div>
+            </div>
+            <div class="proj-list-desc" data-pt="Restaurante de médio porte precisa de aplicativo próprio de delivery com cardápio digital, integração de pagamento, rastreamento de pedidos em tempo real e painel administrativo." data-es="Restaurante de tamaño mediano necesita aplicación de delivery propia con menú digital, integración de pago, rastreo de pedidos en tiempo real y panel administrativo.">Restaurante de médio porte precisa de aplicativo próprio de delivery com cardápio digital, integração de pagamento, rastreamento de pedidos em tempo real e painel administrativo.</div>
+            <div class="proj-skills">
+              <span class="fl-skill">Flutter</span><span class="fl-skill">React Native</span><span class="fl-skill">Node.js</span><span class="fl-skill">Firebase</span>
+            </div>
+            <div class="proj-list-footer">
+              <div class="proj-list-meta">
+                <span>👁 <span data-pt="318 visualizações" data-es="318 visualizaciones">318 visualizações</span></span>
+                <span>📅 60 <span data-pt="dias" data-es="días">dias</span></span>
+                <span>🏢 <span data-pt="Cliente verificado" data-es="Cliente verificado">Cliente verificado</span></span>
+              </div>
+              <div class="proj-list-actions">
+                <span class="proj-proposals">32 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /proj-list-grid -->
+
+        <div class="pagination">
+          <button class="page-btn" disabled>←</button>
+          <button class="page-btn active">1</button>
+          <button class="page-btn">2</button>
+          <button class="page-btn">3</button>
+          <span style="color:var(--text-3);padding:0 6px;">...</span>
+          <button class="page-btn" data-pt="Último" data-es="Último">Último</button>
+          <button class="page-btn">→</button>
+        </div>
+
+      </div><!-- /results -->
+    </div><!-- /layout -->
+  </div><!-- /container -->
+</div><!-- /page-projects -->
+<!-- ══════════════════════════════════════════════
+     PÁGINA: COMO FUNCIONA
+══════════════════════════════════════════════ -->
+<div class="page" id="page-how">
+  <div class="page-banner">
+    <div class="container">
+      <div class="page-banner-title" data-pt="Como Funciona a HereWork" data-es="Cómo Funciona HereWork">Como Funciona a HereWork</div>
+      <div class="page-banner-sub" data-pt="Tudo que você precisa saber para começar a contratar ou a trabalhar como freelancer" data-es="Todo lo que necesitas saber para empezar a contratar o trabajar como freelancer">Tudo que você precisa saber para começar a contratar ou a trabalhar como freelancer</div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-top:48px;padding-bottom:80px;">
+
+    <!-- Tabs: Empresas / Freelancers -->
+    <div class="hiw-page-tabs">
+      <button class="hiw-page-tab active" onclick="switchHIWPage('companies',this)"
+        data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</button>
+      <button class="hiw-page-tab" onclick="switchHIWPage('freelancers',this)"
+        data-pt="Para Freelancers" data-es="Para Freelancers">Para Freelancers</button>
+    </div>
+
+    <!-- TAB: Empresas -->
+    <div class="hiw-tab-content active" id="hiw-companies">
+      <div class="hiw-steps-full">
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">1</div>
+          <div class="hiw-step-icon-big">📋</div>
+          <div class="hiw-step-title-big" data-pt="Cadastre-se gratuitamente" data-es="Regístrate gratis">Cadastre-se gratuitamente</div>
+          <div class="hiw-step-desc-big" data-pt="Crie sua conta em menos de 2 minutos. Sem taxa de cadastro, sem cartão de crédito necessário. Acesse o painel e comece a publicar projetos imediatamente." data-es="Crea tu cuenta en menos de 2 minutos. Sin costo de registro, sin tarjeta de crédito. Accede al panel y empieza a publicar proyectos de inmediato.">Crie sua conta em menos de 2 minutos. Sem taxa de cadastro, sem cartão de crédito necessário. Acesse o painel e comece a publicar projetos imediatamente.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">2</div>
+          <div class="hiw-step-icon-big">📝</div>
+          <div class="hiw-step-title-big" data-pt="Publique seu projeto" data-es="Publica tu proyecto">Publique seu projeto</div>
+          <div class="hiw-step-desc-big" data-pt="Descreva detalhadamente o que você precisa: escopo, prazo, orçamento e habilidades necessárias. Quanto mais detalhado, melhores serão as propostas que você receberá." data-es="Describe detalladamente lo que necesitas: alcance, plazo, presupuesto y habilidades requeridas. Cuanto más detallado, mejores serán las propuestas.">Descreva detalhadamente o que você precisa: escopo, prazo, orçamento e habilidades necessárias. Quanto mais detalhado, melhores serão as propostas que você receberá.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">3</div>
+          <div class="hiw-step-icon-big">👥</div>
+          <div class="hiw-step-title-big" data-pt="Receba propostas" data-es="Recibe propuestas">Receba propostas</div>
+          <div class="hiw-step-desc-big" data-pt="Em poucas horas, profissionais qualificados enviarão propostas com valores, prazos e portfólios. Compare cada candidato e leia as avaliações de outros clientes." data-es="En pocas horas, profesionales calificados enviarán propuestas con valores, plazos y portafolios. Compara candidatos y lee las valoraciones de otros clientes.">Em poucas horas, profissionais qualificados enviarão propostas com valores, prazos e portfólios. Compare cada candidato e leia as avaliações de outros clientes.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">4</div>
+          <div class="hiw-step-icon-big">🤝</div>
+          <div class="hiw-step-title-big" data-pt="Contrate com segurança" data-es="Contrata con seguridad">Contrate com segurança</div>
+          <div class="hiw-step-desc-big" data-pt="Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de escrow para proteger seu pagamento." data-es="Conversa con los candidatos, negocia los términos y contrata al mejor. Firma el contrato digital y deposita en el sistema de escrow para proteger tu pago.">Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de escrow para proteger seu pagamento.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">5</div>
+          <div class="hiw-step-icon-big">📊</div>
+          <div class="hiw-step-title-big" data-pt="Acompanhe o projeto" data-es="Sigue el proyecto">Acompanhe o projeto</div>
+          <div class="hiw-step-desc-big" data-pt="Gerencie tudo pelo painel: envio de arquivos, mensagens, milestones e atualizações. Tenha visibilidade total do progresso em tempo real." data-es="Gestiona todo desde el panel: envío de archivos, mensajes, milestones y actualizaciones. Ten visibilidad total del progreso en tiempo real.">Gerencie tudo pelo painel: envio de arquivos, mensagens, milestones e atualizações. Tenha visibilidade total do progresso em tempo real.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">6</div>
+          <div class="hiw-step-icon-big">💳</div>
+          <div class="hiw-step-title-big" data-pt="Aprove e libere o pagamento" data-es="Aprueba y libera el pago">Aprove e libere o pagamento</div>
+          <div class="hiw-step-desc-big" data-pt="Quando o projeto for entregue e aprovado, libere o pagamento com um clique. O freelancer recebe o valor na carteira e pode sacar via Pix ou TED." data-es="Cuando el proyecto sea entregado y aprobado, libera el pago con un clic. El freelancer recibe el valor en su billetera y puede retirar por transferencia bancaria.">Quando o projeto for entregue e aprovado, libere o pagamento com um clique. O freelancer recebe o valor na carteira e pode sacar via Pix ou TED.</div>
+        </div>
+      </div>
+
+      <!-- Bloco de garantias -->
+      <div style="background:var(--green-light);border:1.5px solid rgba(46,125,50,0.2);border-radius:var(--radius-lg);padding:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:56px;">
+        <div style="text-align:center;">
+          <div style="font-size:36px;margin-bottom:10px;">🔒</div>
+          <div style="font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:6px;" data-pt="Escrow Seguro" data-es="Escrow Seguro">Escrow Seguro</div>
+          <div style="font-size:13px;color:var(--text-2);" data-pt="Seu dinheiro só é liberado após aprovação do trabalho entregue." data-es="Tu dinero solo se libera tras la aprobación del trabajo entregado.">Seu dinheiro só é liberado após aprovação do trabalho entregue.</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:36px;margin-bottom:10px;">🛡️</div>
+          <div style="font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:6px;" data-pt="Mediação de Disputas" data-es="Mediación de Disputas">Mediação de Disputas</div>
+          <div style="font-size:13px;color:var(--text-2);" data-pt="Se houver divergência, nossa equipe atua como mediadora para chegar a um acordo justo." data-es="Si hay discrepancia, nuestro equipo actúa como mediador para llegar a un acuerdo justo.">Se houver divergência, nossa equipe atua como mediadora para chegar a um acordo justo.</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:36px;margin-bottom:10px;">⭐</div>
+          <div style="font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:6px;" data-pt="Avaliações Verificadas" data-es="Calificaciones Verificadas">Avaliações Verificadas</div>
+          <div style="font-size:13px;color:var(--text-2);" data-pt="Todas as avaliações são de clientes reais que concluíram projetos na plataforma." data-es="Todas las calificaciones son de clientes reales que completaron proyectos en la plataforma.">Todas as avaliações são de clientes reais que concluíram projetos na plataforma.</div>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="hiw-faq">
+        <div class="faq-title" data-pt="Perguntas Frequentes" data-es="Preguntas Frecuentes">Perguntas Frequentes</div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Quanto custa publicar um projeto?" data-es="¿Cuánto cuesta publicar un proyecto?">Quanto custa publicar um projeto?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Publicar projetos na HereWork é 100% gratuito. Você só paga uma comissão quando contratar um freelancer e o projeto for concluído com sucesso. A taxa de comissão varia conforme o plano escolhido." data-es="Publicar proyectos en HereWork es 100% gratuito. Solo pagas una comisión cuando contratas un freelancer y el proyecto se completa con éxito. La tasa de comisión varía según el plan elegido.">Publicar projetos na HereWork é 100% gratuito. Você só paga uma comissão quando contratar um freelancer e o projeto for concluído com sucesso. A taxa de comissão varia conforme o plano escolhido.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Como funciona o sistema de escrow?" data-es="¿Cómo funciona el sistema de escrow?">Como funciona o sistema de escrow?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de escrow. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional. Isso protege tanto o cliente quanto o freelancer." data-es="Cuando contratas a un freelancer, el valor acordado se deposita en nuestra cuenta de escrow. El dinero queda retenido de forma segura hasta que apruebes el trabajo entregado. Solo entonces se libera el pago al profesional.">Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de escrow. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="O que acontece se eu não gostar do trabalho entregue?" data-es="¿Qué pasa si no me gusta el trabajo entregado?">O que acontece se eu não gostar do trabalho entregue?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Você pode solicitar revisões conforme combinado no contrato. Se o trabalho não atender ao escopo original, você pode abrir uma disputa. Nossa equipe irá analisar o caso e mediar uma solução justa para ambas as partes. O pagamento só é liberado com sua aprovação." data-es="Puedes solicitar revisiones según lo acordado en el contrato. Si el trabajo no cumple con el alcance original, puedes abrir una disputa. Nuestro equipo analizará el caso y mediará una solución justa.">Você pode solicitar revisões conforme combinado no contrato. Se o trabalho não atender ao escopo original, você pode abrir uma disputa. Nossa equipe irá analisar o caso e mediar uma solução justa para ambas as partes.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Quais formas de pagamento são aceitas?" data-es="¿Qué formas de pago se aceptan?">Quais formas de pagamento são aceitas?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Aceitamos Pix, cartão de crédito (Visa, Mastercard, Elo), boleto bancário e transferência TED/DOC. Para clientes internacionais, também aceitamos pagamento via cartão internacional e transferência SWIFT." data-es="Aceptamos Pix, tarjeta de crédito (Visa, Mastercard, Elo), boleto bancario y transferencia bancaria. Para clientes internacionales, también aceptamos tarjeta internacional y transferencia SWIFT.">Aceitamos Pix, cartão de crédito (Visa, Mastercard, Elo), boleto bancário e transferência TED/DOC. Para clientes internacionais, também aceitamos pagamento via cartão internacional e transferência SWIFT.</div>
+        </div>
+
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Posso contratar o mesmo freelancer em projetos futuros?" data-es="¿Puedo contratar al mismo freelancer en proyectos futuros?">Posso contratar o mesmo freelancer em projetos futuros?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Sim! Você pode salvar freelancers como favoritos e contratá-los diretamente em novos projetos, sem necessidade de publicar uma nova vaga. Basta acessar seu painel, ir em 'Meus Freelancers' e enviar um convite." data-es="¡Sí! Puedes guardar freelancers como favoritos y contratarlos directamente en nuevos proyectos, sin necesidad de publicar una nueva vacante.">Sim! Você pode salvar freelancers como favoritos e contratá-los diretamente em novos projetos, sem necessidade de publicar uma nova vaga. Basta acessar seu painel, ir em 'Meus Freelancers' e enviar um convite.</div>
+        </div>
+      </div>
+    </div><!-- /hiw-companies -->
+
+    <!-- TAB: Freelancers -->
+    <div class="hiw-tab-content" id="hiw-freelancers-page">
+      <div class="hiw-steps-full">
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">1</div>
+          <div class="hiw-step-icon-big">👤</div>
+          <div class="hiw-step-title-big" data-pt="Crie seu perfil profissional" data-es="Crea tu perfil profesional">Crie seu perfil profissional</div>
+          <div class="hiw-step-desc-big" data-pt="Monte um perfil completo com foto, bio, portfólio, habilidades e histórico profissional. Perfis completos recebem até 5x mais convites de clientes." data-es="Crea un perfil completo con foto, bio, portafolio, habilidades e historial profesional. Perfiles completos reciben hasta 5x más invitaciones de clientes.">Monte um perfil completo com foto, bio, portfólio, habilidades e histórico profissional. Perfis completos recebem até 5x mais convites de clientes.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">2</div>
+          <div class="hiw-step-icon-big">🔍</div>
+          <div class="hiw-step-title-big" data-pt="Explore os projetos" data-es="Explora los proyectos">Explore os projetos</div>
+          <div class="hiw-step-desc-big" data-pt="Centenas de novos projetos são publicados diariamente. Use os filtros para encontrar oportunidades alinhadas com suas habilidades, valores e disponibilidade." data-es="Cientos de nuevos proyectos se publican a diario. Usa los filtros para encontrar oportunidades alineadas con tus habilidades, valores y disponibilidad.">Centenas de novos projetos são publicados diariamente. Use os filtros para encontrar oportunidades alinhadas com suas habilidades, valores e disponibilidade.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">3</div>
+          <div class="hiw-step-icon-big">✍️</div>
+          <div class="hiw-step-title-big" data-pt="Envie uma proposta irresistível" data-es="Envía una propuesta irresistible">Envie uma proposta irresistível</div>
+          <div class="hiw-step-desc-big" data-pt="Personalize sua proposta para cada projeto. Apresente seu valor, explique sua abordagem, defina o prazo e o preço. Propostas personalizadas têm 3x mais chance de aprovação." data-es="Personaliza tu propuesta para cada proyecto. Presenta tu valor, explica tu enfoque, define el plazo y el precio. Las propuestas personalizadas tienen 3x más chance de aprobación.">Personalize sua proposta para cada projeto. Apresente seu valor, explique sua abordagem, defina o prazo e o preço.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">4</div>
+          <div class="hiw-step-icon-big">💬</div>
+          <div class="hiw-step-title-big" data-pt="Negocie e seja contratado" data-es="Negocia y sé contratado">Negocie e seja contratado</div>
+          <div class="hiw-step-desc-big" data-pt="Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato. O pagamento fica em escrow garantindo seu recebimento." data-es="Conversa con el cliente por el chat integrado, aclara dudas, ajusta el alcance si es necesario y cierra el contrato. El pago queda en escrow garantizando tu cobro.">Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">5</div>
+          <div class="hiw-step-icon-big">🚀</div>
+          <div class="hiw-step-title-big" data-pt="Execute e entregue" data-es="Ejecuta y entrega">Execute e entregue</div>
+          <div class="hiw-step-desc-big" data-pt="Trabalhe com tranquilidade sabendo que seu pagamento está garantido. Use as ferramentas do painel para enviar atualizações, arquivos e marcos do projeto." data-es="Trabaja con tranquilidad sabiendo que tu pago está garantizado. Usa las herramientas del panel para enviar actualizaciones, archivos e hitos del proyecto.">Trabalhe com tranquilidade sabendo que seu pagamento está garantido. Use as ferramentas do painel para enviar atualizações, arquivos e marcos do projeto.</div>
+        </div>
+        <div class="hiw-step-full">
+          <div class="hiw-step-num-big">6</div>
+          <div class="hiw-step-icon-big">💰</div>
+          <div class="hiw-step-title-big" data-pt="Receba e saque" data-es="Cobra y retira">Receba e saque</div>
+          <div class="hiw-step-desc-big" data-pt="Após aprovação do cliente, o pagamento cai na sua carteira HereWork. Saque a qualquer momento via Pix (instantâneo), TED ou transferência internacional." data-es="Tras la aprobación del cliente, el pago llega a tu billetera HereWork. Retira en cualquier momento por Pix (instantáneo), transferencia bancaria o internacional.">Após aprovação do cliente, o pagamento cai na sua carteira HereWork. Saque a qualquer momento via Pix (instantâneo), TED ou transferência internacional.</div>
+        </div>
+      </div>
+
+      <div class="hiw-faq">
+        <div class="faq-title" data-pt="Perguntas Frequentes para Freelancers" data-es="Preguntas Frecuentes para Freelancers">Perguntas Frequentes para Freelancers</div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Quanto custa ser freelancer na HereWork?" data-es="¿Cuánto cuesta ser freelancer en HereWork?">Quanto custa ser freelancer na HereWork?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="O cadastro e uso básico da plataforma são gratuitos. Quando você fecha um projeto, a HereWork cobra uma comissão de 10% a 20% sobre o valor recebido (dependendo do seu plano). Planos premium reduzem essa taxa e oferecem benefícios adicionais." data-es="El registro y uso básico de la plataforma son gratuitos. Cuando cierras un proyecto, HereWork cobra una comisión del 10% al 20% sobre el valor recibido (dependiendo de tu plan). Los planes premium reducen esta tasa.">O cadastro e uso básico da plataforma são gratuitos. Quando você fecha um projeto, a HereWork cobra uma comissão de 10% a 20% sobre o valor recibido (dependendo do seu plano).</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Como e quando recebo meu pagamento?" data-es="¿Cómo y cuándo recibo mi pago?">Como e quando recebo meu pagamento?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="Após o cliente aprovar a entrega, o valor é creditado automaticamente na sua carteira HereWork. Você pode solicitar saque a qualquer momento. Saques via Pix são processados em minutos. Saques via TED são processados em até 1 dia útil." data-es="Tras la aprobación del cliente, el valor se acredita automáticamente en tu billetera HereWork. Puedes solicitar retiro en cualquier momento. Los retiros por Pix se procesan en minutos.">Após o cliente aprovar a entrega, o valor é creditado automaticamente na sua carteira HereWork. Você pode solicitar saque a qualquer momento. Saques via Pix são processados em minutos.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            <span data-pt="Como me tornar um Top Freelancer?" data-es="¿Cómo convertirme en Top Freelancer?">Como me tornar um Top Freelancer?</span>
+            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="faq-answer" data-pt="O badge 'Top Freelancer' é concedido automaticamente pela plataforma com base em: manutenção de avaliação média acima de 4,7 estrelas, mínimo de 20 projetos concluídos, taxa de resposta acima de 90% e perfil completo com portfólio atualizado." data-es="El badge 'Top Freelancer' es concedido automáticamente por la plataforma en base a: calificación promedio superior a 4,7 estrellas, mínimo de 20 proyectos completados, tasa de respuesta superior al 90% y perfil completo con portafolio actualizado.">O badge 'Top Freelancer' é concedido automaticamente pela plataforma com base em: manutenção de avaliação média acima de 4,7 estrelas, mínimo de 20 projetos concluídos, taxa de resposta acima de 90% e perfil completo com portfólio atualizado.</div>
+        </div>
+      </div>
+    </div><!-- /hiw-freelancers-page -->
+
+  </div><!-- /container -->
+</div><!-- /page-how -->
+
+
+<!-- ══════════════════════════════════════════════
+     PÁGINA: PLANOS
+══════════════════════════════════════════════ -->
+<div class="page" id="page-pricing">
+  <div class="page-banner">
+    <div class="container">
+      <div class="page-banner-title" data-pt="Planos e Preços" data-es="Planes y Precios">Planos e Preços</div>
+      <div class="page-banner-sub" data-pt="Escolha o plano ideal para o seu perfil e maximize seus resultados" data-es="Elige el plan ideal para tu perfil y maximiza tus resultados">Escolha o plano ideal para o seu perfil e maximize seus resultados</div>
+    </div>
+  </div>
+
+  <section class="pricing-section">
+    <div class="container">
+
+      <!-- Toggle mensal/anual -->
+      <div class="pricing-toggle">
+        <span class="pricing-toggle-label" data-pt="Mensal" data-es="Mensual">Mensal</span>
+        <div class="toggle-switch annual" id="billing-toggle" onclick="toggleBilling()">
+          <div class="toggle-knob"></div>
+        </div>
+        <span class="pricing-toggle-label" data-pt="Anual" data-es="Anual">Anual</span>
+        <span class="pricing-badge-annual" data-pt="Economize 20%" data-es="Ahorra 20%">Economize 20%</span>
+      </div>
+
+      <!-- Tabs: Empresas / Freelancers -->
+      <div class="pricing-tabs">
+        <button class="pricing-tab active" onclick="switchPricingTab('companies', this)"
+          data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</button>
+        <button class="pricing-tab" onclick="switchPricingTab('freelancers', this)"
+          data-pt="Para Freelancers" data-es="Para Freelancers">Para Freelancers</button>
+      </div>
+
+      <!-- PLANOS EMPRESAS -->
+      <div id="pricing-companies">
+        <div class="pricing-grid-cards">
+
+          <div class="pricing-card">
+            <div class="pricing-plan-name" data-pt="Básico" data-es="Básico">Básico</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-period" data-pt="Gratuito para sempre" data-es="Gratis para siempre">Gratuito para sempre</div>
+            <div class="pricing-plan-desc" data-pt="Ideal para quem está começando e quer testar a plataforma sem custo." data-es="Ideal para quienes están empezando y quieren probar la plataforma sin costo.">Ideal para quem está começando e quer testar a plataforma sem custo.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Publicação de até 3 projetos/mês" data-es="Publicación de hasta 3 proyectos/mes">Publicação de até 3 projetos/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Acesso à base de freelancers" data-es="Acceso a la base de freelancers">Acesso à base de freelancers</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Chat com candidatos" data-es="Chat con candidatos">Chat com candidatos</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Escrow básico" data-es="Escrow básico">Escrow básico</span></li>
+              <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
+              <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Convites diretos a freelancers" data-es="Invitaciones directas a freelancers">Convites diretos a freelancers</span></li>
+              <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Relatórios avançados" data-es="Reportes avanzados">Relatórios avançados</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 20% por projeto" data-es="Comisión: 20% por proyecto">Comissão: 20% por projeto</div>
+            <button class="btn btn-outline btn-block btn-lg" data-pt="Começar Grátis" data-es="Empezar Gratis">Começar Grátis</button>
+          </div>
+
+          <div class="pricing-card featured">
+            <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
+            <div class="pricing-plan-name" data-pt="Profissional" data-es="Profesional">Profissional</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="149" data-annual="119">149</span></div>
+            <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
+            <div class="pricing-plan-desc" data-pt="Para empresas que contratam com frequência e precisam de agilidade e controle." data-es="Para empresas que contratan frecuentemente y necesitan agilidad y control.">Para empresas que contratam com frequência e precisam de agilidade e controle.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Projetos ilimitados" data-es="Proyectos ilimitados">Projetos ilimitados</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Convites diretos a freelancers" data-es="Invitaciones directas a freelancers">Convites diretos a freelancers</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário (resposta em 4h)" data-es="Soporte prioritario (respuesta en 4h)">Suporte prioritário (resposta em 4h)</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Escrow com milestones" data-es="Escrow con milestones">Escrow com milestones</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Relatórios e métricas avançadas" data-es="Reportes y métricas avanzadas">Relatórios e métricas avançadas</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gestão de equipes" data-es="Gestión de equipos">Gestão de equipes</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Contratos digitais personalizados" data-es="Contratos digitales personalizados">Contratos digitais personalizados</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 12% por projeto" data-es="Comisión reducida: 12% por proyecto">Comissão reduzida: 12% por projeto</div>
+            <button class="btn btn-green btn-block btn-lg" data-pt="Assinar Profissional" data-es="Suscribirse Profesional">Assinar Profissional</button>
+          </div>
+
+          <div class="pricing-card">
+            <div class="pricing-plan-name" data-pt="Enterprise" data-es="Enterprise">Enterprise</div>
+            <div class="pricing-plan-price"><sup></sup><span style="font-size:36px;" data-pt="Sob consulta" data-es="A consultar">Sob consulta</span></div>
+            <div class="pricing-plan-period" data-pt="Personalizado para sua empresa" data-es="Personalizado para tu empresa">Personalizado para sua empresa</div>
+            <div class="pricing-plan-desc" data-pt="Para grandes empresas com volume alto de contratações e necessidades específicas." data-es="Para grandes empresas con alto volumen de contrataciones y necesidades específicas.">Para grandes empresas com volume alto de contratações e necessidades específicas.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Tudo do plano Profissional" data-es="Todo del plan Profesional">Tudo do plano Profissional</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gerente de conta dedicado" data-es="Gerente de cuenta dedicado">Gerente de conta dedicado</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="SLA personalizado" data-es="SLA personalizado">SLA personalizado</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Integração via API" data-es="Integración via API">Integração via API</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Pool privado de talentos" data-es="Pool privado de talentos">Pool privado de talentos</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Faturamento/NF personalizado" data-es="Facturación personalizada">Faturamento/NF personalizado</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Treinamento da equipe" data-es="Capacitación del equipo">Treinamento da equipe</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão negociável" data-es="Comisión negociable">Comissão negociável</div>
+            <button class="btn btn-outline btn-block btn-lg" data-pt="Falar com Vendas" data-es="Hablar con Ventas">Falar com Vendas</button>
+          </div>
+
+        </div>
+      </div><!-- /pricing-companies -->
+
+      <!-- PLANOS FREELANCERS -->
+      <div id="pricing-freelancers" style="display:none;">
+        <div class="pricing-grid-cards">
+
+          <div class="pricing-card">
+            <div class="pricing-plan-name" data-pt="Grátis" data-es="Gratis">Grátis</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-period" data-pt="Gratuito para sempre" data-es="Gratis para siempre">Gratuito para sempre</div>
+            <div class="pricing-plan-desc" data-pt="Para freelancers começando e que querem explorar a plataforma." data-es="Para freelancers que empiezan y quieren explorar la plataforma.">Para freelancers começando e que querem explorar a plataforma.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Perfil profissional completo" data-es="Perfil profesional completo">Perfil profissional completo</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="10 propostas/mês" data-es="10 propuestas/mes">10 propostas/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Portfólio com até 5 projetos" data-es="Portafolio con hasta 5 proyectos">Portfólio com até 5 projetos</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Saque via Pix e TED" data-es="Retiro por Pix y transferencia">Saque via Pix e TED</span></li>
+              <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Destaque nos resultados" data-es="Destacado en resultados">Destaque nos resultados</span></li>
+              <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Selos de verificação premium" data-es="Sellos de verificación premium">Selos de verificação premium</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 20% sobre projetos" data-es="Comisión: 20% sobre proyectos">Comissão: 20% sobre projetos</div>
+            <button class="btn btn-outline btn-block btn-lg" data-pt="Cadastrar Grátis" data-es="Registrarse Gratis">Cadastrar Grátis</button>
+          </div>
+
+          <div class="pricing-card featured">
+            <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
+            <div class="pricing-plan-name" data-pt="Premium" data-es="Premium">Premium</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="49" data-annual="39">49</span></div>
+            <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
+            <div class="pricing-plan-desc" data-pt="Para freelancers que querem mais visibilidade, oportunidades e ganhar mais." data-es="Para freelancers que quieren más visibilidad, oportunidades y ganar más.">Para freelancers que querem mais visibilidade, oportunidades e ganhar mais.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Propostas ilimitadas" data-es="Propuestas ilimitadas">Propostas ilimitadas</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Destaque nos resultados de busca" data-es="Destacado en los resultados de búsqueda">Destaque nos resultados de busca</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Portfólio ilimitado" data-es="Portafolio ilimitado">Portfólio ilimitado</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Selo de verificação premium" data-es="Sello de verificación premium">Selo de verificação premium</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Acesso antecipado a novos projetos" data-es="Acceso anticipado a nuevos proyectos">Acesso antecipado a novos projetos</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Métricas de perfil avançadas" data-es="Métricas de perfil avanzadas">Métricas de perfil avançadas</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 10% sobre projetos" data-es="Comisión reducida: 10% sobre proyectos">Comissão reduzida: 10% sobre projetos</div>
+            <button class="btn btn-green btn-block btn-lg" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
+          </div>
+
+          <div class="pricing-card">
+            <div class="pricing-plan-name" data-pt="Elite" data-es="Elite">Elite</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="99" data-annual="79">99</span></div>
+            <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
+            <div class="pricing-plan-desc" data-pt="Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos." data-es="Para los mejores freelancers que buscan máxima visibilidad y los mejores proyectos.">Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Tudo do plano Premium" data-es="Todo del plan Premium">Tudo do plano Premium</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Posição #1 nos resultados de busca" data-es="Posición #1 en los resultados de búsqueda">Posição #1 nos resultados de busca</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Badge 'Elite' exclusivo no perfil" data-es="Badge 'Elite' exclusivo en el perfil">Badge 'Elite' exclusivo no perfil</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Receba convites de empresas Enterprise" data-es="Recibe invitaciones de empresas Enterprise">Receba convites de empresas Enterprise</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gerente de sucesso dedicado" data-es="Gerente de éxito dedicado">Gerente de sucesso dedicado</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Comissão mais baixa da plataforma" data-es="Comisión más baja de la plataforma">Comissão mais baixa da plataforma</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 7% sobre projetos" data-es="Comisión reducida: 7% sobre proyectos">Comissão reduzida: 7% sobre projetos</div>
+            <button class="btn btn-outline btn-block btn-lg" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
+          </div>
+
+        </div>
+      </div><!-- /pricing-freelancers -->
+
+      <!-- Tabela comparativa -->
+      <div class="pricing-compare">
+        <div class="pricing-compare-title" data-pt="Comparativo completo de planos" data-es="Comparativo completo de planes">Comparativo completo de planos</div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th data-pt="Recurso" data-es="Función">Recurso</th>
+              <th data-pt="Básico / Grátis" data-es="Básico / Gratis">Básico / Grátis</th>
+              <th style="color:var(--green);" data-pt="Profissional / Premium" data-es="Profesional / Premium">Profissional / Premium</th>
+              <th data-pt="Enterprise / Elite" data-es="Enterprise / Elite">Enterprise / Elite</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="compare-section-row" colspan="4" data-pt="Publicações & Propostas" data-es="Publicaciones & Propuestas">Publicações & Propostas</td></tr>
+            <tr>
+              <td data-pt="Projetos / Propostas mensais" data-es="Proyectos / Propuestas mensuales">Projetos / Propostas mensais</td>
+              <td><span class="compare-val">3</span></td>
+              <td><span class="compare-val" data-pt="Ilimitado" data-es="Ilimitado">Ilimitado</span></td>
+              <td><span class="compare-val" data-pt="Ilimitado" data-es="Ilimitado">Ilimitado</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Convites diretos a freelancers" data-es="Invitaciones directas">Convites diretos a freelancers</td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr><td class="compare-section-row" colspan="4" data-pt="Pagamentos & Segurança" data-es="Pagamentos & Seguridad">Pagamentos & Segurança</td></tr>
+            <tr>
+              <td data-pt="Escrow seguro" data-es="Escrow seguro">Escrow seguro</td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Escrow com milestones" data-es="Escrow con milestones">Escrow com milestones</td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Taxa de comissão" data-es="Tasa de comisión">Taxa de comissão</td>
+              <td><span class="compare-val">20%</span></td>
+              <td><span class="compare-val">10–12%</span></td>
+              <td><span class="compare-val">7%</span></td>
+            </tr>
+            <tr><td class="compare-section-row" colspan="4" data-pt="Suporte & Relatórios" data-es="Soporte & Reportes">Suporte & Relatórios</td></tr>
+            <tr>
+              <td data-pt="Suporte por e-mail" data-es="Soporte por email">Suporte por e-mail</td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Gerente dedicado" data-es="Gerente dedicado">Gerente dedicado</td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+            <tr>
+              <td data-pt="Relatórios avançados" data-es="Reportes avanzados">Relatórios avançados</td>
+              <td><span class="compare-no">✗</span></td>
+              <td><span class="compare-yes">✓</span></td>
+              <td><span class="compare-yes">✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Garantia -->
+      <div style="text-align:center;margin-top:48px;padding:36px;background:var(--green-light);border-radius:var(--radius-lg);border:1.5px solid rgba(46,125,50,0.15);">
+        <div style="font-size:42px;margin-bottom:12px;">🛡️</div>
+        <div style="font-size:20px;font-weight:800;color:var(--green-dark);margin-bottom:8px;" data-pt="Garantia de 30 dias" data-es="Garantía de 30 días">Garantia de 30 dias</div>
+        <div style="font-size:15px;color:var(--text-2);max-width:480px;margin:0 auto;" data-pt="Não ficou satisfeito? Devolvemos 100% do valor pago, sem perguntas. Sua confiança é nossa prioridade." data-es="¿No quedaste satisfecho? Devolvemos el 100% del valor pagado, sin preguntas. Tu confianza es nuestra prioridad.">Não ficou satisfeito? Devolvemos 100% do valor pago, sem perguntas. Sua confiança é nossa prioridade.</div>
+      </div>
+
+    </div><!-- /container -->
+  </section>
+</div><!-- /page-pricing -->
+
+<!-- ══ FOOTER ══ -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-top">
+
+      <!-- Marca -->
+      <div>
+        <div class="footer-logo">
+          <svg width="32" height="32" viewBox="0 0 38 38" fill="none">
+            <circle cx="12" cy="12" r="8" fill="#F4511E"/>
+            <circle cx="26" cy="12" r="8" fill="#F4511E" opacity="0.75"/>
+            <circle cx="19" cy="26" r="8" fill="#2E7D32"/>
+          </svg>
+          <span>HereWork</span>
+        </div>
+        <p class="footer-brand-desc"
+          data-pt="O maior marketplace de freelancers do Brasil e América Latina. Conectamos empresas a profissionais qualificados com segurança e agilidade."
+          data-es="El mayor marketplace de freelancers de Brasil y Latinoamérica. Conectamos empresas con profesionales calificados con seguridad y agilidad.">
+          O maior marketplace de freelancers do Brasil e América Latina. Conectamos empresas a profissionais qualificados com segurança e agilidade.
+        </p>
+        <div class="footer-badges">
+          <span class="footer-badge">🔒 <span data-pt="Pagamento Seguro" data-es="Pago Seguro">Pagamento Seguro</span></span>
+          <span class="footer-badge">✅ <span data-pt="Verificado" data-es="Verificado">Verificado</span></span>
+          <span class="footer-badge">🏅 SSL</span>
+        </div>
+        <div class="footer-social">
+          <a href="#" title="Facebook">f</a>
+          <a href="#" title="Instagram">📷</a>
+          <a href="#" title="LinkedIn">in</a>
+          <a href="#" title="Twitter/X">𝕏</a>
+          <a href="#" title="YouTube">▶</a>
+        </div>
+      </div>
+
+      <!-- Empresas -->
+      <div>
+        <div class="footer-col-title" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</div>
+        <ul class="footer-links">
+          <li><a href="#" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</a></li>
+          <li><a href="#" onclick="showPage('freelancers')" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</a></li>
+          <li><a href="#" data-pt="Planos Empresariais" data-es="Planes Empresariales">Planos Empresariais</a></li>
+          <li><a href="#" data-pt="API para Empresas" data-es="API para Empresas">API para Empresas</a></li>
+          <li><a href="#" data-pt="Gestão de Equipes" data-es="Gestión de Equipos">Gestão de Equipes</a></li>
+        </ul>
+      </div>
+
+      <!-- Freelancers -->
+      <div>
+        <div class="footer-col-title" data-pt="Para Freelancers" data-es="Para Freelancers">Para Freelancers</div>
+        <ul class="footer-links">
+          <li><a href="#" data-pt="Criar Perfil" data-es="Crear Perfil">Criar Perfil</a></li>
+          <li><a href="#" onclick="showPage('projects')" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</a></li>
+          <li><a href="#" onclick="showPage('pricing')" data-pt="Planos Premium" data-es="Planes Premium">Planos Premium</a></li>
+          <li><a href="#" data-pt="Certificações" data-es="Certificaciones">Certificações</a></li>
+          <li><a href="#" data-pt="Como Cobrar" data-es="Cómo Cobrar">Como Cobrar</a></li>
+        </ul>
+      </div>
+
+      <!-- Plataforma -->
+      <div>
+        <div class="footer-col-title" data-pt="Plataforma" data-es="Plataforma">Plataforma</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="showPage('how')" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</a></li>
+          <li><a href="#" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a></li>
+          <li><a href="#" data-pt="Blog" data-es="Blog">Blog</a></li>
+          <li><a href="#" data-pt="Segurança" data-es="Seguridad">Segurança</a></li>
+          <li><a href="#" data-pt="Status do Sistema" data-es="Estado del Sistema">Status do Sistema</a></li>
+        </ul>
+      </div>
+
+      <!-- Empresa -->
+      <div>
+        <div class="footer-col-title" data-pt="Empresa" data-es="Empresa">Empresa</div>
+        <ul class="footer-links">
+          <li><a href="#" data-pt="Sobre Nós" data-es="Sobre Nosotros">Sobre Nós</a></li>
+          <li><a href="#" data-pt="Carreiras" data-es="Carreras">Carreiras</a></li>
+          <li><a href="#" data-pt="Imprensa" data-es="Prensa">Imprensa</a></li>
+          <li><a href="#" data-pt="Contato" data-es="Contacto">Contato</a></li>
+          <li><a href="#" data-pt="Parcerias" data-es="Alianzas">Parcerias</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <div>
+        © 2024 HereWork. <span data-pt="Todos os direitos reservados." data-es="Todos los derechos reservados.">Todos os direitos reservados.</span>
+      </div>
+      <div class="footer-bottom-links">
+        <a href="#" data-pt="Termos de Uso" data-es="Términos de Uso">Termos de Uso</a>
+        <a href="#" data-pt="Privacidade" data-es="Privacidad">Privacidade</a>
+        <a href="#" data-pt="Cookies" data-es="Cookies">Cookies</a>
+        <a href="#" data-pt="LGPD / RGPD" data-es="LGPD / RGPD">LGPD / RGPD</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════
+     JAVASCRIPT BASE
+════════════════════════════════════════ -->
+<script>
+// ── SISTEMA DE PÁGINAS (SPA) ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  const nav  = document.getElementById('nav-' + name);
+  if (page) page.classList.add('active');
+  if (nav)  nav.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── TROCA DE IDIOMA ──
+function setLang(lang) {
+  document.documentElement.setAttribute('data-lang', lang);
+  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
+  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+
+  // Texto simples em data-pt / data-es
+  document.querySelectorAll('[data-pt]').forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
+    const val = el.getAttribute('data-' + lang);
+    if (val) el.textContent = val;
+  });
+
+  // Placeholders em inputs
+  document.querySelectorAll('[data-placeholder-pt]').forEach(el => {
+    const val = el.getAttribute('data-placeholder-' + lang);
+    if (val) el.placeholder = val;
+  });
+
+  // <select> options
+  document.querySelectorAll('select option[data-pt]').forEach(opt => {
+    const val = opt.getAttribute('data-' + lang);
+    if (val) opt.textContent = val;
+  });
+}
+
+// ── TAGS RÁPIDAS ──
+function searchTag(el) {
+  const text = el.textContent.trim();
+  const input = document.querySelector('.hero-search-input');
+  if (input) { input.value = text; input.focus(); }
+}
+
+// ── FILTROS SIDEBAR ──
+function toggleFilter(titleEl) {
+  titleEl.classList.toggle('open');
+  const opts = titleEl.nextElementSibling;
+  if (opts) opts.style.display = titleEl.classList.contains('open') ? '' : 'none';
+}
+
+// ── PAGINAÇÃO ──
+document.addEventListener('click', function(e) {
+  const btn = e.target.closest('.page-btn');
+  if (!btn || btn.disabled || btn.textContent.trim() === '←' || btn.textContent.trim() === '→') return;
+  const pagination = btn.closest('.pagination');
+  if (!pagination) return;
+  pagination.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+  if (!isNaN(btn.textContent.trim())) btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ── TABS COMO FUNCIONA ──
+function switchHowTab(tab, btn) {
+  document.querySelectorAll('.how-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('how-' + (tab === 'companies' ? 'companies' : 'freelancers-tab'));
+  if (el) el.classList.add('active');
+}
+
+// ── FAQ ACCORDION ──
+function toggleFaq(btn) {
+  const answer = btn.nextElementSibling;
+  const isOpen = answer.classList.contains('open');
+  // Fecha todos na mesma seção
+  const faqSection = btn.closest('.hiw-faq') || btn.closest('.faq-section');
+  if (faqSection) {
+    faqSection.querySelectorAll('.faq-question').forEach(q => q.classList.remove('open'));
+    faqSection.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
+  }
+  if (!isOpen) {
+    btn.classList.add('open');
+    answer.classList.add('open');
+  }
+}
+
+// ── COMO FUNCIONA — PÁGINA ──
+function switchHIWPage(tab, btn) {
+  document.querySelectorAll('.hiw-page-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.hiw-tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  const id = tab === 'companies' ? 'hiw-companies' : 'hiw-freelancers-page';
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+// ── PLANOS — TAB EMPRESAS/FREELANCERS ──
+function switchPricingTab(tab, btn) {
+  document.querySelectorAll('.pricing-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('pricing-companies').style.display = tab === 'companies' ? '' : 'none';
+  document.getElementById('pricing-freelancers').style.display = tab === 'freelancers' ? '' : 'none';
+}
+
+// ── TOGGLE MENSAL/ANUAL ──
+let isAnnual = true;
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const toggle = document.getElementById('billing-toggle');
+  toggle.classList.toggle('annual', isAnnual);
+  document.querySelectorAll('.price-val').forEach(el => {
+    const val = isAnnual ? el.dataset.annual : el.dataset.monthly;
+    if (val !== undefined) el.textContent = val;
+  });
+  document.querySelectorAll('.pricing-plan-period').forEach(el => {
+    const lang = document.documentElement.getAttribute('data-lang') || 'pt';
+    if (el.dataset.monthly === '0') return;
+    const period = isAnnual
+      ? (lang === 'pt' ? '/mês · cobrado anualmente' : '/mes · cobrado anualmente')
+      : (lang === 'pt' ? '/mês · cobrado mensalmente' : '/mes · cobrado mensualmente');
+    el.textContent = period;
+  });
+}
+
+// Inicializar
+setLang('pt');
+</script>
+</body>
+</html>
