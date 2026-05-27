@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
@@ -1895,6 +1895,157 @@ section { padding: 64px 0; }
   .compare-table th, .compare-table td { padding: 10px 10px; }
   .hiw-page-tab { padding: 12px 16px; font-size: 14px; }
 }
+
+/* ═══════════════════════════════════════════
+   OVERLAY / MODAL SYSTEM
+═══════════════════════════════════════════ */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.50);
+  z-index: 900;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; visibility: hidden;
+  transition: all 0.22s ease;
+}
+.overlay.open { opacity: 1; visibility: visible; }
+.modal {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 100%; max-width: 480px;
+  max-height: 90vh; overflow-y: auto;
+  transform: translateY(22px) scale(0.97);
+  transition: transform 0.24s cubic-bezier(0.34,1.4,0.64,1);
+  position: relative;
+}
+.overlay.open .modal { transform: translateY(0) scale(1); }
+.modal-lg { max-width: 600px; }
+.modal-header {
+  padding: 28px 32px 0;
+  display: flex; align-items: flex-start; justify-content: space-between;
+}
+.modal-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.modal-subtitle { font-size: 14px; color: var(--text-2); margin-top: 5px; }
+.modal-close {
+  background: var(--surface); border: none;
+  width: 32px; height: 32px; border-radius: 50%;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-2); transition: all var(--transition); flex-shrink: 0; margin-left: 12px;
+}
+.modal-close:hover { background: var(--border); color: var(--text); }
+.modal-body { padding: 24px 32px 32px; }
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; }
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 14px; color: var(--text);
+  background: var(--surface); outline: none;
+  transition: border-color var(--transition), background var(--transition), box-shadow var(--transition);
+  font-family: var(--font);
+}
+.form-input, .form-select { height: 44px; padding: 0 14px; }
+.form-textarea { padding: 12px 14px; resize: vertical; min-height: 110px; }
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--green); background: #fff;
+  box-shadow: 0 0 0 3px rgba(46,125,50,0.12);
+}
+.form-input.error, .form-select.error { border-color: #E53935; }
+.form-error { font-size: 12px; color: #E53935; margin-top: 4px; display: none; }
+.form-error.show { display: block; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--text-3); font-size: 13px;
+}
+.form-divider::before, .form-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+.modal-switch-link { text-align: center; font-size: 14px; color: var(--text-2); margin-top: 18px; }
+.modal-switch-link a { color: var(--green); font-weight: 600; cursor: pointer; }
+.modal-switch-link a:hover { text-decoration: underline; }
+.social-login { display: flex; gap: 10px; margin-bottom: 4px; }
+.social-login-btn {
+  flex: 1; height: 42px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: #fff;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  color: var(--text-2); transition: all var(--transition);
+}
+.social-login-btn:hover { border-color: var(--border-2); background: var(--surface); }
+
+/* ═══════════════════════════════════════════
+   TOAST NOTIFICATIONS
+═══════════════════════════════════════════ */
+#toast-container {
+  position: fixed; bottom: 28px; right: 28px;
+  z-index: 9999;
+  display: flex; flex-direction: column; gap: 10px;
+  pointer-events: none;
+}
+.toast {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-size: 14px; font-weight: 500; color: #fff;
+  min-width: 280px; max-width: 380px;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.34,1.4,0.64,1);
+  pointer-events: all;
+}
+.toast.show { transform: translateX(0); }
+.toast-success { background: var(--green); }
+.toast-error   { background: #E53935; }
+.toast-info    { background: var(--blue); }
+.toast-icon { font-size: 17px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════════════
+   MOBILE HAMBURGER + MENU
+═══════════════════════════════════════════ */
+.hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; padding: 6px; border: none;
+  background: transparent; margin-left: auto; border-radius: 6px;
+}
+.hamburger span {
+  display: block; width: 22px; height: 2.5px;
+  background: var(--text); border-radius: 2px; transition: all 0.22s ease;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger.open span:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+@media (max-width: 900px) { .hamburger { display: flex; } }
+.mobile-menu {
+  position: fixed; top: 102px; left: 0; right: 0;
+  background: #fff; border-bottom: 1px solid var(--border);
+  box-shadow: var(--shadow-md); z-index: 490;
+  padding: 12px 20px 24px;
+  transform: translateY(-110%);
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.mobile-menu.open { transform: translateY(0); }
+.mnav-link {
+  display: block; padding: 13px 16px;
+  font-size: 15px; font-weight: 600; color: var(--text-2);
+  border-radius: var(--radius); cursor: pointer;
+  border: none; background: transparent;
+  text-align: left; width: 100%;
+  transition: all var(--transition); font-family: var(--font);
+}
+.mnav-link:hover, .mnav-link.active { background: var(--green-light); color: var(--green); }
+.mobile-divider { height: 1px; background: var(--border); margin: 8px 0; }
+.mobile-menu-auth { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+
+/* ═══════════════════════════════════════════
+   ACTIVE FILTER TAG × REMOVE
+═══════════════════════════════════════════ */
+.active-filter-tag .rm { cursor: pointer; font-size: 14px; margin-left: 4px; opacity: 0.7; }
+.active-filter-tag .rm:hover { opacity: 1; color: #E53935; }
 </style>
 </head>
 <body>
@@ -1966,13 +2117,33 @@ section { padding: 64px 0; }
 
     <!-- Auth -->
     <div class="header-auth">
-      <button class="btn-login" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
-      <button class="btn btn-green btn-sm" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-      <button class="btn btn-primary btn-sm" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+      <button class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+      <button class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
+      <button class="btn btn-primary btn-sm" onclick="openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
     </div>
+
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger" id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
 
   </div>
 </header>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <button class="mnav-link active" id="mnav-home" onclick="showPage('home')" data-pt="Início" data-es="Inicio">Início</button>
+  <button class="mnav-link" id="mnav-freelancers" onclick="showPage('freelancers')" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</button>
+  <button class="mnav-link" id="mnav-projects" onclick="showPage('projects')" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</button>
+  <button class="mnav-link" id="mnav-how" onclick="showPage('how')" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</button>
+  <button class="mnav-link" id="mnav-pricing" onclick="showPage('pricing')" data-pt="Planos" data-es="Planes">Planos</button>
+  <div class="mobile-divider"></div>
+  <div class="mobile-menu-auth">
+    <button class="btn btn-outline btn-block" onclick="openModal('login');closeMobileMenu()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+    <button class="btn btn-green btn-block" onclick="openModal('register');closeMobileMenu()" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
+    <button class="btn btn-primary btn-block" onclick="openModal('publish');closeMobileMenu()" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+  </div>
+</div>
 
 <!-- ═══════════════════════════════════════
      PÁGINAS (SPA — controladas por JS)
@@ -3699,6 +3870,226 @@ section { padding: 64px 0; }
   </section>
 </div><!-- /page-pricing -->
 
+<!-- ════════════════════════════════════════
+     MODAIS
+════════════════════════════════════════ -->
+
+<!-- MODAL: LOGIN -->
+<div class="overlay" id="overlay-login" onclick="if(event.target===this)closeModal('login')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="Entrar na HereWork" data-es="Iniciar sesión en HereWork">Entrar na HereWork</div>
+        <div class="modal-subtitle" data-pt="Acesse sua conta para continuar" data-es="Accede a tu cuenta para continuar">Acesse sua conta para continuar</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('login')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="social-login">
+        <button class="social-login-btn" onclick="showToast('🔗 Login com Google em breve!','info')">
+          <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span data-pt="Continuar com Google" data-es="Continuar con Google">Continuar com Google</span>
+        </button>
+      </div>
+      <div class="form-divider" data-pt="ou use seu e-mail" data-es="o usa tu correo">ou use seu e-mail</div>
+      <div class="form-group">
+        <label class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
+        <input class="form-input" id="login-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
+        <div class="form-error" id="err-login-email"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
+        <input class="form-input" id="login-pass" type="password" data-placeholder-pt="Sua senha" data-placeholder-es="Tu contraseña" placeholder="Sua senha">
+        <div class="form-error" id="err-login-pass"></div>
+      </div>
+      <div style="text-align:right;margin-bottom:20px;">
+        <a style="font-size:13px;color:var(--green);cursor:pointer;" data-pt="Esqueci minha senha" data-es="Olvidé mi contraseña">Esqueci minha senha</a>
+      </div>
+      <button class="btn btn-green btn-block btn-lg" onclick="submitLogin()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+      <div class="modal-switch-link">
+        <span data-pt="Não tem conta?" data-es="¿No tienes cuenta?">Não tem conta?</span>
+        <a onclick="switchModal('login','register')" data-pt=" Cadastre-se grátis" data-es=" Regístrate gratis"> Cadastre-se grátis</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CADASTRO -->
+<div class="overlay" id="overlay-register" onclick="if(event.target===this)closeModal('register')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</div>
+        <div class="modal-subtitle" data-pt="Junte-se a mais de 3,6 milhões de profissionais" data-es="Únete a más de 3,6 millones de profesionales">Junte-se a mais de 3,6 milhões de profissionais</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('register')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;gap:10px;margin-bottom:18px;">
+        <button id="reg-type-client" class="btn btn-green btn-sm" style="flex:1;" onclick="setRegType('client',this)" data-pt="Sou Empresa / Cliente" data-es="Soy Empresa / Cliente">Sou Empresa / Cliente</button>
+        <button id="reg-type-fl" class="btn btn-outline btn-sm" style="flex:1;" onclick="setRegType('freelancer',this)" data-pt="Sou Freelancer" data-es="Soy Freelancer">Sou Freelancer</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Nome completo" data-es="Nombre completo">Nome completo</label>
+        <input class="form-input" id="reg-name" type="text" data-placeholder-pt="Seu nome completo" data-placeholder-es="Tu nombre completo" placeholder="Seu nome completo">
+        <div class="form-error" id="err-reg-name"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
+        <input class="form-input" id="reg-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
+        <div class="form-error" id="err-reg-email"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
+        <input class="form-input" id="reg-pass" type="password" data-placeholder-pt="Crie uma senha segura" data-placeholder-es="Crea una contraseña segura" placeholder="Crie uma senha segura">
+        <div class="form-error" id="err-reg-pass"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-3);margin-bottom:18px;" data-pt="Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade." data-es="Al crear cuenta aceptas nuestros Términos de Uso y Política de Privacidad.">Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade.</div>
+      <button class="btn btn-green btn-block btn-lg" onclick="submitRegister()" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</button>
+      <div class="modal-switch-link">
+        <span data-pt="Já tem conta?" data-es="¿Ya tienes cuenta?">Já tem conta?</span>
+        <a onclick="switchModal('register','login')" data-pt=" Entrar" data-es=" Iniciar sesión"> Entrar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PUBLICAR PROJETO -->
+<div class="overlay" id="overlay-publish" onclick="if(event.target===this)closeModal('publish')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</div>
+        <div class="modal-subtitle" data-pt="Descreva o que você precisa e receba propostas em minutos" data-es="Describe lo que necesitas y recibe propuestas en minutos">Descreva o que você precisa e receba propostas em minutos</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('publish')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-pt="Título do projeto" data-es="Título del proyecto">Título do projeto</label>
+        <input class="form-input" id="proj-title" type="text" data-placeholder-pt="Ex: Desenvolvimento de site institucional em React" data-placeholder-es="Ej: Desarrollo de sitio web institucional en React" placeholder="Ex: Desenvolvimento de site institucional em React">
+        <div class="form-error" id="err-proj-title"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-pt="Categoria" data-es="Categoría">Categoria</label>
+          <select class="form-select" id="proj-cat">
+            <option value="" data-pt="Selecione..." data-es="Selecciona...">Selecione...</option>
+            <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
+            <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
+            <option data-pt="Marketing Digital" data-es="Marketing Digital">Marketing Digital</option>
+            <option data-pt="Redação & Tradução" data-es="Redacción & Traducción">Redação & Tradução</option>
+            <option data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</option>
+            <option data-pt="TI & Sistemas" data-es="TI & Sistemas">TI & Sistemas</option>
+            <option data-pt="Dados & Analytics" data-es="Datos & Analytics">Dados & Analytics</option>
+            <option data-pt="Apps & Mobile" data-es="Apps & Mobile">Apps & Mobile</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-pt="Orçamento (R$)" data-es="Presupuesto (R$)">Orçamento (R$)</label>
+          <input class="form-input" id="proj-budget" type="text" data-placeholder-pt="Ex: 1.500 – 3.000" data-placeholder-es="Ej: 1.500 – 3.000" placeholder="Ex: 1.500 – 3.000">
+          <div class="form-error" id="err-proj-budget"></div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-pt="Tipo de contrato" data-es="Tipo de contrato">Tipo de contrato</label>
+          <select class="form-select">
+            <option data-pt="Preço fixo" data-es="Precio fijo">Preço fixo</option>
+            <option data-pt="Por hora" data-es="Por hora">Por hora</option>
+            <option data-pt="Recorrente" data-es="Recurrente">Recorrente</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-pt="Prazo de entrega" data-es="Plazo de entrega">Prazo de entrega</label>
+          <select class="form-select">
+            <option data-pt="Até 7 dias" data-es="Hasta 7 días">Até 7 dias</option>
+            <option data-pt="Até 15 dias" data-es="Hasta 15 días">Até 15 dias</option>
+            <option data-pt="Até 30 dias" data-es="Hasta 30 días" selected>Até 30 dias</option>
+            <option data-pt="Mais de 30 dias" data-es="Más de 30 días">Mais de 30 dias</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Descrição detalhada" data-es="Descripción detallada">Descrição detalhada</label>
+        <textarea class="form-textarea" id="proj-desc" data-placeholder-pt="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." data-placeholder-es="Describe en detalle lo que necesitas, objetivos, referencias, entregables esperados..." placeholder="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." style="min-height:130px;"></textarea>
+        <div class="form-error" id="err-proj-desc"></div>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" onclick="submitProject()" data-pt="🚀 Publicar Projeto Agora" data-es="🚀 Publicar Proyecto Ahora">🚀 Publicar Projeto Agora</button>
+      <div class="modal-switch-link" style="font-size:12px;color:var(--text-3);margin-top:10px;" data-pt="Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow" data-es="Publicación gratuita · Recibe propuestas en minutos · Pago seguro vía escrow">Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ENVIAR PROPOSTA -->
+<div class="overlay" id="overlay-proposal" onclick="if(event.target===this)closeModal('proposal')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</div>
+        <div class="modal-subtitle" data-pt="Mostre por que você é o profissional ideal" data-es="Muestra por qué eres el profesional ideal">Mostre por que você é o profissional ideal</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('proposal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-pt="Valor da proposta (R$)" data-es="Valor de la propuesta (R$)">Valor da proposta (R$)</label>
+          <input class="form-input" id="prop-value" type="number" min="1" data-placeholder-pt="Ex: 2500" data-placeholder-es="Ej: 2500" placeholder="Ex: 2500">
+          <div class="form-error" id="err-prop-value"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-pt="Prazo de entrega (dias)" data-es="Plazo de entrega (días)">Prazo de entrega (dias)</label>
+          <input class="form-input" id="prop-days" type="number" min="1" data-placeholder-pt="Ex: 20" data-placeholder-es="Ej: 20" placeholder="Ex: 20">
+          <div class="form-error" id="err-prop-days"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Carta de apresentação" data-es="Carta de presentación">Carta de apresentação</label>
+        <textarea class="form-textarea" id="prop-cover" data-placeholder-pt="Apresente-se, descreva sua experiência com projetos similares e por que você é a melhor escolha..." data-placeholder-es="Preséntate, describe tu experiencia con proyectos similares y por qué eres la mejor elección..." placeholder="Apresente-se, descreva sua experiência com projetos similares e por que você é a melhor escolha..." style="min-height:140px;"></textarea>
+        <div class="form-error" id="err-prop-cover"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Portfólio relevante (opcional)" data-es="Portafolio relevante (opcional)">Portfólio relevante (opcional)</label>
+        <input class="form-input" type="url" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
+      </div>
+      <button class="btn btn-green btn-block btn-lg" onclick="submitProposal()" data-pt="📩 Enviar Proposta" data-es="📩 Enviar Propuesta">📩 Enviar Proposta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONVIDAR FREELANCER -->
+<div class="overlay" id="overlay-invite" onclick="if(event.target===this)closeModal('invite')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="Convidar Freelancer" data-es="Invitar Freelancer">Convidar Freelancer</div>
+        <div class="modal-subtitle" data-pt="Envie um convite personalizado para o projeto" data-es="Envía una invitación personalizada al proyecto">Envie um convite personalizado para o projeto</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('invite')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label" data-pt="Selecione o projeto" data-es="Selecciona el proyecto">Selecione o projeto</label>
+        <select class="form-select" id="invite-proj">
+          <option data-pt="Nenhum projeto no momento" data-es="Ningún proyecto por ahora">Nenhum projeto no momento</option>
+          <option data-pt="E-commerce WooCommerce" data-es="E-commerce WooCommerce">E-commerce WooCommerce</option>
+          <option data-pt="Identidade visual startup" data-es="Identidad visual startup">Identidade visual startup</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Mensagem de convite" data-es="Mensaje de invitación">Mensagem de convite</label>
+        <textarea class="form-textarea" id="invite-msg" data-placeholder-pt="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..." data-placeholder-es="¡Hola! Vi tu perfil y creo que serías perfecto para nuestro proyecto de..." placeholder="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..."></textarea>
+        <div class="form-error" id="err-invite-msg"></div>
+      </div>
+      <button class="btn btn-green btn-block btn-lg" onclick="submitInvite()" data-pt="✉️ Enviar Convite" data-es="✉️ Enviar Invitación">✉️ Enviar Convite</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container"></div>
+
 <!-- ══ FOOTER ══ -->
 <footer class="footer">
   <div class="footer-inner">
@@ -3737,7 +4128,7 @@ section { padding: 64px 0; }
       <div>
         <div class="footer-col-title" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</div>
         <ul class="footer-links">
-          <li><a href="#" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</a></li>
+          <li><a href="#" onclick="openModal('publish');return false;" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</a></li>
           <li><a href="#" onclick="showPage('freelancers')" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</a></li>
           <li><a href="#" data-pt="Planos Empresariais" data-es="Planes Empresariales">Planos Empresariais</a></li>
           <li><a href="#" data-pt="API para Empresas" data-es="API para Empresas">API para Empresas</a></li>
@@ -3749,7 +4140,7 @@ section { padding: 64px 0; }
       <div>
         <div class="footer-col-title" data-pt="Para Freelancers" data-es="Para Freelancers">Para Freelancers</div>
         <ul class="footer-links">
-          <li><a href="#" data-pt="Criar Perfil" data-es="Crear Perfil">Criar Perfil</a></li>
+          <li><a href="#" onclick="openModal('register');return false;" data-pt="Criar Perfil" data-es="Crear Perfil">Criar Perfil</a></li>
           <li><a href="#" onclick="showPage('projects')" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</a></li>
           <li><a href="#" onclick="showPage('pricing')" data-pt="Planos Premium" data-es="Planes Premium">Planos Premium</a></li>
           <li><a href="#" data-pt="Certificações" data-es="Certificaciones">Certificações</a></li>
@@ -3801,132 +4192,478 @@ section { padding: 64px 0; }
      JAVASCRIPT BASE
 ════════════════════════════════════════ -->
 <script>
-// ── SISTEMA DE PÁGINAS (SPA) ──
+/* ===========================================
+   SPA NAVEGACAO
+=========================================== */
 function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-  const page = document.getElementById('page-' + name);
-  const nav  = document.getElementById('nav-' + name);
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.nav-link').forEach(function(l){ l.classList.remove('active'); });
+  document.querySelectorAll('.mnav-link').forEach(function(l){ l.classList.remove('active'); });
+  var page = document.getElementById('page-' + name);
+  var nav  = document.getElementById('nav-'  + name);
+  var mnav = document.getElementById('mnav-' + name);
   if (page) page.classList.add('active');
   if (nav)  nav.classList.add('active');
+  if (mnav) mnav.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  closeMobileMenu();
 }
 
-// ── TROCA DE IDIOMA ──
-function setLang(lang) {
-  document.documentElement.setAttribute('data-lang', lang);
-  document.getElementById('btn-pt').classList.toggle('active', lang === 'pt');
-  document.getElementById('btn-es').classList.toggle('active', lang === 'es');
-
-  // Texto simples em data-pt / data-es
-  document.querySelectorAll('[data-pt]').forEach(el => {
+/* ===========================================
+   IDIOMA
+=========================================== */
+function setLang(langCode) {
+  document.documentElement.setAttribute('data-lang', langCode);
+  document.getElementById('btn-pt').classList.toggle('active', langCode === 'pt');
+  document.getElementById('btn-es').classList.toggle('active', langCode === 'es');
+  document.querySelectorAll('[data-pt]').forEach(function(el) {
     if (el.tagName === 'INPUT' || el.tagName === 'SELECT') return;
-    const val = el.getAttribute('data-' + lang);
+    var val = el.getAttribute('data-' + langCode);
     if (val) el.textContent = val;
   });
-
-  // Placeholders em inputs
-  document.querySelectorAll('[data-placeholder-pt]').forEach(el => {
-    const val = el.getAttribute('data-placeholder-' + lang);
+  document.querySelectorAll('[data-placeholder-pt]').forEach(function(el) {
+    var val = el.getAttribute('data-placeholder-' + langCode);
     if (val) el.placeholder = val;
   });
-
-  // <select> options
-  document.querySelectorAll('select option[data-pt]').forEach(opt => {
-    const val = opt.getAttribute('data-' + lang);
+  document.querySelectorAll('select option[data-pt]').forEach(function(opt) {
+    var val = opt.getAttribute('data-' + langCode);
     if (val) opt.textContent = val;
   });
 }
+function lang() { return document.documentElement.getAttribute('data-lang') || 'pt'; }
 
-// ── TAGS RÁPIDAS ──
-function searchTag(el) {
-  const text = el.textContent.trim();
-  const input = document.querySelector('.hero-search-input');
-  if (input) { input.value = text; input.focus(); }
+/* ===========================================
+   BUSCA
+=========================================== */
+function doHeroSearch() {
+  var term = (document.querySelector('.hero-search-input') || {}).value || '';
+  showPage('freelancers');
+  if (term.trim()) {
+    setTimeout(function() {
+      var inp = document.querySelector('#page-freelancers .page-search-input');
+      if (inp) inp.value = term.trim();
+      filterCards('#page-freelancers .fl-list-card', term.trim());
+      showToast('Buscando por "' + term.trim() + '"', 'info');
+    }, 140);
+  }
+}
+function doHeaderSearch() {
+  var term = (document.querySelector('.header-search-input') || {}).value || '';
+  if (!term.trim()) return;
+  showPage('freelancers');
+  setTimeout(function() {
+    var inp = document.querySelector('#page-freelancers .page-search-input');
+    if (inp) inp.value = term.trim();
+    filterCards('#page-freelancers .fl-list-card', term.trim());
+    showToast('Buscando por "' + term.trim() + '"', 'info');
+  }, 140);
+}
+function doPageSearch(pageId) {
+  var inp = document.querySelector('#page-' + pageId + ' .page-search-input');
+  if (!inp) return;
+  var term = inp.value.trim();
+  var sel = pageId === 'freelancers' ? '#page-freelancers .fl-list-card' : '#page-projects .proj-list-card';
+  filterCards(sel, term);
+  if (term) showToast(term, 'info');
+}
+function filterCards(selector, term) {
+  var cards = document.querySelectorAll(selector);
+  var lc = term.toLowerCase();
+  cards.forEach(function(card) {
+    var match = !lc || card.textContent.toLowerCase().indexOf(lc) !== -1;
+    card.style.display = match ? '' : 'none';
+    card.style.borderColor = (match && lc) ? 'var(--green)' : '';
+    card.style.boxShadow   = (match && lc) ? '0 0 0 2px rgba(46,125,50,0.15)' : '';
+  });
 }
 
-// ── FILTROS SIDEBAR ──
+/* ===========================================
+   TAGS RAPIDAS
+=========================================== */
+function searchTag(el) {
+  var l = lang();
+  var text = el.getAttribute('data-' + l) || el.textContent.trim();
+  var input = document.querySelector('.hero-search-input');
+  if (input) input.value = text;
+  doHeroSearch();
+}
+
+/* ===========================================
+   FILTROS SIDEBAR
+=========================================== */
 function toggleFilter(titleEl) {
   titleEl.classList.toggle('open');
-  const opts = titleEl.nextElementSibling;
+  var opts = titleEl.nextElementSibling;
   if (opts) opts.style.display = titleEl.classList.contains('open') ? '' : 'none';
 }
+function clearFilters(btn) {
+  var sidebar = btn.closest('.sidebar');
+  if (!sidebar) return;
+  sidebar.querySelectorAll('input[type=checkbox]').forEach(function(i){ i.checked = false; });
+  sidebar.querySelectorAll('input[type=radio]').forEach(function(i){ i.checked = false; });
+  sidebar.querySelectorAll('input[type=number]').forEach(function(i){ i.value = ''; });
+  var layout = btn.closest('.layout-with-sidebar');
+  if (layout) {
+    var af = layout.querySelector('.active-filters');
+    if (af) af.innerHTML = '';
+    layout.querySelectorAll('.fl-list-card, .proj-list-card').forEach(function(c) {
+      c.style.display = '';
+      c.style.borderColor = '';
+      c.style.boxShadow = '';
+    });
+  }
+  showToast(lang()==='pt' ? 'Filtros removidos' : 'Filtros eliminados', 'info');
+}
 
-// ── PAGINAÇÃO ──
-document.addEventListener('click', function(e) {
-  const btn = e.target.closest('.page-btn');
-  if (!btn || btn.disabled || btn.textContent.trim() === '←' || btn.textContent.trim() === '→') return;
-  const pagination = btn.closest('.pagination');
-  if (!pagination) return;
-  pagination.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
-  if (!isNaN(btn.textContent.trim())) btn.classList.add('active');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-});
-
-// ── TABS COMO FUNCIONA ──
+/* ===========================================
+   TABS
+=========================================== */
 function switchHowTab(tab, btn) {
-  document.querySelectorAll('.how-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.how-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.how-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.how-content').forEach(function(c){ c.classList.remove('active'); });
   btn.classList.add('active');
-  const el = document.getElementById('how-' + (tab === 'companies' ? 'companies' : 'freelancers-tab'));
+  var el = document.getElementById('how-' + (tab === 'companies' ? 'companies' : 'freelancers-tab'));
   if (el) el.classList.add('active');
 }
-
-// ── FAQ ACCORDION ──
-function toggleFaq(btn) {
-  const answer = btn.nextElementSibling;
-  const isOpen = answer.classList.contains('open');
-  // Fecha todos na mesma seção
-  const faqSection = btn.closest('.hiw-faq') || btn.closest('.faq-section');
-  if (faqSection) {
-    faqSection.querySelectorAll('.faq-question').forEach(q => q.classList.remove('open'));
-    faqSection.querySelectorAll('.faq-answer').forEach(a => a.classList.remove('open'));
-  }
-  if (!isOpen) {
-    btn.classList.add('open');
-    answer.classList.add('open');
-  }
-}
-
-// ── COMO FUNCIONA — PÁGINA ──
 function switchHIWPage(tab, btn) {
-  document.querySelectorAll('.hiw-page-tab').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.hiw-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.hiw-page-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.hiw-tab-content').forEach(function(c){ c.classList.remove('active'); });
   btn.classList.add('active');
-  const id = tab === 'companies' ? 'hiw-companies' : 'hiw-freelancers-page';
-  const el = document.getElementById(id);
+  var el = document.getElementById(tab === 'companies' ? 'hiw-companies' : 'hiw-freelancers-page');
   if (el) el.classList.add('active');
 }
-
-// ── PLANOS — TAB EMPRESAS/FREELANCERS ──
 function switchPricingTab(tab, btn) {
-  document.querySelectorAll('.pricing-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.pricing-tab').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   document.getElementById('pricing-companies').style.display = tab === 'companies' ? '' : 'none';
   document.getElementById('pricing-freelancers').style.display = tab === 'freelancers' ? '' : 'none';
 }
 
-// ── TOGGLE MENSAL/ANUAL ──
-let isAnnual = true;
+/* ===========================================
+   FAQ ACCORDION
+=========================================== */
+function toggleFaq(btn) {
+  var answer = btn.nextElementSibling;
+  var isOpen = answer.classList.contains('open');
+  var sect = btn.closest('.hiw-faq') || btn.closest('.faq-section');
+  if (sect) {
+    sect.querySelectorAll('.faq-question').forEach(function(q){ q.classList.remove('open'); });
+    sect.querySelectorAll('.faq-answer').forEach(function(a){ a.classList.remove('open'); });
+  }
+  if (!isOpen) { btn.classList.add('open'); answer.classList.add('open'); }
+}
+
+/* ===========================================
+   TOGGLE MENSAL / ANUAL
+=========================================== */
+var isAnnual = true;
 function toggleBilling() {
   isAnnual = !isAnnual;
-  const toggle = document.getElementById('billing-toggle');
-  toggle.classList.toggle('annual', isAnnual);
-  document.querySelectorAll('.price-val').forEach(el => {
-    const val = isAnnual ? el.dataset.annual : el.dataset.monthly;
+  var toggle = document.getElementById('billing-toggle');
+  if (toggle) toggle.classList.toggle('annual', isAnnual);
+  document.querySelectorAll('.price-val').forEach(function(el) {
+    var val = isAnnual ? el.dataset.annual : el.dataset.monthly;
     if (val !== undefined) el.textContent = val;
   });
-  document.querySelectorAll('.pricing-plan-period').forEach(el => {
-    const lang = document.documentElement.getAttribute('data-lang') || 'pt';
+  document.querySelectorAll('.pricing-plan-period').forEach(function(el) {
     if (el.dataset.monthly === '0') return;
-    const period = isAnnual
-      ? (lang === 'pt' ? '/mês · cobrado anualmente' : '/mes · cobrado anualmente')
-      : (lang === 'pt' ? '/mês · cobrado mensalmente' : '/mes · cobrado mensualmente');
-    el.textContent = period;
+    el.textContent = isAnnual
+      ? (lang()==='pt' ? '/mes · cobrado anualmente' : '/mes · cobrado anualmente')
+      : (lang()==='pt' ? '/mes · cobrado mensalmente' : '/mes · cobrado mensualmente');
   });
 }
 
-// Inicializar
+/* ===========================================
+   PAGINACAO
+=========================================== */
+document.addEventListener('click', function(e) {
+  var pbtn = e.target.closest('.page-btn');
+  if (!pbtn || pbtn.disabled) return;
+  var pagination = pbtn.closest('.pagination');
+  if (!pagination) return;
+  var text = pbtn.textContent.trim();
+  if (text === 'x2192' || text === '→') {
+    var active = pagination.querySelector('.page-btn.active');
+    var next = active && active.nextElementSibling;
+    while (next && next.tagName === 'SPAN') next = next.nextElementSibling;
+    if (next && next.classList.contains('page-btn') && !isNaN(next.textContent.trim())) {
+      pagination.querySelectorAll('.page-btn').forEach(function(b){ b.classList.remove('active'); });
+      next.classList.add('active');
+    }
+  } else if (text === 'x2190' || text === '←') {
+    var active2 = pagination.querySelector('.page-btn.active');
+    var prev = active2 && active2.previousElementSibling;
+    if (prev && prev.classList.contains('page-btn') && !isNaN(prev.textContent.trim())) {
+      pagination.querySelectorAll('.page-btn').forEach(function(b){ b.classList.remove('active'); });
+      prev.classList.add('active');
+    }
+  } else if (!isNaN(text) && text !== '') {
+    pagination.querySelectorAll('.page-btn').forEach(function(b){ b.classList.remove('active'); });
+    pbtn.classList.add('active');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+/* ===========================================
+   MODAL SYSTEM
+=========================================== */
+function openModal(id) {
+  var overlay = document.getElementById('overlay-' + id);
+  if (!overlay) return;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  var overlay = document.getElementById('overlay-' + id);
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  overlay.querySelectorAll('.form-error').forEach(function(e){ e.classList.remove('show'); });
+  overlay.querySelectorAll('.form-input.error,.form-select.error,.form-textarea.error')
+    .forEach(function(e){ e.classList.remove('error'); });
+}
+function switchModal(from, to) {
+  closeModal(from);
+  setTimeout(function(){ openModal(to); }, 210);
+}
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.overlay.open').forEach(function(o){
+    o.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+  closeMobileMenu();
+});
+
+/* ===========================================
+   VALIDACAO DE FORMULARIOS
+=========================================== */
+function _vField(inp, errId, msg) {
+  var err = document.getElementById(errId);
+  if (!inp || !inp.value.trim()) {
+    if (inp) inp.classList.add('error');
+    if (err) { err.textContent = msg; err.classList.add('show'); }
+    return false;
+  }
+  if (inp) inp.classList.remove('error');
+  if (err) err.classList.remove('show');
+  return true;
+}
+function _vEmail(inp, errId) {
+  var err = document.getElementById(errId);
+  var ok = inp && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim());
+  if (!ok) {
+    if (inp) inp.classList.add('error');
+    if (err) { err.textContent = 'E-mail invalido'; err.classList.add('show'); }
+    return false;
+  }
+  if (inp) inp.classList.remove('error');
+  if (err) err.classList.remove('show');
+  return true;
+}
+
+/* Login */
+function submitLogin() {
+  var e = document.getElementById('login-email');
+  var p = document.getElementById('login-pass');
+  var ok = (_vEmail(e,'err-login-email') & _vField(p,'err-login-pass', lang()==='pt'?'A senha e obrigatoria':'La contrasena es obligatoria'));
+  if (!ok) return;
+  closeModal('login');
+  showToast(lang()==='pt'?'Bem-vindo(a) de volta!':'Bienvenido/a de regreso!', 'success');
+}
+
+/* Cadastro */
+var regType = 'client';
+function setRegType(type) {
+  regType = type;
+  document.getElementById('reg-type-client').className = type==='client'?'btn btn-green btn-sm':'btn btn-outline btn-sm';
+  document.getElementById('reg-type-fl').className     = type==='freelancer'?'btn btn-green btn-sm':'btn btn-outline btn-sm';
+}
+function submitRegister() {
+  var n = document.getElementById('reg-name');
+  var e = document.getElementById('reg-email');
+  var p = document.getElementById('reg-pass');
+  var ok = (_vField(n,'err-reg-name',lang()==='pt'?'Nome e obrigatorio':'Nombre es obligatorio')
+          & _vEmail(e,'err-reg-email')
+          & _vField(p,'err-reg-pass',lang()==='pt'?'Crie uma senha':'Crea una contrasena'));
+  if (!ok) return;
+  closeModal('register');
+  showToast(lang()==='pt'?'Cadastro realizado! Verifique seu e-mail.':'Registro exitoso! Revisa tu correo.', 'success');
+}
+
+/* Publicar Projeto */
+function submitProject() {
+  var t = document.getElementById('proj-title');
+  var d = document.getElementById('proj-desc');
+  var c = document.getElementById('proj-cat');
+  var b = document.getElementById('proj-budget');
+  var ok = _vField(t,'err-proj-title',lang()==='pt'?'Titulo e obrigatorio':'El titulo es obligatorio')
+         & _vField(d,'err-proj-desc',lang()==='pt'?'Descricao e obrigatoria':'La descripcion es obligatoria')
+         & _vField(b,'err-proj-budget',lang()==='pt'?'Informe o orcamento':'Ingresa el presupuesto');
+  if (c && !c.value) { c.classList.add('error'); ok = false; } else if (c) c.classList.remove('error');
+  if (!ok) return;
+  closeModal('publish');
+  showToast(lang()==='pt'?'Projeto publicado com sucesso!':'Proyecto publicado con exito!', 'success');
+}
+
+/* Enviar Proposta */
+function submitProposal() {
+  var v = document.getElementById('prop-value');
+  var d = document.getElementById('prop-days');
+  var c = document.getElementById('prop-cover');
+  var ok = _vField(v,'err-prop-value',lang()==='pt'?'Informe seu valor':'Ingresa tu valor')
+         & _vField(d,'err-prop-days',lang()==='pt'?'Informe o prazo':'Ingresa el plazo')
+         & _vField(c,'err-prop-cover',lang()==='pt'?'Escreva uma apresentacao':'Escribe una presentacion');
+  if (!ok) return;
+  closeModal('proposal');
+  showToast(lang()==='pt'?'Proposta enviada com sucesso!':'Propuesta enviada con exito!', 'success');
+}
+
+/* Convidar Freelancer */
+function submitInvite() {
+  var m = document.getElementById('invite-msg');
+  if (!_vField(m,'err-invite-msg',lang()==='pt'?'Escreva uma mensagem':'Escribe un mensaje')) return;
+  closeModal('invite');
+  showToast(lang()==='pt'?'Convite enviado!':'Invitacion enviada!', 'success');
+}
+
+/* ===========================================
+   MOBILE MENU
+=========================================== */
+function toggleMobileMenu() {
+  var menu = document.getElementById('mobile-menu');
+  var btn  = document.getElementById('hamburger-btn');
+  if (!menu) return;
+  var open = menu.classList.toggle('open');
+  if (btn) btn.classList.toggle('open', open);
+  document.body.style.overflow = open ? 'hidden' : '';
+}
+function closeMobileMenu() {
+  var menu = document.getElementById('mobile-menu');
+  var btn  = document.getElementById('hamburger-btn');
+  if (menu) menu.classList.remove('open');
+  if (btn)  btn.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ===========================================
+   TOAST NOTIFICATIONS
+=========================================== */
+function showToast(msg, type) {
+  type = type || 'success';
+  var container = document.getElementById('toast-container');
+  if (!container) return;
+  var toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  var icons = { success:'✅', error:'❌', info:'ℹ️' };
+  toast.innerHTML = '<span class="toast-icon">' + (icons[type]||'') + '</span><span>' + msg + '</span>';
+  container.appendChild(toast);
+  requestAnimationFrame(function(){ requestAnimationFrame(function(){ toast.classList.add('show'); }); });
+  setTimeout(function(){
+    toast.classList.remove('show');
+    setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 420);
+  }, 3500);
+}
+
+/* ===========================================
+   DELEGACAO DE EVENTOS
+=========================================== */
+document.addEventListener('click', function(e) {
+  /* Fechar overlay ao clicar fora */
+  if (e.target.classList.contains('overlay')) {
+    e.target.classList.remove('open');
+    document.body.style.overflow = '';
+    return;
+  }
+  /* Remover tag de filtro */
+  if (e.target.classList.contains('rm')) {
+    var tag = e.target.closest('.active-filter-tag');
+    if (tag) tag.remove();
+    return;
+  }
+  /* Aplicar filtros */
+  var applyBtn = e.target.closest('.filter-apply-btn');
+  if (applyBtn) {
+    var sidebar = applyBtn.closest('.sidebar');
+    var layout  = applyBtn.closest('.layout-with-sidebar');
+    if (sidebar && layout) {
+      var af = layout.querySelector('.active-filters');
+      if (af) {
+        af.innerHTML = '';
+        sidebar.querySelectorAll('input[type=checkbox]:checked,input[type=radio]:checked').forEach(function(inp){
+          var lbl = inp.closest('.filter-option') && inp.closest('.filter-option').querySelector('span');
+          var txt = lbl ? lbl.textContent.trim() : '';
+          if (txt) {
+            var t = document.createElement('span');
+            t.className = 'active-filter-tag';
+            t.innerHTML = txt + ' <span class="rm">x</span>';
+            af.appendChild(t);
+          }
+        });
+      }
+    }
+    showToast(lang()==='pt'?'Filtros aplicados!':'Filtros aplicados!', 'success');
+    window.scrollTo({ top: 200, behavior: 'smooth' });
+    return;
+  }
+  /* Limpar filtros */
+  var resetBtn = e.target.closest('.sidebar-reset');
+  if (resetBtn) { clearFilters(resetBtn); return; }
+  /* Busca no banner */
+  var bannerBtn = e.target.closest('.page-banner-search .btn');
+  if (bannerBtn) {
+    var pg = bannerBtn.closest('.page');
+    if (pg) doPageSearch(pg.id.replace('page-',''));
+    return;
+  }
+  /* Busca hero / header */
+  if (e.target.closest('.hero-search-btn'))   { doHeroSearch();  return; }
+  if (e.target.closest('.header-search-btn')) { doHeaderSearch(); return; }
+
+  /* Botoes que abrem modais */
+  var btn = e.target.closest('button');
+  if (!btn) return;
+  var pt  = btn.getAttribute('data-pt') || '';
+  var txt = btn.textContent.trim();
+
+  if (btn.classList.contains('btn-login'))
+    { openModal('login'); return; }
+  if (/Cadastrar|Registrar|Comenzar|Empezar Gratis|Cadastrar Gratis|Registrarse/.test(txt) || pt==='Cadastrar-se')
+    { openModal('register'); return; }
+  if (/Assinar|Suscribirse/.test(txt))
+    { openModal('register'); return; }
+  if (/Publicar Projeto|Publicar Proyecto/.test(txt) || /Publicar Projeto/.test(pt))
+    { openModal('publish'); return; }
+  if (/Enviar Proposta|Enviar Propuesta/.test(txt))
+    { openModal('proposal'); return; }
+  if (/^Convidar$|^Invitar$/.test(txt))
+    { openModal('invite'); return; }
+  if (/Falar com Vendas|Hablar con Ventas/.test(txt))
+    { openModal('publish'); return; }
+  if (/Criar Perfil|Crear Perfil/.test(txt))
+    { openModal('register'); return; }
+});
+
+/* Enter nos campos de busca */
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Enter') return;
+  if (e.target.classList.contains('hero-search-input'))   { doHeroSearch();  return; }
+  if (e.target.classList.contains('header-search-input')) { doHeaderSearch(); return; }
+  if (e.target.classList.contains('page-search-input')) {
+    var pg = e.target.closest('.page');
+    if (pg) doPageSearch(pg.id.replace('page-',''));
+  }
+});
+
+/* Ordenacao */
+document.addEventListener('change', function(e) {
+  if (e.target.closest('.results-sort select'))
+    showToast(lang()==='pt'?'Resultados reordenados':'Resultados reordenados', 'info');
+});
+
+/* ===========================================
+   INIT
+=========================================== */
 setLang('pt');
 </script>
 </body>
