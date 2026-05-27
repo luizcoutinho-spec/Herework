@@ -2068,7 +2068,7 @@ section { padding: 64px 0; }
       <span class="topbar-sep">·</span>
       <a href="#" class="topbar-link" data-pt="Blog" data-es="Blog">Blog</a>
       <span class="topbar-sep">·</span>
-      <a href="#" class="topbar-link" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</a>
+      <a href="#" class="topbar-link" onclick="showPage('how');return false;" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</a>
     </div>
     <div class="lang-switcher">
       <button class="lang-btn active" id="btn-pt" onclick="setLang('pt')">PT</button>
@@ -2147,9 +2147,9 @@ section { padding: 64px 0; }
   <button class="mnav-link" id="mnav-pricing" onclick="showPage('pricing')" data-pt="Planos" data-es="Planes">Planos</button>
   <div class="mobile-divider"></div>
   <div class="mobile-menu-auth">
-    <button class="btn btn-outline btn-block" onclick="openModal('login');closeMobileMenu()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
-    <button class="btn btn-green btn-block" onclick="openModal('register');closeMobileMenu()" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-    <button class="btn btn-primary btn-block" onclick="openModal('publish');closeMobileMenu()" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+    <button class="btn btn-outline btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('login');},150)" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+    <button class="btn btn-green btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('register');},150)" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
+    <button class="btn btn-primary btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('publish');},150)" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
   </div>
 </div>
 
@@ -2456,7 +2456,7 @@ section { padding: 64px 0; }
       </div>
 
       <div style="text-align:center;margin-top:44px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-lg" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
+        <button class="btn btn-primary btn-lg" onclick="openModal('publish')" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
         <button class="btn btn-outline btn-lg" onclick="showPage('how')" data-pt="Saiba mais →" data-es="Saber más →">Saiba mais →</button>
       </div>
     </div>
@@ -2504,6 +2504,10 @@ section { padding: 64px 0; }
             <div class="fl-rate">R$ 120<span data-pt="/hora" data-es="/hora">/hora</span></div>
             <div class="fl-stats">312 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
           </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-green btn-sm" onclick="openModal('invite')" data-pt="Convidar" data-es="Invitar">Convidar</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('freelancers')" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+          </div>
         </div>
 
         <!-- Card 2 -->
@@ -2534,6 +2538,10 @@ section { padding: 64px 0; }
             <div class="fl-rate">R$ 95<span data-pt="/hora" data-es="/hora">/hora</span></div>
             <div class="fl-stats">267 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
           </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-green btn-sm" onclick="openModal('invite')" data-pt="Convidar" data-es="Invitar">Convidar</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('freelancers')" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+          </div>
         </div>
 
         <!-- Card 3 -->
@@ -2562,6 +2570,10 @@ section { padding: 64px 0; }
           <div class="fl-footer">
             <div class="fl-rate">R$ 80<span data-pt="/hora" data-es="/hora">/hora</span></div>
             <div class="fl-stats">178 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-green btn-sm" onclick="openModal('invite')" data-pt="Convidar" data-es="Invitar">Convidar</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('freelancers')" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
           </div>
         </div>
 
@@ -2592,6 +2604,10 @@ section { padding: 64px 0; }
           <div class="fl-footer">
             <div class="fl-rate">R$ 70<span data-pt="/hora" data-es="/hora">/hora</span></div>
             <div class="fl-stats">445 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;">
+            <button class="btn btn-green btn-sm" onclick="openModal('invite')" data-pt="Convidar" data-es="Invitar">Convidar</button>
+            <button class="btn btn-outline btn-sm" onclick="showPage('freelancers')" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
           </div>
         </div>
 
@@ -2750,7 +2766,10 @@ section { padding: 64px 0; }
               <span>🕐 <span data-pt="Publicado há 2h" data-es="Publicado hace 2h">Publicado há 2h</span></span>
               <span>📅 <span data-pt="30 dias" data-es="30 días">30 dias</span></span>
             </div>
-            <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+            </div>
           </div>
         </div>
 
@@ -2775,7 +2794,10 @@ section { padding: 64px 0; }
               <span>🕐 <span data-pt="Publicado há 5h" data-es="Publicado hace 5h">Publicado há 5h</span></span>
               <span>📅 <span data-pt="15 dias" data-es="15 días">15 dias</span></span>
             </div>
-            <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+            </div>
           </div>
         </div>
 
@@ -2800,7 +2822,10 @@ section { padding: 64px 0; }
               <span>🕐 <span data-pt="Publicado há 1 dia" data-es="Publicado hace 1 día">Publicado há 1 dia</span></span>
               <span>📅 <span data-pt="Recorrente" data-es="Recurrente">Recorrente</span></span>
             </div>
-            <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
+              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+            </div>
           </div>
         </div>
 
@@ -2855,7 +2880,7 @@ section { padding: 64px 0; }
             data-placeholder-es="Buscar por nombre, habilidad o servicio..."
             placeholder="Buscar por nome, habilidade ou serviço...">
         </div>
-        <select style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+        <select id="fl-banner-cat" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
           <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
           <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
           <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
@@ -3195,7 +3220,7 @@ section { padding: 64px 0; }
             data-placeholder-es="Buscar proyectos por palabra clave..."
             placeholder="Buscar projetos por palavra-chave...">
         </div>
-        <select style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+        <select id="proj-banner-cat" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
           <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
           <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
           <option data-pt="Web & Programação" data-es="Web & Programación">Web & Programação</option>
@@ -3293,9 +3318,11 @@ section { padding: 64px 0; }
           </div>
         </div>
 
+        <div class="active-filters" id="proj-active-filters"></div>
+
         <div class="proj-list-grid" id="proj-list-grid">
 
-          <div class="proj-list-card" data-cat="web">
+          <div class="proj-list-card" data-cat="web" data-budget="4000" data-type="fixo" data-deadline="30">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -3327,7 +3354,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="design">
+          <div class="proj-list-card" data-cat="design" data-budget="1500" data-type="fixo" data-deadline="15">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -3359,7 +3386,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="marketing">
+          <div class="proj-list-card" data-cat="marketing" data-budget="2000" data-type="recorrente" data-deadline="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -3391,7 +3418,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="apps">
+          <div class="proj-list-card" data-cat="apps" data-budget="15000" data-type="fixo" data-deadline="60">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -4237,7 +4264,7 @@ section { padding: 64px 0; }
         <ul class="footer-links">
           <li><a href="#" onclick="openModal('publish');return false;" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</a></li>
           <li><a href="#" onclick="showPage('freelancers')" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</a></li>
-          <li><a href="#" data-pt="Planos Empresariais" data-es="Planes Empresariales">Planos Empresariais</a></li>
+          <li><a href="#" onclick="showPage('pricing');return false;" data-pt="Planos Empresariais" data-es="Planes Empresariales">Planos Empresariais</a></li>
           <li><a href="#" data-pt="API para Empresas" data-es="API para Empresas">API para Empresas</a></li>
           <li><a href="#" data-pt="Gestão de Equipes" data-es="Gestión de Equipos">Gestão de Equipes</a></li>
         </ul>
@@ -4380,6 +4407,18 @@ function doHeaderSearch() {
 }
 function doPageSearch(pageId) {
   var prefix = pageId === 'freelancers' ? 'fl' : 'proj';
+  var catSel = document.getElementById(prefix + '-banner-cat');
+  if (catSel && catSel.selectedIndex > 0) {
+    var catOpt = catSel.options[catSel.selectedIndex].getAttribute('data-pt') || '';
+    var sidebar = document.querySelector('#page-' + pageId + ' .sidebar');
+    if (sidebar && catOpt) {
+      sidebar.querySelectorAll('input[type=checkbox]').forEach(function(cb){ cb.checked = false; });
+      sidebar.querySelectorAll('.filter-option input[type=checkbox]').forEach(function(cb) {
+        var lbl = (cb.closest('.filter-option').querySelector('span') || {}).textContent || '';
+        if (_norm(lbl).indexOf(_norm(catOpt.split('&')[0].trim())) !== -1) cb.checked = true;
+      });
+    }
+  }
   applyAllFilters(prefix);
   var inp = document.querySelector('#page-' + pageId + ' .page-search-input');
   if (inp && inp.value.trim()) showToast((lang()==='pt'?'Buscando: ':'Buscando: ') + inp.value.trim(), 'info');
@@ -4462,6 +4501,37 @@ function applyAllFilters(prefix) {
     }
   }
 
+  /* Orçamento (projetos only) */
+  var budgetRange = null;
+  if (!isFL && sidebar) {
+    var budgetRadio = sidebar.querySelector('input[name=budget]:checked');
+    if (budgetRadio) {
+      var bt = _norm((budgetRadio.closest('.filter-option').querySelector('span') || {}).textContent || '');
+      if (bt.indexOf('500') !== -1 && bt.indexOf('2') === -1) budgetRange = [0, 500];
+      else if (bt.indexOf('500') !== -1 && bt.indexOf('2.000') !== -1) budgetRange = [500, 2000];
+      else if (bt.indexOf('2.000') !== -1 && bt.indexOf('10.000') !== -1) budgetRange = [2000, 10000];
+      else budgetRange = [10000, Infinity];
+    }
+  }
+
+  /* Tipo de projeto */
+  var projType = null;
+  if (!isFL && sidebar) {
+    var ptypeRadio = sidebar.querySelector('input[name=ptype]:checked');
+    if (ptypeRadio) projType = _norm((ptypeRadio.closest('.filter-option').querySelector('span') || {}).textContent || '');
+  }
+
+  /* Prazo */
+  var maxDeadline = null;
+  if (!isFL && sidebar) {
+    var deadlineRadio = sidebar.querySelector('input[name=deadline]:checked');
+    if (deadlineRadio) {
+      var dt = (deadlineRadio.closest('.filter-option').querySelector('span') || {}).textContent || '';
+      var dm = dt.match(/\d+/);
+      if (dm) maxDeadline = parseInt(dm[0]);
+      if (_norm(dt).indexOf('mais') !== -1 || _norm(dt).indexOf('mas') !== -1) maxDeadline = 9999;
+    }
+  }
   /* --- Filtrar cards --- */
   var visible = 0;
   cards.forEach(function(card) {
@@ -4501,6 +4571,23 @@ function applyAllFilters(prefix) {
     }
     if (show && minRecs > 0 && isFL) {
       if (parseInt(card.getAttribute('data-recs') || '0') < minRecs) show = false;
+    }
+    if (show && !isFL && budgetRange) {
+      var cb2 = parseFloat(card.getAttribute('data-budget') || '0');
+      if (cb2 < budgetRange[0] || cb2 > budgetRange[1]) show = false;
+    }
+    if (show && !isFL && projType) {
+      var ct = _norm(card.getAttribute('data-type') || '');
+      var ptMatch = false;
+      if (projType.indexOf('fixo') !== -1 && ct.indexOf('fixo') !== -1) ptMatch = true;
+      if (projType.indexOf('hora') !== -1 && ct.indexOf('hora') !== -1) ptMatch = true;
+      if (projType.indexOf('recorr') !== -1 && ct.indexOf('recorr') !== -1) ptMatch = true;
+      if (!ptMatch) show = false;
+    }
+    if (show && !isFL && maxDeadline !== null) {
+      var dl = parseInt(card.getAttribute('data-deadline') || '999');
+      if (maxDeadline === 9999) { if (dl <= 30) show = false; }
+      else { if (dl > maxDeadline) show = false; }
     }
 
     card.style.display     = show ? '' : 'none';
@@ -4670,7 +4757,6 @@ function toggleBilling() {
     if (val !== undefined) el.textContent = val;
   });
   document.querySelectorAll('.pricing-plan-period').forEach(function(el) {
-    if (!el.dataset.monthly || el.dataset.monthly === '0') return;
     el.textContent = isAnnual
       ? (lang()==='pt' ? '/mês · cobrado anualmente'  : '/mes · cobrado anualmente')
       : (lang()==='pt' ? '/mês · cobrado mensalmente' : '/mes · cobrado mensualmente');
@@ -4905,7 +4991,7 @@ function submitProject() {
   var d   = document.getElementById('proj-desc');
   var c   = document.getElementById('proj-cat');
   var b   = document.getElementById('proj-budget');
-  var btn = document.querySelector('#overlay-publish .btn-green');
+  var btn = document.querySelector('#overlay-publish .btn-primary');
   var ok  = _vField(t,'err-proj-title',  lang()==='pt'?'Título obrigatório':'Título obligatorio')
           & _vField(d,'err-proj-desc',   lang()==='pt'?'Descrição obrigatória':'Descripción obligatoria')
           & _vField(b,'err-proj-budget', lang()==='pt'?'Informe o orçamento':'Ingresa el presupuesto');
@@ -4964,7 +5050,7 @@ function closeMobileMenu() {
   var btn  = document.getElementById('hamburger-btn');
   if (menu) menu.classList.remove('open');
   if (btn)  btn.classList.remove('open');
-  document.body.style.overflow = '';
+  if (!document.querySelector('.overlay.open')) document.body.style.overflow = '';
 }
 
 /* ═══════════════════════════════════════════
