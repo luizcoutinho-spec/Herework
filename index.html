@@ -4333,16 +4333,24 @@ section { padding: 64px 0; }
     <!-- Stats -->
     <div class="admin-stats">
       <div class="admin-stat-card">
-        <div class="admin-stat-icon">👥</div>
-        <div class="admin-stat-val" id="adm-stat-users">3.611.888</div>
-        <div class="admin-stat-label">Usuários cadastrados</div>
-        <span class="admin-stat-delta delta-up">+2,4% ↑</span>
+        <div class="admin-stat-icon">🧑‍💻</div>
+        <div class="admin-stat-val" id="adm-stat-users">—</div>
+        <div class="admin-stat-label">Freelancers cadastrados</div>
+        <div style="font-size:11px;color:var(--text-4);margin-top:3px;">
+          <span id="adm-stat-fl-real" style="color:var(--green);font-weight:600;">0 reais</span>
+          &nbsp;·&nbsp;
+          <span id="adm-stat-fl-demo" style="color:var(--text-3);">0 demo</span>
+        </div>
       </div>
       <div class="admin-stat-card orange">
-        <div class="admin-stat-icon">📁</div>
-        <div class="admin-stat-val" id="adm-stat-projects">142.304</div>
-        <div class="admin-stat-label">Projetos ativos</div>
-        <span class="admin-stat-delta delta-up">+5,1% ↑</span>
+        <div class="admin-stat-icon">📋</div>
+        <div class="admin-stat-val" id="adm-stat-projects">—</div>
+        <div class="admin-stat-label">Projetos publicados</div>
+        <div style="font-size:11px;color:var(--text-4);margin-top:3px;">
+          <span id="adm-stat-proj-real" style="color:#f97316;font-weight:600;">0 reais</span>
+          &nbsp;·&nbsp;
+          <span id="adm-stat-proj-demo" style="color:var(--text-3);">0 demo</span>
+        </div>
       </div>
       <div class="admin-stat-card blue">
         <div class="admin-stat-icon">💰</div>
@@ -4355,6 +4363,36 @@ section { padding: 64px 0; }
         <div class="admin-stat-val">98,2%</div>
         <div class="admin-stat-label">Satisfação dos usuários</div>
         <span class="admin-stat-delta delta-down">-0,1% ↓</span>
+      </div>
+    </div>
+
+    <!-- Painel de dados demo -->
+    <div class="admin-section-title" style="margin-top:4px;"><span>🧪</span> Perfis Demo — Recurso de Lançamento</div>
+    <div class="admin-panel" style="margin-bottom:24px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;" id="adm-demo-grid">
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+          <div style="font-size:22px;font-weight:800;color:var(--text);" id="adm-demo-fl-total">—</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Freelancers demo</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+          <div style="font-size:22px;font-weight:800;color:var(--text);" id="adm-demo-proj-total">—</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Projetos demo</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+          <div style="font-size:22px;font-weight:800;color:var(--green);" id="adm-real-fl-total">—</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Freelancers reais</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+          <div style="font-size:22px;font-weight:800;color:#f97316;" id="adm-real-proj-total">—</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Projetos reais</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="font-size:13px;color:var(--text-3);">
+          ℹ️ Perfis demo são identificados pela classe <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px;">.demo-card</code>.
+          Remova-os conforme usuários reais se cadastrarem.
+        </div>
+        <button class="admin-action-btn danger" onclick="adminRemoveDemo()">🗑️ Remover todos os perfis demo</button>
       </div>
     </div>
 
@@ -7557,11 +7595,26 @@ function _buildDemo() {
   if (flCount)   flCount.textContent   = totalFL;
   if (projCount) projCount.textContent = totalProj;
 
-  // Atualizar estatísticas do painel admin
-  var admUsers   = document.getElementById('adm-stat-users');
-  var admProjects= document.getElementById('adm-stat-projects');
-  if (admUsers)    admUsers.textContent    = (totalFL + Math.round(totalFL * 0.4)).toLocaleString('pt-BR');
-  if (admProjects) admProjects.textContent = totalProj.toLocaleString('pt-BR');
+  // Contagem real vs demo
+  var flReal   = flGrid   ? flGrid.querySelectorAll('.fl-list-card:not(.demo-card)').length   : 0;
+  var projReal = projGrid ? projGrid.querySelectorAll('.proj-list-card:not(.demo-card)').length : 0;
+  var flDemo   = flGrid   ? flGrid.querySelectorAll('.fl-list-card.demo-card').length   : 0;
+  var projDemo = projGrid ? projGrid.querySelectorAll('.proj-list-card.demo-card').length : 0;
+
+  // Atualizar cards principais
+  var el;
+  el = document.getElementById('adm-stat-users');    if (el) el.textContent = totalFL.toLocaleString('pt-BR');
+  el = document.getElementById('adm-stat-projects'); if (el) el.textContent = totalProj.toLocaleString('pt-BR');
+  el = document.getElementById('adm-stat-fl-real');  if (el) el.textContent = flReal + ' reais';
+  el = document.getElementById('adm-stat-fl-demo');  if (el) el.textContent = flDemo + ' demo';
+  el = document.getElementById('adm-stat-proj-real'); if (el) el.textContent = projReal + ' reais';
+  el = document.getElementById('adm-stat-proj-demo'); if (el) el.textContent = projDemo + ' demo';
+
+  // Atualizar painel demo
+  el = document.getElementById('adm-demo-fl-total');   if (el) el.textContent = flDemo.toLocaleString('pt-BR');
+  el = document.getElementById('adm-demo-proj-total'); if (el) el.textContent = projDemo.toLocaleString('pt-BR');
+  el = document.getElementById('adm-real-fl-total');   if (el) el.textContent = flReal.toLocaleString('pt-BR');
+  el = document.getElementById('adm-real-proj-total'); if (el) el.textContent = projReal.toLocaleString('pt-BR');
 
   // Rodar filtros para atualizar exibição (mostra os cards relevantes)
   if (typeof applyAllFilters === 'function') {
@@ -7694,6 +7747,48 @@ function pdfRemove(e) {
 }
 function _pdfReset() {
   pdfRemove({ stopPropagation: function(){} });
+}
+
+/* ─── Remove demo cards ─── */
+function adminRemoveDemo() {
+  var flGrid   = document.getElementById('fl-list-grid');
+  var projGrid = document.getElementById('proj-list-grid');
+  var flDemos   = flGrid   ? flGrid.querySelectorAll('.demo-card')   : [];
+  var projDemos = projGrid ? projGrid.querySelectorAll('.demo-card') : [];
+  var total = flDemos.length + projDemos.length;
+
+  if (total === 0) {
+    showToast('Nenhum perfil demo encontrado.', 'info');
+    return;
+  }
+
+  if (!confirm('Remover ' + flDemos.length + ' freelancers demo e ' + projDemos.length + ' projetos demo? Esta ação não pode ser desfeita.')) return;
+
+  flDemos.forEach(function(c){ c.remove(); });
+  projDemos.forEach(function(c){ c.remove(); });
+
+  // Rerun filters and update counts
+  if (typeof applyAllFilters === 'function') {
+    applyAllFilters('fl');
+    applyAllFilters('proj');
+  }
+
+  // Recount and update admin stats
+  var flReal   = flGrid   ? flGrid.querySelectorAll('.fl-list-card').length   : 0;
+  var projReal = projGrid ? projGrid.querySelectorAll('.proj-list-card').length : 0;
+  var el;
+  el = document.getElementById('adm-stat-users');    if (el) el.textContent = flReal.toLocaleString('pt-BR');
+  el = document.getElementById('adm-stat-projects'); if (el) el.textContent = projReal.toLocaleString('pt-BR');
+  el = document.getElementById('adm-stat-fl-real');  if (el) el.textContent = flReal + ' reais';
+  el = document.getElementById('adm-stat-fl-demo');  if (el) el.textContent = '0 demo';
+  el = document.getElementById('adm-stat-proj-real'); if (el) el.textContent = projReal + ' reais';
+  el = document.getElementById('adm-stat-proj-demo'); if (el) el.textContent = '0 demo';
+  el = document.getElementById('adm-demo-fl-total');   if (el) el.textContent = '0';
+  el = document.getElementById('adm-demo-proj-total'); if (el) el.textContent = '0';
+  el = document.getElementById('adm-real-fl-total');   if (el) el.textContent = flReal.toLocaleString('pt-BR');
+  el = document.getElementById('adm-real-proj-total'); if (el) el.textContent = projReal.toLocaleString('pt-BR');
+
+  showToast('✅ ' + total + ' perfis demo removidos com sucesso!', 'success');
 }
 </script>
 </body>
