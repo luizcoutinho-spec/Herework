@@ -3703,7 +3703,7 @@ section { padding: 64px 0; }
               </div>
               <div class="proj-list-actions">
                 <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+                <button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>
               </div>
             </div>
           </div>
@@ -3735,7 +3735,7 @@ section { padding: 64px 0; }
               </div>
               <div class="proj-list-actions">
                 <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+                <button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>
               </div>
             </div>
           </div>
@@ -3767,7 +3767,7 @@ section { padding: 64px 0; }
               </div>
               <div class="proj-list-actions">
                 <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+                <button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>
               </div>
             </div>
           </div>
@@ -3799,7 +3799,7 @@ section { padding: 64px 0; }
               </div>
               <div class="proj-list-actions">
                 <span class="proj-proposals">32 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-                <button class="btn btn-green btn-sm" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+                <button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>
               </div>
             </div>
           </div>
@@ -4693,6 +4693,17 @@ section { padding: 64px 0; }
       <button class="modal-close" onclick="closeModal('proposal')">✕</button>
     </div>
     <div class="modal-body">
+      <!-- Contexto do projeto -->
+      <div id="proposal-project-info" style="display:none;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:20px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-4);margin-bottom:8px;">📋 Projeto</div>
+        <div id="prop-proj-title" style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;line-height:1.4;"></div>
+        <div id="prop-proj-desc" style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:10px;"></div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;">
+          <span id="prop-proj-budget" style="font-size:13px;font-weight:700;color:var(--green);"></span>
+          <span id="prop-proj-cat" style="font-size:12px;color:var(--text-3);background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2px 10px;"></span>
+          <span id="prop-proj-deadline" style="font-size:12px;color:var(--text-3);"></span>
+        </div>
+      </div>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" data-pt="Valor da proposta (R$)" data-es="Valor de la propuesta (R$)">Valor da proposta (R$)</label>
@@ -7379,10 +7390,40 @@ function _flCard(cat, idx) {
     '</div>';
 }
 
+/* ── Descrições por categoria ── */
+var _DESCS = {
+  design:      ['Empresa em crescimento busca designer para criar identidade visual completa: logotipo, paleta de cores, tipografia e aplicações digitais. Necessário portfólio com trabalhos similares e atenção a briefing detalhado.','Startup do setor tech precisa de designer criativo para desenvolver interface de produto digital. Buscamos profissional com experiência em Design System e prototipagem interativa no Figma.','Loja de e-commerce busca profissional para criação de kit de materiais visuais: banners, posts, stories e assets para campanha de lançamento. Briefing completo disponível.','Marca consolidada no mercado busca redesign completo da identidade visual. O trabalho envolve pesquisa de mercado, proposta criativa e entrega de todos os arquivos finais.'],
+  web:         ['Empresa de médio porte precisa de desenvolvedor para construção de sistema web completo com painel administrativo, controle de usuários e relatórios. Stack: React + Node.js.','Startup em fase de lançamento busca dev full stack para desenvolvimento de MVP com autenticação, CRUD completo e deploy em cloud. Documentação técnica obrigatória.','Empresa busca profissional para desenvolver landing page de alta conversão com animações, integração com CRM e pixel de rastreamento configurado. Prazo curto.','Plataforma B2B precisa de engenheiro para refatoração e migração de sistema legado para arquitetura moderna. Será necessário manter compatibilidade com integrações existentes.'],
+  marketing:   ['E-commerce em expansão busca especialista para gestão completa de tráfego pago: Google Ads, Meta Ads e TikTok. Meta: reduzir CAC e aumentar ROAS. Relatórios semanais.','Empresa do setor de saúde precisa de profissional para criar e executar estratégia de conteúdo orgânico para LinkedIn e Instagram. Foco em autoridade e geração de leads.','Marca de moda busca especialista para planejamento e execução de campanha de lançamento de coleção. Engloba social, email marketing e influencers. Budget definido.','SaaS B2B busca growth hacker para implementar funil de aquisição completo: landing pages, automação de email, retargeting e testes A/B contínuos.'],
+  redacao:     ['Portal de conteúdo busca redator para produção de artigos otimizados para SEO. Mínimo 8 artigos por mês, com pesquisa de palavras-chave e revisão incluída.','Startup de tecnologia precisa de copywriter para escrever textos de todas as páginas do site, incluindo home, produto, sobre e blog. Tom inovador e direto ao ponto.','Empresa de exportação precisa de tradutor especializado para traduzir contratos, manuais técnicos e materiais de marketing do português para inglês. Experiência jurídica é diferencial.','Produtora de vídeos precisa de roteirista para série de vídeos institucionais e educativos no YouTube. Entregas semanais com revisão incluída.'],
+  video:       ['Empresa de tecnologia precisa de editor para produzir vídeo institucional de 3 minutos: roteiro aprovado, captação feita, precisa de edição, motion e trilha.','Canal do YouTube com 200k seguidores busca editor para 8 vídeos mensais: corte, color grading, legendas e thumbnails. Estilo dinâmico e jovem.','Plataforma de cursos precisa de animador 2D para criar 10 vídeos explicativos de 2-3 minutos cada. Personagens já criados, necessário animação e sincronização de voz.','Agência de marketing busca motion designer para criar pacote de templates animados para Instagram: stories, reels e posts. 30 peças no total.'],
+  ti:          ['Empresa com 150 usuários precisa migrar toda infraestrutura on-premise para AWS. Inclui servidores, banco de dados, backup e configuração de segurança. Suporte pós-migração por 30 dias.','Startup de fintech busca especialista para implementar política de segurança da informação, incluindo LGPD, controle de acessos, firewall e monitoramento 24/7.','Empresa industrial precisa de profissional para configurar rede corporativa completa em nova sede: switches, Wi-Fi, VPN, Active Directory e servidores de arquivos.','Empresa de varejo precisa de engenheiro DevOps para criar pipeline CI/CD, containerizar aplicações e configurar ambiente de homologação e produção em Kubernetes.'],
+  apps:        ['Rede de academias precisa de aplicativo mobile iOS e Android para os alunos acompanharem treinos, evoluções e agendarem aulas. Integração com sistema interno via API REST.','Clínica médica busca dev para criar app de telemedicina com videochamada, prontuário eletrônico, agendamento e pagamento integrado. LGPD e CFM compliance obrigatórios.','Startup de logística precisa de app de rastreamento em tempo real para motoristas e clientes, com notificações push, mapa e histórico de entregas.','Empresa de RH quer app de ponto eletrônico mobile com reconhecimento facial, geolocalização e integração com sistema de folha. iOS e Android.'],
+  dados:       ['Rede de varejo com 40 lojas precisa de dashboard executivo em Power BI com indicadores de vendas, estoque, metas e comparativos. Atualização automática diária.','Empresa de logística busca engenheiro de dados para criar pipeline completo de ingestão, transformação e carga de dados de múltiplas fontes no BigQuery.','Fintech precisa de cientista de dados para construir modelo preditivo de aprovação de crédito usando histórico de transações. Entregar modelo em produção com API.','Indústria precisa de analista para criar relatórios gerenciais automatizados que substituam planilhas manuais. Integrações com ERP e CRM existentes.'],
+  ia:          ['Empresa de e-commerce precisa de chatbot com IA generativa para atendimento ao cliente 24/7: responder dúvidas, rastrear pedidos e abrir chamados automaticamente.','SaaS B2B busca engenheiro de ML para construir sistema de recomendação personalizada baseado em comportamento do usuário. Precisão mínima de 85%.','Jurídico de empresa busca especialista para criar ferramenta de análise automatizada de contratos usando LLMs, identificando cláusulas de risco e inconsistências.','Plataforma de educação precisa de sistema de geração automática de questões e avaliações personalizadas usando modelos de linguagem. API documentada e testada.'],
+  consultoria: ['Empresa familiar em processo de profissionalização busca consultor para mapeamento de processos, definição de KPIs e implementação de OKRs. Três meses de projeto.','Startup pré-seed busca especialista para construir plano de negócios completo, projeções financeiras e pitch deck para rodada de investimento.','Empresa de serviços com 80 funcionários precisa de consultoria para implantação de metodologia ágil Scrum nas equipes de desenvolvimento e produto.','Empresa familiar busca consultor para realizar valuation e preparar empresa para possível venda ou entrada de sócio investidor. Sigilo absoluto.'],
+  ecommerce:   ['Marca de cosméticos quer criar loja virtual do zero na Shopify com integração de pagamento, ERP, frete e marketing. Catálogo de 200 produtos.','Indústria têxtil busca especialista para gestão e otimização de presença nos principais marketplaces: Mercado Livre, Amazon, Shopee e Americanas.','Loja virtual com 50k visitas/mês precisa de especialista em CRO para aumentar taxa de conversão. Análise de heatmaps, testes A/B e otimização de checkout.','Rede de distribuidores busca especialista para criar portal B2B de pedidos integrado ao ERP, com tabelas de preço por cliente e aprovação de pedidos.'],
+  suporte:     ['Empresa SaaS em crescimento precisa implementar central de atendimento com Zendesk, base de conhecimento, chatbot de primeiro nível e SLAs definidos.','E-commerce em expansão busca analista de Customer Success para criar jornada do cliente, onboarding automatizado e programa de retenção de clientes recorrentes.','Fintech precisa de especialista para criar FAQ e base de conhecimento completa sobre o produto, fluxos de atendimento e scripts para equipe de suporte.','Empresa de software busca especialista para integrar Intercom ao produto, criar fluxos de onboarding in-app e configurar automações de engajamento.'],
+  seo:         ['E-commerce de eletrônicos com 5.000 produtos precisa de auditoria técnica completa de SEO e plano de ação priorizado para os próximos 6 meses.','Site institucional lento busca especialista para otimização de Core Web Vitals, redução de LCP e melhoria de pontuação no PageSpeed para mobile e desktop.','Startup SaaS precisa de estratégia de link building para aumentar autoridade de domínio e ranquear para palavras-chave de alto valor no mercado B2B.','Rede de franquias com 30 unidades precisa de estratégia de SEO local para Google Meu Negócio, citações e conteúdo localizado por cidade.'],
+  educacao:    ['Empresa de seguros precisa transformar treinamento presencial de 40h em curso EAD interativo com videoaulas, quizzes, certificado e rastreamento de progresso.','Multinacional busca designer instrucional para criar programa de onboarding digital para novos colaboradores, integrando cultura, processos e sistemas da empresa.','Instituto de ensino precisa de produtor para gravar, editar e publicar 30 videoaulas de 15 minutos cada. Estúdio disponível, necessário técnico e editor.','Empresa de tecnologia busca especialista para gamificar programa de capacitação técnica, incluindo badges, ranking e missões para engajar equipe de 200 pessoas.'],
+  engenharia:  ['Indústria de alimentos precisa de engenheiro para projetar nova linha de produção automatizada, incluindo layout, especificação de equipamentos e memorial de cálculo.','Construtora busca projetista para elaborar projetos complementares (hidráulico, elétrico e ar condicionado) de edifício comercial de 12 andares com todas as ARTs.','Empresa de automação busca engenheiro para programação de CLPs e supervisório SCADA para controle de processo industrial em planta química.','Indústria busca consultor para implementar programa de lean manufacturing, reduzindo desperdícios e aumentando OEE da linha principal em 20%.'],
+  idiomas:     ['Escritório de advocacia precisa de tradutor juramentado para traduzir documentos societários do inglês para português e certificar para uso em órgãos públicos.','Software house precisa localizar plataforma SaaS completa para 4 idiomas: espanhol, inglês, francês e alemão. Inclui interface, emails e documentação de ajuda.','Produtora de conteúdo busca especialista em legendagem para 50 vídeos educativos em inglês, com transcrição, tradução e formatação para YouTube e plataformas EAD.','Empresa multinacional busca professor para programa de inglês para executivos: 2h semanais por pessoa, foco em business english e apresentações internacionais.'],
+  juridico:    ['Startup de tecnologia precisa de advogado para elaborar contratos com clientes, fornecedores e colaboradores, além de termos de uso e política de privacidade alinhados à LGPD.','Empresa familiar em crescimento busca contador para realizar planejamento tributário completo, avaliar melhor regime e identificar economia fiscal legal para o próximo ano.','Empresa de médio porte busca advogado trabalhista para auditoria de toda a documentação de RH, identificar passivos e regularizar pendências antes de processo de M&A.','Plataforma digital busca advogado especialista em direito digital para adequação completa à LGPD, incluindo mapeamento de dados, DPA e treinamento de equipe.'],
+  fotografia:  ['Loja virtual de moda precisa de fotógrafo para ensaio de 200 produtos com modelo: fundo infinito, 3 ângulos por peça e entrega editada em 5 dias úteis.','Empresa de consultoria busca fotógrafo para ensaio corporativo da equipe de 40 pessoas: fotos individuais e em grupo para LinkedIn, site e materiais institucionais.','Rede de restaurantes precisa de fotógrafo gastronômico para fotografar 80 pratos do cardápio com styling incluso. Entrega em alta resolução para impressão e digital.','Construtora busca fotógrafo para cobertura completa de empreendimento: obra, áreas comuns, unidade decorada e arredores. Drone autorizado se necessário.'],
+  rh:          ['Empresa de tecnologia em expansão precisa recrutar 15 desenvolvedores sênior em 60 dias. Será necessário headhunter com forte network na área de tech.','Startup série A busca especialista para estruturar área de RH do zero: política salarial, descrição de cargos, avaliação de desempenho e programa de benefícios.','Empresa com 200 colaboradores precisa de consultoria para criar programa de desenvolvimento de líderes, incluindo assessment, trilha de capacitação e acompanhamento.','Empresa em processo de mudança cultural busca especialista para conduzir pesquisa de clima, analisar resultados e criar plano de ação com gestores.'],
+  arquitetura: ['Família busca arquiteto para projeto completo de residência de 250m² em terreno de esquina: anteprojeto, executivo, aprovação na prefeitura e compatibilização.','Rede de franquias busca arquiteto para desenvolver projeto-padrão de nova loja para replicação em 20 unidades. Inclui conceito, especificações e caderno técnico.','Empresa busca designer de interiores para reformar escritório de 400m² incluindo recepção, salas de reunião, espaços colaborativos e copa. Entrega completa 3D.','Incorporadora busca especialista em BIM para modelar projeto residencial de 80 unidades em Revit, compatibilizar disciplinas e gerar pranchas executivas.'],
+  jogos:       ['Estúdio indie busca desenvolvedor Unity para criar jogo mobile hyper-casual com 20 fases, sistema de moedas, ads monetização e publicação nas stores.','Empresa de treinamento busca game designer para criar serious game corporativo sobre segurança do trabalho com mecânicas de gamificação e relatório de desempenho.','Estúdio de animação precisa de artista 2D para criar todos os assets de jogo plataformer: personagens, cenários, interfaces e efeitos. Estilo cartoon moderno.','Publisher indie busca desenvolvedor para integrar sistema de multiplayer online em jogo existente em Unity, com matchmaking, leaderboard e salas privadas.'],
+  musica:      ['Artista independente precisa de produtor musical para gravar, produzir e mixar EP de 5 faixas com arranjos completos. Estúdio a definir, budget aprovado.','Agência de publicidade busca compositor para criar jingle memorável para campanha nacional de grande marca do varejo. Versões de 15s, 30s e 60s.','Produtora de games busca compositor para criar trilha sonora adaptativa de 40 minutos para RPG indie. Estilo orquestral com elementos eletrônicos.','Estúdio de podcast busca engenheiro de áudio para editar, mixar e masterizar 50 episódios de podcast corporativo. Entrega com loudness normalizado para streaming.'],
+  blockchain:  ['DeFi protocol busca desenvolvedor Solidity sênior para criar e auditar smart contracts de staking e yield farming com testes unitários completos e documentação.','Empresa do setor imobiliário busca especialista para criar solução de tokenização de ativos imobiliários em blockchain, com contratos ERC-1400 e portal de investidores.','Marketplace de NFTs em fase de lançamento busca dev Web3 para construir frontend com integração wallet, mint, listagem e secondary market na rede Polygon.','Empresa fintech busca auditor para realizar security review completo de smart contracts ERC-20 antes do lançamento em mainnet. Relatório técnico detalhado.'],
+  saude:       ['Clínica de emagrecimento busca nutricionista para criar programa online de 12 semanas com planos alimentares personalizados, suporte semanal e app de acompanhamento.','Academia com 800 alunos busca personal trainer para criar programas de treino individualizados online, com acompanhamento mensal e ajustes quinzenais de planilha.','Empresa com 300 funcionários busca profissional para criar e executar programa de qualidade de vida e saúde corporativa: palestras, ginástica laboral e campanhas mensais.','Empresa de tecnologia busca psicólogo para oferecer suporte em saúde mental para equipe remota: sessões individuais online, grupos de apoio e políticas de bem-estar.']
+};
+
 /* ── Gerar card de projeto ── */
 function _projCard(cat, idx) {
   var d     = CATS[cat];
   var title = _pick(d.pt);
+  var descs = _DESCS[cat] || ['Projeto na área de ' + d.l + '. Detalhes completos serão enviados ao freelancer selecionado. Candidatos devem apresentar portfólio e proposta detalhada.'];
+  var desc  = descs[idx % descs.length];
   var bu    = d.bu[_rnd(d.bu.length)];
   var bMin  = bu[0], bMax = bu[1];
   var type  = d.ty[_rnd(d.ty.length)];
@@ -7413,6 +7454,7 @@ function _projCard(cat, idx) {
         '<div class="proj-list-type">' + dlStr + '</div>' +
       '</div>' +
     '</div>' +
+    '<div class="proj-list-desc" style="font-size:13px;color:var(--text-2);line-height:1.6;margin:10px 0 12px;">' + desc + '</div>' +
     '<div class="proj-skills">' +
       sk.map(function(s){ return '<span class="fl-skill">' + s + '</span>'; }).join('') +
     '</div>' +
@@ -7423,12 +7465,11 @@ function _projCard(cat, idx) {
       '</div>' +
       '<div class="proj-list-actions">' +
         '<span class="proj-proposals">' + props + ' propostas</span>' +
-        '<button class="btn btn-green btn-sm" onclick="openModal(\'proposal\')">Enviar Proposta</button>' +
+        '<button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>' +
       '</div>' +
     '</div>' +
   '</div>';
 }
-
 /* ── Inserir no DOM ── */
 function _buildDemo() {
   var flGrid   = document.getElementById('fl-list-grid');
@@ -7479,6 +7520,51 @@ if (document.readyState === 'loading') {
 }
 
 })();
+
+/* ─── Open proposal modal with project context ─── */
+function openProposalFor(btn) {
+  var card   = btn ? btn.closest('.proj-list-card') : null;
+  var info   = document.getElementById('proposal-project-info');
+  var valInp = document.getElementById('prop-value');
+  var daysInp= document.getElementById('prop-days');
+
+  // Reset fields
+  if (valInp)  valInp.value  = '';
+  if (daysInp) daysInp.value = '';
+  document.querySelectorAll('#overlay-proposal .form-error').forEach(function(e){ e.textContent=''; e.classList.remove('show'); });
+  document.querySelectorAll('#overlay-proposal .form-input, #overlay-proposal .form-textarea').forEach(function(e){ e.classList.remove('error'); });
+
+  if (card && info) {
+    var titleEl  = card.querySelector('.proj-list-title');
+    var descEl   = card.querySelector('.proj-list-desc');
+    var budgetEl = card.querySelector('.proj-list-budget');
+    var deadEl   = card.querySelector('.proj-list-type');
+    var catEl    = card.querySelector('.proj-cat');
+
+    document.getElementById('prop-proj-title').textContent    = titleEl  ? titleEl.textContent.trim()  : '';
+    document.getElementById('prop-proj-desc').textContent     = descEl   ? descEl.textContent.trim()   : '';
+    document.getElementById('prop-proj-budget').textContent   = budgetEl ? budgetEl.textContent.trim() : '';
+    document.getElementById('prop-proj-deadline').textContent = deadEl   ? '⏱ ' + deadEl.textContent.trim() : '';
+    document.getElementById('prop-proj-cat').textContent      = catEl    ? catEl.textContent.trim()    : '';
+
+    // Pre-fill value suggestion (midpoint of budget range)
+    if (valInp && budgetEl) {
+      var nums = budgetEl.textContent.replace(/[R$\s]/g,'').split('–').map(function(n){ return parseInt(n.replace(/\./g,'').replace(',','.')); }).filter(Number);
+      if (nums.length === 2) valInp.placeholder = 'Ex: ' + Math.round((nums[0]+nums[1])/2).toLocaleString('pt-BR');
+    }
+    // Pre-fill deadline suggestion
+    if (daysInp) {
+      var dl = parseInt(card.getAttribute('data-deadline') || '0');
+      if (dl > 0) daysInp.placeholder = 'Ex: ' + dl;
+    }
+
+    info.style.display = 'block';
+  } else if (info) {
+    info.style.display = 'none';
+  }
+
+  openModal('proposal');
+}
 </script>
 </body>
 </html>
