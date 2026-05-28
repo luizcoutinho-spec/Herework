@@ -2158,6 +2158,158 @@ section { padding: 64px 0; }
   padding: 10px 14px; font-size: 12px; color: #9a3412; margin-bottom: 18px;
   display: flex; align-items: flex-start; gap: 6px;
 }
+/* ═══════════════════════════════════════════
+   PAYMENT MODAL — PIX + CARTÃO
+═══════════════════════════════════════════ */
+#overlay-payment .modal { max-width: 500px; padding: 0; overflow: hidden; }
+.pay-header {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  color: #fff; padding: 22px 28px 18px; text-align: center;
+}
+.pay-header-amount { font-size: 32px; font-weight: 800; letter-spacing: -1px; }
+.pay-header-amount sup { font-size: 16px; font-weight: 600; vertical-align: super; margin-right: 2px; }
+.pay-header-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
+.pay-secure { display: flex; align-items: center; justify-content: center; gap: 5px; font-size: 11px; color: #888; margin-top: 8px; }
+
+/* Tabs */
+.pay-tabs { display: flex; border-bottom: 1.5px solid var(--border); background: var(--surface); }
+.pay-tab {
+  flex: 1; padding: 14px 8px; border: none; background: none;
+  font-size: 13px; font-weight: 600; color: var(--text-3);
+  cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  border-bottom: 2.5px solid transparent; margin-bottom: -1.5px;
+}
+.pay-tab.active { color: var(--green); border-bottom-color: var(--green); }
+.pay-tab:hover:not(.active) { color: var(--text); background: var(--bg); }
+.pay-tab-icon { font-size: 16px; }
+
+/* Tab panels */
+.pay-body { padding: 24px 28px 28px; }
+.pay-panel { display: none; }
+.pay-panel.active { display: block; }
+
+/* PIX */
+.pix-qr-wrap {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+}
+.pix-qr-box {
+  background: #fff; border: 2px solid var(--border);
+  border-radius: 12px; padding: 14px; display: inline-flex;
+  box-shadow: 0 4px 16px rgba(0,0,0,.07);
+}
+.pix-qr-box svg { display: block; }
+.pix-timer {
+  display: flex; align-items: center; gap: 6px;
+  background: #fff7ed; border: 1px solid #fed7aa;
+  border-radius: 20px; padding: 5px 14px;
+  font-size: 13px; font-weight: 600; color: #c2410c;
+}
+.pix-timer-dot { width: 7px; height: 7px; background: #f97316; border-radius: 50%; animation: blink 1s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+.pix-copy-wrap {
+  width: 100%; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  display: flex; align-items: center; overflow: hidden;
+}
+.pix-copy-key {
+  flex: 1; padding: 10px 12px; font-size: 11px; color: var(--text-3);
+  font-family: monospace; word-break: break-all; line-height: 1.5;
+}
+.pix-copy-btn {
+  flex-shrink: 0; padding: 10px 16px; background: var(--green); color: #fff;
+  border: none; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background var(--transition);
+}
+.pix-copy-btn:hover { background: var(--green-dark); }
+.pix-steps { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.pix-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-2);
+}
+.pix-step-num {
+  min-width: 22px; height: 22px; background: var(--green);
+  color: #fff; border-radius: 50%; font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.pix-waiting {
+  display: flex; align-items: center; gap: 8px; justify-content: center;
+  font-size: 13px; color: var(--text-3); margin-top: 4px;
+}
+.pix-spinner {
+  width: 16px; height: 16px; border: 2px solid var(--border);
+  border-top-color: var(--green); border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+
+/* Credit card */
+.card-preview-wrap { perspective: 1000px; height: 160px; margin-bottom: 20px; }
+.card-preview {
+  width: 100%; height: 160px; position: relative;
+  transform-style: preserve-3d; transition: transform .6s ease;
+  border-radius: 16px;
+}
+.card-preview.flipped { transform: rotateY(180deg); }
+.card-face {
+  position: absolute; inset: 0; border-radius: 16px;
+  backface-visibility: hidden; overflow: hidden;
+  padding: 20px 22px;
+}
+.card-front {
+  background: linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);
+  color: #fff;
+}
+.card-back {
+  background: linear-gradient(135deg,#374151,#1f2937);
+  transform: rotateY(180deg); color: #fff;
+}
+.card-logo-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.card-brand-logo { font-size: 13px; font-weight: 800; letter-spacing: .5px; opacity: .9; min-width: 60px; text-align: right; }
+.card-chip { width: 34px; height: 26px; background: linear-gradient(135deg,#d4af37,#f5d060); border-radius: 5px; }
+.card-number-disp { font-family: 'Courier New',monospace; font-size: 17px; letter-spacing: 3px; margin-bottom: 16px; }
+.card-bottom-row { display: flex; justify-content: space-between; align-items: flex-end; }
+.card-holder-lbl { font-size: 9px; opacity: .6; text-transform: uppercase; margin-bottom: 2px; }
+.card-holder-val { font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; min-height: 18px; }
+.card-expiry-val { font-size: 14px; font-weight: 600; }
+.card-back-stripe { background: #374151; height: 38px; margin: 0 -22px 14px; }
+.card-cvv-band { background: #fff; border-radius: 4px; padding: 6px 12px; display: flex; justify-content: flex-end; }
+.card-cvv-val { font-family: 'Courier New',monospace; font-size: 14px; color: #1f2937; letter-spacing: 3px; }
+/* Card brand colors */
+.card-front.visa    { background: linear-gradient(135deg,#1a1a6e,#1f3c88); }
+.card-front.master  { background: linear-gradient(135deg,#1a1a2e,#c0392b); }
+.card-front.amex    { background: linear-gradient(135deg,#2980b9,#1a5276); }
+.card-front.elo     { background: linear-gradient(135deg,#2c3e50,#f39c12); }
+.card-front.hipercard { background: linear-gradient(135deg,#b71c1c,#880e0e); }
+
+/* Card form */
+.card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.pay-installments {
+  width: 100%; height: 42px; padding: 0 12px;
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  font-size: 14px; color: var(--text); background: var(--surface); outline: none;
+  transition: border-color var(--transition);
+}
+.pay-installments:focus { border-color: var(--green); }
+
+/* Payment success */
+.pay-success {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; padding: 32px 28px 36px; gap: 12px;
+}
+.pay-success.show { display: flex; }
+.pay-success-icon {
+  width: 72px; height: 72px; background: #dcfce7; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+.pay-success-title { font-size: 22px; font-weight: 800; color: var(--text); }
+.pay-success-sub   { font-size: 14px; color: var(--text-3); max-width: 320px; }
+.pay-success-code  {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 10px 18px;
+  font-family: monospace; font-size: 13px; color: var(--text-2); letter-spacing: 1px;
+}
 </style>
 </head>
 <body>
@@ -3928,7 +4080,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Contratos digitais personalizados" data-es="Contratos digitales personalizados">Contratos digitais personalizados</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 12% por projeto" data-es="Comisión reducida: 12% por proyecto">Comissão reduzida: 12% por projeto</div>
-            <button class="btn btn-green btn-block btn-lg" data-pt="Assinar Profissional" data-es="Suscribirse Profesional">Assinar Profissional</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?119:149,'Plano Profissional · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'profissional')" data-pt="Assinar Profissional" data-es="Suscribirse Profesional">Assinar Profissional</button>
           </div>
 
           <div class="pricing-card">
@@ -3992,7 +4144,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Métricas de perfil avançadas" data-es="Métricas de perfil avanzadas">Métricas de perfil avançadas</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 10% sobre projetos" data-es="Comisión reducida: 10% sobre proyectos">Comissão reduzida: 10% sobre projetos</div>
-            <button class="btn btn-green btn-block btn-lg" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?39:49,'Plano Premium · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'premium')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
           </div>
 
           <div class="pricing-card">
@@ -4010,7 +4162,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Comissão mais baixa da plataforma" data-es="Comisión más baja de la plataforma">Comissão mais baixa da plataforma</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 7% sobre projetos" data-es="Comisión reducida: 7% sobre proyectos">Comissão reduzida: 7% sobre projetos</div>
-            <button class="btn btn-outline btn-block btn-lg" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
+            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(isAnnual?79:99,'Plano Elite · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
           </div>
 
         </div>
@@ -4696,6 +4848,266 @@ section { padding: 64px 0; }
   </div>
 </div>
 
+
+<!-- MODAL: PAGAMENTO PIX + CARTÃO -->
+<div class="overlay" id="overlay-payment" onclick="if(event.target===this)closeModal('payment')">
+  <div class="modal" style="max-width:500px;padding:0;overflow:hidden;">
+
+    <!-- Header dinâmico -->
+    <div class="pay-header">
+      <div style="font-size:12px;color:#aaa;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;" id="pay-plan-label">Plano Profissional</div>
+      <div class="pay-header-amount"><sup>R$</sup><span id="pay-amount-display">149</span></div>
+      <div class="pay-header-desc" id="pay-desc-display">Assinatura mensal · Renovação automática</div>
+      <div class="pay-secure">🔒 Ambiente seguro &nbsp;·&nbsp; SSL 256-bit &nbsp;·&nbsp; PCI DSS</div>
+    </div>
+
+    <!-- Tela de sucesso (hidden) -->
+    <div class="pay-success" id="pay-success">
+      <div class="pay-success-icon">✅</div>
+      <div class="pay-success-title">Pagamento Confirmado!</div>
+      <div class="pay-success-sub" id="pay-success-sub">Seu plano foi ativado com sucesso. Você receberá um e-mail de confirmação em breve.</div>
+      <div class="pay-success-code" id="pay-success-code">TXN-HW-00000000</div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="closeModal('payment')">Ir para o Painel →</button>
+    </div>
+
+    <!-- Conteúdo de pagamento (visível inicialmente) -->
+    <div id="pay-content">
+      <!-- Tabs -->
+      <div class="pay-tabs">
+        <button class="pay-tab active" id="pay-tab-pix" onclick="switchPayTab('pix')">
+          <span class="pay-tab-icon">⚡</span> PIX
+        </button>
+        <button class="pay-tab" id="pay-tab-card" onclick="switchPayTab('card')">
+          <span class="pay-tab-icon">💳</span> Cartão de Crédito
+        </button>
+      </div>
+
+      <div class="pay-body">
+
+        <!-- ─── PAINEL PIX ─── -->
+        <div class="pay-panel active" id="pay-panel-pix">
+          <div class="pix-qr-wrap">
+
+            <!-- Timer -->
+            <div class="pix-timer">
+              <span class="pix-timer-dot"></span>
+              Expira em <strong id="pix-countdown">15:00</strong>
+            </div>
+
+            <!-- QR Code SVG -->
+            <div class="pix-qr-box">
+              <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+                <!-- Finder patterns (cantos) -->
+                <rect x="10" y="10" width="50" height="50" rx="4" fill="#000"/>
+                <rect x="16" y="16" width="38" height="38" rx="2" fill="#fff"/>
+                <rect x="22" y="22" width="26" height="26" rx="1" fill="#000"/>
+                <!-- Finder top-right -->
+                <rect x="120" y="10" width="50" height="50" rx="4" fill="#000"/>
+                <rect x="126" y="16" width="38" height="38" rx="2" fill="#fff"/>
+                <rect x="132" y="22" width="26" height="26" rx="1" fill="#000"/>
+                <!-- Finder bottom-left -->
+                <rect x="10" y="120" width="50" height="50" rx="4" fill="#000"/>
+                <rect x="16" y="126" width="38" height="38" rx="2" fill="#fff"/>
+                <rect x="22" y="132" width="26" height="26" rx="1" fill="#000"/>
+                <!-- Timing patterns -->
+                <rect x="70" y="10" width="6" height="6" fill="#000"/>
+                <rect x="82" y="10" width="6" height="6" fill="#000"/>
+                <rect x="94" y="10" width="6" height="6" fill="#000"/>
+                <rect x="70" y="164" width="6" height="6" fill="#000"/>
+                <rect x="82" y="164" width="6" height="6" fill="#000"/>
+                <rect x="10" y="70" width="6" height="6" fill="#000"/>
+                <rect x="10" y="82" width="6" height="6" fill="#000"/>
+                <rect x="10" y="94" width="6" height="6" fill="#000"/>
+                <rect x="164" y="70" width="6" height="6" fill="#000"/>
+                <rect x="164" y="82" width="6" height="6" fill="#000"/>
+                <!-- Data modules (centro — padrão aleatório fixo) -->
+                <rect x="70" y="22" width="6" height="6" fill="#000"/>
+                <rect x="82" y="28" width="6" height="6" fill="#000"/>
+                <rect x="94" y="22" width="6" height="6" fill="#000"/>
+                <rect x="106" y="34" width="6" height="6" fill="#000"/>
+                <rect x="70" y="40" width="6" height="6" fill="#000"/>
+                <rect x="94" y="40" width="6" height="6" fill="#000"/>
+                <rect x="76" y="52" width="6" height="6" fill="#000"/>
+                <rect x="100" y="52" width="6" height="6" fill="#000"/>
+                <rect x="70" y="64" width="6" height="6" fill="#000"/>
+                <rect x="88" y="58" width="6" height="6" fill="#000"/>
+                <rect x="112" y="64" width="6" height="6" fill="#000"/>
+                <rect x="76" y="70" width="6" height="6" fill="#000"/>
+                <rect x="94" y="70" width="6" height="6" fill="#000"/>
+                <rect x="106" y="76" width="6" height="6" fill="#000"/>
+                <rect x="82" y="82" width="6" height="6" fill="#000"/>
+                <rect x="100" y="88" width="6" height="6" fill="#000"/>
+                <rect x="70" y="94" width="6" height="6" fill="#000"/>
+                <rect x="88" y="94" width="6" height="6" fill="#000"/>
+                <rect x="112" y="94" width="6" height="6" fill="#000"/>
+                <rect x="76" y="106" width="6" height="6" fill="#000"/>
+                <rect x="94" y="106" width="6" height="6" fill="#000"/>
+                <rect x="70" y="118" width="6" height="6" fill="#000"/>
+                <rect x="100" y="112" width="6" height="6" fill="#000"/>
+                <rect x="82" y="124" width="6" height="6" fill="#000"/>
+                <rect x="106" y="118" width="6" height="6" fill="#000"/>
+                <rect x="118" y="70" width="6" height="6" fill="#000"/>
+                <rect x="130" y="76" width="6" height="6" fill="#000"/>
+                <rect x="124" y="88" width="6" height="6" fill="#000"/>
+                <rect x="136" y="82" width="6" height="6" fill="#000"/>
+                <rect x="118" y="100" width="6" height="6" fill="#000"/>
+                <rect x="130" y="106" width="6" height="6" fill="#000"/>
+                <rect x="142" y="94" width="6" height="6" fill="#000"/>
+                <rect x="118" y="118" width="6" height="6" fill="#000"/>
+                <rect x="130" y="124" width="6" height="6" fill="#000"/>
+                <rect x="142" y="112" width="6" height="6" fill="#000"/>
+                <rect x="154" y="118" width="6" height="6" fill="#000"/>
+                <rect x="118" y="136" width="6" height="6" fill="#000"/>
+                <rect x="136" y="142" width="6" height="6" fill="#000"/>
+                <rect x="148" y="136" width="6" height="6" fill="#000"/>
+                <rect x="22" y="70" width="6" height="6" fill="#000"/>
+                <rect x="34" y="76" width="6" height="6" fill="#000"/>
+                <rect x="46" y="70" width="6" height="6" fill="#000"/>
+                <rect x="28" y="88" width="6" height="6" fill="#000"/>
+                <rect x="52" y="82" width="6" height="6" fill="#000"/>
+                <rect x="22" y="100" width="6" height="6" fill="#000"/>
+                <rect x="40" y="94" width="6" height="6" fill="#000"/>
+                <rect x="34" y="106" width="6" height="6" fill="#000"/>
+                <rect x="46" y="112" width="6" height="6" fill="#000"/>
+                <!-- Logo PIX centro -->
+                <rect x="76" y="76" width="28" height="28" rx="4" fill="#32BCAD"/>
+                <text x="90" y="96" font-family="Arial" font-weight="bold" font-size="14" fill="white" text-anchor="middle">PIX</text>
+              </svg>
+            </div>
+
+            <!-- Chave Pix Copia e Cola -->
+            <div class="pix-copy-wrap">
+              <div class="pix-copy-key" id="pix-key-display">00020126580014BR.GOV.BCB.PIX0136herework@pagamentos.com.br520400005303986540<span id="pix-amount-inline">149</span>5802BR5910HereWork6009SAOPAULO62070503***6304A8B2</div>
+              <button class="pix-copy-btn" onclick="copyPixKey()">📋 Copiar</button>
+            </div>
+
+            <!-- Instruções -->
+            <div class="pix-steps">
+              <div class="pix-step"><span class="pix-step-num">1</span><span>Abra o app do seu banco e acesse a área <strong>Pix</strong></span></div>
+              <div class="pix-step"><span class="pix-step-num">2</span><span>Escaneie o QR Code ou cole o código <strong>Pix Copia e Cola</strong></span></div>
+              <div class="pix-step"><span class="pix-step-num">3</span><span>Confirme o pagamento de <strong>R$ <span class="pix-amount-ref">149,00</span></strong> para <strong>HereWork</strong></span></div>
+              <div class="pix-step"><span class="pix-step-num">4</span><span>A confirmação é <strong>instantânea</strong> — você receberá um e-mail</span></div>
+            </div>
+
+            <!-- Status aguardando -->
+            <div class="pix-waiting">
+              <div class="pix-spinner"></div>
+              Aguardando confirmação do pagamento...
+            </div>
+
+            <!-- Botão simular (demo) -->
+            <button class="btn btn-green" style="width:100%;" id="pix-simulate-btn" onclick="simulatePixPayment()">
+              ✅ Simular Pagamento PIX (Demo)
+            </button>
+
+          </div>
+        </div><!-- /pix panel -->
+
+        <!-- ─── PAINEL CARTÃO ─── -->
+        <div class="pay-panel" id="pay-panel-card">
+
+          <!-- Visualização do cartão -->
+          <div class="card-preview-wrap">
+            <div class="card-preview" id="card-preview">
+              <div class="card-face card-front" id="card-front-face">
+                <div class="card-logo-row">
+                  <div class="card-chip"></div>
+                  <div class="card-brand-logo" id="card-brand-disp"></div>
+                </div>
+                <div class="card-number-disp" id="card-number-disp">•••• •••• •••• ••••</div>
+                <div class="card-bottom-row">
+                  <div>
+                    <div class="card-holder-lbl">Nome do titular</div>
+                    <div class="card-holder-val" id="card-name-disp">NOME SOBRENOME</div>
+                  </div>
+                  <div style="text-align:right;">
+                    <div class="card-holder-lbl">Validade</div>
+                    <div class="card-expiry-val" id="card-expiry-disp">MM/AA</div>
+                  </div>
+                </div>
+              </div>
+              <div class="card-face card-back">
+                <div class="card-back-stripe"></div>
+                <div class="card-cvv-band">
+                  <div class="card-cvv-val" id="card-cvv-disp">•••</div>
+                </div>
+                <div style="text-align:right;font-size:10px;opacity:.5;margin-top:6px;">CVV</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulário -->
+          <div class="form-group">
+            <label class="form-label">Número do Cartão</label>
+            <input class="form-input" id="card-number-input" type="text" maxlength="19"
+              placeholder="0000 0000 0000 0000" autocomplete="cc-number"
+              oninput="formatCardNumber(this)" onfocus="flipCard(false)">
+            <div class="field-error" id="err-card-number"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nome no Cartão</label>
+            <input class="form-input" id="card-name-input" type="text" maxlength="26"
+              placeholder="Como aparece no cartão"
+              oninput="document.getElementById('card-name-disp').textContent=(this.value.toUpperCase()||'NOME SOBRENOME')"
+              onfocus="flipCard(false)">
+            <div class="field-error" id="err-card-name"></div>
+          </div>
+
+          <div class="card-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Validade</label>
+              <input class="form-input" id="card-expiry-input" type="text" maxlength="5"
+                placeholder="MM/AA" autocomplete="cc-exp"
+                oninput="formatCardExpiry(this)" onfocus="flipCard(false)">
+              <div class="field-error" id="err-card-expiry"></div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">CVV</label>
+              <input class="form-input" id="card-cvv-input" type="text" maxlength="4"
+                placeholder="•••" autocomplete="cc-csc"
+                oninput="var v=this.value.replace(/\D/g,'');this.value=v;document.getElementById('card-cvv-disp').textContent=v||'•••'"
+                onfocus="flipCard(true)" onblur="flipCard(false)">
+              <div class="field-error" id="err-card-cvv"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:14px;">
+            <label class="form-label">Parcelas</label>
+            <select class="pay-installments" id="card-installments">
+              <option value="1" id="inst-1">1x de R$ 149,00 sem juros</option>
+              <option value="2" id="inst-2">2x de R$ 74,50 sem juros</option>
+              <option value="3" id="inst-3">3x de R$ 49,67 sem juros</option>
+              <option value="6" id="inst-6">6x de R$ 24,83 sem juros</option>
+              <option value="12" id="inst-12">12x de R$ 12,42 com juros</option>
+            </select>
+          </div>
+
+          <div class="field-error" id="err-card-general" style="margin-bottom:8px;"></div>
+
+          <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="card-pay-btn" onclick="submitCardPayment()">
+            🔒 Pagar R$ <span id="card-pay-amount">149,00</span>
+          </button>
+
+          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:var(--text-4);">Aceito:</span>
+            <span style="font-size:20px;" title="Visa">💳</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-3);">VISA</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-3);">MASTERCARD</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-3);">ELO</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-3);">AMEX</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text-3);">HIPERCARD</span>
+          </div>
+          <div style="text-align:center;font-size:11px;color:var(--text-4);margin-top:6px;">
+            🔒 Pagamentos processados com segurança via <strong>Stripe</strong>
+          </div>
+
+        </div><!-- /card panel -->
+      </div><!-- /pay-body -->
+    </div><!-- /pay-content -->
+
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -5748,7 +6160,7 @@ document.addEventListener('click', function(e) {
     if (/Cadastrar|Registrar|Começar|Gratis|Empezar|Começar/.test(txt) || pt === 'Cadastrar-se')
       { openModal('register'); return; }
     if (/Assinar|Suscribirse/.test(txt))
-      { openModal('register'); return; }
+      { openPaymentModal(149, 'Plano HereWork', ''); return; }
     if (/Publicar Projeto|Publicar Proyecto/.test(txt) || /Publicar/.test(pt))
       { openModal('publish'); return; }
     if (/Enviar Proposta|Enviar Propuesta/.test(txt))
@@ -6436,6 +6848,256 @@ showPage = function(id) {
   }
   _origShowPage(id);
 };
+
+/* ═══════════════════════════════════════════════════
+   PAYMENT SYSTEM — PIX + STRIPE CARD
+═══════════════════════════════════════════════════ */
+var _payCtx = { amount: 149, desc: 'Plano Profissional', plan: 'profissional' };
+var _pixTimerInterval = null;
+var _pixSeconds = 900; // 15 min
+
+function openPaymentModal(amount, desc, plan) {
+  _payCtx = { amount: amount || 149, desc: desc || 'Assinatura HereWork', plan: plan || '' };
+  var fmt = _payCtx.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+
+  // Update header
+  var el; 
+  el = document.getElementById('pay-amount-display'); if(el) el.textContent = _payCtx.amount.toLocaleString('pt-BR');
+  el = document.getElementById('pay-desc-display');   if(el) el.textContent = _payCtx.desc;
+  el = document.getElementById('pay-plan-label');     if(el) el.textContent = _payCtx.plan ? ('Plano ' + _payCtx.plan.charAt(0).toUpperCase() + _payCtx.plan.slice(1)) : 'HereWork';
+
+  // Update PIX amount references
+  el = document.getElementById('pix-amount-inline');  if(el) el.textContent = _payCtx.amount;
+  document.querySelectorAll('.pix-amount-ref').forEach(function(e){ e.textContent = fmt; });
+
+  // Update card pay button
+  el = document.getElementById('card-pay-amount');    if(el) el.textContent = fmt;
+
+  // Build installments
+  _buildInstallments(_payCtx.amount);
+
+  // Reset to PIX tab + hide success
+  switchPayTab('pix');
+  var suc = document.getElementById('pay-success');    if(suc){ suc.classList.remove('show'); suc.style.display='none'; }
+  var cnt = document.getElementById('pay-content');    if(cnt) cnt.style.display='block';
+
+  // Start PIX timer
+  _startPixTimer();
+
+  openModal('payment');
+}
+
+function _buildInstallments(amt) {
+  var sel = document.getElementById('card-installments'); if(!sel) return;
+  var plans = [
+    { n:1,  label: '1x de R$ {v} sem juros', rate: 1.0 },
+    { n:2,  label: '2x de R$ {v} sem juros', rate: 1.0 },
+    { n:3,  label: '3x de R$ {v} sem juros', rate: 1.0 },
+    { n:6,  label: '6x de R$ {v} sem juros', rate: 1.0 },
+    { n:12, label: '12x de R$ {v} com juros (2,99% a.m.)', rate: 1.0299 }
+  ];
+  sel.innerHTML = '';
+  plans.forEach(function(p) {
+    var monthly = (amt * p.rate / p.n).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+    var opt = document.createElement('option');
+    opt.value = p.n;
+    opt.textContent = p.label.replace('{v}', monthly);
+    sel.appendChild(opt);
+  });
+}
+
+function switchPayTab(tab) {
+  ['pix','card'].forEach(function(t) {
+    var btn = document.getElementById('pay-tab-' + t);
+    var panel = document.getElementById('pay-panel-' + t);
+    if(btn)   btn.classList.toggle('active', t === tab);
+    if(panel) panel.classList.toggle('active', t === tab);
+  });
+  if(tab === 'card') { flipCard(false); }
+}
+
+/* ── PIX Timer ── */
+function _startPixTimer() {
+  clearInterval(_pixTimerInterval);
+  _pixSeconds = 900;
+  _updatePixTimer();
+  _pixTimerInterval = setInterval(function() {
+    _pixSeconds--;
+    _updatePixTimer();
+    if(_pixSeconds <= 0) {
+      clearInterval(_pixTimerInterval);
+      var el = document.getElementById('pix-countdown');
+      if(el) el.textContent = 'Expirado';
+    }
+  }, 1000);
+}
+function _updatePixTimer() {
+  var el = document.getElementById('pix-countdown'); if(!el) return;
+  var m = Math.floor(_pixSeconds / 60), s = _pixSeconds % 60;
+  el.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+}
+
+/* ── Copy PIX key ── */
+function copyPixKey() {
+  var el = document.getElementById('pix-key-display');
+  if(!el) return;
+  var txt = el.textContent || el.innerText;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(function() {
+      showToast('⚡ Código PIX copiado!', 'success');
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    showToast('⚡ Código PIX copiado!', 'success');
+  }
+}
+
+/* ── Simulate PIX payment (demo only) ── */
+function simulatePixPayment() {
+  var btn = document.getElementById('pix-simulate-btn');
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
+  setTimeout(function() {
+    clearInterval(_pixTimerInterval);
+    _showPaySuccess('pix');
+  }, 1800);
+}
+
+/* ── Credit Card ── */
+var _cardBrands = {
+  visa:      { pattern: /^4/, label: 'VISA', len: 16 },
+  master:    { pattern: /^(5[1-5]|2[2-7])/, label: 'MASTERCARD', len: 16 },
+  amex:      { pattern: /^3[47]/, label: 'AMEX', len: 15 },
+  elo:       { pattern: /^(4011|4312|4389|4514|4576|5041|5066|5067|509|6277|6362|6363|6500|6516|6550)/, label: 'ELO', len: 16 },
+  hipercard: { pattern: /^(606282|637095|637568|637599|637609|637612)/, label: 'HIPERCARD', len: 16 }
+};
+
+function _detectBrand(num) {
+  var clean = num.replace(/\s/g,'');
+  for(var k in _cardBrands) {
+    if(_cardBrands[k].pattern.test(clean)) return k;
+  }
+  return '';
+}
+
+function formatCardNumber(el) {
+  var raw = el.value.replace(/\D/g,'').substring(0,16);
+  var brand = _detectBrand(raw);
+  var groups = brand === 'amex'
+    ? [4,6,5]
+    : [4,4,4,4];
+  var out = ''; var i = 0;
+  groups.forEach(function(g){ if(i < raw.length){ out += raw.substring(i,i+g) + ' '; i+=g; } });
+  el.value = out.trim();
+
+  // Update preview
+  var disp = raw.padEnd(16,'•');
+  var formatted = disp.substring(0,4)+' '+disp.substring(4,8)+' '+disp.substring(8,12)+' '+disp.substring(12,16);
+  var dispEl = document.getElementById('card-number-disp');
+  if(dispEl) dispEl.textContent = formatted;
+
+  // Update brand
+  var face = document.getElementById('card-front-face');
+  var brandEl = document.getElementById('card-brand-disp');
+  if(face) {
+    face.className = 'card-face card-front' + (brand ? ' ' + brand : '');
+  }
+  if(brandEl) brandEl.textContent = brand ? _cardBrands[brand].label : '';
+}
+
+function formatCardExpiry(el) {
+  var raw = el.value.replace(/\D/g,'').substring(0,4);
+  if(raw.length > 2) raw = raw.substring(0,2) + '/' + raw.substring(2);
+  el.value = raw;
+  var dispEl = document.getElementById('card-expiry-disp');
+  if(dispEl) dispEl.textContent = raw || 'MM/AA';
+}
+
+function flipCard(toBack) {
+  var card = document.getElementById('card-preview');
+  if(card) card.classList.toggle('flipped', toBack);
+}
+
+function _luhn(num) {
+  var digits = num.replace(/\D/g,'').split('').reverse().map(Number);
+  var sum = 0;
+  digits.forEach(function(d,i){
+    if(i%2===1){ d*=2; if(d>9) d-=9; }
+    sum+=d;
+  });
+  return sum%10===0;
+}
+
+function submitCardPayment() {
+  var numEl  = document.getElementById('card-number-input');
+  var nameEl = document.getElementById('card-name-input');
+  var expEl  = document.getElementById('card-expiry-input');
+  var cvvEl  = document.getElementById('card-cvv-input');
+  var btn    = document.getElementById('card-pay-btn');
+  var errG   = document.getElementById('err-card-general');
+
+  // Clear errors
+  ['err-card-number','err-card-name','err-card-expiry','err-card-cvv','err-card-general']
+    .forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=''; });
+
+  var ok = true;
+  var num = (numEl ? numEl.value.replace(/\s/g,'') : '');
+  var brand = _detectBrand(num);
+
+  if(!num || num.length < 15) {
+    var e = document.getElementById('err-card-number');
+    if(e) e.textContent = 'Número de cartão inválido.'; ok=false;
+  } else if(!_luhn(num)) {
+    var e = document.getElementById('err-card-number');
+    if(e) e.textContent = 'Número de cartão inválido (dígito verificador).'; ok=false;
+  }
+  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
+    var e = document.getElementById('err-card-name');
+    if(e) e.textContent = 'Informe o nome completo como no cartão.'; ok=false;
+  }
+  var exp = expEl ? expEl.value : '';
+  if(!/^\d{2}\/\d{2}$/.test(exp)) {
+    var e = document.getElementById('err-card-expiry');
+    if(e) e.textContent = 'Validade inválida (MM/AA).'; ok=false;
+  } else {
+    var parts = exp.split('/');
+    var mm = parseInt(parts[0]), yy = parseInt(parts[1]);
+    var now = new Date(); var nowY = now.getFullYear()%100; var nowM = now.getMonth()+1;
+    if(mm<1||mm>12||(yy<nowY||(yy===nowY&&mm<nowM))) {
+      var e = document.getElementById('err-card-expiry');
+      if(e) e.textContent = 'Cartão expirado ou data inválida.'; ok=false;
+    }
+  }
+  var cvv = cvvEl ? cvvEl.value : '';
+  var cvvLen = brand==='amex' ? 4 : 3;
+  if(!cvv || cvv.length < cvvLen) {
+    var e = document.getElementById('err-card-cvv');
+    if(e) e.textContent = 'CVV inválido.'; ok=false;
+  }
+  if(!ok) return;
+
+  _setBtnLoading(btn, true);
+  // Simulate Stripe processing
+  setTimeout(function() {
+    _setBtnLoading(btn, false);
+    _showPaySuccess('card');
+  }, 2200);
+}
+
+function _showPaySuccess(method) {
+  var cnt = document.getElementById('pay-content'); if(cnt) cnt.style.display='none';
+  var suc = document.getElementById('pay-success');
+  var sub = document.getElementById('pay-success-sub');
+  var code = document.getElementById('pay-success-code');
+  var txn = 'TXN-HW-' + Math.random().toString(36).substring(2,10).toUpperCase();
+  if(code) code.textContent = txn;
+  if(sub) sub.textContent = method === 'pix'
+    ? 'Pagamento PIX confirmado! Seu plano foi ativado. Você receberá um e-mail de confirmação em instantes.'
+    : 'Pagamento aprovado pela operadora. Seu plano foi ativado. Você receberá um e-mail com a nota fiscal em breve.';
+  if(suc) { suc.style.display='flex'; setTimeout(function(){ suc.classList.add('show'); }, 20); }
+  showToast((method==='pix'?'⚡ PIX confirmado!':'💳 Pagamento aprovado!') + ' Plano ativado com sucesso.', 'success');
+}
 </script>
 
 </body>
