@@ -2310,6 +2310,40 @@ section { padding: 64px 0; }
   border-radius: var(--radius); padding: 10px 18px;
   font-family: monospace; font-size: 13px; color: var(--text-2); letter-spacing: 1px;
 }
+/* ─── PDF Upload Field ─── */
+.pdf-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--bg);
+  position: relative;
+}
+.pdf-upload-area:hover { border-color: var(--green); background: #f0fdf4; }
+.pdf-upload-area.has-file { border-color: var(--green); border-style: solid; background: #f0fdf4; }
+.pdf-upload-area.drag-over { border-color: var(--green); background: #dcfce7; transform: scale(1.01); }
+.pdf-upload-area input[type=file] { display: none; }
+.pdf-upload-icon { font-size: 28px; margin-bottom: 6px; }
+.pdf-upload-text { font-size: 14px; font-weight: 600; color: var(--text-2); margin-bottom: 3px; }
+.pdf-upload-sub  { font-size: 12px; color: var(--text-4); }
+.pdf-file-preview {
+  display: none; align-items: center; gap: 12px;
+  background: var(--surface); border: 1.5px solid var(--green);
+  border-radius: var(--radius); padding: 10px 14px; margin-top: 10px;
+}
+.pdf-file-preview.show { display: flex; }
+.pdf-file-icon { font-size: 24px; flex-shrink: 0; }
+.pdf-file-info { flex: 1; text-align: left; }
+.pdf-file-name { font-size: 13px; font-weight: 600; color: var(--text); word-break: break-all; }
+.pdf-file-size { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.pdf-file-remove {
+  flex-shrink: 0; background: none; border: none; cursor: pointer;
+  font-size: 16px; color: var(--text-3); padding: 4px;
+  border-radius: 50%; transition: all var(--transition);
+}
+.pdf-file-remove:hover { background: #fee2e2; color: #ef4444; }
 </style>
 </head>
 <body>
@@ -4723,7 +4757,28 @@ section { padding: 64px 0; }
       </div>
       <div class="form-group">
         <label class="form-label" data-pt="Portfólio relevante (opcional)" data-es="Portafolio relevante (opcional)">Portfólio relevante (opcional)</label>
-        <input class="form-input" type="url" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
+        <input class="form-input" type="url" id="prop-portfolio" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
+        <div class="pdf-upload-area" id="pdf-drop-zone" onclick="document.getElementById('prop-pdf-input').click()"
+          ondragover="pdfDragOver(event)" ondragleave="pdfDragLeave(event)" ondrop="pdfDrop(event)">
+          <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected(this)">
+          <div id="pdf-placeholder">
+            <div class="pdf-upload-icon">&#128196;</div>
+            <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
+            <div class="pdf-upload-sub">Somente arquivos .pdf &nbsp;&middot;&nbsp; Máximo 10 MB</div>
+          </div>
+        </div>
+        <div class="pdf-file-preview" id="pdf-file-preview">
+          <span class="pdf-file-icon">&#128213;</span>
+          <div class="pdf-file-info">
+            <div class="pdf-file-name" id="pdf-file-name">arquivo.pdf</div>
+            <div class="pdf-file-size" id="pdf-file-size">0 KB</div>
+          </div>
+          <button type="button" class="pdf-file-remove" onclick="pdfRemove(event)" title="Remover">&#x2715;</button>
+        </div>
+        <div class="form-error" id="err-prop-pdf"></div>
       </div>
       <button class="btn btn-green btn-block btn-lg" onclick="submitProposal()" data-pt="📩 Enviar Proposta" data-es="📩 Enviar Propuesta">📩 Enviar Proposta</button>
     </div>
@@ -5787,6 +5842,7 @@ function closeModal(id) {
   if (!overlay) return;
   overlay.classList.remove('open');
   document.body.style.overflow = '';
+  if (id === 'proposal' && typeof _pdfReset === 'function') _pdfReset();
   overlay.querySelectorAll('.form-error').forEach(function(e){ e.classList.remove('show'); });
   overlay.querySelectorAll('.form-input.error,.form-select.error,.form-textarea.error')
     .forEach(function(e){ e.classList.remove('error'); });
@@ -6043,7 +6099,9 @@ function submitProposal() {
   setTimeout(function(){
     _setBtnLoading(btn, false);
     closeModal('proposal');
-    showToast(lang()==='pt' ? 'Proposta enviada com sucesso!' : 'Propuesta enviada exitosamente!', 'success');
+    _pdfReset();
+    var hasPdf = document.getElementById('prop-pdf-input') && document.getElementById('prop-pdf-input').files && document.getElementById('prop-pdf-input').files.length > 0;
+    showToast(lang()==='pt' ? 'Proposta enviada com sucesso!' + (hasPdf?' (PDF anexado)':'') : 'Propuesta enviada exitosamente!', 'success');
   }, 800);
 }
 
@@ -7564,6 +7622,78 @@ function openProposalFor(btn) {
   }
 
   openModal('proposal');
+}
+
+/* ─── PDF Upload Handler ─── */
+function pdfSelected(input) {
+  var f = input.files && input.files[0];
+  _pdfApply(f);
+}
+function pdfDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('pdf-drop-zone');
+  if (z) z.classList.add('drag-over');
+}
+function pdfDragLeave(e) {
+  var z = document.getElementById('pdf-drop-zone');
+  if (z) z.classList.remove('drag-over');
+}
+function pdfDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('pdf-drop-zone');
+  if (z) z.classList.remove('drag-over');
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  _pdfApply(f);
+}
+function _pdfApply(f) {
+  var errEl  = document.getElementById('err-prop-pdf');
+  var zone   = document.getElementById('pdf-drop-zone');
+  var prev   = document.getElementById('pdf-file-preview');
+  var nameEl = document.getElementById('pdf-file-name');
+  var sizeEl = document.getElementById('pdf-file-size');
+  var ph     = document.getElementById('pdf-placeholder');
+
+  if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+
+  if (!f) return;
+
+  // Validate type
+  if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+    if (errEl) { errEl.textContent = lang()==='pt' ? 'Apenas arquivos PDF s' + String.fromCharCode(0xE3) + 'o aceitos.' : 'Solo se aceptan archivos PDF.'; errEl.classList.add('show'); }
+    return;
+  }
+  // Validate size (10 MB)
+  if (f.size > 10 * 1024 * 1024) {
+    if (errEl) { errEl.textContent = lang()==='pt' ? 'O arquivo excede 10 MB.' : 'El archivo excede 10 MB.'; errEl.classList.add('show'); }
+    return;
+  }
+
+  // Show preview
+  var kb = f.size < 1024 * 1024
+    ? (f.size / 1024).toFixed(0) + ' KB'
+    : (f.size / (1024*1024)).toFixed(1) + ' MB';
+
+  if (nameEl) nameEl.textContent = f.name;
+  if (sizeEl) sizeEl.textContent = kb;
+  if (prev)   prev.classList.add('show');
+  if (zone)   zone.classList.add('has-file');
+  if (ph)     ph.style.display = 'none';
+}
+function pdfRemove(e) {
+  e.stopPropagation();
+  var inp  = document.getElementById('prop-pdf-input');
+  var prev = document.getElementById('pdf-file-preview');
+  var zone = document.getElementById('pdf-drop-zone');
+  var ph   = document.getElementById('pdf-placeholder');
+  var err  = document.getElementById('err-prop-pdf');
+  if (inp)  inp.value = '';
+  if (prev) prev.classList.remove('show');
+  if (zone) zone.classList.remove('has-file');
+  if (ph)   ph.style.display = '';
+  if (err)  { err.textContent = ''; err.classList.remove('show'); }
+}
+function _pdfReset() {
+  pdfRemove({ stopPropagation: function(){} });
 }
 </script>
 </body>
