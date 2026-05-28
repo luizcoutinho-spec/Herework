@@ -2372,6 +2372,24 @@ section { padding: 64px 0; }
       <button class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <button class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+      <!-- User chip (shown when logged in) -->
+      <div id="nav-user-chip" style="display:none;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:40px;padding:5px 14px 5px 6px;cursor:pointer;" onclick="toggleUserMenu()">
+        <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),#66BB6A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;" id="nav-user-avatar">U</div>
+        <span style="font-size:13px;font-weight:600;color:var(--text);" id="nav-user-name">User</span>
+        <span style="font-size:10px;color:var(--text-3);">▼</span>
+      </div>
+      <!-- Dropdown menu -->
+      <div id="user-dropdown" style="display:none;position:absolute;top:58px;right:24px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);min-width:200px;z-index:9999;overflow:hidden;">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border-2);">
+          <div style="font-size:13px;font-weight:700;color:var(--text);" id="dd-user-name">Usu&aacute;rio</div>
+          <div style="font-size:12px;color:var(--text-3);" id="dd-user-email">email@email.com</div>
+        </div>
+        <button onclick="closeUserMenu();showPage('home')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#128100; Meu Perfil</button>
+        <button onclick="closeUserMenu();showPage('projects')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#128196; Meus Projetos</button>
+        <button onclick="closeUserMenu();showPage('pricing')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#11088; Planos</button>
+        <div style="border-top:1px solid var(--border-2);"></div>
+        <button onclick="closeUserMenu();userLogout()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:#ef4444;display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">&#128682; Sair</button>
+      </div>
     </div>
 
     <!-- Hamburger (mobile) -->
@@ -5899,8 +5917,12 @@ function submitLogin() {
   _setBtnLoading(btn, true);
   setTimeout(function(){
     _setBtnLoading(btn, false);
+    var email = e ? e.value.trim() : '';
+    var name  = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+    _setSession(name, email, 'client');
+    if (e) e.value = ''; if (p) p.value = '';
     closeModal('login');
-    showToast(lang()==='pt' ? 'Bem-vindo(a) de volta!' : 'Bienvenido/a de regreso!', 'success');
+    showToast(lang()==='pt' ? '👋 Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!' : '👋 ¡Bienvenido/a de regreso, ' + name.split(' ')[0] + '!', 'success');
   }, 800);
 }
 
@@ -5912,6 +5934,38 @@ function setRegType(type) {
   if (cBtn) cBtn.className = type==='client'     ? 'btn btn-green btn-sm' : 'btn btn-outline btn-sm';
   if (fBtn) fBtn.className = type==='freelancer'  ? 'btn btn-green btn-sm' : 'btn btn-outline btn-sm';
 }
+/* ─── Estado de sessão simulado ─── */
+var _session = null; // { name, email, type }
+
+function _setSession(name, email, type) {
+  _session = { name: name, email: email, type: type };
+  var chip = document.getElementById('nav-user-chip');
+  if (chip) {
+    chip.style.display = 'flex';
+    var nameEl = document.getElementById('nav-user-name');
+    if (nameEl) nameEl.textContent = name.split(' ')[0];
+    var avEl = document.getElementById('nav-user-avatar');
+    if (avEl) avEl.textContent = name.charAt(0).toUpperCase();
+  }
+  // Hide login/register, keep Publicar
+  document.querySelectorAll('.btn-login').forEach(function(b){ b.style.display='none'; });
+  document.querySelectorAll('#overlay-register ~ * .btn-green, .header-auth > .btn.btn-green').forEach(function(b){ b.style.display='none'; });
+  var regBtn = document.querySelector('.header-auth > .btn.btn-green.btn-sm');
+  if (regBtn) regBtn.style.display = 'none';
+  var loginBtn = document.querySelector('.header-auth > .btn-login');
+  if (loginBtn) loginBtn.style.display = 'none';
+}
+
+function _clearSession() {
+  _session = null;
+  var chip = document.getElementById('nav-user-chip');
+  if (chip) chip.style.display = 'none';
+  var loginBtn = document.querySelector('.header-auth > .btn-login');
+  var regBtn   = document.querySelector('.header-auth > .btn.btn-green.btn-sm');
+  if (loginBtn) loginBtn.style.display = '';
+  if (regBtn)   regBtn.style.display   = '';
+}
+
 function submitRegister() {
   var n    = document.getElementById('reg-name');
   var e    = document.getElementById('reg-email');
@@ -5931,17 +5985,21 @@ function submitRegister() {
 
   if (!ok) return;
   _setBtnLoading(btn, true);
+
   setTimeout(function(){
     _setBtnLoading(btn, false);
+    var name  = n ? n.value.trim() : '';
+    var email = e ? e.value.trim() : '';
+    var first = name.split(' ')[0];
+    _setSession(name, email, regType);
+    if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
     closeModal('register');
-    var firstName = n ? n.value.trim().split(' ')[0] : '';
     showToast(
       lang()==='pt'
-        ? '&#x2705; Conta criada' + (firstName ? ', ' + firstName : '') + '! Verifique seu e-mail para ativar.'
-        : '&#x2705; Cuenta creada' + (firstName ? ', ' + firstName : '') + '! Revisa tu correo para activar.',
+        ? '👋 Bem-vindo(a), ' + first + '! Sua conta está ativa.'
+        : '👋 ¡Bienvenido/a, ' + first + '! Tu cuenta está activa.',
       'success'
     );
-    if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
   }, 900);
 }
 function submitProject() {
@@ -7113,6 +7171,36 @@ function _showPaySuccess(method) {
   if(suc) { suc.style.display='flex'; setTimeout(function(){ suc.classList.add('show'); }, 20); }
   showToast((method==='pix'?'⚡ PIX confirmado!':'💳 Pagamento aprovado!') + ' Plano ativado com sucesso.', 'success');
 }
+
+/* ─── User session menu ─── */
+function toggleUserMenu() {
+  var dd = document.getElementById('user-dropdown');
+  if (!dd) return;
+  var open = dd.style.display === 'block';
+  dd.style.display = open ? 'none' : 'block';
+  if (!open && _session) {
+    var n = document.getElementById('dd-user-name');
+    var e = document.getElementById('dd-user-email');
+    if (n) n.textContent = _session.name;
+    if (e) e.textContent = _session.email;
+  }
+}
+function closeUserMenu() {
+  var dd = document.getElementById('user-dropdown');
+  if (dd) dd.style.display = 'none';
+}
+function userLogout() {
+  _clearSession();
+  showToast(lang()==='pt' ? 'Sessão encerrada. Até logo!' : 'Sesión cerrada. ¡Hasta luego!', 'info');
+}
+// Close dropdown when clicking outside
+document.addEventListener('click', function(ev) {
+  var chip = document.getElementById('nav-user-chip');
+  var dd   = document.getElementById('user-dropdown');
+  if (dd && dd.style.display === 'block' && !chip.contains(ev.target) && !dd.contains(ev.target)) {
+    dd.style.display = 'none';
+  }
+});
 </script>
 
 </body>
