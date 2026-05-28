@@ -2064,9 +2064,9 @@ section { padding: 64px 0; }
 <div class="topbar">
   <div class="topbar-inner">
     <div class="topbar-left">
-      <a href="#" class="topbar-link" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
+      <a href="#" class="topbar-link" onclick="openInfoPage('help');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
       <span class="topbar-sep">·</span>
-      <a href="#" class="topbar-link" data-pt="Blog" data-es="Blog">Blog</a>
+      <a href="#" class="topbar-link" onclick="openInfoPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a>
       <span class="topbar-sep">·</span>
       <a href="#" class="topbar-link" onclick="showPage('how');return false;" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</a>
     </div>
@@ -4369,10 +4369,10 @@ section { padding: 64px 0; }
         © 2025 HereWork. <span data-pt="Todos os direitos reservados." data-es="Todos los derechos reservados.">Todos os direitos reservados.</span>
       </div>
       <div class="footer-bottom-links">
-        <a href="#" data-pt="Termos de Uso" data-es="Términos de Uso">Termos de Uso</a>
-        <a href="#" data-pt="Privacidade" data-es="Privacidad">Privacidade</a>
-        <a href="#" data-pt="Cookies" data-es="Cookies">Cookies</a>
-        <a href="#" data-pt="LGPD / RGPD" data-es="LGPD / RGPD">LGPD / RGPD</a>
+        <a href="#" onclick="openInfoPage('terms');return false;" data-pt="Termos de Uso" data-es="Términos de Uso">Termos de Uso</a>
+        <a href="#" onclick="openInfoPage('privacy');return false;" data-pt="Privacidade" data-es="Privacidad">Privacidade</a>
+        <a href="#" onclick="openInfoPage('cookies');return false;" data-pt="Cookies" data-es="Cookies">Cookies</a>
+        <a href="#" onclick="openInfoPage('lgpd');return false;" data-pt="LGPD / RGPD" data-es="LGPD / RGPD">LGPD / RGPD</a>
       </div>
     </div>
   </div>
@@ -5695,6 +5695,106 @@ _IP.partners = {
        '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128295; Tecnolog&iacute;a</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">SaaS y productividad</div></div>' +
        '</div>' +
        '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Proponer alianza &rarr;</button>'
+  }
+};
+
+_IP.terms = {
+  pt: { t: 'Termos de Uso',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Ao utilizar a plataforma HereWork, voc&ecirc; concorda com os presentes Termos de Uso. Leia atentamente antes de continuar.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>1. Acesso &agrave; Plataforma</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">O acesso &agrave; HereWork &eacute; gratuito para cria&ccedil;&atilde;o de conta. Funcionalidades premium est&atilde;o sujeitas a planos pagos. Voc&ecirc; deve ter 18 anos ou mais para se cadastrar.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>2. Responsabilidade dos Usu&aacute;rios</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Cada usu&aacute;rio &eacute; respons&aacute;vel pelas informa&ccedil;&otilde;es fornecidas. &Eacute; vedado publicar conte&uacute;do falso, ofensivo ou que viole direitos de terceiros.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>3. Contratos entre Partes</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">A HereWork atua como intermedi&aacute;ria. Os contratos firmados entre clientes e freelancers s&atilde;o de responsabilidade exclusiva das partes envolvidas.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>4. Pagamentos e Taxas</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">A plataforma cobra uma taxa de servi&ccedil;o sobre cada transa&ccedil;&atilde;o conclu&iacute;da. Os valores s&atilde;o exibidos de forma transparente antes da confirma&ccedil;&atilde;o do pagamento.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>5. Altera&ccedil;&otilde;es nos Termos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">A HereWork pode atualizar estes Termos a qualquer momento. Voc&ecirc; ser&aacute; notificado por e-mail e dentro da plataforma sobre mudan&ccedil;as relevantes.</div></div>' +
+       '</div>' +
+       '<p style="font-size:12px;color:var(--text-4);margin-top:16px;">&#128197; &Uacute;ltima atualiza&ccedil;&atilde;o: Janeiro de 2025 &nbsp;|&nbsp; D&uacute;vidas? <a href="#" onclick="switchModal(\'info\',\'contact\')">Fale conosco</a></p>'
+  },
+  es: { t: 'T&eacute;rminos de Uso',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Al utilizar la plataforma HereWork, aceptas los presentes T&eacute;rminos de Uso. L&eacute;elos detenidamente antes de continuar.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>1. Acceso a la Plataforma</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">El acceso a HereWork es gratuito para crear una cuenta. Las funcionalidades premium est&aacute;n sujetas a planes de pago. Debes tener 18 a&ntilde;os o m&aacute;s para registrarte.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>2. Responsabilidad de los Usuarios</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Cada usuario es responsable de la informaci&oacute;n proporcionada. Queda prohibido publicar contenido falso, ofensivo o que viole derechos de terceros.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>3. Contratos entre Partes</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">HereWork act&uacute;a como intermediaria. Los contratos entre clientes y freelancers son responsabilidad exclusiva de las partes involucradas.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>4. Pagos y Tarifas</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">La plataforma cobra una tarifa de servicio sobre cada transacci&oacute;n completada. Los valores se muestran de forma transparente antes de confirmar el pago.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>5. Cambios en los T&eacute;rminos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">HereWork puede actualizar estos T&eacute;rminos en cualquier momento. Ser&aacute;s notificado por correo y dentro de la plataforma sobre cambios relevantes.</div></div>' +
+       '</div>' +
+       '<p style="font-size:12px;color:var(--text-4);margin-top:16px;">&#128197; &Uacute;ltima actualizaci&oacute;n: Enero 2025 &nbsp;|&nbsp; &iquest;Dudas? <a href="#" onclick="switchModal(\'info\',\'contact\')">Cont&aacute;ctanos</a></p>'
+  }
+};
+
+_IP.privacy = {
+  pt: { t: 'Pol&iacute;tica de Privacidade',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">A HereWork valoriza sua privacidade. Saiba como coletamos, usamos e protegemos seus dados pessoais.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128196; Dados Coletados</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Coletamos nome, e-mail, dados de perfil, hist&oacute;rico de projetos e informa&ccedil;&otilde;es de pagamento necess&aacute;rias para operar a plataforma.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128295; Como Usamos seus Dados</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Seus dados s&atilde;o usados para: personalizar sua experi&ecirc;ncia, processar pagamentos, enviar notifica&ccedil;&otilde;es relevantes e melhorar nossos servi&ccedil;os.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128274; Seguran&ccedil;a dos Dados</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Utilizamos criptografia SSL/TLS e armazenamento seguro em servidores certificados. Nunca vendemos seus dados para terceiros.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128100; Seus Direitos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Voc&ecirc; pode solicitar acesso, corre&ccedil;&atilde;o ou exclus&atilde;o dos seus dados a qualquer momento atrav&eacute;s das configura&ccedil;&otilde;es da conta ou pelo nosso suporte.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127758; Compartilhamento</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Dados podem ser compartilhados com processadores de pagamento e, quando exigido por lei, com autoridades competentes.</div></div>' +
+       '</div>' +
+       '<p style="font-size:12px;color:var(--text-4);margin-top:16px;">&#128197; &Uacute;ltima atualiza&ccedil;&atilde;o: Janeiro de 2025 &nbsp;|&nbsp; Em conform. com a LGPD (Lei n&ordm; 13.709/2018)</p>'
+  },
+  es: { t: 'Pol&iacute;tica de Privacidad',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">HereWork valora tu privacidad. Conoce c&oacute;mo recopilamos, usamos y protegemos tus datos personales.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128196; Datos Recopilados</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Recopilamos nombre, correo, datos de perfil, historial de proyectos e informaci&oacute;n de pago necesaria para operar la plataforma.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128295; C&oacute;mo Usamos tus Datos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Tus datos se usan para: personalizar tu experiencia, procesar pagos, enviar notificaciones relevantes y mejorar nuestros servicios.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128274; Seguridad de Datos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Utilizamos cifrado SSL/TLS y almacenamiento seguro en servidores certificados. Nunca vendemos tus datos a terceros.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128100; Tus Derechos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Puedes solicitar acceso, correcci&oacute;n o eliminaci&oacute;n de tus datos en cualquier momento a trav&eacute;s de la configuraci&oacute;n de cuenta o soporte.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127758; Compartir Datos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Los datos pueden compartirse con procesadores de pago y, cuando lo exija la ley, con autoridades competentes.</div></div>' +
+       '</div>' +
+       '<p style="font-size:12px;color:var(--text-4);margin-top:16px;">&#128197; &Uacute;ltima actualizaci&oacute;n: Enero 2025 &nbsp;|&nbsp; Conforme al RGPD y legislaci&oacute;n aplicable</p>'
+  }
+};
+
+_IP.cookies = {
+  pt: { t: 'Pol&iacute;tica de Cookies',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Usamos cookies e tecnologias similares para melhorar sua experi&ecirc;ncia na HereWork.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127850; O que s&atilde;o Cookies?</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Cookies s&atilde;o pequenos arquivos armazenados no seu navegador que permitem lembrar prefer&ecirc;ncias e manter sua sess&atilde;o ativa.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#9989; Cookies Essenciais</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;"><b>Sempre ativos.</b> Necess&aacute;rios para o funcionamento b&aacute;sico: autentica&ccedil;&atilde;o, seguran&ccedil;a da sess&atilde;o e prefer&ecirc;ncias de idioma.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128202; Cookies Anal&iacute;ticos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Nos ajudam a entender como os usu&aacute;rios interagem com a plataforma para melhorar funcionalidades e performance.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127919; Cookies de Personaliza&ccedil;&atilde;o</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Permitem recordar suas prefer&ecirc;ncias (tema, idioma, filtros) para oferecer uma experi&ecirc;ncia personalizada.</div></div>' +
+       '</div>' +
+       '<p style="color:var(--text-2);margin-top:16px;font-size:14px;">Para gerenciar suas prefer&ecirc;ncias de cookies, acesse as <b>Configura&ccedil;&otilde;es da Conta</b> ou as configura&ccedil;&otilde;es do seu navegador.</p>'
+  },
+  es: { t: 'Pol&iacute;tica de Cookies',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Usamos cookies y tecnolog&iacute;as similares para mejorar tu experiencia en HereWork.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127850; &iquest;Qu&eacute; son las Cookies?</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Las cookies son peque&ntilde;os archivos almacenados en tu navegador que permiten recordar preferencias y mantener tu sesi&oacute;n activa.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#9989; Cookies Esenciales</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;"><b>Siempre activas.</b> Necesarias para el funcionamiento b&aacute;sico: autenticaci&oacute;n, seguridad de sesi&oacute;n y preferencias de idioma.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128202; Cookies Anal&iacute;ticas</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Nos ayudan a entender c&oacute;mo los usuarios interact&uacute;an con la plataforma para mejorar funcionalidades y rendimiento.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127919; Cookies de Personalizaci&oacute;n</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Permiten recordar tus preferencias (tema, idioma, filtros) para ofrecer una experiencia personalizada.</div></div>' +
+       '</div>' +
+       '<p style="color:var(--text-2);margin-top:16px;font-size:14px;">Para gestionar tus preferencias de cookies, accede a <b>Configuraci&oacute;n de Cuenta</b> o la configuraci&oacute;n de tu navegador.</p>'
+  }
+};
+
+_IP.lgpd = {
+  pt: { t: 'LGPD &amp; RGPD',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">A HereWork &eacute; totalmente compat&iacute;vel com a Lei Geral de Prote&ccedil;&atilde;o de Dados (LGPD) do Brasil e o Regulamento Geral sobre a Prote&ccedil;&atilde;o de Dados (RGPD) da Uni&atilde;o Europeia.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127463;&#127479; LGPD — Lei n&ordm; 13.709/2018</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Garante direitos fundamentais de liberdade e privacidade. Voc&ecirc; tem direito de confirmar, acessar, corrigir, anonimizar, portar e eliminar seus dados.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127466;&#127482; RGPD — Regulamento (UE) 2016/679</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Aplicado a usu&aacute;rios da Uni&atilde;o Europeia. Garante os mesmos direitos de prote&ccedil;&atilde;o de dados com base nos princ&iacute;pios de transpar&ecirc;ncia, finalidade e minimiza&ccedil;&atilde;o de dados.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128272; DPO — Encarregado de Dados</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Nossa equipe de prote&ccedil;&atilde;o de dados pode ser contatada pelo e-mail <b>privacidade@herework.com.br</b> para quaisquer d&uacute;vidas ou solicita&ccedil;&otilde;es.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128221; Solicitar seus Direitos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Para exercer seus direitos (acesso, corre&ccedil;&atilde;o, exclus&atilde;o, portabilidade), envie uma solicita&ccedil;&atilde;o por escrito pelo canal de suporte ou via e-mail.</div></div>' +
+       '</div>' +
+       '<div style="margin-top:16px;text-align:center;">' +
+       '<button class="btn btn-outline btn-sm" onclick="closeModal(\'info\');openModal(\'contact\')">&#128231; Solicitar Direitos LGPD</button>' +
+       '</div>'
+  },
+  es: { t: 'LGPD &amp; RGPD',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">HereWork cumple plenamente con la Ley General de Protecci&oacute;n de Datos (LGPD) de Brasil y el Reglamento General de Protecci&oacute;n de Datos (RGPD) de la Uni&oacute;n Europea.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:12px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127463;&#127479; LGPD — Ley n&ordm; 13.709/2018</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Garantiza derechos fundamentales de libertad y privacidad. Tienes derecho a confirmar, acceder, corregir, anonimizar, portar y eliminar tus datos.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127466;&#127482; RGPD — Reglamento (UE) 2016/679</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Aplicado a usuarios de la Uni&oacute;n Europea. Garantiza los mismos derechos de protecci&oacute;n de datos basados en los principios de transparencia, finalidad y minimizaci&oacute;n.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128272; DPO — Delegado de Protecci&oacute;n de Datos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Nuestro equipo de protecci&oacute;n de datos puede ser contactado en <b>privacidad@herework.com.br</b> para cualquier duda o solicitud.</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128221; Solicitar tus Derechos</b><div style="font-size:13px;color:var(--text-3);margin-top:4px;">Para ejercer tus derechos (acceso, correcci&oacute;n, eliminaci&oacute;n, portabilidad), env&iacute;a una solicitud por escrito a trav&eacute;s del canal de soporte o por correo.</div></div>' +
+       '</div>' +
+       '<div style="margin-top:16px;text-align:center;">' +
+       '<button class="btn btn-outline btn-sm" onclick="closeModal(\'info\');openModal(\'contact\')">&#128231; Solicitar Derechos RGPD</button>' +
+       '</div>'
   }
 };
 
