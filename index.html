@@ -4300,13 +4300,13 @@ section { padding: 64px 0; }
     <div class="admin-stats">
       <div class="admin-stat-card">
         <div class="admin-stat-icon">👥</div>
-        <div class="admin-stat-val">3.611.888</div>
+        <div class="admin-stat-val" id="adm-stat-users">3.611.888</div>
         <div class="admin-stat-label">Usuários cadastrados</div>
         <span class="admin-stat-delta delta-up">+2,4% ↑</span>
       </div>
       <div class="admin-stat-card orange">
         <div class="admin-stat-icon">📁</div>
-        <div class="admin-stat-val">142.304</div>
+        <div class="admin-stat-val" id="adm-stat-projects">142.304</div>
         <div class="admin-stat-label">Projetos ativos</div>
         <span class="admin-stat-delta delta-up">+5,1% ↑</span>
       </div>
@@ -7201,5 +7201,284 @@ document.addEventListener('click', function(ev) {
 });
 </script>
 
+<script>
+/* ═══════════════════════════════════════════════════════════
+   GERADOR DE DADOS DEMO — freelancers e projetos por categoria
+   RECURSO DE LANÇAMENTO — remover perfis conforme plataforma cresce
+═══════════════════════════════════════════════════════════ */
+(function() {
+
+/* ── Pools de dados ── */
+var FN = ['Carlos','Marina','João','Ana','Pedro','Juliana','Rafael','Fernanda','Lucas','Camila',
+          'Mateus','Larissa','Diego','Beatriz','Felipe','Natalia','Bruno','Amanda','Thiago','Patricia',
+          'Gustavo','Mariana','Ricardo','Carolina','André','Vanessa','Rodrigo','Isabela','Leonardo',
+          'Priscila','Eduardo','Leticia','Henrique','Aline','Gabriel','Renata','Alexandre','Simone',
+          'Leandro','Claudia','Daniel','Luciana','Marcelo','Viviane','Roberto','Cristina','Paulo','Bruna'];
+var LN = ['Silva','Santos','Oliveira','Souza','Lima','Ferreira','Costa','Pereira','Almeida','Nascimento',
+          'Carvalho','Gomes','Martins','Rodrigues','Barbosa','Araújo','Cardoso','Correia','Monteiro','Freitas',
+          'Rocha','Dias','Nunes','Cunha','Teixeira','Mendes','Pinto','Moreira','Lopes','Ramos'];
+var CT = ['São Paulo, SP','Rio de Janeiro, RJ','Belo Horizonte, MG','Curitiba, PR','Porto Alegre, RS',
+          'Salvador, BA','Fortaleza, CE','Recife, PE','Florianópolis, SC','Brasília, DF',
+          'Campinas, SP','Goiânia, GO','Natal, RN','Maceió, AL','Manaus, AM','Vitória, ES',
+          'Belém, PA','João Pessoa, PB','São Luís, MA','Teresina, PI'];
+var GR = [['#1565C0','#42A5F5'],['#2E7D32','#66BB6A'],['#F4511E','#FF8A65'],['#6A1B9A','#CE93D8'],
+          ['#00695C','#4DB6AC'],['#E65100','#FFA726'],['#880E4F','#F48FB1'],['#0D47A1','#90CAF9'],
+          ['#4A148C','#AB47BC'],['#1B5E20','#A5D6A7'],['#BF360C','#FFAB91'],['#006064','#80DEEA']];
+
+/* ── Dados por categoria ── */
+var CATS = {
+  design:      { l:'Design & Criação',        r:['Designer UI/UX','Designer Gráfico','Diretor de Arte','Designer de Marca','Ilustrador Digital'],
+                 sk:[['Figma','Illustrator','Photoshop','Branding'],['Adobe XD','After Effects','Illustrator','Typography'],['Figma','Framer','Sketch','UI Design'],['InDesign','Photoshop','Branding','Packaging'],['Procreate','Illustrator','Concept Art','Storyboard']],
+                 pt:['Criação de identidade visual para startup','Redesign de interface mobile app','Criação de logo e manual de marca','Design de embalagem produto premium','Ilustrações para campanha digital','Redesign website institucional','Kit de posts para redes sociais'],
+                 bu:[[1500,3000],[800,1500],[2000,5000],[1200,2500],[600,1200]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  web:         { l:'Web & Programação',        r:['Desenvolvedor Full Stack','Dev Front-end','Dev Back-end','Engenheiro de Software','Arquiteto de Sistemas'],
+                 sk:[['React','Node.js','TypeScript','PostgreSQL'],['Vue.js','Laravel','MySQL','Docker'],['Next.js','Python','MongoDB','Redis'],['Angular','Spring Boot','AWS','Kubernetes'],['React Native','GraphQL','Prisma','Vercel']],
+                 pt:['Desenvolvimento de sistema de gestão','Criação de landing page high-conversion','API REST para aplicação mobile','Migração de sistema legado para cloud','Portal corporativo com CMS personalizado','E-commerce B2B com dashboard analítico','Integração de sistemas via webhooks'],
+                 bu:[[3000,8000],[1500,4000],[5000,15000],[2000,6000],[800,2000]], ty:['fixo','fixo','fixo','fixo','hora'] },
+  marketing:   { l:'Marketing Digital',       r:['Especialista em Marketing Digital','Growth Hacker','Social Media Manager','Analista de Tráfego Pago','Estrategista Digital'],
+                 sk:[['Google Ads','Facebook Ads','SEO','Analytics'],['Instagram','TikTok','Copywriting','Canva'],['Email Marketing','HubSpot','CRM','Automação'],['LinkedIn Ads','Performance','ROAS','Tag Manager'],['Influencer','Branding','Conteúdo','Estratégia']],
+                 pt:['Gestão de tráfego pago Google e Meta','Estratégia de conteúdo para redes sociais','Campanha de lançamento de produto','Auditoria e otimização de SEO','Setup de automação de e-mail marketing','Gestão mensal de social media','Criação de funil de vendas digital'],
+                 bu:[[1500,4000],[800,2000],[3000,8000],[1200,3000],[2000,5000]], ty:['recorrente','recorrente','fixo','fixo','fixo'] },
+  redacao:     { l:'Redação & Tradução',       r:['Redator Publicitário','Copywriter','Tradutor','Produtor de Conteúdo','Jornalista Digital'],
+                 sk:[['Copywriting','SEO Writing','Blog','Content Strategy'],['UX Writing','Microcopy','Email','Landing Page'],['Tradução EN/PT','Localização','Revisão','Legendagem'],['Jornalismo','Assessoria','Press Release','Ghostwriting'],['Roteirismo','Podcast','YouTube','Storytelling']],
+                 pt:['Redação de artigos SEO para blog','Copywriting para landing pages','Tradução técnica inglês-português','Roteiros para vídeos institucionais','Produção de conteúdo mensal para blog','Revisão e edição de e-book','Criação de newsletter semanal'],
+                 bu:[[500,1500],[800,2000],[1000,3000],[400,1000],[600,1800]], ty:['fixo','fixo','fixo','fixo','recorrente'] },
+  video:       { l:'Vídeo & Animação',         r:['Editor de Vídeo','Motion Designer','Animador 2D/3D','Videomaker','Colorista'],
+                 sk:[['Premiere Pro','After Effects','DaVinci','Color Grading'],['Cinema 4D','Blender','After Effects','3D Motion'],['After Effects','Lottie','2D Animation','Storytelling'],['Sony Vegas','OBS','Streaming','Drone'],['Premiere','Davinci','VFX','Sound Design']],
+                 pt:['Edição de vídeo institucional corporativo','Animação de logo com intro para YouTube','Motion graphics para apresentação','Vídeo explainer para app mobile','Série de reels para instagram','Documentário curto para ONG','Animação 3D de produto para e-commerce'],
+                 bu:[[1500,4000],[800,2500],[2000,6000],[600,2000],[3000,8000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  ti:          { l:'TI & Sistemas',            r:['Analista de TI','Especialista em Infraestrutura','Administrador de Redes','Consultor de TI','Engenheiro DevOps'],
+                 sk:[['Linux','Windows Server','Active Directory','Firewall'],['AWS','Azure','GCP','Terraform'],['Docker','Kubernetes','CI/CD','Jenkins'],['Zabbix','Grafana','Monitoramento','ITIL'],['VMware','Hyper-V','Backup','Segurança']],
+                 pt:['Migração de infraestrutura para cloud AWS','Implementação de solução de backup','Configuração de VPN corporativa','Setup de monitoramento de servidores','Auditoria de segurança de rede','Implantação de Active Directory','Criação de pipeline CI/CD automatizado'],
+                 bu:[[3000,9000],[1500,4000],[2000,6000],[1000,3000],[5000,15000]], ty:['fixo','fixo','fixo','fixo','hora'] },
+  apps:        { l:'Apps & Mobile',            r:['Desenvolvedor iOS','Desenvolvedor Android','Dev React Native','Dev Flutter','Arquiteto Mobile'],
+                 sk:[['Swift','Xcode','SwiftUI','CoreData'],['Kotlin','Jetpack Compose','Firebase','Room'],['React Native','Expo','TypeScript','Redux'],['Flutter','Dart','Firebase','GetX'],['React Native','Android','iOS','API Integration']],
+                 pt:['Aplicativo de delivery para restaurante','App de agendamento para clínica','Sistema de ponto mobile para empresas','App de e-commerce iOS e Android','Aplicativo de academia com gamificação','App de rastreamento de entregas','MVP de app fintech com pagamentos'],
+                 bu:[[8000,20000],[5000,12000],[3000,8000],[10000,25000],[6000,15000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  dados:       { l:'Dados & Analytics',        r:['Analista de Dados','Cientista de Dados','Engenheiro de Dados','DBA','Especialista em BI'],
+                 sk:[['Python','SQL','Pandas','Tableau'],['R','Machine Learning','Scikit-learn','Jupyter'],['Spark','Airflow','dbt','BigQuery'],['Power BI','DAX','ETL','SQL Server'],['Looker','Metabase','Data Warehouse','Analytics']],
+                 pt:['Dashboard analítico em Power BI','Pipeline de dados com Apache Airflow','Análise exploratória de base de clientes','Modelo preditivo de churn','ETL para integração de sistemas','Relatórios gerenciais automatizados','Implementação de data warehouse'],
+                 bu:[[3000,8000],[5000,15000],[2000,6000],[4000,12000],[1500,4000]], ty:['fixo','fixo','fixo','fixo','recorrente'] },
+  ia:          { l:'IA & Machine Learning',    r:['Engenheiro de ML','Especialista em IA','Dev de LLMs','Pesquisador de IA','Engenheiro de MLOps'],
+                 sk:[['Python','TensorFlow','PyTorch','Scikit-learn'],['LangChain','OpenAI API','RAG','Vector DB'],['Hugging Face','Fine-tuning','NLP','Transformers'],['Computer Vision','YOLO','OpenCV','CNN'],['MLflow','Kubeflow','Feature Store','A/B Testing']],
+                 pt:['Chatbot com IA para atendimento ao cliente','Modelo de classificação de imagens','Sistema de recomendação personalizada','Integração de LLM em produto SaaS','Análise de sentimentos em reviews','Automação com agentes de IA','Pipeline de RAG para base de conhecimento'],
+                 bu:[[5000,15000],[8000,25000],[3000,10000],[10000,30000],[4000,12000]], ty:['fixo','fixo','fixo','fixo','hora'] },
+  consultoria: { l:'Consultoria & Negócios',   r:['Consultor de Negócios','Gerente de Projetos','Coach Empresarial','Analista de Processos','Consultor Estratégico'],
+                 sk:[['PMI','PMBOK','Agile','Scrum'],['Business Model','OKR','KPI','Estratégia'],['Lean','Six Sigma','BPM','BPMN'],['Valuation','M&A','Financial Modeling','Excel'],['Change Management','RH','Cultura','Liderança']],
+                 pt:['Reestruturação de processos operacionais','Planejamento estratégico 2025-2027','Implementação de metodologia ágil','Diagnóstico organizacional completo','Criação de plano de negócios para investidores','Gestão de projeto de TI corporativo','Consultoria para expansão de franquia'],
+                 bu:[[4000,12000],[3000,8000],[2000,6000],[5000,15000],[1500,4000]], ty:['fixo','hora','fixo','fixo','hora'] },
+  ecommerce:   { l:'E-commerce & Vendas',      r:['Especialista em E-commerce','Gestor de Marketplace','Consultor de Vendas Online','Especialista Shopify','Analista de Conversão'],
+                 sk:[['Shopify','WooCommerce','VTEX','Magento'],['Amazon','Mercado Livre','B2W','Marketplace'],['Google Shopping','Meta Ads','Remarketing','CRO'],['Checkout','UX E-commerce','A/B Test','CRO'],['Logística','Fulfillment','ERP','Estoque']],
+                 pt:['Criação de loja virtual Shopify completa','Gestão e otimização de marketplace','Setup de campanhas Google Shopping','Auditoria de taxa de conversão','Integração ERP com e-commerce','Criação de loja VTEX enterprise','Estratégia de precificação dinâmica'],
+                 bu:[[3000,8000],[2000,5000],[1500,4000],[2500,7000],[4000,10000]], ty:['fixo','recorrente','recorrente','fixo','fixo'] },
+  suporte:     { l:'Suporte ao Cliente',       r:['Analista de Customer Success','Especialista em CX','Gestor de Suporte','Atendente Bilíngue','Analista de Help Desk'],
+                 sk:[['Zendesk','Freshdesk','Intercom','Salesforce'],['Customer Success','NPS','CSAT','Churn'],['Help Desk','ITIL','SLA','Ticketing'],['Inglês Fluente','Espanhol','Tradução','Atendimento'],['Chat','Email','Telefone','CRM']],
+                 pt:['Implementação de central de atendimento','Criação de base de conhecimento FAQ','Setup de chatbot para suporte','Treinamento de equipe de CS','Integração CRM com ferramentas de suporte','Análise de NPS e satisfação','Auditoria de processos de atendimento'],
+                 bu:[[2000,6000],[1500,4000],[3000,8000],[1000,3000],[2500,7000]], ty:['fixo','fixo','fixo','hora','fixo'] },
+  seo:         { l:'SEO & Performance',        r:['Especialista em SEO','Analista de Performance','Consultor de SEO Técnico','Link Builder','Especialista Core Web Vitals'],
+                 sk:[['SEO Técnico','Semrush','Ahrefs','Google Search Console'],['Core Web Vitals','PageSpeed','Lighthouse','GTmetrix'],['Link Building','Digital PR','Outreach','DA/PA'],['SEO Local','Google Meu Negócio','Schema','Citações'],['Content SEO','Topical Authority','Keyword Research','E-E-A-T']],
+                 pt:['Auditoria técnica SEO completa','Otimização de velocidade de site','Estratégia de link building','SEO local para rede de lojas','Produção de conteúdo otimizado','Migração de domínio com SEO','Setup de rastreamento Analytics 4'],
+                 bu:[[2000,6000],[1500,4000],[3000,9000],[1000,3000],[800,2500]], ty:['fixo','fixo','recorrente','recorrente','fixo'] },
+  educacao:    { l:'Educação & Treinamento',   r:['Instrutor EAD','Designer Instrucional','Tutor Online','Consultor de T&D','Criador de Cursos'],
+                 sk:[['Articulate','Moodle','Hotmart','Storytelling'],['Instrucional Design','LMS','SCORM','xAPI'],['Excel Avançado','Power BI','Formação Corporativa','Workshops'],['Gamificação','Microlearning','Video Aula','Avaliações'],['Adobe Captivate','Vyond','Canva','Apresentações']],
+                 pt:['Criação de curso EAD para plataforma','Design instrucional de treinamento corporativo','Produção de vídeo-aulas profissionais','Implementação de LMS corporativo','Gamificação de programa de treinamento','Trilha de onboarding para novos colaboradores','Certificação técnica para equipe de vendas'],
+                 bu:[[3000,8000],[2000,6000],[1500,4000],[4000,10000],[1000,3000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  engenharia:  { l:'Engenharia & Manufatura',  r:['Engenheiro Mecânico','Engenheiro Industrial','Projetista CAD','Engenheiro de Automação','Consultor de Manufatura'],
+                 sk:[['AutoCAD','SolidWorks','CATIA','Revit'],['PLC','Automação Industrial','SCADA','CLP'],['Lean Manufacturing','Six Sigma','TPM','Kaizen'],['Projetos Hidráulicos','HVAC','Elétrica','Laudos'],['NR','ABNT','ISO 9001','Laudos Técnicos']],
+                 pt:['Projeto mecânico de linha de produção','Automação de processo industrial','Laudo técnico para regularização','Projeto hidrossanitário residencial','Consultoria em lean manufacturing','Modelagem 3D de peça para prototipagem','Revisão de projetos elétricos industriais'],
+                 bu:[[5000,15000],[3000,9000],[2000,6000],[1500,4000],[4000,12000]], ty:['fixo','fixo','fixo','fixo','hora'] },
+  idiomas:     { l:'Idiomas & Localização',    r:['Tradutor EN/PT/ES','Intérprete','Revisor Técnico','Especialista em Localização','Professor de Idiomas'],
+                 sk:[['Inglês','Espanhol','Tradução Jurídica','SDL Trados'],['Francês','Alemão','Interpretação','ABNT'],['Localização de Software','i18n','L10n','CAT Tools'],['Legendagem','Dublagem','Transcrição','Closed Caption'],['Ensino Online','IELTS','TOEFL','Cambridge']],
+                 pt:['Tradução de contrato jurídico para inglês','Localização de software para mercado latino','Legendagem de série de vídeos corporativos','Revisão técnica de manual de produto','Interpretação simultânea para evento','Tradução de site para 3 idiomas','Ensino de inglês para equipe executiva'],
+                 bu:[[1000,3000],[800,2500],[500,1500],[1500,4000],[2000,6000]], ty:['fixo','fixo','fixo','fixo','recorrente'] },
+  juridico:    { l:'Jurídico & Financeiro',    r:['Advogado Corporativo','Contador','Consultor Tributário','Analista Financeiro','Advogado Digital'],
+                 sk:[['Contratos','LGPD','Societário','Trabalhista'],['Contabilidade','IRPJ','CSLL','Simples Nacional'],['Planejamento Tributário','ICMS','PIS','COFINS'],['Valuation','DCF','FP&A','Excel Avançado'],['Direito Digital','LGPD','Compliance','Termos de Uso']],
+                 pt:['Elaboração de contrato de prestação de serviço','Consultoria tributária para abertura de empresa','Planejamento financeiro empresarial anual','Adequação à LGPD para plataforma digital','Due diligence para fusão de empresas','Revisão de contratos de fornecedores','Política de privacidade e termos de uso'],
+                 bu:[[2000,6000],[1500,4000],[3000,8000],[1000,3000],[4000,12000]], ty:['fixo','hora','fixo','fixo','fixo'] },
+  fotografia:  { l:'Fotografia',               r:['Fotógrafo Corporativo','Fotógrafo de Produto','Fotógrafo Editorial','Fotógrafo de Eventos','Fotógrafo de Arquitetura'],
+                 sk:[['Lightroom','Photoshop','Canon 5D','Estúdio'],['Produto','E-commerce','Still Life','Lighting'],['Moda','Editorial','Retoque','Estúdio'],['Sony A7','Flash','Retratos','Eventos'],['Drone','DJI','Arquitetura','Real Estate']],
+                 pt:['Fotos de produtos para e-commerce','Ensaio fotográfico para equipe corporativa','Cobertura fotográfica de evento empresarial','Fotos para catálogo de moda','Fotografia arquitetônica para construtora','Ensaio para perfil LinkedIn executivos','Fotos de gastronomia para restaurante'],
+                 bu:[[800,2500],[500,1500],[1200,4000],[600,2000],[1500,5000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  rh:          { l:'RH & Recrutamento',        r:['Especialista em RH','Recrutador Senior','Consultor de DHO','Analista de Cargos','Business Partner RH'],
+                 sk:[['Recrutamento','LinkedIn Recruiter','Employer Branding','ATS'],['Descrição de Cargos','Avaliação de Desempenho','PDI','Clima Organizacional'],['Folha de Pagamento','eSocial','CIPA','Legislação'],['Onboarding','Treinamento','T&D','Cultura'],['Hunting','Executive Search','Assessment','Testes']],
+                 pt:['Recrutamento para equipe de tecnologia','Implementação de avaliação de desempenho','Criação de programa de onboarding','Pesquisa de clima organizacional','Hunting executivo para C-Level','Reestruturação de plano de cargos e salários','Implantação de cultura ágil em equipes'],
+                 bu:[[2000,6000],[3000,9000],[1500,4000],[2500,7000],[4000,12000]], ty:['fixo','fixo','fixo','fixo','hora'] },
+  arquitetura: { l:'Arquitetura & Interiores', r:['Arquiteto Residencial','Designer de Interiores','Arquiteto Corporativo','Paisagista','BIM Specialist'],
+                 sk:[['AutoCAD','Revit','SketchUp','Lumion'],['3ds Max','V-Ray','Renderização','BIM'],['Interiores','Decoração','Mobiliário','Iluminação'],['Paisagismo','Plantas Nativas','REVIT MEP','Projetos'],['Projetos Comerciais','Retrofit','Aprovação Prefeitura','AECB']],
+                 pt:['Projeto de interiores apartamento 100m²','Reforma e modernização de escritório','Projeto residencial unifamiliar completo','Renderização 3D para aprovação do cliente','Paisagismo para área comercial','Projeto de loja para rede de franquias','Adequação de imóvel comercial para AVCB'],
+                 bu:[[3000,9000],[2000,6000],[5000,15000],[1500,4000],[4000,12000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  jogos:       { l:'Jogos & Entretenimento',   r:['Desenvolvedor de Jogos Unity','Game Designer','Artista de Jogos 2D/3D','Programador Unreal','Sound Designer'],
+                 sk:[['Unity','C#','Physics','Shaders'],['Unreal Engine','Blueprint','C++','VR/AR'],['Pixel Art','Aseprite','Concept Art','Character Design'],['Blender','Maya','3D Modeling','Rigging'],['FMOD','Wwise','Sound Design','Composição']],
+                 pt:['Desenvolvimento de jogo mobile hyper-casual','Game design document para RPG indie','Arte 2D completa para plataformer','Integração de monetização em jogo mobile','Sistema de matchmaking multiplayer','Level design para puzzle game','Trilha sonora para jogo indie'],
+                 bu:[[5000,15000],[2000,6000],[3000,9000],[4000,12000],[1500,5000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  musica:      { l:'Música & Áudio',           r:['Produtor Musical','Mixador e Masterizador','Compositor de Trilhas','Locutor','Engenheiro de Áudio'],
+                 sk:[['Ableton Live','Logic Pro','FL Studio','Produção'],['Pro Tools','Mixing','Mastering','Stem'],['Composição','Trilha Sonora','Jingles','Orquestração'],['Voz Over','Locução','Radio','Podcast'],['Podcast','Edição','Adobe Audition','RSS']],
+                 pt:['Produção musical completa para EP','Masterização de álbum independente','Jingle publicitário para campanha','Trilha sonora para vídeo institucional','Locução para audiobook','Produção de podcast corporativo','Edição e design de som para série web'],
+                 bu:[[2000,8000],[1000,3500],[1500,5000],[500,2000],[800,3000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  blockchain:  { l:'Blockchain & Web3',        r:['Desenvolvedor Solidity','Especialista DeFi','Dev Web3','Auditor de Smart Contracts','Consultor Blockchain'],
+                 sk:[['Solidity','Ethereum','Hardhat','OpenZeppelin'],['Web3.js','Ethers.js','React','MetaMask'],['Rust','Solana','Anchor','SPL Token'],['Smart Contract Audit','Slither','MythX','Security'],['NFT','ERC-721','ERC-20','IPFS']],
+                 pt:['Desenvolvimento de smart contract ERC-20','Marketplace de NFTs com royalties','Auditoria de segurança de contrato','Integração Web3 em aplicação existente','Token de utilidade para plataforma','Sistema de staking e recompensas DeFi','DAO com governança on-chain'],
+                 bu:[[8000,25000],[5000,15000],[10000,30000],[3000,9000],[6000,18000]], ty:['fixo','fixo','fixo','fixo','fixo'] },
+  saude:       { l:'Saúde & Bem-estar',        r:['Nutricionista Digital','Personal Trainer Online','Psicólogo Clínico','Fisioterapeuta','Coach de Saúde'],
+                 sk:[['Nutrição','Dietas','Reeducação Alimentar','Suplementação'],['Personal Training','Funcional','Hipertrofia','Planilhas'],['TCC','Psicanálise','EMDR','Saúde Mental'],['Pilates','Reabilitação','Ortopedia','Neurológico'],['Mindfulness','Coaching','Bem-estar','Meditação']],
+                 pt:['Plano alimentar personalizado 3 meses','Programa de treino online 16 semanas','Consultoria de saúde corporativa','Conteúdo para blog de saúde e nutrição','Programa de bem-estar para empresas','Aplicativo de saúde e acompanhamento','Workshop de mindfulness para equipes'],
+                 bu:[[800,2500],[1000,3000],[1500,4500],[600,2000],[2000,6000]], ty:['recorrente','recorrente','hora','fixo','fixo'] }
+};
+
+/* ── Pseudo-random seeded ── */
+var _seed = 42;
+function _rnd(max) { _seed = (_seed * 16807 + 0) % 2147483647; return _seed % max; }
+function _pick(arr) { return arr[_rnd(arr.length)]; }
+function _between(a,b) { return a + _rnd(b - a + 1); }
+
+/* ── Gerar card de freelancer ── */
+function _flCard(cat, idx) {
+  var d    = CATS[cat];
+  var g    = GR[_rnd(GR.length)];
+  var fn   = FN[_rnd(FN.length)];
+  var ln   = LN[_rnd(LN.length)];
+  var name = fn + ' ' + ln;
+  var ini  = fn[0] + ln[0];
+  var role = _pick(d.r);
+  var city = _pick(CT);
+  var sk   = d.sk[_rnd(d.sk.length)];
+  var rate = _between(40, 250);
+  var rat  = (40 + _rnd(11)) / 10; // 4.0–5.0
+  var recs = _between(5, 420);
+  var proj = _between(10, 380);
+  var top  = recs > 200 ? 'true' : 'false';
+  var ver  = _rnd(4) > 0 ? 'true' : 'false';
+  var since= _between(2018, 2024);
+
+  return '<div class="fl-list-card demo-card" data-cat="' + cat + '" data-rate="' + rate +
+    '" data-rating="' + rat.toFixed(1) + '" data-verified="' + ver + '" data-top="' + top +
+    '" data-recs="' + recs + '" style="display:none">' +
+    '<div class="fl-list-avatar" style="background:linear-gradient(135deg,' + g[0] + ',' + g[1] + ')">' + ini + '</div>' +
+    '<div class="fl-list-body">' +
+      '<div class="fl-list-top"><span class="fl-list-name">' + name + '</span>' +
+      (top === 'true' ? '<span class="fl-badge-top">Top Freelancer</span>' : '') +
+      (ver === 'true' ? '<span class="fl-badge-verified">✓ Verificado</span>' : '') +
+      '</div>' +
+      '<div class="fl-list-role">' + role + ' — ' + city + '</div>' +
+      '<div class="fl-skills" style="margin-bottom:8px;">' +
+        sk.map(function(s){ return '<span class="fl-skill">' + s + '</span>'; }).join('') +
+      '</div>' +
+      '<div class="fl-list-meta">' +
+        '<span>⭐ ' + rat.toFixed(1) + ' (' + _between(10,300) + ' avaliações)</span>' +
+        '<span>📁 ' + proj + ' projetos</span>' +
+        '<span>👍 ' + recs + ' recomendações</span>' +
+        '<span>📅 Desde ' + since + '</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fl-list-right">' +
+      '<div class="fl-list-rate">R$ ' + rate + '<small>/hora</small></div>' +
+      '<div class="fl-list-rating"><span class="stars">★★★★' + (rat >= 4.8 ? '★' : '☆') + '</span> ' + rat.toFixed(1) + '</div>' +
+      '<button class="btn btn-green btn-sm" onclick="openModal(\'invite\')">Convidar</button>' +
+      '<button class="btn btn-outline btn-sm" onclick="showPage(\'freelancers\')">Ver Perfil</button>' +
+    '</div>' +
+    '</div>';
+}
+
+/* ── Gerar card de projeto ── */
+function _projCard(cat, idx) {
+  var d     = CATS[cat];
+  var title = _pick(d.pt);
+  var bu    = d.bu[_rnd(d.bu.length)];
+  var bMin  = bu[0], bMax = bu[1];
+  var type  = d.ty[_rnd(d.ty.length)];
+  var dl    = type === 'recorrente' ? 0 : _pick([7,15,30,45,60,90]);
+  var props = _between(2, 35);
+  var views = _between(20, 500);
+  var hours = _between(1, 48);
+  var sk    = CATS[cat].sk[_rnd(CATS[cat].sk.length)].slice(0,3);
+  var tagCls= type === 'recorrente' ? 'tag-blue' : type === 'hora' ? 'tag-orange' : 'tag-green';
+  var tagLbl= type === 'recorrente' ? 'Recorrente' : type === 'hora' ? 'Por Hora' : 'Preço Fixo';
+  var catLbl= d.l;
+  var budStr= 'R$ ' + bMin.toLocaleString('pt-BR') + ' – ' + bMax.toLocaleString('pt-BR');
+  var dlStr = type === 'recorrente' ? 'Por mês' : 'Prazo: ' + dl + ' dias';
+
+  return '<div class="proj-list-card demo-card" data-cat="' + cat + '" data-budget="' + bMax +
+    '" data-type="' + type + '" data-deadline="' + dl + '" style="display:none">' +
+    '<div class="proj-list-header">' +
+      '<div class="proj-list-left">' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">' +
+          '<span class="proj-cat">' + catLbl + '</span>' +
+          '<span class="tag ' + tagCls + '">' + tagLbl + '</span>' +
+          '<span style="font-size:11px;color:var(--text-3);">Publicado há ' + hours + 'h</span>' +
+        '</div>' +
+        '<div class="proj-list-title">' + title + '</div>' +
+      '</div>' +
+      '<div class="proj-list-right">' +
+        '<div class="proj-list-budget">' + budStr + '</div>' +
+        '<div class="proj-list-type">' + dlStr + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="proj-skills">' +
+      sk.map(function(s){ return '<span class="fl-skill">' + s + '</span>'; }).join('') +
+    '</div>' +
+    '<div class="proj-list-footer">' +
+      '<div class="proj-list-meta">' +
+        '<span>👁 ' + views + ' visualizações</span>' +
+        '<span>🏢 Cliente verificado</span>' +
+      '</div>' +
+      '<div class="proj-list-actions">' +
+        '<span class="proj-proposals">' + props + ' propostas</span>' +
+        '<button class="btn btn-green btn-sm" onclick="openModal(\'proposal\')">Enviar Proposta</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+/* ── Inserir no DOM ── */
+function _buildDemo() {
+  var flGrid   = document.getElementById('fl-list-grid');
+  var projGrid = document.getElementById('proj-list-grid');
+  if (!flGrid && !projGrid) return;
+
+  var flHTML = '', projHTML = '';
+  var cats = Object.keys(CATS);
+
+  cats.forEach(function(cat) {
+    // 18 freelancers por categoria
+    for (var i = 0; i < 18; i++) { flHTML   += _flCard(cat, i); }
+    // 10 projetos por categoria
+    for (var j = 0; j < 10; j++) { projHTML += _projCard(cat, j); }
+  });
+
+  if (flGrid)   flGrid.insertAdjacentHTML('beforeend', flHTML);
+  if (projGrid) projGrid.insertAdjacentHTML('beforeend', projHTML);
+
+  // Atualizar contadores gerais
+  var totalFL   = flGrid   ? flGrid.querySelectorAll('.fl-list-card').length   : 0;
+  var totalProj = projGrid ? projGrid.querySelectorAll('.proj-list-card').length : 0;
+
+  // Atualizar contadores de resultado (serão corrigidos pelo applyAllFilters depois)
+  var flCount   = document.getElementById('fl-count');
+  var projCount = document.getElementById('proj-count');
+  if (flCount)   flCount.textContent   = totalFL;
+  if (projCount) projCount.textContent = totalProj;
+
+  // Atualizar estatísticas do painel admin
+  var admUsers   = document.getElementById('adm-stat-users');
+  var admProjects= document.getElementById('adm-stat-projects');
+  if (admUsers)    admUsers.textContent    = (totalFL + Math.round(totalFL * 0.4)).toLocaleString('pt-BR');
+  if (admProjects) admProjects.textContent = totalProj.toLocaleString('pt-BR');
+
+  // Rodar filtros para atualizar exibição (mostra os cards relevantes)
+  if (typeof applyAllFilters === 'function') {
+    applyAllFilters('fl');
+    applyAllFilters('proj');
+  }
+}
+
+// Executar após DOM pronto
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _buildDemo);
+} else {
+  _buildDemo();
+}
+
+})();
+</script>
 </body>
 </html>
