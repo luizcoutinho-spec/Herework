@@ -2369,8 +2369,8 @@ section { padding: 64px 0; }
 
     <!-- Auth -->
     <div class="header-auth">
-      <button class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
-      <button class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
+      <button id="nav-login-btn" class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+      <button id="nav-register-btn" class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
       <button class="btn btn-primary btn-sm" onclick="openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
       <!-- User chip (shown when logged in) -->
       <div id="nav-user-chip" style="display:none;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:40px;padding:5px 14px 5px 6px;cursor:pointer;" onclick="toggleUserMenu()">
@@ -5939,33 +5939,31 @@ var _session = null; // { name, email, type }
 
 function _setSession(name, email, type) {
   _session = { name: name, email: email, type: type };
-  var chip = document.getElementById('nav-user-chip');
+
+  // Show user chip, hide login/register buttons
+  var chip    = document.getElementById('nav-user-chip');
+  var loginBtn= document.getElementById('nav-login-btn');
+  var regBtn  = document.getElementById('nav-register-btn');
+
+  if (loginBtn) loginBtn.style.display = 'none';
+  if (regBtn)   regBtn.style.display   = 'none';
   if (chip) {
     chip.style.display = 'flex';
     var nameEl = document.getElementById('nav-user-name');
+    var avEl   = document.getElementById('nav-user-avatar');
     if (nameEl) nameEl.textContent = name.split(' ')[0];
-    var avEl = document.getElementById('nav-user-avatar');
-    if (avEl) avEl.textContent = name.charAt(0).toUpperCase();
+    if (avEl)   avEl.textContent   = name.charAt(0).toUpperCase();
   }
-  // Hide login/register, keep Publicar
-  document.querySelectorAll('.btn-login').forEach(function(b){ b.style.display='none'; });
-  document.querySelectorAll('#overlay-register ~ * .btn-green, .header-auth > .btn.btn-green').forEach(function(b){ b.style.display='none'; });
-  var regBtn = document.querySelector('.header-auth > .btn.btn-green.btn-sm');
-  if (regBtn) regBtn.style.display = 'none';
-  var loginBtn = document.querySelector('.header-auth > .btn-login');
-  if (loginBtn) loginBtn.style.display = 'none';
 }
-
 function _clearSession() {
   _session = null;
-  var chip = document.getElementById('nav-user-chip');
-  if (chip) chip.style.display = 'none';
-  var loginBtn = document.querySelector('.header-auth > .btn-login');
-  var regBtn   = document.querySelector('.header-auth > .btn.btn-green.btn-sm');
+  var chip    = document.getElementById('nav-user-chip');
+  var loginBtn= document.getElementById('nav-login-btn');
+  var regBtn  = document.getElementById('nav-register-btn');
+  if (chip)     chip.style.display     = 'none';
   if (loginBtn) loginBtn.style.display = '';
   if (regBtn)   regBtn.style.display   = '';
 }
-
 function submitRegister() {
   var n    = document.getElementById('reg-name');
   var e    = document.getElementById('reg-email');
