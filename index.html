@@ -4201,6 +4201,62 @@ section { padding: 64px 0; }
   </div>
 </div>
 
+<!-- MODAL: INFO GERAL (generico para paginas do footer) -->
+<div class="overlay" id="overlay-info" onclick="if(event.target===this)closeModal('info')">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-header">
+      <div id="info-title" class="modal-title" style="font-size:18px;"></div>
+      <button class="modal-close" onclick="closeModal('info')">&#10005;</button>
+    </div>
+    <div class="modal-body" id="info-body" style="max-height:72vh;overflow-y:auto;padding-right:4px;"></div>
+  </div>
+</div>
+
+<!-- MODAL: CONTATO -->
+<div class="overlay" id="overlay-contact" onclick="if(event.target===this)closeModal('contact')">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-pt="&#128236; Fale Conosco" data-es="&#128236; Cont&#225;ctanos">&#128236; Fale Conosco</div>
+        <div class="modal-subtitle" data-pt="Responderemos em at&#233; 24 horas" data-es="Te responderemos en menos de 24 horas">Responderemos em at&#233; 24 horas</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('contact')">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" data-pt="Seu nome" data-es="Tu nombre">Seu nome</label>
+          <input class="form-input" id="contact-name" type="text" data-placeholder-pt="Nome completo" data-placeholder-es="Nombre completo" placeholder="Nome completo">
+          <div class="form-error" id="err-contact-name"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-pt="E-mail" data-es="Correo">E-mail</label>
+          <input class="form-input" id="contact-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
+          <div class="form-error" id="err-contact-email"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Assunto" data-es="Asunto">Assunto</label>
+        <select class="form-select" id="contact-subject">
+          <option value="" data-pt="Selecione o assunto" data-es="Selecciona el asunto">Selecione o assunto</option>
+          <option data-pt="Suporte t&#233;cnico" data-es="Soporte t&#233;cnico">Suporte t&#233;cnico</option>
+          <option data-pt="Financeiro / Pagamentos" data-es="Financiero / Pagos">Financeiro / Pagamentos</option>
+          <option data-pt="Den&#250;ncia ou modera&#231;&#227;o" data-es="Denuncia o moderaci&#243;n">Den&#250;ncia ou modera&#231;&#227;o</option>
+          <option data-pt="Parceria comercial" data-es="Alianza comercial">Parceria comercial</option>
+          <option data-pt="Imprensa" data-es="Prensa">Imprensa</option>
+          <option data-pt="Outros" data-es="Otros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-pt="Mensagem" data-es="Mensaje">Mensagem</label>
+        <textarea class="form-textarea" id="contact-msg" data-placeholder-pt="Descreva sua d&#250;vida, sugest&#227;o ou problema..." data-placeholder-es="Describe tu duda, sugerencia o problema..." placeholder="Descreva sua d&#250;vida, sugest&#227;o ou problema..." style="min-height:120px;"></textarea>
+        <div class="form-error" id="err-contact-msg"></div>
+      </div>
+      <button class="btn btn-green btn-block btn-lg" onclick="submitContact()" data-pt="&#128228; Enviar Mensagem" data-es="&#128228; Enviar Mensaje">&#128228; Enviar Mensagem</button>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text-3);" data-pt="Ou entre em contato: suporte@herework.com.br" data-es="O cont&#225;ctanos: soporte@herework.com.br">Ou entre em contato: suporte@herework.com.br</div>
+    </div>
+  </div>
+</div>
 <!-- BANNER LGPD / COOKIES -->
 <div id="lgpd-banner" style="position:fixed;bottom:0;left:0;right:0;background:var(--text);color:#fff;z-index:8000;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;transform:translateY(100%);transition:transform 0.4s ease;">
   <div style="flex:1;min-width:280px;">
@@ -4265,8 +4321,8 @@ section { padding: 64px 0; }
           <li><a href="#" onclick="openModal('publish');return false;" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</a></li>
           <li><a href="#" onclick="showPage('freelancers')" data-pt="Encontrar Freelancers" data-es="Encontrar Freelancers">Encontrar Freelancers</a></li>
           <li><a href="#" onclick="showPage('pricing');return false;" data-pt="Planos Empresariais" data-es="Planes Empresariales">Planos Empresariais</a></li>
-          <li><a href="#" data-pt="API para Empresas" data-es="API para Empresas">API para Empresas</a></li>
-          <li><a href="#" data-pt="Gestão de Equipes" data-es="Gestión de Equipos">Gestão de Equipes</a></li>
+          <li><a href="#" onclick="openInfoPage('api');return false;" data-pt="API para Empresas" data-es="API para Empresas">API para Empresas</a></li>
+          <li><a href="#" onclick="openInfoPage('teams');return false;" data-pt="Gestão de Equipes" data-es="Gestión de Equipos">Gestão de Equipes</a></li>
         </ul>
       </div>
 
@@ -4277,8 +4333,8 @@ section { padding: 64px 0; }
           <li><a href="#" onclick="openModal('register');return false;" data-pt="Criar Perfil" data-es="Crear Perfil">Criar Perfil</a></li>
           <li><a href="#" onclick="showPage('projects')" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</a></li>
           <li><a href="#" onclick="showPage('pricing')" data-pt="Planos Premium" data-es="Planes Premium">Planos Premium</a></li>
-          <li><a href="#" data-pt="Certificações" data-es="Certificaciones">Certificações</a></li>
-          <li><a href="#" data-pt="Como Cobrar" data-es="Cómo Cobrar">Como Cobrar</a></li>
+          <li><a href="#" onclick="openInfoPage('cert');return false;" data-pt="Certificações" data-es="Certificaciones">Certificações</a></li>
+          <li><a href="#" onclick="openInfoPage('guide');return false;" data-pt="Como Cobrar" data-es="Cómo Cobrar">Como Cobrar</a></li>
         </ul>
       </div>
 
@@ -4287,10 +4343,10 @@ section { padding: 64px 0; }
         <div class="footer-col-title" data-pt="Plataforma" data-es="Plataforma">Plataforma</div>
         <ul class="footer-links">
           <li><a href="#" onclick="showPage('how')" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</a></li>
-          <li><a href="#" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a></li>
-          <li><a href="#" data-pt="Blog" data-es="Blog">Blog</a></li>
-          <li><a href="#" data-pt="Segurança" data-es="Seguridad">Segurança</a></li>
-          <li><a href="#" data-pt="Status do Sistema" data-es="Estado del Sistema">Status do Sistema</a></li>
+          <li><a href="#" onclick="openInfoPage('help');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a></li>
+          <li><a href="#" onclick="openInfoPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a></li>
+          <li><a href="#" onclick="openInfoPage('security');return false;" data-pt="Segurança" data-es="Seguridad">Segurança</a></li>
+          <li><a href="#" onclick="openInfoPage('status');return false;" data-pt="Status do Sistema" data-es="Estado del Sistema">Status do Sistema</a></li>
         </ul>
       </div>
 
@@ -4298,11 +4354,11 @@ section { padding: 64px 0; }
       <div>
         <div class="footer-col-title" data-pt="Empresa" data-es="Empresa">Empresa</div>
         <ul class="footer-links">
-          <li><a href="#" data-pt="Sobre Nós" data-es="Sobre Nosotros">Sobre Nós</a></li>
-          <li><a href="#" data-pt="Carreiras" data-es="Carreras">Carreiras</a></li>
-          <li><a href="#" data-pt="Imprensa" data-es="Prensa">Imprensa</a></li>
-          <li><a href="#" data-pt="Contato" data-es="Contacto">Contato</a></li>
-          <li><a href="#" data-pt="Parcerias" data-es="Alianzas">Parcerias</a></li>
+          <li><a href="#" onclick="openInfoPage('about');return false;" data-pt="Sobre Nós" data-es="Sobre Nosotros">Sobre Nós</a></li>
+          <li><a href="#" onclick="openInfoPage('careers');return false;" data-pt="Carreiras" data-es="Carreras">Carreiras</a></li>
+          <li><a href="#" onclick="openInfoPage('press');return false;" data-pt="Imprensa" data-es="Prensa">Imprensa</a></li>
+          <li><a href="#" onclick="openModal('contact');return false;" data-pt="Contato" data-es="Contacto">Contato</a></li>
+          <li><a href="#" onclick="openInfoPage('partners');return false;" data-pt="Parcerias" data-es="Alianzas">Parcerias</a></li>
         </ul>
       </div>
 
@@ -5322,6 +5378,355 @@ function init() {
   });
 }
 
+
+/* ═══════════════════════════════════════════
+   INFO PAGES — conteudo das paginas do footer
+═══════════════════════════════════════════ */
+var _IP = {};
+
+_IP.api = {
+  pt: { t: 'API para Empresas',
+    b: '<p style="color:var(--text-2);margin-bottom:18px;">Integre a HereWork diretamente ao seu sistema com nossa API REST.</p>' +
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="font-size:20px;">&#9889;</div><b>REST API</b><div style="font-size:12px;color:var(--text-3);">JSON &middot; OAuth2 &middot; 1.000 req/min</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="font-size:20px;">&#128273;</div><b>Auth</b><div style="font-size:12px;color:var(--text-3);">API Key + OAuth 2.0</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="font-size:20px;">&#128225;</div><b>Webhooks</b><div style="font-size:12px;color:var(--text-3);">Notifica&ccedil;&otilde;es em tempo real</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="font-size:20px;">&#128218;</div><b>SDKs</b><div style="font-size:12px;color:var(--text-3);">JS, Python, PHP, Java</div></div>' +
+       '</div>' +
+       '<div style="background:var(--green-light);border-radius:var(--radius);padding:14px;margin-bottom:16px;">' +
+       '<b style="color:var(--green-dark);">Endpoints principais</b>' +
+       '<ul style="font-size:13px;color:var(--text-2);padding-left:16px;line-height:2;margin:6px 0 0;">' +
+       '<li>POST /projects &mdash; Publicar projeto</li>' +
+       '<li>GET /freelancers &mdash; Buscar profissionais</li>' +
+       '<li>POST /contracts &mdash; Criar contrato</li>' +
+       '<li>POST /payments &mdash; Pagamento via escrow</li></ul></div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Documenta&ccedil;&atilde;o enviada!\',\'success\')">Solicitar acesso &rarr;</button>'
+  },
+  es: { t: 'API para Empresas',
+    b: '<p style="color:var(--text-2);margin-bottom:18px;">Integra HereWork a tu sistema con nuestra API REST.</p>' +
+       '<div style="background:var(--green-light);border-radius:var(--radius);padding:14px;margin-bottom:16px;">' +
+       '<b style="color:var(--green-dark);">Endpoints principales</b>' +
+       '<ul style="font-size:13px;padding-left:16px;line-height:2;margin:6px 0 0;">' +
+       '<li>POST /projects</li><li>GET /freelancers</li><li>POST /payments</li></ul></div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Documentaci&oacute;n enviada!\',\'success\')">Solicitar acceso &rarr;</button>'
+  }
+};
+_IP.teams = {
+  pt: { t: 'Gest&atilde;o de Equipes',
+    b: '<p style="color:var(--text-2);margin-bottom:18px;">Gerencie m&uacute;ltiplos freelancers e projetos em um painel centralizado.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128202;</span><div><b>Dashboard centralizado</b><div style="font-size:13px;color:var(--text-3);">Vis&atilde;o geral de projetos e pagamentos</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128179;</span><div><b>Pagamento em lote</b><div style="font-size:13px;color:var(--text-3);">Pague m&uacute;ltiplos freelancers de uma s&oacute; vez</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#129309;</span><div><b>Pool de talentos</b><div style="font-size:13px;color:var(--text-3);">Monte sua pr&oacute;pria equipe de favoritos</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128203;</span><div><b>Contratos jur&iacute;dicos</b><div style="font-size:13px;color:var(--text-3);">Modelos com valida&ccedil;&atilde;o jur&iacute;dica inclusa</div></div></div>' +
+       '</div>' +
+       '<div style="background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:var(--radius);padding:16px;text-align:center;color:#fff;">' +
+       '<b style="font-size:15px;">Dispon&iacute;vel nos planos Business e Enterprise</b>' +
+       '<div style="font-size:12px;opacity:0.85;margin:6px 0 12px;">A partir de R$ 299/m&ecirc;s para at&eacute; 10 usu&aacute;rios</div>' +
+       '<button class="btn btn-white btn-sm" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planos &rarr;</button></div>'
+  },
+  es: { t: 'Gesti&oacute;n de Equipos',
+    b: '<p style="color:var(--text-2);margin-bottom:18px;">Gestiona m&uacute;ltiples freelancers en un panel centralizado.</p>' +
+       '<div style="background:linear-gradient(135deg,var(--green),var(--green-dark));border-radius:var(--radius);padding:16px;text-align:center;color:#fff;">' +
+       '<b>Disponible en planes Business y Enterprise</b>' +
+       '<div style="font-size:12px;opacity:0.85;margin:6px 0 12px;">Desde R$ 299/mes</div>' +
+       '<button class="btn btn-white btn-sm" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planes &rarr;</button></div>'
+  }
+};
+
+_IP.cert = {
+  pt: { t: 'Certifica&ccedil;&otilde;es HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Comprove suas habilidades com selos reconhecidos pelas melhores empresas.</p>' +
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">' +
+       '<div style="border:2px solid var(--green);border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129351;</div><b style="color:var(--green);">Verificado</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Identidade + portf&oacute;lio</div></div>' +
+       '<div style="border:2px solid var(--orange);border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129352;</div><b style="color:var(--orange);">Profissional</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Teste t&eacute;cnico aprovado</div></div>' +
+       '<div style="border:2px solid #1565C0;border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129353;</div><b style="color:#1565C0;">Especialista</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Top 10% da categoria</div></div>' +
+       '<div style="border:2px solid #6A1B9A;border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#128081;</div><b style="color:#6A1B9A;">Top Freelancer</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Top 1% &mdash; convite exclusivo</div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Inscri&ccedil;&otilde;es abertas!\',\'success\');closeModal(\'info\')">Iniciar certifica&ccedil;&atilde;o &rarr;</button>'
+  },
+  es: { t: 'Certificaciones HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Demuestra tus habilidades con sellos oficiales.</p>' +
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px;">' +
+       '<div style="border:2px solid var(--green);border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129351;</div><b style="color:var(--green);">Verificado</b></div>' +
+       '<div style="border:2px solid var(--orange);border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129352;</div><b style="color:var(--orange);">Profesional</b></div>' +
+       '<div style="border:2px solid #1565C0;border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#129353;</div><b style="color:#1565C0;">Especialista</b></div>' +
+       '<div style="border:2px solid #6A1B9A;border-radius:var(--radius);padding:14px;text-align:center;"><div style="font-size:26px;">&#128081;</div><b style="color:#6A1B9A;">Top Freelancer</b></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Inscripciones abiertas!\',\'success\');closeModal(\'info\')">Iniciar certificaci&oacute;n &rarr;</button>'
+  }
+};
+
+_IP.guide = {
+  pt: { t: 'Como Cobrar',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Boas pr&aacute;ticas para definir seus pre&ccedil;os e aumentar seus ganhos.</p>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:12px;">' +
+       '<b style="display:block;margin-bottom:8px;">&#128202; M&eacute;dia de mercado</b>' +
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:13px;">' +
+       '<div>Design UI/UX: <b style="color:var(--green)">R$ 70&ndash;120/h</b></div>' +
+       '<div>Dev Full Stack: <b style="color:var(--green)">R$ 90&ndash;180/h</b></div>' +
+       '<div>Marketing: <b style="color:var(--green)">R$ 50&ndash;100/h</b></div>' +
+       '<div>Reda&ccedil;&atilde;o: <b style="color:var(--green)">R$ 40&ndash;80/h</b></div>' +
+       '<div>V&iacute;deo/Motion: <b style="color:var(--green)">R$ 60&ndash;110/h</b></div>' +
+       '<div>Dados/BI: <b style="color:var(--green)">R$ 80&ndash;160/h</b></div></div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:12px;">' +
+       '<b style="display:block;margin-bottom:6px;">&#128161; Dicas para cobrar mais</b>' +
+       '<ul style="font-size:13px;color:var(--text-2);padding-left:16px;line-height:2;margin:0;">' +
+       '<li>Inclua revis&otilde;es no pre&ccedil;o base</li>' +
+       '<li>Cobre por entregável em projetos fechados</li>' +
+       '<li>Use escrow para garantir recebimento</li>' +
+       '<li>Cases reais aumentam convers&atilde;o em 3&times;</li></ul></div>' +
+       '<div style="background:var(--green-light);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:13px;">' +
+       '<b style="color:var(--green-dark);">Taxa:</b> 12% &bull; Plano Pro: 8% &bull; Elite: 5%</div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planos e taxas &rarr;</button>'
+  },
+  es: { t: 'C&oacute;mo Cobrar',
+    b: '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:12px;">' +
+       '<b>&#128161; Consejos</b>' +
+       '<ul style="font-size:13px;color:var(--text-2);padding-left:16px;line-height:2;margin:6px 0 0;">' +
+       '<li>Incluye revisiones en el precio base</li>' +
+       '<li>Usa escrow para cobros seguros</li>' +
+       '<li>Casos reales multiplican conversiones 3&times;</li></ul></div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planes y comisiones &rarr;</button>'
+  }
+};
+_IP.help = {
+  pt: { t: 'Central de Ajuda',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Respostas r&aacute;pidas para as d&uacute;vidas mais comuns.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')"><b>Como contratar um freelancer?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Publique projeto &rarr; Receba propostas &rarr; Escolha o profissional</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')"><b>Como funciona o pagamento escrow?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Valor retido at&eacute; aprova&ccedil;&atilde;o da entrega</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')"><b>O que &eacute; o selo Verificado?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Identidade + portf&oacute;lio validados pela equipe HereWork</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')"><b>Posso cancelar um projeto?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Sim, com pol&iacute;tica de reembolso proporcional ao progresso</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')"><b>Como emitir nota fiscal?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Autom&aacute;tico no painel para usu&aacute;rios com CNPJ</div></div>' +
+       '</div>' +
+       '<button class="btn btn-outline btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">N&atilde;o encontrou? Fale conosco &rarr;</button>'
+  },
+  es: { t: 'Centro de Ayuda',
+    b: '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Art&iacute;culo abierto!\',\'info\')"><b>&iquest;C&oacute;mo contratar un freelancer?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Publica &rarr; Recibe propuestas &rarr; Elige al profesional</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Art&iacute;culo abierto!\',\'info\')"><b>&iquest;C&oacute;mo funciona el escrow?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Fondos retenidos hasta tu aprobaci&oacute;n</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;cursor:pointer;" onclick="showToast(\'Art&iacute;culo abierto!\',\'info\')"><b>&iquest;Puedo cancelar un proyecto?</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">S&iacute;, con pol&iacute;tica de reembolso proporcional</div></div>' +
+       '</div>' +
+       '<button class="btn btn-outline btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Cont&aacute;ctanos &rarr;</button>'
+  }
+};
+
+_IP.blog = {
+  pt: { t: 'Blog HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Conte&uacute;do exclusivo sobre carreira freelancer e tend&ecirc;ncias do mercado.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')">' +
+       '<div style="padding:16px;background:linear-gradient(135deg,var(--green-light),#f0fff0);">' +
+       '<span style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;">Carreira</span>' +
+       '<div style="font-weight:700;font-size:15px;margin:5px 0;">Como cobrar R$&nbsp;20.000/m&ecirc;s como freelancer em 2025</div>' +
+       '<div style="font-size:12px;color:var(--text-3);">28 Mai 2025 &bull; 8 min</div></div></div>' +
+       '<div style="border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')">' +
+       '<div style="padding:16px;background:linear-gradient(135deg,#fff3e0,#fff8f1);">' +
+       '<span style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;">Tend&ecirc;ncias</span>' +
+       '<div style="font-weight:700;font-size:15px;margin:5px 0;">IA no mercado freelancer: oportunidade ou amea&ccedil;a?</div>' +
+       '<div style="font-size:12px;color:var(--text-3);">24 Mai 2025 &bull; 6 min</div></div></div>' +
+       '<div style="border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;" onclick="showToast(\'Artigo aberto!\',\'info\')">' +
+       '<div style="padding:16px;background:linear-gradient(135deg,#e3f2fd,#f1f8ff);">' +
+       '<span style="font-size:11px;font-weight:700;color:#1565C0;text-transform:uppercase;">Dicas</span>' +
+       '<div style="font-weight:700;font-size:15px;margin:5px 0;">10 ferramentas essenciais para freelancers em 2025</div>' +
+       '<div style="font-size:12px;color:var(--text-3);">20 Mai 2025 &bull; 5 min</div></div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Blog completo em breve!\',\'info\')">Ver todos os artigos &rarr;</button>'
+  },
+  es: { t: 'Blog HereWork',
+    b: '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;" onclick="showToast(\'Art&iacute;culo abierto!\',\'info\')">' +
+       '<div style="padding:16px;background:linear-gradient(135deg,var(--green-light),#f0fff0);">' +
+       '<span style="font-size:11px;font-weight:700;color:var(--green);">CARRERA</span>' +
+       '<div style="font-weight:700;font-size:15px;margin:5px 0;">C&oacute;mo ganar R$&nbsp;20.000/mes en 2025</div>' +
+       '<div style="font-size:12px;color:var(--text-3);">28 May 2025</div></div></div>' +
+       '<div style="border-radius:var(--radius);border:1.5px solid var(--border);cursor:pointer;" onclick="showToast(\'Art&iacute;culo abierto!\',\'info\')">' +
+       '<div style="padding:16px;background:linear-gradient(135deg,#fff3e0,#fff8f1);">' +
+       '<span style="font-size:11px;font-weight:700;color:var(--orange);">TENDENCIAS</span>' +
+       '<div style="font-weight:700;font-size:15px;margin:5px 0;">IA en el mercado freelancer</div>' +
+       '<div style="font-size:12px;color:var(--text-3);">24 May 2025</div></div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Blog completo pr&oacute;ximamente!\',\'info\')">Ver todos los art&iacute;culos &rarr;</button>'
+  }
+};
+_IP.security = {
+  pt: { t: 'Seguran&ccedil;a HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Padr&otilde;es internacionais para proteger seus dados e transa&ccedil;&otilde;es.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128274;</span><div><b>SSL 256-bit + TLS 1.3</b><div style="font-size:13px;color:var(--text-3);">Comunica&ccedil;&atilde;o criptografada de ponta a ponta</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Escrow Seguro</b><div style="font-size:13px;color:var(--text-3);">Valores retidos at&eacute; aprova&ccedil;&atilde;o da entrega</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128203;</span><div><b>Conformidade LGPD</b><div style="font-size:13px;color:var(--text-3);">Dados tratados conforme Lei Geral de Prote&ccedil;&atilde;o de Dados</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#9989;</span><div><b>KYC obrigat&oacute;rio</b><div style="font-size:13px;color:var(--text-3);">Verifica&ccedil;&atilde;o de CPF + documento para freelancers</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128737;&#65039;</span><div><b>Antifraude por IA</b><div style="font-size:13px;color:var(--text-3);">Monitoramento 24/7 de transa&ccedil;&otilde;es e perfis</div></div></div>' +
+       '</div>' +
+       '<div style="background:var(--green-light);border-radius:var(--radius);padding:14px;text-align:center;">' +
+       '<b style="color:var(--green-dark);">Certifica&ccedil;&atilde;o PCI-DSS Level 1</b>' +
+       '<div style="font-size:13px;color:var(--text-2);margin-top:4px;">O mais alto padr&atilde;o para pagamentos</div></div>'
+  },
+  es: { t: 'Seguridad HereWork',
+    b: '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128274;</span><div><b>SSL 256-bit + TLS 1.3</b><div style="font-size:13px;color:var(--text-3);">Comunicaci&oacute;n cifrada de extremo a extremo</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Escrow Seguro</b><div style="font-size:13px;color:var(--text-3);">Fondos retenidos hasta tu aprobaci&oacute;n</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128203;</span><div><b>LGPD/RGPD</b><div style="font-size:13px;color:var(--text-3);">Datos tratados conforme ley de protecci&oacute;n</div></div></div>' +
+       '</div>' +
+       '<div style="background:var(--green-light);border-radius:var(--radius);padding:14px;text-align:center;"><b style="color:var(--green-dark);">Certificaci&oacute;n PCI-DSS Level 1</b></div>'
+  }
+};
+
+_IP.status = {
+  pt: { t: 'Status do Sistema',
+    b: '<div style="text-align:center;padding:20px;margin-bottom:18px;background:var(--green-light);border-radius:var(--radius);">' +
+       '<div style="font-size:44px;margin-bottom:8px;">&#9989;</div>' +
+       '<b style="font-size:17px;color:var(--green-dark);">Todos os sistemas operacionais</b>' +
+       '<div style="font-size:13px;color:var(--text-3);margin-top:4px;">100% uptime nas &uacute;ltimas 72h</div></div>' +
+       '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>API / Plataforma</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagamentos / Escrow</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Notifica&ccedil;&otilde;es / E-mail</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Chat em tempo real</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>CDN / Upload de arquivos</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '</div>' +
+       '<div style="text-align:center;font-size:12px;color:var(--text-3);">Hist&oacute;rico: 99,97% de disponibilidade nos &uacute;ltimos 12 meses</div>'
+  },
+  es: { t: 'Estado del Sistema',
+    b: '<div style="text-align:center;padding:20px;margin-bottom:18px;background:var(--green-light);border-radius:var(--radius);">' +
+       '<div style="font-size:44px;margin-bottom:8px;">&#9989;</div>' +
+       '<b style="font-size:17px;color:var(--green-dark);">Todos los sistemas operativos</b>' +
+       '<div style="font-size:13px;color:var(--text-3);margin-top:4px;">100% uptime en las &uacute;ltimas 72h</div></div>' +
+       '<div style="display:flex;flex-direction:column;gap:6px;">' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>API / Plataforma</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagos / Escrow</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Chat en tiempo real</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '</div>'
+  }
+};
+_IP.about = {
+  pt: { t: 'Sobre a HereWork',
+    b: '<div style="text-align:center;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,var(--green-light),#fff);border-radius:var(--radius);">' +
+       '<div style="font-size:40px;margin-bottom:8px;">&#128640;</div>' +
+       '<b style="font-size:17px;">O maior marketplace de freelancers do Brasil</b>' +
+       '<div style="font-size:13px;color:var(--text-2);margin-top:5px;">Fundada em 2021 em S&atilde;o Paulo &bull; Brasil e Am&eacute;rica Latina</div></div>' +
+       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;text-align:center;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:var(--green);">3,6M+</b><div style="font-size:12px;color:var(--text-3);">Freelancers</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:var(--orange);">92K+</b><div style="font-size:12px;color:var(--text-3);">Empresas ativas</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:#1565C0;">R$&nbsp;1,2B</b><div style="font-size:12px;color:var(--text-3);">Em pagamentos</div></div></div>' +
+       '<p style="font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:14px;">A HereWork nasceu com a miss&atilde;o de democratizar o acesso a trabalho de qualidade, conectando empresas a profissionais qualificados com seguran&ccedil;a e agilidade.</p>' +
+       '<p style="font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:18px;">Nossa equipe de 200+ colaboradores trabalha para criar a melhor experi&ecirc;ncia para freelancers e contratantes, com foco em seguran&ccedil;a e transpar&ecirc;ncia.</p>' +
+       '<div style="display:flex;gap:10px;">' +
+       '<button class="btn btn-green" style="flex:1;" onclick="showToast(\'Nossa miss&atilde;o: democratizar o trabalho!\',\'info\')">Nossa miss&atilde;o &rarr;</button>' +
+       '<button class="btn btn-outline" onclick="openInfoPage(\'careers\')">Carreiras</button></div>'
+  },
+  es: { t: 'Sobre HereWork',
+    b: '<div style="text-align:center;margin-bottom:20px;padding:20px;background:linear-gradient(135deg,var(--green-light),#fff);border-radius:var(--radius);">' +
+       '<div style="font-size:40px;margin-bottom:8px;">&#128640;</div><b style="font-size:17px;">El mayor marketplace de freelancers de Brasil</b>' +
+       '<div style="font-size:13px;color:var(--text-2);margin-top:5px;">Fundada en 2021 &bull; Brasil y Am&eacute;rica Latina</div></div>' +
+       '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:18px;text-align:center;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:var(--green);">3,6M+</b><div style="font-size:12px;color:var(--text-3);">Freelancers</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:var(--orange);">92K+</b><div style="font-size:12px;color:var(--text-3);">Empresas activas</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:12px;"><b style="font-size:18px;color:#1565C0;">R$&nbsp;1,2B</b><div style="font-size:12px;color:var(--text-3);">En pagos</div></div></div>' +
+       '<p style="font-size:14px;color:var(--text-2);line-height:1.8;margin-bottom:18px;">HereWork naci&oacute; para democratizar el acceso a trabajo de calidad, conectando empresas con profesionales independientes en toda Latinoam&eacute;rica.</p>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'&#161;Conoce nuestra misi&oacute;n!\',\'info\')">Conocer m&aacute;s &rarr;</button>'
+  }
+};
+
+_IP.careers = {
+  pt: { t: 'Carreiras na HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Fa&ccedil;a parte de uma das startups que mais cresce no Brasil. 100% remoto.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Senior Full Stack Engineer</b><span style="background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Aberta</span></div><div style="font-size:13px;color:var(--text-3);">Remoto &bull; R$&nbsp;18k&ndash;25k/m&ecirc;s &bull; React, Node.js</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Product Designer Senior</b><span style="background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Aberta</span></div><div style="font-size:13px;color:var(--text-3);">Remoto &bull; R$&nbsp;14k&ndash;19k/m&ecirc;s &bull; Figma</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Head de Growth Marketing</b><span style="background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Aberta</span></div><div style="font-size:13px;color:var(--text-3);">Remoto &bull; R$&nbsp;16k&ndash;22k/m&ecirc;s &bull; SEO, Paid</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Customer Success Specialist</b><span style="background:#F59E0B;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Em breve</span></div><div style="font-size:13px;color:var(--text-3);">Remoto/h&iacute;brido &bull; R$&nbsp;6k&ndash;9k/m&ecirc;s</div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Candidatura enviada!\',\'success\');closeModal(\'info\')">Candidatar-se agora &rarr;</button>'
+  },
+  es: { t: 'Carreras en HereWork',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">S&eacute; parte de una de las startups que m&aacute;s crece en Brasil. 100% remoto.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Senior Full Stack Engineer</b><span style="background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Abierta</span></div><div style="font-size:13px;color:var(--text-3);">Remoto &bull; R$&nbsp;18k&ndash;25k/mes</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><div style="display:flex;justify-content:space-between;margin-bottom:5px;"><b>Product Designer Senior</b><span style="background:var(--green);color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">Abierta</span></div><div style="font-size:13px;color:var(--text-3);">Remoto &bull; R$&nbsp;14k&ndash;19k/mes</div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="showToast(\'Postulaci&oacute;n enviada!\',\'success\');closeModal(\'info\')">Postularme ahora &rarr;</button>'
+  }
+};
+
+_IP.press = {
+  pt: { t: 'Imprensa',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Materiais oficiais e contato para jornalistas e assessoria de imprensa.</p>' +
+       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;" onclick="showToast(\'Kit de imprensa enviado!\',\'success\')"><div style="font-size:24px;margin-bottom:6px;">&#128230;</div><b>Kit de Imprensa</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Logo, fotos e dados</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;text-align:center;cursor:pointer;" onclick="showToast(\'Press releases baixados!\',\'success\')"><div style="font-size:24px;margin-bottom:6px;">&#128196;</div><b>Press Releases</b><div style="font-size:12px;color:var(--text-3);margin-top:4px;">Comunicados recentes</div></div>' +
+       '</div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:16px;">' +
+       '<b style="display:block;margin-bottom:10px;">Cobertura recente:</b>' +
+       '<div style="display:flex;flex-direction:column;gap:8px;font-size:13px;color:var(--text-2);">' +
+       '<div>&#128240; <b>Folha de S.Paulo</b> &mdash; "HereWork levanta R$&nbsp;80M em Série B" (Mar/2025)</div>' +
+       '<div>&#128240; <b>Exame</b> &mdash; "A startup que quer ser o LinkedIn do trabalho freelancer" (Jan/2025)</div>' +
+       '<div>&#128240; <b>Valor Econômico</b> &mdash; "Marketplace cresce 340% em 2024" (Nov/2024)</div>' +
+       '</div></div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Falar com Assessoria &rarr;</button>'
+  },
+  es: { t: 'Prensa',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Material oficial y contacto para periodistas.</p>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;margin-bottom:16px;">' +
+       '<b style="display:block;margin-bottom:8px;">Cobertura reciente:</b>' +
+       '<div style="font-size:13px;color:var(--text-2);">&#128240; <b>Folha de S.Paulo</b> &mdash; HereWork capta R$&nbsp;80M en Serie B (Mar/2025)</div></div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Hablar con Prensa &rarr;</button>'
+  }
+};
+
+_IP.partners = {
+  pt: { t: 'Parcerias',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Junte-se ao ecossistema HereWork e amplie sua oferta de valor.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127979; Parceiros Educacionais</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Universidades e cursos que formam freelancers qualificados</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128179; Parceiros Financeiros</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Fintechs, bancos digitais e solu&ccedil;&otilde;es de pagamento</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128295; Parceiros de Tecnologia</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">SaaS e ferramentas de produtividade</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128226; Parceiros de M&iacute;dia</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Ve&iacute;culos que alcançam nossa audiência</div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Propor parceria &rarr;</button>'
+  },
+  es: { t: 'Alianzas',
+    b: '<p style="color:var(--text-2);margin-bottom:16px;">Únete al ecosistema HereWork.</p>' +
+       '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#127979; Educaci&oacute;n</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Formaci&oacute;n de freelancers calificados</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128179; Finanzas</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">Bancos digitales y pagos</div></div>' +
+       '<div style="background:var(--surface);border-radius:var(--radius);padding:14px;"><b>&#128295; Tecnolog&iacute;a</b><div style="font-size:13px;color:var(--text-3);margin-top:3px;">SaaS y productividad</div></div>' +
+       '</div>' +
+       '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');openModal(\'contact\')">Proponer alianza &rarr;</button>'
+  }
+};
+
+function openInfoPage(key) {
+  var lc   = lang();
+  var page = _IP[key];
+  if (!page) return;
+  var data = page[lc] || page['pt'];
+  var te = document.getElementById('info-title');
+  var be = document.getElementById('info-body');
+  if (te) te.innerHTML = data.t;
+  if (be) be.innerHTML = data.b;
+  openModal('info');
+}
+
+function submitContact() {
+  var n   = document.getElementById('contact-name');
+  var e   = document.getElementById('contact-email');
+  var m   = document.getElementById('contact-msg');
+  var btn = document.querySelector('#overlay-contact .btn-green');
+  var ok  = (_vField(n,'err-contact-name',  lang()==='pt'?'Nome obrigatorio':'Nombre obligatorio')
+           & _vEmail(e,'err-contact-email')
+           & _vField(m,'err-contact-msg',   lang()==='pt'?'Mensagem obrigatoria':'Mensaje obligatorio'));
+  if (!ok) return;
+  _setBtnLoading(btn, true);
+  setTimeout(function(){
+    _setBtnLoading(btn, false);
+    closeModal('contact');
+    if (n) n.value = ''; if (e) e.value = ''; if (m) m.value = '';
+    showToast(lang()==='pt' ? 'Mensagem enviada! Responderemos em breve.' : 'Mensaje enviado! Te responderemos pronto.', 'success');
+  }, 800);
+}
 init();
 </script>
 
