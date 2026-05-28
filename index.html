@@ -252,55 +252,7 @@ ul { list-style: none; }
 }
 .logo-text span { color: var(--orange); }
 
-/* Search bar no header */
-.header-search {
-  flex: 1;
-  max-width: 480px;
-  position: relative;
-}
-.header-search-input {
-  width: 100%;
-  height: 40px;
-  padding: 0 16px 0 42px;
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius-full);
-  font-size: 14px;
-  color: var(--text);
-  background: var(--surface);
-  transition: border-color var(--transition), background var(--transition);
-  outline: none;
-}
-.header-search-input:focus {
-  border-color: var(--green);
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
-}
-.header-search-input::placeholder { color: var(--text-3); }
-.header-search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-3);
-  font-size: 16px;
-  pointer-events: none;
-}
-.header-search-btn {
-  position: absolute;
-  right: 5px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: var(--green);
-  color: #fff;
-  border: none;
-  border-radius: var(--radius-full);
-  padding: 5px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background var(--transition);
-}
-.header-search-btn:hover { background: var(--green-dark); }
+
 
 /* Nav links */
 .nav {
@@ -1861,7 +1813,6 @@ section { padding: 64px 0; }
 }
 @media (max-width: 900px) {
   .nav { display: none; }
-  .header-search { display: none; }
   .hero-search-select { display: none; }
   .stat-item { padding: 8px 20px; }
   .how-content.active { grid-template-columns: 1fr; }
@@ -2096,18 +2047,6 @@ section { padding: 64px 0; }
       <span class="logo-text">Here<span>work</span></span>
     </a>
 
-    <!-- Search bar -->
-    <div class="header-search">
-      <span class="header-search-icon">🔍</span>
-      <input
-        class="header-search-input"
-        type="text"
-        data-placeholder-pt="Buscar freelancers ou serviços..."
-        data-placeholder-es="Buscar freelancers o servicios..."
-        placeholder="Buscar freelancers ou serviços..."
-      >
-      <button class="header-search-btn" data-pt="Buscar" data-es="Buscar">Buscar</button>
-    </div>
 
     <!-- Nav links -->
     <nav class="nav">
@@ -4542,17 +4481,6 @@ function doHeroSearch() {
     if (term) showToast((lang()==='pt'?'Buscando: ':'Buscando: ') + term, 'info');
   }, 150);
 }
-function doHeaderSearch() {
-  var term = (document.querySelector('.header-search-input') || {}).value || '';
-  if (!term.trim()) return;
-  showPage('freelancers');
-  setTimeout(function() {
-    var inp = document.querySelector('#page-freelancers .page-search-input');
-    if (inp) inp.value = term.trim();
-    applyAllFilters('fl');
-    showToast((lang()==='pt'?'Buscando: ':'Buscando: ') + term.trim(), 'info');
-  }, 150);
-}
 function doPageSearch(pageId) {
   var prefix = pageId === 'freelancers' ? 'fl' : 'proj';
   var catSel = document.getElementById(prefix + '-banner-cat');
@@ -5360,7 +5288,6 @@ document.addEventListener('click', function(e) {
 
   /* Busca hero / header */
   if (e.target.closest('.hero-search-btn'))   { doHeroSearch();   return; }
-  if (e.target.closest('.header-search-btn')) { doHeaderSearch(); return; }
 
   /* Scroll to top */
   if (e.target.closest('#scroll-top-btn')) {
@@ -5404,7 +5331,6 @@ document.addEventListener('click', function(e) {
 document.addEventListener('keydown', function(e) {
   if (e.key !== 'Enter') return;
   if (e.target.classList.contains('hero-search-input'))   { doHeroSearch();   return; }
-  if (e.target.classList.contains('header-search-input')) { doHeaderSearch(); return; }
   if (e.target.classList.contains('page-search-input')) {
     var pg = e.target.closest('.page');
     if (pg) doPageSearch(pg.id.replace('page-',''));
