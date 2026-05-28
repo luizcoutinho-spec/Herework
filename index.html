@@ -5913,22 +5913,37 @@ function setRegType(type) {
   if (fBtn) fBtn.className = type==='freelancer'  ? 'btn btn-green btn-sm' : 'btn btn-outline btn-sm';
 }
 function submitRegister() {
-  var n   = document.getElementById('reg-name');
-  var e   = document.getElementById('reg-email');
-  var p   = document.getElementById('reg-pass');
-  var btn = document.querySelector('#overlay-register .btn-green');
-  var ok  = (_vField(n,'err-reg-name',  lang()==='pt'?'Nome obrigatório':'Nombre obligatorio')
-           & _vEmail(e,'err-reg-email')
-           & _vField(p,'err-reg-pass',  lang()==='pt'?'Crie uma senha':'Crea una contraseña'));
+  var n    = document.getElementById('reg-name');
+  var e    = document.getElementById('reg-email');
+  var p    = document.getElementById('reg-pass');
+  var btn  = document.getElementById('reg-submit-btn');
+  var errP = document.getElementById('err-reg-pass');
+
+  var ok = (_vField(n,'err-reg-name',  lang()==='pt'?'Nome obrigatório':'Nombre obligatorio')
+          & _vEmail(e,'err-reg-email')
+          & _vField(p,'err-reg-pass',  lang()==='pt'?'Crie uma senha':'Crea una contraseña'));
+
+  if (ok && p && p.value.length < 6) {
+    if (errP) { errP.textContent = lang()==='pt'?'Mínimo de 6 caracteres.':'Mínimo 6 caracteres.'; errP.classList.add('show'); }
+    if (p) p.classList.add('error');
+    ok = false;
+  }
+
   if (!ok) return;
   _setBtnLoading(btn, true);
   setTimeout(function(){
     _setBtnLoading(btn, false);
     closeModal('register');
-    showToast(lang()==='pt' ? 'Cadastro realizado! Verifique seu e-mail.' : 'Registro exitoso! Revisa tu correo.', 'success');
-  }, 800);
+    var firstName = n ? n.value.trim().split(' ')[0] : '';
+    showToast(
+      lang()==='pt'
+        ? '&#x2705; Conta criada' + (firstName ? ', ' + firstName : '') + '! Verifique seu e-mail para ativar.'
+        : '&#x2705; Cuenta creada' + (firstName ? ', ' + firstName : '') + '! Revisa tu correo para activar.',
+      'success'
+    );
+    if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
+  }, 900);
 }
-
 function submitProject() {
   var t   = document.getElementById('proj-title');
   var d   = document.getElementById('proj-desc');
