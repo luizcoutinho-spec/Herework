@@ -4748,6 +4748,27 @@ section { padding: 64px 0; }
         <textarea class="form-textarea" id="proj-desc" data-placeholder-pt="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." data-placeholder-es="Describe en detalle lo que necesitas, objetivos, referencias, entregables esperados..." placeholder="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." style="min-height:130px;"></textarea>
         <div class="form-error" id="err-proj-desc"></div>
       </div>
+      <div class="form-group">
+        <label class="form-label">Anexar Briefing / Documento em PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(opcional &middot; m&aacute;x. 10 MB)</span></label>
+        <div class="pdf-upload-area" id="proj-pdf-drop-zone" onclick="document.getElementById('proj-pdf-input').click()"
+          ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
+          <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected2(this)">
+          <div id="proj-pdf-placeholder">
+            <div class="pdf-upload-icon">&#128196;</div>
+            <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
+            <div class="pdf-upload-sub">Briefing, especifica&ccedil;&atilde;o t&eacute;cnica, wireframe &middot; somente .pdf &middot; m&aacute;x. 10 MB</div>
+          </div>
+        </div>
+        <div class="pdf-file-preview" id="proj-pdf-preview">
+          <span class="pdf-file-icon">&#128213;</span>
+          <div class="pdf-file-info">
+            <div class="pdf-file-name" id="proj-pdf-name">arquivo.pdf</div>
+            <div class="pdf-file-size" id="proj-pdf-size">0 KB</div>
+          </div>
+          <button type="button" class="pdf-file-remove" onclick="pdfRemove2(event)" title="Remover">&#x2715;</button>
+        </div>
+        <div class="form-error" id="err-proj-pdf"></div>
+      </div>
       <button class="btn btn-primary btn-block btn-lg" onclick="submitProject()" data-pt="🚀 Publicar Projeto Agora" data-es="🚀 Publicar Proyecto Ahora">🚀 Publicar Projeto Agora</button>
       <div class="modal-switch-link" style="font-size:12px;color:var(--text-3);margin-top:10px;" data-pt="Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow" data-es="Publicación gratuita · Recibe propuestas en minutos · Pago seguro vía escrow">Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow</div>
     </div>
@@ -5880,7 +5901,8 @@ function closeModal(id) {
   if (!overlay) return;
   overlay.classList.remove('open');
   document.body.style.overflow = '';
-  if (id === 'proposal' && typeof _pdfReset === 'function') _pdfReset();
+  if (id === 'proposal' && typeof _pdfReset  === 'function') _pdfReset();
+  if (id === 'publish'  && typeof _pdfReset2 === 'function') _pdfReset2();
   overlay.querySelectorAll('.form-error').forEach(function(e){ e.classList.remove('show'); });
   overlay.querySelectorAll('.form-input.error,.form-select.error,.form-textarea.error')
     .forEach(function(e){ e.classList.remove('error'); });
@@ -6120,7 +6142,9 @@ function submitProject() {
   setTimeout(function(){
     _setBtnLoading(btn, false);
     closeModal('publish');
-    showToast(lang()==='pt' ? 'Projeto publicado com sucesso!' : 'Proyecto publicado exitosamente!', 'success');
+    var hasPdf2 = document.getElementById('proj-pdf-input') && document.getElementById('proj-pdf-input').files && document.getElementById('proj-pdf-input').files.length > 0;
+    _pdfReset2();
+    showToast(lang()==='pt' ? 'Projeto publicado com sucesso!' + (hasPdf2?' (PDF anexado)':'') : 'Proyecto publicado exitosamente!', 'success');
   }, 800);
 }
 
@@ -7790,6 +7814,64 @@ function adminRemoveDemo() {
 
   showToast('✅ ' + total + ' perfis demo removidos com sucesso!', 'success');
 }
+
+/* ─── PDF Upload — Publicar Projeto ─── */
+function pdfSelected2(input) {
+  _pdfApply2(input.files && input.files[0]);
+}
+function pdfDragOver2(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('proj-pdf-drop-zone');
+  if (z) z.classList.add('drag-over');
+}
+function pdfDragLeave2(e) {
+  var z = document.getElementById('proj-pdf-drop-zone');
+  if (z) z.classList.remove('drag-over');
+}
+function pdfDrop2(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('proj-pdf-drop-zone');
+  if (z) z.classList.remove('drag-over');
+  _pdfApply2(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]);
+}
+function _pdfApply2(f) {
+  var errEl  = document.getElementById('err-proj-pdf');
+  var zone   = document.getElementById('proj-pdf-drop-zone');
+  var prev   = document.getElementById('proj-pdf-preview');
+  var nameEl = document.getElementById('proj-pdf-name');
+  var sizeEl = document.getElementById('proj-pdf-size');
+  var ph     = document.getElementById('proj-pdf-placeholder');
+  if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+  if (!f) return;
+  if (f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+    if (errEl) { errEl.textContent = lang()==='pt' ? 'Apenas arquivos PDF são aceitos.' : 'Solo se aceptan archivos PDF.'; errEl.classList.add('show'); }
+    return;
+  }
+  if (f.size > 10 * 1024 * 1024) {
+    if (errEl) { errEl.textContent = lang()==='pt' ? 'O arquivo excede 10 MB.' : 'El archivo excede 10 MB.'; errEl.classList.add('show'); }
+    return;
+  }
+  var kb = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/(1024*1024)).toFixed(1)+' MB';
+  if (nameEl) nameEl.textContent = f.name;
+  if (sizeEl) sizeEl.textContent = kb;
+  if (prev)  prev.classList.add('show');
+  if (zone)  zone.classList.add('has-file');
+  if (ph)    ph.style.display = 'none';
+}
+function pdfRemove2(e) {
+  e.stopPropagation();
+  var inp  = document.getElementById('proj-pdf-input');
+  var prev = document.getElementById('proj-pdf-preview');
+  var zone = document.getElementById('proj-pdf-drop-zone');
+  var ph   = document.getElementById('proj-pdf-placeholder');
+  var err  = document.getElementById('err-proj-pdf');
+  if (inp)  inp.value = '';
+  if (prev) prev.classList.remove('show');
+  if (zone) zone.classList.remove('has-file');
+  if (ph)   ph.style.display = '';
+  if (err)  { err.textContent = ''; err.classList.remove('show'); }
+}
+function _pdfReset2() { pdfRemove2({ stopPropagation: function(){} }); }
 </script>
 </body>
 </html>
