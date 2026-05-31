@@ -6389,7 +6389,7 @@ section { padding: 64px 0; }
           style="min-height:120px;" oninput="revDescCount(this)"></textarea>
         <div style="display:flex;justify-content:space-between;margin-top:4px;">
           <div class="form-error" id="err-rev-desc" style="flex:1;"></div>
-          <span style="font-size:11px;color:var(--text-4);" id="rev-desc-count">0 / 30 mín.</span>
+          <span style="font-size:11px;color:var(--text-4);" id="rev-desc-count">0 / 20 mín.</span>
         </div>
       </div>
 
@@ -10164,29 +10164,45 @@ function selectRevUrgency(level) {
 function revDescCount(el) {
   var len = el.value.length;
   var cnt = document.getElementById('rev-desc-count');
-  if(cnt){ cnt.textContent = len + ' / 30 mín.'; cnt.style.color = len>=30 ? 'var(--green)' : 'var(--text-4)'; }
+  if(cnt){ cnt.textContent = len + ' / 20 mín.'; cnt.style.color = len>=20 ? 'var(--green)' : 'var(--text-4)'; }
 }
 
 function submitRevision() {
-  var ok = true;
+  /* Lê estado direto do DOM — não depende de _revCtx */
+  var typeBtn    = document.querySelector('#overlay-revision .revision-type-btn.selected');
+  var urgencyBtn = document.querySelector('#overlay-revision .revision-urgency-btn[class*="sel-"]');
+  var desc       = document.getElementById('rev-description');
+  var ok         = true;
 
-  if(!_revCtx.type) {
+  /* Limpa erros anteriores */
+  ['err-rev-type','err-rev-urgency','err-rev-desc'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.textContent=''; el.classList.remove('show'); }
+  });
+
+  if(!typeBtn) {
     var e = document.getElementById('err-rev-type');
     if(e){ e.textContent='Selecione o tipo de revisão.'; e.classList.add('show'); }
     ok = false;
   }
-  if(!_revCtx.urgency) {
+  if(!urgencyBtn) {
     var e = document.getElementById('err-rev-urgency');
     if(e){ e.textContent='Selecione a urgência.'; e.classList.add('show'); }
     ok = false;
   }
-  var desc = document.getElementById('rev-description');
-  if(!desc || desc.value.trim().length < 30) {
+  if(!desc || desc.value.trim().length < 20) {
     var e = document.getElementById('err-rev-desc');
-    if(e){ e.textContent='Descreva a revisão com pelo menos 30 caracteres.'; e.classList.add('show'); }
+    if(e){ e.textContent='Descreva com pelo menos 20 caracteres.'; e.classList.add('show'); }
     ok = false;
   }
   if(!ok) return;
+
+  /* Coleta dados ANTES de fechar modal */
+  var dlSel  = document.getElementById('rev-deadline');
+  var dlText = dlSel ? dlSel.options[dlSel.selectedIndex].text : '48 horas';
+  var projId = _revCtx.projId || '';
+  var p      = _dashProj[projId];
+  var who    = p ? (p.freelancer || p.client || 'O profissional') : 'O profissional';
 
   var btn = document.getElementById('rev-submit-btn');
   _setBtnLoading(btn, true);
@@ -10195,8 +10211,7 @@ function submitRevision() {
     _setBtnLoading(btn, false);
     closeModal('revision');
 
-    /* Update project status in dashboard */
-    var p = _dashProj[_revCtx.projId];
+    /* Atualiza status no dashboard */
     if(p) {
       p.status      = 'review-pending';
       p.statusLabel = 'Revisão solicitada';
@@ -10204,13 +10219,8 @@ function submitRevision() {
       _renderDashFLActive();
     }
 
-    var deadline = document.getElementById('rev-deadline');
-    var dlText = deadline ? deadline.options[deadline.selectedIndex].text : '48 horas';
-    var p2 = _dashProj[_revCtx.projId];
-    var who = p2 ? (p2.freelancer || p2.client || 'O profissional') : 'O profissional';
-
     showToast(
-      '📝 Revisão solicitada! ' + who + ' foi notificado e tem ' + dlText + ' para reenviar. Pagamento permanece em escrow.',
+      '📝 Revisão solicitada! ' + who + ' foi notificado e tem ' + dlText + ' para corrigir. Pagamento permanece em escrow.',
       'success'
     );
   }, 900);
