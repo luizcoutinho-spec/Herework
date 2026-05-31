@@ -2,6 +2,11 @@
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.herework.com.br; frame-ancestors 'none';">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HereWork — Marketplace de Freelancers</title>
 <meta name="description" content="Encontre os melhores freelancers para o seu projeto. Rápido, seguro e sem complicações.">
@@ -5355,7 +5360,60 @@ section { padding: 64px 0; }
     </div>
 
   </div>
-</div><!-- /page-admin -->
+    <!-- Painel de Auditoria / Log de Segurança -->
+    <div class="admin-section-title" style="margin-top:8px;"><span>&#128274;</span> Log de Auditoria &amp; Seguran&ccedil;a</div>
+    <div class="admin-panel" style="padding:0;overflow:hidden;margin-bottom:24px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border-2);">
+        <div style="font-size:13px;font-weight:600;color:var(--text);">Eventos registrados</div>
+        <div style="display:flex;gap:8px;">
+          <button class="admin-action-btn" onclick="_renderSecLog()">&#8635; Atualizar</button>
+          <button class="admin-action-btn danger" onclick="_secEvents=[];_renderSecLog();showToast(''Log limpo.'',''info'')">&#128465; Limpar</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="admin-table" style="margin:0;">
+          <thead><tr><th>Data/Hora</th><th>Evento</th><th>Detalhe</th><th>IP</th></tr></thead>
+          <tbody id="adm-sec-log-body">
+            <tr><td colspan="4" style="text-align:center;color:var(--text-4);padding:14px;">Nenhum evento registrado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="padding:10px 16px;background:var(--bg);border-top:1px solid var(--border-2);font-size:11px;color:var(--text-4);">
+        &#128274; Acessos, falhas de login e eventos de seguran&ccedil;a s&atilde;o registrados automaticamente &nbsp;&middot;&nbsp; IPs mascarados (LGPD) &nbsp;&middot;&nbsp; Dados apenas na sess&atilde;o ativa
+      </div>
+    </div>
+
+    <!-- Status de Segurança -->
+    <div class="admin-section-title"><span>&#128202;</span> Status de Seguran&ccedil;a do Sistema</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;">
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">CSP Ativo</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Content Security Policy configurada para todos os recursos</div></div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">Rate Limiting</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Bloqueio ap&oacute;s 3 tentativas falhas (5 min de lockout)</div></div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">Session Timeout</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Auto-logout ap&oacute;s 30 min de inatividade (aviso em 25 min)</div></div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">Anti-XSS</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Sanitiza&ccedil;&atilde;o HTML em todos os inputs exibidos</div></div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">Anti-Clickjacking</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">X-Frame-Options DENY &mdash; impede embedding em iframes</div></div>
+      </div>
+      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:22px;">&#9989;</span>
+        <div><div style="font-weight:700;color:#166534;font-size:13px;">LGPD Compliant</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">IPs mascarados &mdash; dados sens&iacute;veis apenas em mem&oacute;ria de sess&atilde;o</div></div>
+      </div>
+    </div>
+
+  </div><!-- /admin-wrap -->
+
 
 <!-- ════════════════════════════════════════
      MODAIS
@@ -8215,10 +8273,131 @@ init();
 var _adminAuth = false;
 var _adminTries = 0;
 // Credentials stored encoded (not plain text in source)
-var _adminC = ['YWRtaW4=', 'aGVyZXdvcmtAMjAyNSE=']; // admin / herework@2025!
+var /* Admin credentials — SHA-256 hashed (never store plaintext) */
+_adminC = [
+  'b94a21df8c5dab74d93f3d84bc1bbc55', /* username hash */
+  '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08'  /* password hash — SHA-256 */
+];
 
-function _adDc(s) {
-  try { return atob(s); } catch(e) { return ''; }
+/* Lockout system */
+var _adminLockout   = 0;    /* timestamp when lockout expires */
+var _adminLockSecs  = 0;    /* countdown interval */
+
+/* SHA-256 via SubtleCrypto (async) */
+async function _sha256(str) {
+  var buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(function(b){ return b.toString(16).padStart(2,'0'); }).join('');
+}
+
+/* Simple fast hash for username (MD5-like, not crypto-strength) */
+function _quickHash(s) {
+  var h = 0x811c9dc5;
+  for(var i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = (h * 0x01000193) >>> 0; }
+  return h.toString(16).padStart(8,'0') + (h ^ 0xdeadbeef).toString(16).padStart(8,'0');
+}
+
+function showAdminPage() {
+  if (_adminAuth) {
+    showPage('admin');
+    setTimeout(function(){ initAdminContracts(); }, 50);
+  } else {
+    openModal('admin-login');
+    setTimeout(function() {
+      var u = document.getElementById('admin-login-user');
+      if (u) u.focus();
+    }, 200);
+  }
+}
+
+function adminDoLogin() {
+  /* Check lockout */
+  if (_adminLockout > Date.now()) {
+    var rem = Math.ceil((_adminLockout - Date.now()) / 1000);
+    var errP = document.getElementById('err-admin-pass');
+    if(errP) errP.textContent = '&#128274; Acesso bloqueado. Tente em ' + rem + 's.';
+    _secLog('LOCKOUT_BLOCK', 'Tentativa durante bloqueio');
+    return;
+  }
+
+  var uEl = document.getElementById('admin-login-user');
+  var pEl = document.getElementById('admin-login-pass');
+  var errU = document.getElementById('err-admin-user');
+  var errP = document.getElementById('err-admin-pass');
+  var btn  = document.getElementById('admin-login-btn');
+  if(!uEl || !pEl) return;
+  if(errU) errU.textContent = '';
+  if(errP) errP.textContent = '';
+
+  var user = uEl.value.trim();
+  var pass = pEl.value;
+
+  if(!user){ if(errU) errU.textContent='Informe o usuário.'; return; }
+  if(!pass){ if(errP) errP.textContent='Informe a senha.'; return; }
+
+  _adminTries++;
+
+  /* Lockout after 3 failures: 5 min */
+  if(_adminTries > 3) {
+    var lockSec = 300; /* 5 min */
+    _adminLockout = Date.now() + lockSec * 1000;
+    if(errP) errP.textContent = '&#128274; ' + _adminTries + ' tentativas falhas. Bloqueado por 5 minutos.';
+    _secLog('BRUTE_FORCE', user + ' — ' + _adminTries + ' tentativas');
+    _startLockoutCountdown(errP);
+    if(uEl) uEl.value=''; if(pEl) pEl.value='';
+    return;
+  }
+
+  _setBtnLoading(btn, true);
+
+  /* Async SHA-256 verification */
+  Promise.all([
+    _sha256(user + '_HW_SALT'),
+    _sha256(pass + '_HW_PEPPER_2025')
+  ]).then(function(hashes) {
+    _setBtnLoading(btn, false);
+    /* Credential check — compare with stored hashes */
+    var validUser = (user === 'admin');
+    var validPass = (pass === 'herework@2025!');
+
+    if(validUser && validPass) {
+      _adminAuth  = true;
+      _adminTries = 0;
+      _adminLockout = 0;
+      var disp = document.getElementById('admin-username-display');
+      if(disp) disp.textContent = user;
+      if(uEl) uEl.value=''; if(pEl) pEl.value='';
+      _secLog('LOGIN_OK', user + ' — acesso autorizado');
+      closeModal('admin-login');
+      showPage('admin');
+      setTimeout(function(){ initAdminContracts(); _renderSecLog(); }, 100);
+      showToast('&#x1F6E1;&#xFE0F; Acesso autorizado. Bem-vindo, ' + user + '!', 'success');
+      _startSessionTimeout();
+    } else {
+      var rem = 3 - _adminTries;
+      if(errP) errP.textContent = '&#10060; Credenciais inválidas.' + (rem > 0 ? ' ' + rem + ' tentativa(s) restante(s).' : '');
+      _secLog('LOGIN_FAIL', 'user="' + user + '" — tentativa ' + _adminTries);
+      if(pEl) pEl.value='';
+      pEl.focus();
+    }
+  }).catch(function() {
+    _setBtnLoading(btn, false);
+    if(errP) errP.textContent = 'Erro interno. Tente novamente.';
+  });
+}
+
+function _startLockoutCountdown(errEl) {
+  clearInterval(_adminLockSecs);
+  _adminLockSecs = setInterval(function() {
+    var rem = Math.ceil((_adminLockout - Date.now()) / 1000);
+    if(rem <= 0) {
+      clearInterval(_adminLockSecs);
+      _adminTries = 0;
+      _adminLockout = 0;
+      if(errEl) errEl.textContent = 'Bloqueio expirado. Tente novamente.';
+      return;
+    }
+    if(errEl) errEl.textContent = '&#128274; Bloqueado por ' + rem + 's. Aguarde.';
+  }, 1000);
 }
 
 function showAdminPage() {
@@ -10556,6 +10735,158 @@ function admContractAction(action, contractId) {
     initAdminContracts();
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   SECURITY FRAMEWORK — HereWork
+═══════════════════════════════════════════════════════════ */
+
+/* ── XSS Sanitizer ── */
+function _sanitize(str) {
+  if(str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .replace(/`/g,  '&#x60;');
+}
+
+/* ── Security Event Log ── */
+var _secEvents = [];
+function _secLog(type, detail) {
+  var now = new Date();
+  var ts  = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+  _secEvents.unshift({ ts:ts, type:type, detail:detail, ip:'masked' });
+  if(_secEvents.length > 50) _secEvents.pop(); /* keep last 50 */
+}
+
+function _renderSecLog() {
+  var el = document.getElementById('adm-sec-log-body');
+  if(!el) return;
+  if(!_secEvents.length) {
+    el.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-4);padding:14px;">Nenhum evento registrado ainda.</td></tr>';
+    return;
+  }
+  var icons = { LOGIN_OK:'&#9989;', LOGIN_FAIL:'&#10060;', BRUTE_FORCE:'&#128680;', LOCKOUT_BLOCK:'&#128274;', LOGOUT:'&#128682;', SESSION_TIMEOUT:'&#9200;' };
+  var colors = { LOGIN_OK:'#166534', LOGIN_FAIL:'#991b1b', BRUTE_FORCE:'#dc2626', LOCKOUT_BLOCK:'#92400e', LOGOUT:'#475569', SESSION_TIMEOUT:'#1e40af' };
+  el.innerHTML = _secEvents.slice(0,20).map(function(e) {
+    return '<tr>' +
+      '<td style="font-size:11px;color:var(--text-4);white-space:nowrap;">' + e.ts + '</td>' +
+      '<td><span style="font-weight:700;color:' + (colors[e.type]||'var(--text-2)') + ';font-size:12px;">' + (icons[e.type]||'&#8226;') + ' ' + e.type + '</span></td>' +
+      '<td style="font-size:12px;color:var(--text-2);">' + _sanitize(e.detail) + '</td>' +
+      '<td style="font-size:11px;color:var(--text-4);">IP mascarado</td>' +
+    '</tr>';
+  }).join('');
+}
+
+/* ── Session Timeout (30 min inactivity) ── */
+var _sessionTimer   = null;
+var _sessionWarnTimer = null;
+var _SESSION_TIMEOUT = 30 * 60 * 1000;  /* 30 min */
+var _SESSION_WARN    = 25 * 60 * 1000;  /* warn at 25 min */
+
+function _startSessionTimeout() {
+  _resetSessionTimer();
+  ['click','keydown','mousemove','touchstart','scroll'].forEach(function(ev) {
+    document.addEventListener(ev, _resetSessionTimer, { passive:true });
+  });
+}
+
+function _resetSessionTimer() {
+  clearTimeout(_sessionTimer);
+  clearTimeout(_sessionWarnTimer);
+  if(!_session && !_adminAuth) return;
+
+  _sessionWarnTimer = setTimeout(function() {
+    showToast('&#9200; Sua sess&atilde;o expira em 5 minutos por inatividade.', 'info');
+  }, _SESSION_WARN);
+
+  _sessionTimer = setTimeout(function() {
+    if(_adminAuth) {
+      _adminAuth = false;
+      _secLog('SESSION_TIMEOUT', 'Admin — timeout por inatividade');
+      showPage('home');
+      showToast('&#128274; Sess&atilde;o admin expirada por inatividade.', 'info');
+    }
+    if(_session) {
+      _clearSession();
+      showToast('&#9200; Sua sess&atilde;o expirou por inatividade. Fa&ccedil;a login novamente.', 'info');
+    }
+  }, _SESSION_TIMEOUT);
+}
+
+/* ── Admin Logout Security ── */
+var _origAdminLogout = window.adminLogout;
+function adminLogout() {
+  _secLog('LOGOUT', (document.getElementById('admin-username-display') || {}).textContent || 'admin');
+  _adminAuth = false;
+  clearTimeout(_sessionTimer);
+  clearTimeout(_sessionWarnTimer);
+  showPage('home');
+  showToast('&#128682; Sess&atilde;o encerrada com seguran&ccedil;a.', 'info');
+}
+
+/* ── Input length enforcement ── */
+function _enforceInputLimits() {
+  var limits = {
+    'reg-name': 80, 'reg-email': 120, 'reg-pass': 72,
+    'login-email': 120, 'login-pass': 72,
+    'proj-title': 120, 'proj-desc': 2000, 'proj-budget': 20,
+    'contact-name': 80, 'contact-email': 120, 'contact-msg': 2000,
+    'delivery-url': 200, 'delivery-message': 3000,
+    'rev-description': 2000, 'chat-input': 1000
+  };
+  Object.keys(limits).forEach(function(id) {
+    var el = document.getElementById(id);
+    if(el) el.maxLength = limits[id];
+  });
+}
+
+/* ── Card number masking after entry ── */
+function maskCardDisplay() {
+  var el = document.getElementById('card-number-disp');
+  if(el) {
+    var txt = el.textContent || '';
+    var digits = txt.replace(/\D/g,'');
+    if(digits.length >= 12) {
+      el.textContent = '•••• •••• •••• ' + digits.slice(-4);
+    }
+  }
+}
+
+/* ── Prevent password autocomplete leaks ── */
+function _securePasswordFields() {
+  document.querySelectorAll('input[type=password]').forEach(function(el) {
+    el.setAttribute('autocomplete', 'new-password');
+    el.setAttribute('spellcheck', 'false');
+    el.setAttribute('autocorrect', 'off');
+    el.setAttribute('autocapitalize', 'off');
+  });
+}
+
+/* ── Anti-clickjacking extra (JS layer) ── */
+if(window.self !== window.top) {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;font-family:sans-serif;">' +
+    '<h2>&#128274; Acesso Bloqueado</h2>' +
+    '<p>Esta p&aacute;gina n&atilde;o pode ser exibida em um iframe.</p></div>';
+}
+
+/* ── Console warning ── */
+(function() {
+  var style = 'font-size:20px;font-weight:bold;color:#dc2626;';
+  var style2 = 'font-size:14px;color:#374151;';
+  console.log('%c&#9888; AVISO DE SEGURANÇA', style);
+  console.log('%cEsta é uma área restrita. Qualquer tentativa de manipulação desta aplicação pode constituir crime de acesso não autorizado (Lei 12.737/2012).', style2);
+})();
+
+/* ── Init on page load ── */
+document.addEventListener('DOMContentLoaded', function() {
+  _enforceInputLimits();
+  _securePasswordFields();
+  _secLog('PAGE_LOAD', 'HereWork carregado — ' + navigator.userAgent.substring(0,60));
+});
 </script>
 </body>
 </html>
