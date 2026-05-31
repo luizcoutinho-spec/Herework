@@ -2607,6 +2607,90 @@ section { padding: 64px 0; }
 .dash-empty-icon { font-size: 40px; margin-bottom: 12px; }
 .dash-empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
 .dash-empty-sub   { font-size: 13px; color: var(--text-3); }
+/* ═══════════════════════════════════════
+   MODAL: ENVIAR ENTREGA
+═══════════════════════════════════════ */
+#overlay-delivery .modal { max-width: 560px; }
+.delivery-header-band {
+  background: linear-gradient(135deg,#1a1a2e,#0f3460);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 18px 22px; margin: -24px -24px 20px;
+  display: flex; align-items: center; gap: 14px;
+}
+.delivery-header-icon {
+  width: 48px; height: 48px; background: rgba(255,255,255,.1);
+  border-radius: 12px; display: flex; align-items: center;
+  justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+.delivery-header-info .title { font-size: 15px; font-weight: 700; color: #fff; }
+.delivery-header-info .sub   { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+/* Checklist */
+.delivery-checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.delivery-check-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius);
+  border: 1.5px solid var(--border); background: var(--bg);
+  cursor: pointer; transition: all var(--transition); user-select: none;
+}
+.delivery-check-item:hover { border-color: var(--green); background: #f0fdf4; }
+.delivery-check-item.checked { border-color: var(--green); background: #f0fdf4; }
+.delivery-check-item input[type=checkbox] {
+  width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; flex-shrink: 0;
+}
+.delivery-check-label { font-size: 13px; font-weight: 500; color: var(--text-2); flex: 1; }
+.delivery-check-item.checked .delivery-check-label { color: var(--green); text-decoration: none; }
+
+/* File multi-upload */
+.delivery-files-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.delivery-file-item {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 8px 12px;
+}
+.delivery-file-item .name { flex: 1; font-size: 12px; font-weight: 600; color: var(--text); word-break: break-all; }
+.delivery-file-item .size { font-size: 11px; color: var(--text-4); white-space: nowrap; }
+.delivery-file-item .remove {
+  background: none; border: none; cursor: pointer; color: var(--text-3);
+  font-size: 14px; padding: 2px 4px; border-radius: 4px; transition: all var(--transition);
+}
+.delivery-file-item .remove:hover { background: #fee2e2; color: #ef4444; }
+
+/* URL input with preview icon */
+.delivery-url-wrap { position: relative; }
+.delivery-url-wrap .form-input { padding-left: 38px; }
+.delivery-url-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; pointer-events: none;
+}
+
+/* Progress steps */
+.delivery-sending {
+  display: none; flex-direction: column; align-items: center;
+  gap: 12px; padding: 24px 0; text-align: center;
+}
+.delivery-sending.show { display: flex; }
+.delivery-send-progress {
+  width: 100%; height: 8px; background: var(--border);
+  border-radius: 4px; overflow: hidden; position: relative;
+}
+.delivery-send-fill {
+  height: 100%; background: linear-gradient(90deg, var(--green), #66BB6A);
+  border-radius: 4px; width: 0; transition: width .4s ease;
+}
+.delivery-send-step { font-size: 13px; color: var(--text-2); font-weight: 500; }
+
+/* Success state */
+.delivery-success {
+  display: none; flex-direction: column; align-items: center;
+  text-align: center; gap: 10px; padding: 24px 0;
+}
+.delivery-success.show { display: flex; }
+.delivery-success-icon {
+  width: 72px; height: 72px; background: #dcfce7; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
 </style>
 </head>
 <body>
@@ -5899,6 +5983,110 @@ section { padding: 64px 0; }
     </div><!-- /contract-body -->
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: ENVIAR ENTREGA (FREELANCER)
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-delivery" onclick="if(event.target===this)closeModal('delivery')">
+  <div class="modal" style="max-width:560px;">
+
+    <!-- Header band -->
+    <div class="delivery-header-band">
+      <div class="delivery-header-icon">📤</div>
+      <div class="delivery-header-info">
+        <div class="title" id="delivery-proj-title">Enviar Entrega do Projeto</div>
+        <div class="sub">Para: <strong id="delivery-client-name" style="color:#fff;">Cliente</strong> &nbsp;·&nbsp; R$ <span id="delivery-value" style="color:#66BB6A;font-weight:700;">0</span> em escrow</div>
+      </div>
+      <button class="modal-close" style="color:#fff;margin-left:auto;" onclick="closeModal('delivery')">&#x2715;</button>
+    </div>
+
+    <!-- Form content -->
+    <div id="delivery-form-content">
+
+      <!-- Checklist de entregáveis -->
+      <div class="form-group">
+        <label class="form-label">&#9989; Confirme os itens entregues</label>
+        <div class="delivery-checklist" id="delivery-checklist">
+          <!-- populated by JS -->
+        </div>
+        <div class="form-error" id="err-delivery-checklist"></div>
+      </div>
+
+      <!-- Link do trabalho -->
+      <div class="form-group">
+        <label class="form-label">&#127758; Link do trabalho / Repositório <span style="font-size:11px;color:var(--text-4);">(opcional)</span></label>
+        <div class="delivery-url-wrap">
+          <span class="delivery-url-icon">🔗</span>
+          <input class="form-input" id="delivery-url" type="url"
+            placeholder="https://github.com/seu-repo / https://seu-projeto.vercel.app">
+        </div>
+        <div class="form-error" id="err-delivery-url"></div>
+      </div>
+
+      <!-- Anexar arquivos (múltiplos PDFs) -->
+      <div class="form-group">
+        <label class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
+        <div class="pdf-upload-area" id="delivery-drop-zone"
+          onclick="document.getElementById('delivery-file-input').click()"
+          ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryDrop(event)"
+          style="margin-bottom:8px;">
+          <input type="file" id="delivery-file-input" accept=".pdf,application/pdf" multiple onchange="deliveryFilesSelected(this)">
+          <div id="delivery-placeholder">
+            <div class="pdf-upload-icon">📎</div>
+            <div class="pdf-upload-text">Clique ou arraste os arquivos PDF aqui</div>
+            <div class="pdf-upload-sub">Relatório final, documentação, artes, exports · múltiplos arquivos aceitos</div>
+          </div>
+        </div>
+        <div class="delivery-files-list" id="delivery-files-list"></div>
+        <div class="form-error" id="err-delivery-files"></div>
+      </div>
+
+      <!-- Mensagem para o cliente -->
+      <div class="form-group">
+        <label class="form-label">&#128172; Mensagem para o cliente <span style="font-size:11px;color:var(--text-4);">(obrigatório)</span></label>
+        <textarea class="form-textarea" id="delivery-message"
+          placeholder="Descreva o que foi entregue, como usar o trabalho, senhas de acesso (se houver), próximos passos sugeridos..."
+          style="min-height:120px;"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+          <span style="font-size:11px;color:var(--text-4);" id="delivery-msg-count">0 / 50 mínimo</span>
+        </div>
+        <div class="form-error" id="err-delivery-message"></div>
+      </div>
+
+      <!-- Nota de confiança -->
+      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:var(--radius);padding:12px 14px;margin-bottom:18px;font-size:12px;color:#166534;display:flex;gap:8px;align-items:flex-start;">
+        <span style="font-size:16px;flex-shrink:0;">&#128274;</span>
+        <span>Após enviar a entrega, o cliente terá <strong>7 dias</strong> para aprovar ou solicitar revisão. Se não houver resposta, o pagamento é liberado automaticamente.</span>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" id="delivery-submit-btn" onclick="submitDelivery()">
+        &#128228; Enviar Entrega ao Cliente
+      </button>
+    </div><!-- /delivery-form-content -->
+
+    <!-- Sending progress -->
+    <div class="delivery-sending" id="delivery-sending">
+      <div style="font-size:36px;">&#128228;</div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);">Enviando entrega...</div>
+      <div class="delivery-send-progress" style="width:100%;">
+        <div class="delivery-send-fill" id="delivery-send-fill"></div>
+      </div>
+      <div class="delivery-send-step" id="delivery-send-step">Compactando arquivos...</div>
+    </div>
+
+    <!-- Success state -->
+    <div class="delivery-success" id="delivery-success">
+      <div class="delivery-success-icon">&#127881;</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text);">Entrega enviada com sucesso!</div>
+      <div style="font-size:13px;color:var(--text-3);max-width:360px;line-height:1.6;">
+        <strong id="delivery-client-name-2">O cliente</strong> foi notificado e tem <strong>7 dias</strong> para aprovar. Assim que aprovar, o pagamento de <strong>R$ <span id="delivery-success-value">0</span></strong> será liberado para você.
+      </div>
+      <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 18px;font-family:monospace;font-size:12px;color:var(--text-3);" id="delivery-confirmation-code"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;" onclick="closeModal('delivery')">&#x2714; Fechar</button>
+    </div>
+
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -8981,7 +9169,7 @@ function _renderDashFLActive() {
       '<div class="dash-proj-footer">' +
         _personChip(p.client, 'Cliente') +
         '<div class="dash-proj-actions">' +
-          '<button class="btn btn-primary btn-sm" onclick="showToast(\'Entrega enviada para aprovação do cliente!\',\'success\')">📤 Enviar Entrega</button>' +
+          '<button class="btn btn-primary btn-sm" onclick="openDeliveryModal({id:p.id,title:p.title,client:p.client,value:p.value})">&#128228; Enviar Entrega</button>' +
           '<button class="btn btn-outline btn-sm" onclick="showToast(\'Abrindo chat...\',\'info\')">💬 Chat</button>' +
         '</div>' +
       '</div>' +
@@ -9041,6 +9229,266 @@ function _emptyState(icon, title, sub) {
   return '<div class="dash-empty"><div class="dash-empty-icon">' + icon + '</div>' +
     '<div class="dash-empty-title">' + title + '</div>' +
     '<div class="dash-empty-sub">' + sub + '</div></div>';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ENVIAR ENTREGA — FREELANCER
+═══════════════════════════════════════════════════════════ */
+var _deliveryCtx  = {};
+var _deliveryFiles = [];
+
+/* Checkboxes padrão por tipo de projeto */
+var _deliveryChecks = {
+  default: [
+    'Todos os arquivos finais entregues',
+    'Código-fonte / arquivos editáveis incluídos',
+    'Documentação / instruções de uso anexadas',
+    'Revisões solicitadas anteriormente atendidas',
+    'Prazo cumprido conforme contrato'
+  ]
+};
+
+function openDeliveryModal(proj) {
+  _deliveryCtx  = proj || {};
+  _deliveryFiles = [];
+
+  /* Preencher cabeçalho */
+  var el;
+  el = document.getElementById('delivery-proj-title');   if(el) el.textContent = proj.title || 'Entrega do Projeto';
+  el = document.getElementById('delivery-client-name');  if(el) el.textContent = proj.client || 'Cliente';
+  el = document.getElementById('delivery-client-name-2');if(el) el.textContent = proj.client || 'O cliente';
+  el = document.getElementById('delivery-value');        if(el) el.textContent = (proj.value||0).toLocaleString('pt-BR');
+  el = document.getElementById('delivery-success-value');if(el) el.textContent = (proj.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+
+  /* Montar checklist */
+  var items = proj.checklist || _deliveryChecks.default;
+  var cl = document.getElementById('delivery-checklist');
+  if(cl) {
+    cl.innerHTML = items.map(function(item, i) {
+      return '<label class="delivery-check-item" id="dci-'+i+'" onclick="toggleDeliveryCheck('+i+',this)">' +
+        '<input type="checkbox" id="dcheck-'+i+'" onclick="event.stopPropagation();" onchange="toggleDeliveryCheck('+i+',this.closest(\'label\'))">' +
+        '<span class="delivery-check-label">'+item+'</span>' +
+        '<span style="font-size:14px;color:var(--green);display:none;" id="dcheck-icon-'+i+'">&#10003;</span>' +
+      '</label>';
+    }).join('');
+  }
+
+  /* Limpar campos */
+  el = document.getElementById('delivery-url');     if(el) el.value = '';
+  el = document.getElementById('delivery-message'); if(el) { el.value = ''; _updateMsgCount(); }
+  document.getElementById('delivery-files-list').innerHTML = '';
+  document.getElementById('delivery-placeholder').style.display = '';
+  document.getElementById('delivery-drop-zone').classList.remove('has-file');
+  ['err-delivery-checklist','err-delivery-url','err-delivery-message','err-delivery-files']
+    .forEach(function(id){ var e=document.getElementById(id); if(e){e.textContent='';e.classList.remove('show');} });
+
+  /* Reset states */
+  document.getElementById('delivery-form-content').style.display = 'block';
+  var s = document.getElementById('delivery-sending'); if(s){ s.classList.remove('show'); s.style.display='none'; }
+  var ok = document.getElementById('delivery-success'); if(ok){ ok.classList.remove('show'); ok.style.display='none'; }
+
+  openModal('delivery');
+}
+
+function toggleDeliveryCheck(i, lbl) {
+  var cb   = document.getElementById('dcheck-'+i);
+  var icon = document.getElementById('dcheck-icon-'+i);
+  if(!cb) return;
+  cb.checked = !cb.checked;
+  if(lbl) lbl.classList.toggle('checked', cb.checked);
+  if(icon) icon.style.display = cb.checked ? '' : 'none';
+}
+
+function _updateMsgCount() {
+  var el  = document.getElementById('delivery-message');
+  var cnt = document.getElementById('delivery-msg-count');
+  if(!el || !cnt) return;
+  var len = el.value.length;
+  cnt.textContent = len + ' / 50 mínimo';
+  cnt.style.color = len >= 50 ? 'var(--green)' : 'var(--text-4)';
+}
+
+/* Attach message counter */
+document.addEventListener('DOMContentLoaded', function() {
+  var ta = document.getElementById('delivery-message');
+  if(ta) ta.addEventListener('input', _updateMsgCount);
+});
+
+/* ── File handling ── */
+function deliveryFilesSelected(input) {
+  if(!input.files) return;
+  Array.from(input.files).forEach(function(f){ _deliveryAddFile(f); });
+  input.value = ''; // allow re-selecting same file
+}
+function deliveryDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('delivery-drop-zone'); if(z) z.classList.add('drag-over');
+}
+function deliveryDragLeave(e) {
+  var z = document.getElementById('delivery-drop-zone'); if(z) z.classList.remove('drag-over');
+}
+function deliveryDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('delivery-drop-zone'); if(z) z.classList.remove('drag-over');
+  if(e.dataTransfer && e.dataTransfer.files)
+    Array.from(e.dataTransfer.files).forEach(function(f){ _deliveryAddFile(f); });
+}
+
+function _deliveryAddFile(f) {
+  var errEl = document.getElementById('err-delivery-files');
+  if(errEl){ errEl.textContent=''; errEl.classList.remove('show'); }
+
+  if(f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+    if(errEl){ errEl.textContent='Apenas arquivos PDF são aceitos.'; errEl.classList.add('show'); }
+    return;
+  }
+  if(f.size > 10 * 1024 * 1024) {
+    if(errEl){ errEl.textContent='"' + f.name + '" excede 10 MB.'; errEl.classList.add('show'); }
+    return;
+  }
+  // Avoid duplicates
+  if(_deliveryFiles.some(function(x){ return x.name === f.name; })) {
+    if(errEl){ errEl.textContent='"' + f.name + '" já foi adicionado.'; errEl.classList.add('show'); }
+    return;
+  }
+  _deliveryFiles.push(f);
+  _renderDeliveryFiles();
+}
+
+function _renderDeliveryFiles() {
+  var list = document.getElementById('delivery-files-list');
+  var ph   = document.getElementById('delivery-placeholder');
+  if(!list) return;
+  if(_deliveryFiles.length === 0) {
+    list.innerHTML = '';
+    if(ph) ph.style.display = '';
+    document.getElementById('delivery-drop-zone').classList.remove('has-file');
+    return;
+  }
+  if(ph) ph.style.display = 'none';
+  document.getElementById('delivery-drop-zone').classList.add('has-file');
+  list.innerHTML = _deliveryFiles.map(function(f, i) {
+    var kb = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/(1024*1024)).toFixed(1)+' MB';
+    return '<div class="delivery-file-item">' +
+      '<span style="font-size:18px;">📕</span>' +
+      '<span class="name">'+f.name+'</span>' +
+      '<span class="size">'+kb+'</span>' +
+      '<button class="remove" onclick="deliveryRemoveFile('+i+')" title="Remover">&#x2715;</button>' +
+    '</div>';
+  }).join('');
+}
+
+function deliveryRemoveFile(i) {
+  _deliveryFiles.splice(i, 1);
+  _renderDeliveryFiles();
+}
+
+/* ── Validation ── */
+function _validateDelivery() {
+  var ok = true;
+
+  /* At least 3 checkboxes checked */
+  var checked = 0;
+  document.querySelectorAll('#delivery-checklist input[type=checkbox]').forEach(function(cb){ if(cb.checked) checked++; });
+  var total = _deliveryCtx.checklist ? _deliveryCtx.checklist.length : _deliveryChecks.default.length;
+  if(checked < Math.min(3, total)) {
+    var e = document.getElementById('err-delivery-checklist');
+    if(e){ e.textContent = 'Confirme ao menos os itens principais da entrega.'; e.classList.add('show'); }
+    ok = false;
+  } else {
+    var e = document.getElementById('err-delivery-checklist'); if(e){ e.textContent=''; e.classList.remove('show'); }
+  }
+
+  /* Message min 50 chars */
+  var msg = document.getElementById('delivery-message');
+  if(!msg || msg.value.trim().length < 50) {
+    var e = document.getElementById('err-delivery-message');
+    if(e){ e.textContent = 'Descreva a entrega com pelo menos 50 caracteres.'; e.classList.add('show'); }
+    ok = false;
+  } else {
+    var e = document.getElementById('err-delivery-message'); if(e){ e.textContent=''; e.classList.remove('show'); }
+  }
+
+  /* URL format (if provided) */
+  var url = document.getElementById('delivery-url');
+  if(url && url.value.trim() && !/^https?:\/\//.test(url.value.trim())) {
+    var e = document.getElementById('err-delivery-url');
+    if(e){ e.textContent = 'Informe uma URL válida começando com http:// ou https://'; e.classList.add('show'); }
+    ok = false;
+  } else {
+    var e = document.getElementById('err-delivery-url'); if(e){ e.textContent=''; e.classList.remove('show'); }
+  }
+
+  return ok;
+}
+
+/* ── Submit ── */
+function submitDelivery() {
+  if(!_validateDelivery()) return;
+
+  var btn = document.getElementById('delivery-submit-btn');
+  _setBtnLoading(btn, true);
+
+  /* Hide form, show progress */
+  setTimeout(function() {
+    document.getElementById('delivery-form-content').style.display = 'none';
+    var sending = document.getElementById('delivery-sending');
+    sending.style.display = 'flex'; sending.classList.add('show');
+
+    var fill  = document.getElementById('delivery-send-fill');
+    var step  = document.getElementById('delivery-send-step');
+    var steps = [
+      { w:20,  txt:'Compactando arquivos...' },
+      { w:45,  txt:'Enviando para o servidor seguro...' },
+      { w:70,  txt:'Notificando o cliente...' },
+      { w:90,  txt:'Registrando na blockchain de contratos...' },
+      { w:100, txt:'Entrega confirmada! ✅' }
+    ];
+    var si = 0;
+    var iv = setInterval(function() {
+      if(si >= steps.length) { clearInterval(iv); _deliverySuccess(); return; }
+      fill.style.width  = steps[si].w + '%';
+      step.textContent  = steps[si].txt;
+      si++;
+    }, 600);
+  }, 300);
+}
+
+function _deliverySuccess() {
+  var sending = document.getElementById('delivery-sending'); if(sending) sending.classList.remove('show');
+  setTimeout(function() {
+    if(sending) sending.style.display = 'none';
+    var success = document.getElementById('delivery-success');
+    if(success){ success.style.display='flex'; setTimeout(function(){ success.classList.add('show'); },20); }
+
+    /* Generate confirmation code */
+    var code = 'DLV-HW-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+    var codeEl = document.getElementById('delivery-confirmation-code');
+    if(codeEl) codeEl.textContent = '🔒 Protocolo: ' + code;
+
+    /* Update dashboard card status */
+    _updateDashProjectStatus(_deliveryCtx.id, 'review', 'Aguardando aprovação', 100);
+
+    showToast('📤 Entrega enviada! ' + (_deliveryCtx.client||'O cliente') + ' será notificado agora.', 'success');
+  }, 400);
+}
+
+function _updateDashProjectStatus(projId, newStatus, newLabel, newProgress) {
+  /* Update in _dashData */
+  _dashData.freelancer.active.forEach(function(p) {
+    if(p.id === projId) {
+      p.status = newStatus; p.statusLabel = newLabel; p.progress = newProgress;
+    }
+  });
+  /* Also update client side (same project, different perspective) */
+  _dashData.client.active.forEach(function(p) {
+    if(p.linkedId === projId || p.id === projId) {
+      p.status = newStatus; p.statusLabel = newLabel; p.progress = newProgress;
+    }
+  });
+  /* Re-render dashboard sections if visible */
+  _renderDashFLActive();
+  _renderDashClientActive();
 }
 </script>
 </body>
