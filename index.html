@@ -2691,6 +2691,167 @@ section { padding: 64px 0; }
   display: flex; align-items: center; justify-content: center;
   font-size: 36px; animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
 }
+/* ═══════════════════════════════════════
+   MODAL: CHAT
+═══════════════════════════════════════ */
+#overlay-chat .modal {
+  max-width: 520px; padding: 0; overflow: hidden;
+  display: flex; flex-direction: column; height: 80vh; max-height: 640px;
+}
+
+/* Header */
+.chat-header {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  padding: 14px 18px; display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+}
+.chat-header-avatar {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, var(--green), #66BB6A);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: #fff;
+}
+.chat-header-info { flex: 1; }
+.chat-header-name   { font-size: 15px; font-weight: 700; color: #fff; }
+.chat-header-status { font-size: 11px; color: #94a3b8; margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.chat-online-dot    { width: 7px; height: 7px; background: #22c55e; border-radius: 50%; animation: blink 2s infinite; }
+.chat-project-chip  {
+  background: rgba(255,255,255,.1); border-radius: 20px;
+  padding: 4px 10px; font-size: 11px; color: #cbd5e1;
+  max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* Messages area */
+.chat-messages {
+  flex: 1; overflow-y: auto; padding: 16px;
+  background: var(--bg); display: flex; flex-direction: column; gap: 4px;
+  scroll-behavior: smooth;
+}
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Date divider */
+.chat-date-divider {
+  text-align: center; font-size: 11px; color: var(--text-4);
+  background: var(--bg); padding: 4px 0; margin: 8px 0;
+  position: relative;
+}
+.chat-date-divider::before, .chat-date-divider::after {
+  content: ''; position: absolute; top: 50%; height: 1px;
+  background: var(--border); width: calc(50% - 50px);
+}
+.chat-date-divider::before { left: 0; }
+.chat-date-divider::after  { right: 0; }
+
+/* Bubbles */
+.chat-bubble-wrap {
+  display: flex; align-items: flex-end; gap: 7px; margin-bottom: 2px;
+}
+.chat-bubble-wrap.sent    { flex-direction: row-reverse; }
+.chat-bubble-wrap.received{ flex-direction: row; }
+
+.chat-bubble-av {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; margin-bottom: 2px;
+}
+.sent .chat-bubble-av     { background: linear-gradient(135deg, var(--green), #66BB6A); }
+.received .chat-bubble-av { background: linear-gradient(135deg, #1565c0, #42a5f5); }
+
+.chat-bubble {
+  max-width: 72%; padding: 9px 13px;
+  border-radius: 16px; font-size: 13px; line-height: 1.5;
+  position: relative; word-break: break-word;
+}
+.sent .chat-bubble {
+  background: var(--green); color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.received .chat-bubble {
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border-2); border-bottom-left-radius: 4px;
+}
+.chat-bubble-time {
+  font-size: 10px; margin-top: 3px; text-align: right;
+  display: flex; align-items: center; justify-content: flex-end; gap: 3px;
+}
+.sent .chat-bubble-time     { color: rgba(255,255,255,.65); }
+.received .chat-bubble-time { color: var(--text-4); }
+.chat-read-check { font-size: 10px; }
+.chat-read-check.read { color: #93c5fd; }
+
+/* File bubble */
+.chat-file-bubble {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.15); border-radius: 8px;
+  padding: 7px 10px; margin-top: 4px; cursor: pointer;
+}
+.received .chat-file-bubble { background: var(--bg); border: 1px solid var(--border); }
+.chat-file-bubble .fname { font-size: 12px; font-weight: 600; }
+.chat-file-bubble .fsize { font-size: 10px; opacity: .75; }
+
+/* Typing indicator */
+.chat-typing {
+  display: none; align-items: center; gap: 6px;
+  padding: 6px 14px; font-size: 12px; color: var(--text-3);
+  flex-shrink: 0;
+}
+.chat-typing.show { display: flex; }
+.chat-typing-dots span {
+  display: inline-block; width: 6px; height: 6px;
+  background: var(--text-3); border-radius: 50%;
+  margin: 0 1px; animation: typingDot 1.2s infinite;
+}
+.chat-typing-dots span:nth-child(2){ animation-delay:.2s; }
+.chat-typing-dots span:nth-child(3){ animation-delay:.4s; }
+@keyframes typingDot { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+/* Input area */
+.chat-input-area {
+  padding: 10px 12px; background: var(--surface);
+  border-top: 1px solid var(--border-2); flex-shrink: 0;
+  display: flex; align-items: flex-end; gap: 8px;
+}
+.chat-input-box {
+  flex: 1; min-height: 38px; max-height: 110px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 8px 14px; font-size: 13px;
+  color: var(--text); resize: none; outline: none; line-height: 1.5;
+  transition: border-color var(--transition); overflow-y: auto;
+  font-family: inherit;
+}
+.chat-input-box:focus { border-color: var(--green); }
+.chat-input-box::placeholder { color: var(--text-4); }
+.chat-action-btn {
+  width: 38px; height: 38px; border-radius: 50%; border: none;
+  background: none; cursor: pointer; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); transition: all var(--transition); flex-shrink: 0;
+}
+.chat-action-btn:hover { background: var(--bg); color: var(--text); }
+.chat-send-btn {
+  width: 38px; height: 38px; border-radius: 50%; border: none;
+  background: var(--green); color: #fff; cursor: pointer;
+  font-size: 16px; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all var(--transition); box-shadow: 0 2px 8px rgba(46,125,50,.3);
+}
+.chat-send-btn:hover  { background: var(--green-dark); transform: scale(1.08); }
+.chat-send-btn:active { transform: scale(.95); }
+
+/* Emoji picker (simples) */
+.chat-emoji-picker {
+  position: absolute; bottom: 58px; left: 12px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 10px 12px;
+  box-shadow: var(--shadow-lg); display: none; z-index: 100;
+  width: 280px; flex-wrap: wrap; gap: 4px;
+}
+.chat-emoji-picker.show { display: flex; }
+.chat-emoji-btn {
+  font-size: 20px; background: none; border: none; cursor: pointer;
+  padding: 4px; border-radius: 6px; transition: background .1s;
+}
+.chat-emoji-btn:hover { background: var(--bg); }
 </style>
 </head>
 <body>
@@ -6087,6 +6248,59 @@ section { padding: 64px 0; }
 
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CHAT — CLIENTE / FREELANCER
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-chat" onclick="if(event.target===this)closeModal('chat')">
+  <div class="modal" style="max-width:520px;padding:0;overflow:hidden;display:flex;flex-direction:column;height:80vh;max-height:640px;">
+
+    <!-- Header -->
+    <div class="chat-header">
+      <div class="chat-header-avatar" id="chat-av">C</div>
+      <div class="chat-header-info">
+        <div class="chat-header-name" id="chat-with-name">Freelancer</div>
+        <div class="chat-header-status">
+          <span class="chat-online-dot"></span>
+          <span id="chat-online-label">Online agora</span>
+        </div>
+      </div>
+      <div class="chat-project-chip" id="chat-proj-chip">Projeto</div>
+      <button class="modal-close" style="color:#fff;margin-left:8px;" onclick="closeModal('chat')">&#x2715;</button>
+    </div>
+
+    <!-- Messages -->
+    <div class="chat-messages" id="chat-messages"></div>
+
+    <!-- Typing indicator -->
+    <div class="chat-typing" id="chat-typing">
+      <div class="chat-typing-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <span id="chat-typing-name">digitando...</span>
+    </div>
+
+    <!-- Emoji picker -->
+    <div class="chat-emoji-picker" id="chat-emoji-picker">
+      &#128512; &#128513; &#128514; &#128515; &#128516; &#128522; &#128525; &#128591;
+      &#128077; &#128078; &#10084; &#127881; &#9989; &#128080; &#128293; &#127919;
+      &#128736; &#128187; &#127760; &#128196; &#128222; &#128340; &#9200; &#128274;
+    </div>
+
+    <!-- Input -->
+    <div class="chat-input-area" style="position:relative;">
+      <button class="chat-action-btn" onclick="toggleEmojiPicker()" title="Emoji">&#128578;</button>
+      <button class="chat-action-btn" onclick="chatAttachFile()" title="Anexar PDF">&#128206;</button>
+      <textarea class="chat-input-box" id="chat-input"
+        placeholder="Digite uma mensagem..."
+        rows="1"
+        onkeydown="chatKeyDown(event)"
+        oninput="chatAutoResize(this)"></textarea>
+      <button class="chat-send-btn" onclick="chatSendMessage()" title="Enviar">&#10148;</button>
+    </div>
+
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -9084,7 +9298,7 @@ function _renderDashClientActive() {
         '<div class="dash-proj-actions">' +
           (isReview
             ? '<button class="btn btn-primary btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\''+p.freelancerRole+'\',value:'+p.value+',project:\''+p.title+'\',deadline:\''+p.deadline+'\'});contractStep4()">✅ Aprovar Entrega</button>'
-            : '<button class="btn btn-outline btn-sm" onclick="showToast(\'Abrindo chat com '+p.freelancer+'...\',\'info\')">💬 Chat</button>') +
+            : '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.freelancer,myRole:'client'})">💬 Chat</button>') +
           '<button class="btn btn-outline btn-sm" onclick="contractRevision()">📝 Revisão</button>' +
         '</div>' +
       '</div>' +
@@ -9170,7 +9384,7 @@ function _renderDashFLActive() {
         _personChip(p.client, 'Cliente') +
         '<div class="dash-proj-actions">' +
           '<button class="btn btn-primary btn-sm" onclick="openDeliveryModal({id:p.id,title:p.title,client:p.client,value:p.value})">&#128228; Enviar Entrega</button>' +
-          '<button class="btn btn-outline btn-sm" onclick="showToast(\'Abrindo chat...\',\'info\')">💬 Chat</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.client||'Cliente',myRole:'freelancer'})">💬 Chat</button>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -9489,6 +9703,263 @@ function _updateDashProjectStatus(projId, newStatus, newLabel, newProgress) {
   /* Re-render dashboard sections if visible */
   _renderDashFLActive();
   _renderDashClientActive();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CHAT — CLIENTE / FREELANCER
+═══════════════════════════════════════════════════════════ */
+var _chatCtx = {};
+var _chatHistory = {};   // keyed by projectId
+
+/* Pre-built demo conversations */
+var _demoChatHistory = {
+  'fa1': [
+    { from:'client', text:'Olá! Vi que você começou o projeto. Como está o andamento?', time:'09:14', read:true },
+    { from:'me',     text:'Bom dia! Já finalizei a estrutura de URLs e estou configurando as meta tags. Tudo dentro do cronograma. 👍', time:'09:31', read:true },
+    { from:'client', text:'Ótimo! Você consegue incluir um relatório semanal de progresso também?', time:'09:45', read:true },
+    { from:'me',     text:'Claro, sem problema. Vou enviar toda sexta-feira com os KPIs principais: posições, impressões e cliques.', time:'09:52', read:true },
+    { from:'client', text:'Perfeito! Aguardo o primeiro relatório na sexta então 😊', time:'10:03', read:true },
+    { from:'me',     file:true, fileName:'plano-seo-semana1.pdf', fileSize:'1.2 MB', text:'Segue o plano de ação da primeira semana:', time:'11:20', read:true },
+    { from:'client', text:'Recebi! Muito bem detalhado, obrigado.', time:'11:35', read:true },
+    { from:'me',     text:'Qualquer dúvida é só chamar aqui! Vou manter você atualizado.', time:'11:36', read:false }
+  ],
+  'c1': [
+    { from:'me',     text:'Olá Carlos! Você consegue me dar uma previsão de entrega do módulo de checkout?', time:'14:22', read:true },
+    { from:'client', text:'Oi! Estou finalizando a integração com o Pix. Deve ficar pronto até quinta-feira.', time:'14:45', read:true },
+    { from:'me',     text:'Perfeito. Só me garante que vai funcionar no mobile também, certo?', time:'14:47', read:true },
+    { from:'client', text:'Sim, está completamente responsivo. Já testei no iOS e Android. Segue uma prévia:', time:'15:10', read:true },
+    { from:'client', file:true, fileName:'preview-checkout-mobile.pdf', fileSize:'842 KB', text:'', time:'15:11', read:true },
+    { from:'me',     text:'Ficou excelente! Aguardando a entrega final então 👏', time:'15:28', read:true }
+  ],
+  'c2': [
+    { from:'me',     text:'Marina, a identidade ficou incrível! Mas precisaria ajustar o tom da cor principal, ficou um pouco escura.', time:'10:05', read:true },
+    { from:'client', text:'Entendido! Vou clarear um pouco o verde primário. Tenho mais 2 variações para mostrar amanhã.', time:'10:22', read:true },
+    { from:'me',     text:'Perfeito. E o manual de marca vai estar incluso na entrega final?', time:'10:25', read:true },
+    { from:'client', text:'Sim, com todas as aplicações: digital, impresso e apresentações. 📋', time:'10:31', read:true },
+    { from:'client', text:'Aliás, já posso enviar a versão preliminar do manual agora se quiser dar uma olhada.', time:'10:32', read:true },
+    { from:'me',     text:'Manda sim! Quero ver como está ficando.', time:'10:35', read:true },
+    { from:'client', file:true, fileName:'manual-marca-v2-preliminar.pdf', fileSize:'3.8 MB', text:'Versão preliminar do manual:', time:'10:58', read:false }
+  ]
+};
+
+function openChatModal(opts) {
+  opts = opts || {};
+  _chatCtx = opts;
+
+  var withName = opts.withName || 'Contato';
+  var projTitle = opts.projectTitle || 'Projeto';
+  var projId    = opts.projectId   || 'default';
+
+  /* Header */
+  var el;
+  el = document.getElementById('chat-av');          if(el) el.textContent = withName.charAt(0).toUpperCase();
+  el = document.getElementById('chat-with-name');   if(el) el.textContent = withName;
+  el = document.getElementById('chat-proj-chip');   if(el) el.textContent = projTitle;
+  el = document.getElementById('chat-typing-name'); if(el) el.textContent = withName.split(' ')[0] + ' está digitando...';
+
+  /* Load or init history */
+  if(!_chatHistory[projId]) {
+    _chatHistory[projId] = JSON.parse(JSON.stringify(_demoChatHistory[projId] || []));
+  }
+
+  /* Render messages */
+  _chatRender(projId);
+
+  /* Clear input */
+  var inp = document.getElementById('chat-input');
+  if(inp) { inp.value = ''; chatAutoResize(inp); }
+
+  /* Hide typing */
+  var typing = document.getElementById('chat-typing');
+  if(typing) typing.classList.remove('show');
+
+  openModal('chat');
+
+  /* Scroll to bottom */
+  setTimeout(function(){
+    var msgs = document.getElementById('chat-messages');
+    if(msgs) msgs.scrollTop = msgs.scrollHeight;
+  }, 100);
+}
+
+function _chatRender(projId) {
+  var msgs = document.getElementById('chat-messages');
+  if(!msgs) return;
+  var history = _chatHistory[projId] || [];
+
+  if(!history.length) {
+    msgs.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text-4);">' +
+      '<div style="font-size:36px;margin-bottom:10px;">💬</div>' +
+      '<div style="font-size:14px;font-weight:600;color:var(--text-3);">Nenhuma mensagem ainda</div>' +
+      '<div style="font-size:12px;margin-top:4px;">Inicie a conversa abaixo</div></div>';
+    return;
+  }
+
+  var myInitial = (_session ? _session.name.charAt(0).toUpperCase() : 'V');
+  var otherInitial = (_chatCtx.withName || 'C').charAt(0).toUpperCase();
+  var html = '<div class="chat-date-divider">Hoje</div>';
+
+  history.forEach(function(msg) {
+    var isSent = msg.from === 'me';
+    var av = isSent ? myInitial : otherInitial;
+    var readMark = isSent
+      ? '<span class="chat-read-check ' + (msg.read?'read':'') + '">' + (msg.read ? '✓✓' : '✓') + '</span>'
+      : '';
+
+    var bubbleContent = '';
+    if(msg.file) {
+      bubbleContent = (msg.text ? '<div style="margin-bottom:5px;font-size:12px;">' + msg.text + '</div>' : '') +
+        '<div class="chat-file-bubble" onclick="showToast(\'Abrindo ' + msg.fileName + '...\',\'info\')">' +
+          '<span style="font-size:20px;">📕</span>' +
+          '<div><div class="fname">' + msg.fileName + '</div>' +
+          '<div class="fsize">' + msg.fileSize + '</div></div>' +
+          '<span style="font-size:12px;margin-left:auto;">⬇</span>' +
+        '</div>';
+    } else {
+      bubbleContent = msg.text;
+    }
+
+    html += '<div class="chat-bubble-wrap ' + (isSent ? 'sent' : 'received') + '">' +
+      '<div class="chat-bubble-av">' + av + '</div>' +
+      '<div>' +
+        '<div class="chat-bubble">' + bubbleContent + '</div>' +
+        '<div class="chat-bubble-time">' + msg.time + ' ' + readMark + '</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  msgs.innerHTML = html;
+  setTimeout(function(){ msgs.scrollTop = msgs.scrollHeight; }, 50);
+}
+
+function chatSendMessage() {
+  var inp = document.getElementById('chat-input');
+  var text = inp ? inp.value.trim() : '';
+  if(!text) return;
+
+  var projId = _chatCtx.projectId || 'default';
+  if(!_chatHistory[projId]) _chatHistory[projId] = [];
+
+  /* Add sent message */
+  var now = new Date();
+  var time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  _chatHistory[projId].push({ from:'me', text:text, time:time, read:false });
+
+  inp.value = ''; chatAutoResize(inp);
+  _chatRender(projId);
+
+  /* Hide emoji picker */
+  var ep = document.getElementById('chat-emoji-picker'); if(ep) ep.classList.remove('show');
+
+  /* Show typing indicator after a moment */
+  var delay = 1200 + Math.random() * 2000;
+  setTimeout(function(){
+    var typing = document.getElementById('chat-typing');
+    if(typing && document.getElementById('overlay-chat').classList.contains('open')) {
+      typing.classList.add('show');
+      /* Auto-reply after 1.5-3s */
+      setTimeout(function(){
+        if(typing) typing.classList.remove('show');
+        var reply = _chatAutoReply(text);
+        var t2 = new Date();
+        var time2 = t2.getHours().toString().padStart(2,'0') + ':' + t2.getMinutes().toString().padStart(2,'0');
+        _chatHistory[projId].push({ from:'client', text:reply, time:time2, read:true });
+        _chatRender(projId);
+      }, 1500 + Math.random()*1500);
+    }
+  }, delay);
+}
+
+/* Smart auto-replies */
+var _chatReplies = [
+  'Entendido! Vou verificar isso agora.',
+  'Ótimo ponto. Deixa eu analisar e te retorno em breve. 👍',
+  'Claro, pode deixar! Vou resolver isso.',
+  'Perfeito, anotado. Continuo trabalhando nisso.',
+  'Boa observação! Vou ajustar conforme solicitado.',
+  'Sim, já estou trabalhando nisso. Prazo mantido! ✅',
+  'Recebi! Obrigado pelo feedback. Terei novidades em breve.',
+  'Com certeza! Vou incluir isso na entrega.',
+  'Ok, vou fazer os ajustes necessários. 🛠️',
+  'Combinado! Qualquer dúvida é só chamar aqui.'
+];
+function _chatAutoReply(msg) {
+  var lc = msg.toLowerCase();
+  if(/prazo|quando|data|entrega/.test(lc)) return 'Dentro do prazo! Sem problemas por aqui. 📅';
+  if(/arquivo|pdf|documento/.test(lc))    return 'Vou enviar o arquivo em breve. Aguarde um momento. 📎';
+  if(/ok|certo|entendi|ótimo|perfeito/.test(lc)) return 'Ótimo! Qualquer novidade te aviso por aqui. 👌';
+  if(/problema|erro|bug/.test(lc))        return 'Entendido. Vou investigar e corrijo o mais rápido possível. 🔧';
+  if(/obrigad/.test(lc))                  return 'Por nada! Estou aqui para ajudar. 😊';
+  if(/oi|olá|bom dia|boa tarde/.test(lc)) return 'Olá! Tudo bem? Em que posso ajudar? 👋';
+  return _chatReplies[Math.floor(Math.random() * _chatReplies.length)];
+}
+
+function chatKeyDown(e) {
+  if(e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    chatSendMessage();
+  }
+}
+
+function chatAutoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 110) + 'px';
+}
+
+function toggleEmojiPicker() {
+  var ep = document.getElementById('chat-emoji-picker');
+  if(ep) ep.classList.toggle('show');
+}
+
+function chatAttachFile() {
+  var inp = document.createElement('input');
+  inp.type = 'file'; inp.accept = '.pdf,application/pdf';
+  inp.onchange = function() {
+    if(!inp.files || !inp.files[0]) return;
+    var f = inp.files[0];
+    if(f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+      showToast('Apenas PDFs são aceitos no chat.', 'info'); return;
+    }
+    if(f.size > 10*1024*1024) { showToast('Arquivo excede 10 MB.', 'info'); return; }
+    var projId = _chatCtx.projectId || 'default';
+    if(!_chatHistory[projId]) _chatHistory[projId] = [];
+    var now = new Date();
+    var time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+    var kb = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/(1024*1024)).toFixed(1)+' MB';
+    _chatHistory[projId].push({ from:'me', file:true, fileName:f.name, fileSize:kb, text:'', time:time, read:false });
+    _chatRender(projId);
+    showToast('📎 Arquivo "' + f.name + '" enviado!', 'success');
+  };
+  inp.click();
+}
+
+/* Close emoji picker on outside click */
+document.addEventListener('click', function(e) {
+  var ep = document.getElementById('chat-emoji-picker');
+  if(ep && ep.classList.contains('show') && !e.target.closest('#chat-emoji-picker') && !e.target.closest('.chat-action-btn')) {
+    ep.classList.remove('show');
+  }
+});
+
+/* Inject emojis as real buttons after DOM ready */
+document.addEventListener('DOMContentLoaded', function() {
+  var ep = document.getElementById('chat-emoji-picker');
+  if(!ep) return;
+  var emojis = ['😀','😄','😂','😊','😍','🙏','👍','👎','❤️','🎉','✅','👏','🔥','🎯','🛠️','💻','🌐','📄','📞','📋','⏰','🔒','🚀','💡','📎','💬','🤝','🏆','📊','✍️'];
+  ep.innerHTML = emojis.map(function(em) {
+    return '<button class="chat-emoji-btn" onclick="chatInsertEmoji(\'' + em + '\')">' + em + '</button>';
+  }).join('');
+});
+
+function chatInsertEmoji(em) {
+  var inp = document.getElementById('chat-input');
+  if(!inp) return;
+  var pos = inp.selectionStart || inp.value.length;
+  inp.value = inp.value.substring(0, pos) + em + inp.value.substring(pos);
+  inp.focus();
+  inp.selectionStart = inp.selectionEnd = pos + em.length;
+  chatAutoResize(inp);
+  document.getElementById('chat-emoji-picker').classList.remove('show');
 }
 </script>
 </body>
