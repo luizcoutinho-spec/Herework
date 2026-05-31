@@ -8413,58 +8413,6 @@ function showAdminPage() {
   }
 }
 
-function adminDoLogin() {
-  var uEl = document.getElementById('admin-login-user');
-  var pEl = document.getElementById('admin-login-pass');
-  var errU = document.getElementById('err-admin-user');
-  var errP = document.getElementById('err-admin-pass');
-  var btn  = document.getElementById('admin-login-btn');
-  if (!uEl || !pEl) return;
-
-  if (errU) errU.textContent = '';
-  if (errP) errP.textContent = '';
-
-  var user = uEl.value.trim();
-  var pass = pEl.value;
-
-  if (!user) { if (errU) errU.textContent = lang()==='pt' ? 'Informe o usuário.' : 'Ingresa el usuario.'; return; }
-  if (!pass) { if (errP) errP.textContent = lang()==='pt' ? 'Informe a senha.'   : 'Ingresa la contraseña.'; return; }
-
-  _adminTries++;
-  if (_adminTries > 5) {
-    if (errP) errP.textContent = lang()==='pt' ? 'Muitas tentativas. Tente novamente mais tarde.' : 'Demasiados intentos.';
-    _setBtnLoading(btn, false);
-    return;
-  }
-
-  _setBtnLoading(btn, true);
-
-  setTimeout(function() {
-    _setBtnLoading(btn, false);
-    if (user === _adDc(_adminC[0]) && pass === _adDc(_adminC[1])) {
-      _adminAuth = true;
-      _adminTries = 0;
-      var disp = document.getElementById('admin-username-display');
-      if (disp) disp.textContent = user;
-      closeModal('admin-login');
-      if (uEl) uEl.value = '';
-      if (pEl) pEl.value = '';
-      showPage('admin');
-      setTimeout(function(){ initAdminContracts(); }, 100);
-      showToast('🛡️ Bem-vindo ao painel de administração!', 'success');
-    } else {
-      if (errP) errP.textContent = lang()==='pt'
-        ? 'Credenciais inválidas. (' + _adminTries + '/5 tentativas)'
-        : 'Credenciales inválidas. (' + _adminTries + '/5 intentos)';
-    }
-  }, 900);
-}
-
-function adminLogout() {
-  _adminAuth = false;
-  showPage('home');
-  showToast(lang()==='pt' ? 'Sessão admin encerrada.' : 'Sesión admin cerrada.', 'info');
-}
 
 function adminAction(type) {
   var msgs = {
