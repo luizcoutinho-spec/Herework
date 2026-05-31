@@ -9273,12 +9273,33 @@ function _escrowBar(progress, value) {
     '</div>';
 }
 
+/* ── Projeto lookup por ID (evita escaping em onclick) ── */
+var _dashProj = {};
+
+function dashAction(action, id) {
+  var p = _dashProj[id];
+  if (!p) return;
+  if (action === 'deliver') {
+    openDeliveryModal({ id: p.id, title: p.title, client: p.client, value: p.value });
+  } else if (action === 'chat-fl') {
+    openChatModal({ projectId: p.id, projectTitle: p.title, withName: p.client || 'Cliente', myRole: 'freelancer' });
+  } else if (action === 'chat-client') {
+    openChatModal({ projectId: p.id, projectTitle: p.title, withName: p.freelancer, myRole: 'client' });
+  } else if (action === 'approve') {
+    openContractModal({ name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline });
+    setTimeout(function(){ contractStep4(); }, 100);
+  } else if (action === 'revision') {
+    showToast('📝 Revisão solicitada! O freelancer foi notificado e tem 48h para reenviar.', 'info');
+  }
+}
+
 function _renderDashClientActive() {
   var el = document.getElementById('dash-client-active');
-  if(!el) return;
+  if (!el) return;
   var d = _dashData.client.active;
-  if(!d.length) { el.innerHTML = _emptyState('🔒','Nenhum contrato ativo','Contrate um freelancer para começar'); return; }
+  if (!d.length) { el.innerHTML = _emptyState('🔒','Nenhum contrato ativo','Contrate um freelancer para começar'); return; }
   el.innerHTML = d.map(function(p) {
+    _dashProj[p.id] = p;
     var isReview = p.status === 'review';
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
@@ -9297,15 +9318,14 @@ function _renderDashClientActive() {
         _personChip(p.freelancer, p.freelancerRole) +
         '<div class="dash-proj-actions">' +
           (isReview
-            ? '<button class="btn btn-primary btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\''+p.freelancerRole+'\',value:'+p.value+',project:\''+p.title+'\',deadline:\''+p.deadline+'\'});contractStep4()">✅ Aprovar Entrega</button>'
-            : '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.freelancer,myRole:\'client\'})">💬 Chat</button>') +
-          '<button class="btn btn-outline btn-sm" onclick="contractRevision()">📝 Revisão</button>' +
+            ? '<button class="btn btn-primary btn-sm" onclick="dashAction(\'approve\',\'' + p.id + '\')">✅ Aprovar Entrega</button>'
+            : '<button class="btn btn-outline btn-sm" onclick="dashAction(\'chat-client\',\'' + p.id + '\')">💬 Chat</button>') +
+          '<button class="btn btn-outline btn-sm" onclick="dashAction(\'revision\',\'' + p.id + '\')">📝 Revisão</button>' +
         '</div>' +
       '</div>' +
     '</div>';
   }).join('');
 }
-
 function _renderDashClientWaiting() {
   var el = document.getElementById('dash-client-waiting');
   if(!el) return;
@@ -9361,10 +9381,11 @@ function _renderDashClientDone() {
 
 function _renderDashFLActive() {
   var el = document.getElementById('dash-fl-active');
-  if(!el) return;
+  if (!el) return;
   var d = _dashData.freelancer.active;
-  if(!d.length) { el.innerHTML = _emptyState('⚡','Nenhum contrato ativo','Envie propostas para começar a trabalhar'); return; }
+  if (!d.length) { el.innerHTML = _emptyState('⚡','Nenhum contrato ativo','Envie propostas para começar a trabalhar'); return; }
   el.innerHTML = d.map(function(p) {
+    _dashProj[p.id] = p;
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
         '<div class="dash-proj-title">' + p.title + '</div>' +
@@ -9377,20 +9398,20 @@ function _renderDashFLActive() {
       '</div>' +
       '<div class="escrow-progress">' +
         '<div class="escrow-progress-label"><span>Progresso da entrega</span><span>' + p.progress + '%</span></div>' +
-        '<div class="escrow-progress-bar"><div class="escrow-progress-fill" style="width:'+p.progress+'%"></div></div>' +
+        '<div class="escrow-progress-bar"><div class="escrow-progress-fill" style="width:' + p.progress + '%"></div></div>' +
       '</div>' +
       '<div class="dash-proj-desc">' + p.desc + '</div>' +
       '<div class="dash-proj-footer">' +
         _personChip(p.client, 'Cliente') +
         '<div class="dash-proj-actions">' +
-          '<button class="btn btn-primary btn-sm" onclick="openDeliveryModal({id:p.id,title:p.title,client:p.client,value:p.value})">&#128228; Enviar Entrega</button>' +
-          '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.client||\'Cliente\',myRole:\'freelancer\'})">💬 Chat</button>' +
+          '<button class="btn btn-primary btn-sm" onclick="dashAction(\'deliver\',\'' + p.id + '\')">📤 Enviar Entrega</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="dashAction(\'chat-fl\',\'' + p.id + '\')">💬 Chat</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="dashAction(\'revision\',\'' + p.id + '\')">📝 Revisão</button>' +
         '</div>' +
       '</div>' +
     '</div>';
   }).join('');
 }
-
 function _renderDashFLProposals() {
   var el = document.getElementById('dash-fl-proposals');
   if(!el) return;
