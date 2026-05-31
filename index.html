@@ -2483,6 +2483,130 @@ section { padding: 64px 0; }
 }
 .approve-summary .amount { font-size:26px; font-weight:800; color:var(--green); }
 .approve-summary .label  { font-size:13px; color:#166534; margin-top:3px; }
+/* ═══════════════════════════════════════
+   DASHBOARD — MEUS PROJETOS
+═══════════════════════════════════════ */
+#page-dashboard { background: var(--bg); min-height: 80vh; }
+.dash-header {
+  background: linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);
+  padding: 32px 0 28px; color: #fff; margin-bottom: 28px;
+}
+.dash-welcome    { font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+.dash-welcome span { color: #66BB6A; }
+.dash-sub        { font-size: 14px; color: #94a3b8; margin-bottom: 22px; }
+.dash-stats-row  { display: flex; gap: 14px; flex-wrap: wrap; }
+.dash-stat {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--radius-lg); padding: 14px 20px; min-width: 130px;
+}
+.dash-stat-val { font-size: 24px; font-weight: 800; color: #fff; }
+.dash-stat-lbl { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+.dash-stat-delta { font-size: 11px; color: #66BB6A; margin-top: 2px; }
+
+/* Role tabs */
+.dash-role-tabs  { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+.dash-role-tab {
+  padding: 10px 22px; border-radius: 40px; font-size: 14px; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-2); cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; gap: 7px;
+}
+.dash-role-tab.active {
+  background: var(--green); border-color: var(--green); color: #fff;
+  box-shadow: 0 4px 12px rgba(46,125,50,.25);
+}
+.dash-role-tab:hover:not(.active) { border-color: var(--green); color: var(--green); }
+.dash-tab-badge {
+  background: rgba(255,255,255,.25); border-radius: 20px;
+  padding: 1px 7px; font-size: 11px; font-weight: 700;
+}
+.dash-role-tab:not(.active) .dash-tab-badge {
+  background: var(--bg); color: var(--text-3);
+}
+
+/* Section header */
+.dash-section { margin-bottom: 32px; }
+.dash-section-title {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.dash-section-title span { font-size: 18px; }
+
+/* Project cards */
+.dash-proj-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 12px;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.dash-proj-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); }
+.dash-proj-card-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 12px; margin-bottom: 10px;
+}
+.dash-proj-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.dash-proj-meta  {
+  display: flex; flex-wrap: wrap; gap: 12px;
+  font-size: 12px; color: var(--text-3); margin-bottom: 12px;
+}
+.dash-proj-meta span { display: flex; align-items: center; gap: 4px; }
+.dash-proj-desc  { font-size: 13px; color: var(--text-2); margin-bottom: 12px; line-height: 1.6; }
+.dash-proj-footer{
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+}
+.dash-proj-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Status badges */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  white-space: nowrap;
+}
+.status-waiting   { background: #fef3c7; color: #92400e; }
+.status-active    { background: #dcfce7; color: #166534; }
+.status-escrow    { background: #e0f2fe; color: #075985; }
+.status-review    { background: #fde8ff; color: #6b21a8; }
+.status-done      { background: #f1f5f9; color: #475569; }
+.status-sent      { background: #fff7ed; color: #c2410c; }
+.status-rejected  { background: #fee2e2; color: #991b1b; }
+
+/* Escrow progress bar */
+.escrow-progress {
+  background: var(--bg); border: 1px solid var(--border-2);
+  border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px;
+}
+.escrow-progress-label {
+  display: flex; justify-content: space-between; font-size: 12px;
+  color: var(--text-3); margin-bottom: 6px;
+}
+.escrow-progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.escrow-progress-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--green), #66BB6A);
+  transition: width .6s ease;
+}
+
+/* Person chip */
+.dash-person {
+  display: flex; align-items: center; gap: 8px;
+}
+.dash-person-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--green), #66BB6A);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.dash-person-name { font-size: 13px; font-weight: 600; color: var(--text-2); }
+
+/* Empty state */
+.dash-empty {
+  text-align: center; padding: 40px 20px;
+  background: var(--surface); border: 1.5px dashed var(--border);
+  border-radius: var(--radius-lg);
+}
+.dash-empty-icon { font-size: 40px; margin-bottom: 12px; }
+.dash-empty-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.dash-empty-sub   { font-size: 13px; color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -2557,7 +2681,7 @@ section { padding: 64px 0; }
           <div style="font-size:13px;font-weight:700;color:var(--text);" id="dd-user-name">Usu&aacute;rio</div>
           <div style="font-size:12px;color:var(--text-3);" id="dd-user-email">email@email.com</div>
         </div>
-        <button onclick="closeUserMenu();showPage('home')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#128100; Meu Perfil</button>
+        <button onclick="closeUserMenu();openDashboard()" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#128101; Meu Painel</button>
         <button onclick="closeUserMenu();showPage('projects')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#128196; Meus Projetos</button>
         <button onclick="closeUserMenu();showPage('pricing')" style="width:100%;text-align:left;padding:11px 16px;border:none;background:none;cursor:pointer;font-size:13px;color:var(--text-2);display:flex;align-items:center;gap:8px;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='none'">&#11088; Planos</button>
         <div style="border-top:1px solid var(--border-2);"></div>
@@ -3320,6 +3444,108 @@ section { padding: 64px 0; }
 <!-- ══════════════════════════════════════════════
      PÁGINA: FREELANCERS
 ══════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════
+     PAGE: DASHBOARD — MEUS PROJETOS
+═══════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+
+  <!-- Header -->
+  <div class="dash-header">
+    <div class="container">
+      <div class="dash-welcome">Olá, <span id="dash-user-name">Usuário</span> 👋</div>
+      <div class="dash-sub" id="dash-user-sub">Bem-vindo ao seu painel de projetos</div>
+      <div class="dash-stats-row">
+        <div class="dash-stat">
+          <div class="dash-stat-val" id="ds-active">0</div>
+          <div class="dash-stat-lbl">Contratos ativos</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val" id="ds-escrow">R$ 0</div>
+          <div class="dash-stat-lbl">Em escrow</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val" id="ds-done">0</div>
+          <div class="dash-stat-lbl">Concluídos</div>
+        </div>
+        <div class="dash-stat">
+          <div class="dash-stat-val" id="ds-proposals">0</div>
+          <div class="dash-stat-lbl">Propostas</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Role tabs -->
+    <div class="dash-role-tabs">
+      <button class="dash-role-tab active" id="dtab-client" onclick="switchDashTab('client')">
+        🏢 Como Cliente <span class="dash-tab-badge" id="dtab-client-count">0</span>
+      </button>
+      <button class="dash-role-tab" id="dtab-freelancer" onclick="switchDashTab('freelancer')">
+        🧑‍💻 Como Freelancer <span class="dash-tab-badge" id="dtab-fl-count">0</span>
+      </button>
+    </div>
+
+    <!-- ─── VISÃO DO CLIENTE ─── -->
+    <div id="dpanel-client">
+
+      <!-- Botão publicar -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+        <button class="btn btn-primary" onclick="openModal('publish')">+ Publicar Novo Projeto</button>
+      </div>
+
+      <!-- Contratos ativos (cliente) -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>🔒</span> Contratos Ativos — Pagamento em Escrow</div>
+        <div id="dash-client-active"></div>
+      </div>
+
+      <!-- Projetos aguardando propostas -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>📋</span> Projetos Publicados — Aguardando Propostas</div>
+        <div id="dash-client-waiting"></div>
+      </div>
+
+      <!-- Histórico cliente -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>✅</span> Concluídos</div>
+        <div id="dash-client-done"></div>
+      </div>
+
+    </div><!-- /client panel -->
+
+    <!-- ─── VISÃO DO FREELANCER ─── -->
+    <div id="dpanel-freelancer" style="display:none;">
+
+      <!-- Botão buscar projetos -->
+      <div style="display:flex;justify-content:flex-end;margin-bottom:18px;">
+        <button class="btn btn-primary" onclick="showPage('projects')">🔍 Encontrar Projetos</button>
+      </div>
+
+      <!-- Contratos ativos (freelancer) -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>⚡</span> Em Desenvolvimento — Prazo em Andamento</div>
+        <div id="dash-fl-active"></div>
+      </div>
+
+      <!-- Propostas enviadas -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>📩</span> Propostas Enviadas — Aguardando Resposta</div>
+        <div id="dash-fl-proposals"></div>
+      </div>
+
+      <!-- Histórico freelancer -->
+      <div class="dash-section">
+        <div class="dash-section-title"><span>🏆</span> Trabalhos Concluídos</div>
+        <div id="dash-fl-done"></div>
+      </div>
+
+    </div><!-- /freelancer panel -->
+
+  </div>
+</div><!-- /page-dashboard -->
 <div class="page" id="page-freelancers">
 
   <!-- Banner -->
@@ -6471,7 +6697,8 @@ function submitLogin() {
     _setSession(name, email, 'client');
     if (e) e.value = ''; if (p) p.value = '';
     closeModal('login');
-    showToast(lang()==='pt' ? '👋 Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!' : '👋 ¡Bienvenido/a de regreso, ' + name.split(' ')[0] + '!', 'success');
+    showToast(lang()==='pt' ? '&#x1F44B; Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!' : '&#x1F44B; &#xa1;Bienvenido/a de regreso, ' + name.split(' ')[0] + '!', 'success');
+    setTimeout(function(){ openDashboard(); }, 500);
   }, 800);
 }
 
@@ -6543,10 +6770,11 @@ function submitRegister() {
     closeModal('register');
     showToast(
       lang()==='pt'
-        ? '👋 Bem-vindo(a), ' + first + '! Sua conta está ativa.'
-        : '👋 ¡Bienvenido/a, ' + first + '! Tu cuenta está activa.',
+        ? '&#x1F44B; Bem-vindo(a), ' + first + '! Sua conta est&aacute; ativa.'
+        : '&#x1F44B; &#xa1;Bienvenido/a, ' + first + '! Tu cuenta est&aacute; activa.',
       'success'
     );
+    setTimeout(function(){ openDashboard(); }, 500);
   }, 900);
 }
 function submitProject() {
@@ -8476,6 +8704,343 @@ function contractApprove() {
 function contractRevision() {
   closeModal('contract');
   showToast('📝 Revisão solicitada! O freelancer foi notificado e tem 48h para reenviar.', 'info');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DASHBOARD — MEUS PROJETOS
+═══════════════════════════════════════════════════════════ */
+
+/* ── Demo data (substituída por dados reais no futuro) ── */
+var _dashData = {
+  client: {
+    active: [
+      {
+        id:'c1', title:'Desenvolvimento de e-commerce com WooCommerce',
+        freelancer:'Carlos Almeida', freelancerRole:'Dev Full Stack',
+        value:4800, deadline:'18 dias restantes', progress:45,
+        status:'active', statusLabel:'Em desenvolvimento',
+        desc:'Loja virtual com integração de pagamento (Pix, cartão, boleto), gestão de estoque e painel administrativo.',
+        skills:['WordPress','WooCommerce','PHP','CSS']
+      },
+      {
+        id:'c2', title:'Identidade visual para startup fintech',
+        freelancer:'Marina Lima', freelancerRole:'Designer UI/UX',
+        value:3800, deadline:'7 dias restantes', progress:80,
+        status:'review', statusLabel:'Aguardando aprovação',
+        desc:'Logotipo, manual de marca, paleta de cores, tipografia e aplicações digitais.',
+        skills:['Branding','Figma','Illustrator']
+      }
+    ],
+    waiting: [
+      {
+        id:'w1', title:'App de delivery para restaurante (iOS e Android)',
+        proposals:8, budget:'R$ 8.000 – 15.000', posted:'Publicado há 3h',
+        desc:'Aplicativo com cardápio digital, rastreamento de pedidos e painel administrativo.',
+        skills:['Flutter','React Native','Firebase']
+      }
+    ],
+    done: [
+      {
+        id:'d1', title:'Gestão de redes sociais — Janeiro/Fevereiro',
+        freelancer:'Rafael Pereira', value:2400, rating:5,
+        completedAt:'Concluído em 28 Fev 2025',
+        desc:'Gestão mensal do Instagram, Facebook e LinkedIn com criação de conteúdo.'
+      }
+    ]
+  },
+  freelancer: {
+    active: [
+      {
+        id:'fa1', title:'Campanha de SEO para e-commerce de moda',
+        client:'Loja Bella Moda', value:3200, deadline:'22 dias restantes',
+        progress:30, status:'active',
+        desc:'Otimização on-page, link building e relatórios mensais de performance.',
+        skills:['SEO','Google Analytics','SEM']
+      }
+    ],
+    proposals: [
+      {
+        id:'fp1', title:'Sistema de agendamento online para clínica',
+        value:5500, sentAt:'Enviada há 2h', status:'sent',
+        desc:'Plataforma web com calendário interativo, notificações e integração com WhatsApp.'
+      },
+      {
+        id:'fp2', title:'Redesign completo do site institucional',
+        value:4200, sentAt:'Enviada há 1 dia', status:'sent',
+        desc:'Novo layout moderno, responsivo e otimizado para conversão.'
+      }
+    ],
+    done: [
+      {
+        id:'fd1', title:'Desenvolvimento de landing page para produto SaaS',
+        client:'TechStart Ltda', value:2800, rating:5,
+        completedAt:'Concluído em 15 Jan 2025',
+        desc:'Landing page com animações, formulário de captura e integração com CRM.'
+      },
+      {
+        id:'fd2', title:'API REST para plataforma de educação',
+        client:'EduPlus', value:6400, rating:4,
+        completedAt:'Concluído em 3 Dez 2024',
+        desc:'API com autenticação JWT, endpoints de cursos, alunos e pagamentos.'
+      }
+    ]
+  }
+};
+
+function openDashboard() {
+  if (!_session) { openModal('login'); return; }
+  var name = _session.name || 'Usuário';
+  var type = _session.type || 'client';
+
+  // Update header
+  var el;
+  el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
+  el = document.getElementById('dash-user-sub');
+  if(el) el.textContent = type === 'freelancer'
+    ? 'Acompanhe seus contratos e propostas enviadas'
+    : 'Gerencie seus projetos e contratações';
+
+  // Update stats
+  var ca = _dashData.client.active.length;
+  var fa = _dashData.freelancer.active.length;
+  var escrow = _dashData.client.active.reduce(function(s,p){return s+p.value;},0);
+  var done = _dashData.client.done.length + _dashData.freelancer.done.length;
+  var props = _dashData.client.waiting.reduce(function(s,p){return s+(p.proposals||0);},0) + _dashData.freelancer.proposals.length;
+
+  el = document.getElementById('ds-active');    if(el) el.textContent = ca + fa;
+  el = document.getElementById('ds-escrow');    if(el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR');
+  el = document.getElementById('ds-done');      if(el) el.textContent = done;
+  el = document.getElementById('ds-proposals'); if(el) el.textContent = props;
+
+  // Badge counts
+  el = document.getElementById('dtab-client-count');
+  if(el) el.textContent = ca + _dashData.client.waiting.length;
+  el = document.getElementById('dtab-fl-count');
+  if(el) el.textContent = fa + _dashData.freelancer.proposals.length;
+
+  // Render all sections
+  _renderDashClientActive();
+  _renderDashClientWaiting();
+  _renderDashClientDone();
+  _renderDashFLActive();
+  _renderDashFLProposals();
+  _renderDashFLDone();
+
+  // Default tab based on user type
+  switchDashTab(type === 'freelancer' ? 'freelancer' : 'client');
+
+  showPage('dashboard');
+}
+
+function switchDashTab(tab) {
+  ['client','freelancer'].forEach(function(t) {
+    var btn = document.getElementById('dtab-' + t);
+    var pnl = document.getElementById('dpanel-' + t);
+    if(btn) btn.classList.toggle('active', t === tab);
+    if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+/* ── Render helpers ── */
+function _statusBadge(status, label) {
+  var cls = { active:'status-active', review:'status-review', escrow:'status-escrow',
+              waiting:'status-waiting', done:'status-done', sent:'status-sent', rejected:'status-rejected' };
+  var icons = { active:'⚡', review:'👁', escrow:'🔒', waiting:'⏳', done:'✅', sent:'📩', rejected:'❌' };
+  return '<span class="status-badge ' + (cls[status]||'status-waiting') + '">' +
+    (icons[status]||'') + ' ' + label + '</span>';
+}
+function _skillTags(skills) {
+  return (skills||[]).map(function(s){ return '<span class="fl-skill">'+s+'</span>'; }).join('');
+}
+function _stars(n) {
+  return '★'.repeat(n) + '☆'.repeat(5-n);
+}
+function _personChip(name, role) {
+  var init = name ? name.charAt(0).toUpperCase() : '?';
+  return '<div class="dash-person"><div class="dash-person-av">' + init + '</div>' +
+    '<div><div class="dash-person-name">' + name + '</div>' +
+    '<div style="font-size:11px;color:var(--text-4);">' + role + '</div></div></div>';
+}
+function _escrowBar(progress, value) {
+  var fmt = value.toLocaleString('pt-BR', {minimumFractionDigits:2});
+  return '<div class="escrow-progress">' +
+    '<div class="escrow-progress-label">' +
+    '<span>🔒 R$ ' + fmt + ' em escrow</span>' +
+    '<span>' + progress + '% concluído</span></div>' +
+    '<div class="escrow-progress-bar"><div class="escrow-progress-fill" style="width:'+progress+'%"></div></div>' +
+    '</div>';
+}
+
+function _renderDashClientActive() {
+  var el = document.getElementById('dash-client-active');
+  if(!el) return;
+  var d = _dashData.client.active;
+  if(!d.length) { el.innerHTML = _emptyState('🔒','Nenhum contrato ativo','Contrate um freelancer para começar'); return; }
+  el.innerHTML = d.map(function(p) {
+    var isReview = p.status === 'review';
+    return '<div class="dash-proj-card">' +
+      '<div class="dash-proj-card-top">' +
+        '<div>' +
+          '<div class="dash-proj-title">' + p.title + '</div>' +
+          '<div class="dash-proj-meta" style="margin-top:5px;">' +
+            '<span>📅 ' + p.deadline + '</span>' +
+            '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + '</span>' +
+          '</div>' +
+        '</div>' +
+        _statusBadge(p.status, p.statusLabel) +
+      '</div>' +
+      _escrowBar(p.progress, p.value) +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-footer">' +
+        _personChip(p.freelancer, p.freelancerRole) +
+        '<div class="dash-proj-actions">' +
+          (isReview
+            ? '<button class="btn btn-primary btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\''+p.freelancerRole+'\',value:'+p.value+',project:\''+p.title+'\',deadline:\''+p.deadline+'\'});contractStep4()">✅ Aprovar Entrega</button>'
+            : '<button class="btn btn-outline btn-sm" onclick="showToast(\'Abrindo chat com '+p.freelancer+'...\',\'info\')">💬 Chat</button>') +
+          '<button class="btn btn-outline btn-sm" onclick="contractRevision()">📝 Revisão</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _renderDashClientWaiting() {
+  var el = document.getElementById('dash-client-waiting');
+  if(!el) return;
+  var d = _dashData.client.waiting;
+  if(!d.length) { el.innerHTML = _emptyState('📋','Nenhum projeto publicado','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openModal(\'publish\')">+ Publicar Projeto</button>'); return; }
+  el.innerHTML = d.map(function(p) {
+    return '<div class="dash-proj-card">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + p.title + '</div>' +
+        _statusBadge('waiting', 'Aguardando propostas') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>💰 ' + p.budget + '</span>' +
+        '<span>📩 ' + p.proposals + ' propostas recebidas</span>' +
+        '<span>🕐 ' + p.posted + '</span>' +
+      '</div>' +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-footer">' +
+        '<div>' + _skillTags(p.skills) + '</div>' +
+        '<div class="dash-proj-actions">' +
+          '<button class="btn btn-primary btn-sm" onclick="showToast(\'Ver as '+p.proposals+' propostas recebidas\',\'info\')">📩 Ver '+p.proposals+' Propostas</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="showToast(\'Projeto editado!\',\'success\')">✏️ Editar</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _renderDashClientDone() {
+  var el = document.getElementById('dash-client-done');
+  if(!el) return;
+  var d = _dashData.client.done;
+  if(!d.length) { el.innerHTML = _emptyState('✅','Nenhum projeto concluído ainda','Seus projetos finalizados aparecerão aqui'); return; }
+  el.innerHTML = d.map(function(p) {
+    return '<div class="dash-proj-card" style="opacity:.85;">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + p.title + '</div>' +
+        _statusBadge('done','Concluído') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + '</span>' +
+        '<span>📅 ' + p.completedAt + '</span>' +
+        '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + p.rating + '.0</span>' +
+      '</div>' +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-footer">' +
+        _personChip(p.freelancer, 'Freelancer') +
+        '<button class="btn btn-outline btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\'Profissional\',value:'+p.value+',project:\'Novo Projeto\',deadline:\'30 dias\'})">🔄 Contratar novamente</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _renderDashFLActive() {
+  var el = document.getElementById('dash-fl-active');
+  if(!el) return;
+  var d = _dashData.freelancer.active;
+  if(!d.length) { el.innerHTML = _emptyState('⚡','Nenhum contrato ativo','Envie propostas para começar a trabalhar'); return; }
+  el.innerHTML = d.map(function(p) {
+    return '<div class="dash-proj-card">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + p.title + '</div>' +
+        _statusBadge('active','Em andamento') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' em escrow</span>' +
+        '<span>📅 ' + p.deadline + '</span>' +
+        '<span>📊 ' + p.progress + '% concluído</span>' +
+      '</div>' +
+      '<div class="escrow-progress">' +
+        '<div class="escrow-progress-label"><span>Progresso da entrega</span><span>' + p.progress + '%</span></div>' +
+        '<div class="escrow-progress-bar"><div class="escrow-progress-fill" style="width:'+p.progress+'%"></div></div>' +
+      '</div>' +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-footer">' +
+        _personChip(p.client, 'Cliente') +
+        '<div class="dash-proj-actions">' +
+          '<button class="btn btn-primary btn-sm" onclick="showToast(\'Entrega enviada para aprovação do cliente!\',\'success\')">📤 Enviar Entrega</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="showToast(\'Abrindo chat...\',\'info\')">💬 Chat</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _renderDashFLProposals() {
+  var el = document.getElementById('dash-fl-proposals');
+  if(!el) return;
+  var d = _dashData.freelancer.proposals;
+  if(!d.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
+  el.innerHTML = d.map(function(p) {
+    return '<div class="dash-proj-card">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + p.title + '</div>' +
+        _statusBadge('sent','Aguardando resposta') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>💰 Proposta: R$ ' + p.value.toLocaleString('pt-BR') + '</span>' +
+        '<span>🕐 ' + p.sentAt + '</span>' +
+      '</div>' +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-actions" style="margin-top:8px;">' +
+        '<button class="btn btn-outline btn-sm" onclick="showToast(\'Proposta retirada.\',\'info\')">❌ Retirar proposta</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _renderDashFLDone() {
+  var el = document.getElementById('dash-fl-done');
+  if(!el) return;
+  var d = _dashData.freelancer.done;
+  if(!d.length) { el.innerHTML = _emptyState('🏆','Nenhum trabalho concluído','Conclua projetos para construir seu histórico'); return; }
+  el.innerHTML = d.map(function(p) {
+    return '<div class="dash-proj-card" style="opacity:.85;">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + p.title + '</div>' +
+        _statusBadge('done','Concluído') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' recebido</span>' +
+        '<span>📅 ' + p.completedAt + '</span>' +
+        '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + p.rating + '.0</span>' +
+      '</div>' +
+      '<div class="dash-proj-desc">' + p.desc + '</div>' +
+      '<div class="dash-proj-footer">' +
+        _personChip(p.client, 'Cliente') +
+        '<button class="btn btn-outline btn-sm" onclick="showToast(\'Projeto adicionado ao portfólio!\',\'success\')">📁 Adicionar ao Portfólio</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _emptyState(icon, title, sub) {
+  return '<div class="dash-empty"><div class="dash-empty-icon">' + icon + '</div>' +
+    '<div class="dash-empty-title">' + title + '</div>' +
+    '<div class="dash-empty-sub">' + sub + '</div></div>';
 }
 </script>
 </body>
