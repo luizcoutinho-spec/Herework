@@ -2880,6 +2880,93 @@ section { padding: 64px 0; }
 .revision-urgency-btn.sel-low    { border-color:#22c55e; color:#16a34a; background:#f0fdf4; }
 .revision-urgency-btn.sel-medium { border-color:#f59e0b; color:#d97706; background:#fffbeb; }
 .revision-urgency-btn.sel-high   { border-color:#ef4444; color:#dc2626; background:#fef2f2; }
+/* ═══════════════════════════════════════
+   ADMIN — MONITOR DE CONTRATOS
+═══════════════════════════════════════ */
+.adm-contracts-tabs {
+  display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap;
+}
+.adm-ctab {
+  padding:8px 18px; border-radius:var(--radius-full);
+  border:1.5px solid var(--border); background:var(--surface);
+  font-size:13px; font-weight:600; color:var(--text-3);
+  cursor:pointer; transition:all var(--transition);
+  display:flex; align-items:center; gap:6px;
+}
+.adm-ctab.active { background:var(--text); color:#fff; border-color:var(--text); }
+.adm-ctab:hover:not(.active) { border-color:var(--text-2); color:var(--text-2); }
+.adm-ctab-count {
+  background:rgba(255,255,255,.2); color:#fff;
+  border-radius:20px; padding:1px 7px; font-size:11px;
+}
+.adm-ctab:not(.active) .adm-ctab-count {
+  background:var(--bg); color:var(--text-3);
+}
+
+.adm-contract-row {
+  display:grid;
+  grid-template-columns: 2fr 1.2fr 1.2fr 0.9fr 0.8fr auto;
+  gap:12px; align-items:center;
+  padding:12px 16px; border-bottom:1px solid var(--border-2);
+  font-size:13px; transition:background var(--transition);
+}
+.adm-contract-row:hover { background:var(--bg); }
+.adm-contract-row.header {
+  font-size:11px; font-weight:700; color:var(--text-4);
+  text-transform:uppercase; letter-spacing:.4px;
+  padding:8px 16px; background:var(--bg); border-radius:var(--radius) var(--radius) 0 0;
+}
+.adm-proj-name { font-weight:700; color:var(--text); line-height:1.3; }
+.adm-proj-cat  { font-size:11px; color:var(--text-4); margin-top:2px; }
+.adm-person    { display:flex; align-items:center; gap:7px; }
+.adm-person-av {
+  width:26px; height:26px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:10px; font-weight:800; color:#fff;
+}
+.adm-person-av.client { background:linear-gradient(135deg,#1565c0,#42a5f5); }
+.adm-person-av.fl     { background:linear-gradient(135deg,#2e7d32,#66bb6a); }
+.adm-person-name { font-weight:600; color:var(--text-2); font-size:12px; }
+.adm-person-role { font-size:10px; color:var(--text-4); }
+.adm-escrow-val { font-weight:700; color:var(--text); }
+.adm-escrow-sub { font-size:10px; color:var(--text-4); }
+.adm-deadline-ok   { color:var(--green); font-weight:600; }
+.adm-deadline-warn { color:#f59e0b; font-weight:600; }
+.adm-deadline-late { color:#ef4444; font-weight:600; }
+.adm-empty-contracts {
+  text-align:center; padding:32px 20px;
+  color:var(--text-4); font-size:13px;
+}
+
+.adm-pill {
+  display:inline-flex; align-items:center; gap:4px;
+  padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
+  white-space:nowrap;
+}
+.adm-pill-approval { background:#e0f2fe; color:#0369a1; }
+.adm-pill-revision { background:#fde8ff; color:#7e22ce; }
+.adm-pill-pending  { background:#fff7ed; color:#c2410c; }
+.adm-pill-active   { background:#dcfce7; color:#166534; }
+
+.adm-mini-btn {
+  padding:4px 10px; border-radius:var(--radius); border:1px solid var(--border);
+  background:var(--surface); font-size:11px; font-weight:600;
+  color:var(--text-2); cursor:pointer; transition:all var(--transition);
+  white-space:nowrap;
+}
+.adm-mini-btn:hover { background:var(--bg); border-color:var(--text-3); }
+.adm-mini-btn.primary { background:var(--green); color:#fff; border-color:var(--green); }
+.adm-mini-btn.primary:hover { background:var(--green-dark); }
+.adm-mini-btn.warn { background:#fef3c7; color:#92400e; border-color:#fde68a; }
+.adm-mini-btn.danger{ background:#fee2e2; color:#991b1b; border-color:#fca5a5; }
+
+@media(max-width:900px) {
+  .adm-contract-row {
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .adm-contract-row.header { display:none; }
+}
 </style>
 </head>
 <body>
@@ -5034,6 +5121,41 @@ section { padding: 64px 0; }
       </div>
     </div>
 
+    <!-- Monitor de Contratos -->
+    <div class="admin-section-title"><span>&#128274;</span> Monitor de Contratos &amp; Escrow</div>
+
+    <!-- Tabs -->
+    <div class="adm-contracts-tabs">
+      <button class="adm-ctab active" id="adm-ctab-approval" onclick="switchAdmContractTab('approval')">
+        &#9989; Aguardando Aprova&ccedil;&atilde;o <span class="adm-ctab-count" id="adm-ctab-approval-count">0</span>
+      </button>
+      <button class="adm-ctab" id="adm-ctab-revision" onclick="switchAdmContractTab('revision')">
+        &#9998; Em Revis&atilde;o <span class="adm-ctab-count" id="adm-ctab-revision-count">0</span>
+      </button>
+      <button class="adm-ctab" id="adm-ctab-pending" onclick="switchAdmContractTab('pending')">
+        &#9203; Pendente de Envio <span class="adm-ctab-count" id="adm-ctab-pending-count">0</span>
+      </button>
+      <button class="adm-ctab" id="adm-ctab-active" onclick="switchAdmContractTab('active')">
+        &#9889; Todos em Andamento <span class="adm-ctab-count" id="adm-ctab-active-count">0</span>
+      </button>
+    </div>
+
+    <!-- Contract panels -->
+    <div class="admin-panel" style="padding:0;overflow:hidden;margin-bottom:28px;">
+
+      <!-- Header row -->
+      <div class="adm-contract-row header">
+        <span>Projeto</span>
+        <span>&#127968; Cliente</span>
+        <span>&#129489;&#8205;&#128187; Freelancer</span>
+        <span>&#128274; Escrow</span>
+        <span>Prazo</span>
+        <span>A&ccedil;&atilde;o</span>
+      </div>
+
+      <!-- Content area -->
+      <div id="adm-contracts-content"></div>
+    </div>
     <!-- Ações rápidas -->
     <div class="admin-section-title"><span>⚡</span> Ações Rápidas</div>
     <div class="admin-actions-row">
@@ -8102,6 +8224,7 @@ function _adDc(s) {
 function showAdminPage() {
   if (_adminAuth) {
     showPage('admin');
+    setTimeout(function(){ initAdminContracts(); }, 50);
   } else {
     openModal('admin-login');
     setTimeout(function() {
@@ -8148,6 +8271,7 @@ function adminDoLogin() {
       if (uEl) uEl.value = '';
       if (pEl) pEl.value = '';
       showPage('admin');
+      setTimeout(function(){ initAdminContracts(); }, 100);
       showToast('🛡️ Bem-vindo ao painel de administração!', 'success');
     } else {
       if (errP) errP.textContent = lang()==='pt'
@@ -10224,6 +10348,213 @@ function submitRevision() {
       'success'
     );
   }, 900);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN — MONITOR DE CONTRATOS
+═══════════════════════════════════════════════════════════ */
+
+/* Dados de contrato para o admin (inclui _dashData + extra demo) */
+var _adminContracts = [
+  /* Aguardando aprovação — cliente precisa aprovar */
+  {
+    id:'ac1', title:'Identidade visual para startup fintech',
+    category:'Design & Criação',
+    client:{ name:'Tech Solutions Ltda', email:'contato@techsolutions.com.br' },
+    freelancer:{ name:'Marina Lima', email:'marina@herework.com.br', role:'Designer UI/UX' },
+    value:3800, status:'approval', statusLabel:'Aguardando Aprovação',
+    deadline:'2 dias', deadlineClass:'adm-deadline-warn',
+    deliveredAt:'Há 5 dias'
+  },
+  {
+    id:'ac2', title:'API REST para plataforma de cursos online',
+    category:'Web & Programação',
+    client:{ name:'EduPlus Educação', email:'projetos@eduplus.com.br' },
+    freelancer:{ name:'Carlos Almeida', email:'carlos@herework.com.br', role:'Dev Full Stack' },
+    value:7200, status:'approval', statusLabel:'Aguardando Aprovação',
+    deadline:'5 dias', deadlineClass:'adm-deadline-ok',
+    deliveredAt:'Há 2 dias'
+  },
+  /* Em revisão */
+  {
+    id:'ac3', title:'Campanha de SEO para e-commerce de moda',
+    category:'Marketing Digital',
+    client:{ name:'Loja Bella Moda', email:'marketing@bellamoda.com.br' },
+    freelancer:{ name:'Rafael Pereira', email:'rafael@herework.com.br', role:'Especialista SEO' },
+    value:3200, status:'revision', statusLabel:'Em Revisão',
+    deadline:'1 dia', deadlineClass:'adm-deadline-late',
+    revisionReason:'Relatório incompleto — faltam métricas de conversão'
+  },
+  {
+    id:'ac4', title:'App de delivery para restaurante',
+    category:'Apps & Mobile',
+    client:{ name:'Restaurante Sabor & Arte', email:'ti@saborarte.com.br' },
+    freelancer:{ name:'Fernando Melo', email:'fernando@herework.com.br', role:'Dev Mobile' },
+    value:12000, status:'revision', statusLabel:'Em Revisão',
+    deadline:'3 dias', deadlineClass:'adm-deadline-warn',
+    revisionReason:'Rastreamento de pedidos não funciona no iOS 17'
+  },
+  /* Pendente de envio — freelancer ainda não entregou */
+  {
+    id:'ac5', title:'Desenvolvimento de e-commerce com WooCommerce',
+    category:'Web & Programação',
+    client:{ name:'Boutique Elegance', email:'admin@boutique.com.br' },
+    freelancer:{ name:'Carlos Almeida', email:'carlos@herework.com.br', role:'Dev Full Stack' },
+    value:4800, status:'pending', statusLabel:'Pendente de Envio',
+    deadline:'18 dias', deadlineClass:'adm-deadline-ok',
+    progress:45
+  },
+  {
+    id:'ac6', title:'Gestão mensal de redes sociais',
+    category:'Marketing Digital',
+    client:{ name:'Padaria Dona Maria', email:'donaria@padaria.com.br' },
+    freelancer:{ name:'Rafael Pereira', email:'rafael@herework.com.br', role:'Social Media' },
+    value:2400, status:'pending', statusLabel:'Pendente de Envio',
+    deadline:'22 dias', deadlineClass:'adm-deadline-ok',
+    progress:30
+  },
+  {
+    id:'ac7', title:'Edição de vídeo institucional 5 min',
+    category:'Vídeo & Animação',
+    client:{ name:'Construtora Horizonte', email:'marketing@horizonte.com.br' },
+    freelancer:{ name:'Tatiane Carvalho', email:'tatiane@herework.com.br', role:'Editora de Vídeo' },
+    value:1800, status:'pending', statusLabel:'Pendente de Envio',
+    deadline:'7 dias', deadlineClass:'adm-deadline-warn',
+    progress:70
+  },
+  /* Todos em andamento */
+  {
+    id:'ac8', title:'Copywriting para campanha Black Friday',
+    category:'Redação & Tradução',
+    client:{ name:'MegaStore Online', email:'marketing@megastore.com.br' },
+    freelancer:{ name:'Juliana Santos', email:'juliana@herework.com.br', role:'Copywriter' },
+    value:2800, status:'active', statusLabel:'Em Desenvolvimento',
+    deadline:'12 dias', deadlineClass:'adm-deadline-ok',
+    progress:55
+  }
+];
+
+var _admCurrentTab = 'approval';
+
+function initAdminContracts() {
+  /* Atualiza contagens nos tabs */
+  var counts = { approval:0, revision:0, pending:0, active:0 };
+  _adminContracts.forEach(function(c) {
+    if(counts[c.status] !== undefined) counts[c.status]++;
+    if(c.status !== 'approval') counts.active++;
+  });
+  counts.active = _adminContracts.length;
+
+  var el;
+  el = document.getElementById('adm-ctab-approval-count'); if(el) el.textContent = counts.approval;
+  el = document.getElementById('adm-ctab-revision-count'); if(el) el.textContent = counts.revision;
+  el = document.getElementById('adm-ctab-pending-count');  if(el) el.textContent = counts.pending;
+  el = document.getElementById('adm-ctab-active-count');   if(el) el.textContent = _adminContracts.length;
+
+  renderAdminContracts(_admCurrentTab);
+}
+
+function switchAdmContractTab(tab) {
+  _admCurrentTab = tab;
+  ['approval','revision','pending','active'].forEach(function(t) {
+    var btn = document.getElementById('adm-ctab-' + t);
+    if(btn) btn.classList.toggle('active', t === tab);
+  });
+  renderAdminContracts(tab);
+}
+
+function renderAdminContracts(tab) {
+  var el = document.getElementById('adm-contracts-content');
+  if(!el) return;
+
+  var list = tab === 'active'
+    ? _adminContracts
+    : _adminContracts.filter(function(c){ return c.status === tab; });
+
+  if(!list.length) {
+    el.innerHTML = '<div class="adm-empty-contracts">&#10003; Nenhum contrato nesta categoria no momento.</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(function(c) {
+    /* Status pill */
+    var pillClass = { approval:'adm-pill-approval', revision:'adm-pill-revision', pending:'adm-pill-pending', active:'adm-pill-active' }[c.status] || 'adm-pill-pending';
+    var pillIcon  = { approval:'&#9989;', revision:'&#9998;', pending:'&#9203;', active:'&#9889;' }[c.status] || '';
+
+    /* Extra info row */
+    var extraInfo = '';
+    if(c.status === 'revision' && c.revisionReason) {
+      extraInfo = '<div style="font-size:11px;color:#7e22ce;margin-top:3px;">&#128172; ' + c.revisionReason + '</div>';
+    } else if(c.status === 'pending' && c.progress !== undefined) {
+      extraInfo = '<div style="font-size:11px;color:var(--text-4);margin-top:3px;">' +
+        '<div style="width:80px;height:4px;background:var(--border);border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px;">' +
+        '<div style="width:'+c.progress+'%;height:100%;background:var(--green);border-radius:2px;"></div></div>' +
+        c.progress + '%</div>';
+    } else if(c.status === 'approval' && c.deliveredAt) {
+      extraInfo = '<div style="font-size:11px;color:var(--text-4);margin-top:3px;">&#128228; Entregue ' + c.deliveredAt + '</div>';
+    }
+
+    /* Action buttons */
+    var actions = '';
+    if(c.status === 'approval') {
+      actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
+        '<button class="adm-mini-btn primary" onclick="admContractAction(\'release\',\''+c.id+'\')">&#128176; Liberar</button>' +
+        '<button class="adm-mini-btn warn" onclick="admContractAction(\'remind\',\''+c.id+'\')">&#128276; Lembrar</button>' +
+        '</div>';
+    } else if(c.status === 'revision') {
+      actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
+        '<button class="adm-mini-btn warn" onclick="admContractAction(\'mediate\',\''+c.id+'\')">&#9878;&#65039; Mediar</button>' +
+        '<button class="adm-mini-btn" onclick="admContractAction(\'extend\',\''+c.id+'\')">&#128197; Prazo +7d</button>' +
+        '</div>';
+    } else if(c.status === 'pending') {
+      actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
+        '<button class="adm-mini-btn warn" onclick="admContractAction(\'nudge\',\''+c.id+'\')">&#128276; Cobrar FL</button>' +
+        '<button class="adm-mini-btn" onclick="admContractAction(\'extend\',\''+c.id+'\')">&#128197; Prazo +7d</button>' +
+        '</div>';
+    } else {
+      actions = '<button class="adm-mini-btn" onclick="admContractAction(\'view\',\''+c.id+'\')">&#128269; Ver</button>';
+    }
+
+    return '<div class="adm-contract-row">' +
+      /* Project */ '<div><div class="adm-proj-name">' + c.title + '</div>' +
+        '<div class="adm-proj-cat">' + c.category + ' &nbsp;·&nbsp; <span class="adm-pill ' + pillClass + '">' + pillIcon + ' ' + c.statusLabel + '</span></div>' +
+        extraInfo + '</div>' +
+      /* Client */ '<div class="adm-person">' +
+        '<div class="adm-person-av client">' + c.client.name.charAt(0).toUpperCase() + '</div>' +
+        '<div><div class="adm-person-name">' + c.client.name + '</div>' +
+        '<div class="adm-person-role">' + c.client.email + '</div></div>' +
+      '</div>' +
+      /* Freelancer */ '<div class="adm-person">' +
+        '<div class="adm-person-av fl">' + c.freelancer.name.charAt(0).toUpperCase() + '</div>' +
+        '<div><div class="adm-person-name">' + c.freelancer.name + '</div>' +
+        '<div class="adm-person-role">' + c.freelancer.role + '</div></div>' +
+      '</div>' +
+      /* Escrow */ '<div><div class="adm-escrow-val">R$ ' + c.value.toLocaleString('pt-BR') + '</div>' +
+        '<div class="adm-escrow-sub">em escrow</div></div>' +
+      /* Deadline */ '<div class="' + c.deadlineClass + '">' + c.deadline + '</div>' +
+      /* Actions */ '<div>' + actions + '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function admContractAction(action, contractId) {
+  var c = _adminContracts.filter(function(x){ return x.id === contractId; })[0];
+  if(!c) return;
+  var msgs = {
+    release: '&#128176; Pagamento de R$ ' + (c.value||0).toLocaleString('pt-BR') + ' liberado para ' + (c.freelancer ? c.freelancer.name : 'freelancer') + '!',
+    remind:  '&#128276; Lembrete enviado para ' + (c.client ? c.client.name : 'cliente') + ' aprovar a entrega.',
+    mediate: '&#9878;&#65039; Processo de mediação aberto para "' + c.title + '". Equipe notificada.',
+    nudge:   '&#128276; ' + (c.freelancer ? c.freelancer.name : 'Freelancer') + ' foi cobrado sobre a entrega pendente.',
+    extend:  '&#128197; Prazo estendido em 7 dias para "' + c.title + '".',
+    view:    '&#128269; Abrindo detalhes do contrato...'
+  };
+  showToast(msgs[action] || 'Ação executada.', action === 'release' ? 'success' : 'info');
+
+  /* Remove from list if released */
+  if(action === 'release') {
+    _adminContracts = _adminContracts.filter(function(x){ return x.id !== contractId; });
+    initAdminContracts();
+  }
 }
 </script>
 </body>
