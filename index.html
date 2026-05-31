@@ -2344,6 +2344,145 @@ section { padding: 64px 0; }
   border-radius: 50%; transition: all var(--transition);
 }
 .pdf-file-remove:hover { background: #fee2e2; color: #ef4444; }
+/* ═══════════════════════════════════════
+   CONTRATO + ESCROW — MODAL
+═══════════════════════════════════════ */
+#overlay-contract .modal { max-width:560px; padding:0; overflow:hidden; }
+
+/* Stepper */
+.contract-stepper {
+  display:flex; align-items:center; padding:18px 28px 0;
+  background:var(--surface); border-bottom:1px solid var(--border-2);
+}
+.contract-step-item {
+  display:flex; flex-direction:column; align-items:center; gap:4px; flex:1;
+}
+.contract-step-circle {
+  width:32px; height:32px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:13px; font-weight:700;
+  background:var(--bg); border:2px solid var(--border);
+  color:var(--text-3); transition:all .3s;
+}
+.contract-step-circle.done  { background:var(--green); border-color:var(--green); color:#fff; }
+.contract-step-circle.active{ background:#fff; border-color:var(--green); color:var(--green); box-shadow:0 0 0 3px rgba(46,125,50,.12); }
+.contract-step-label { font-size:10px; color:var(--text-4); font-weight:500; white-space:nowrap; }
+.contract-step-label.active { color:var(--green); font-weight:700; }
+.contract-step-line { flex:1; height:2px; background:var(--border); margin-bottom:14px; transition:background .3s; }
+.contract-step-line.done { background:var(--green); }
+
+/* Step panels */
+.contract-body { padding:24px 28px 28px; }
+.contract-panel { display:none; }
+.contract-panel.active { display:block; }
+
+/* Contract details */
+.contract-parties {
+  display:flex; align-items:center; gap:12px;
+  background:var(--bg); border:1px solid var(--border-2);
+  border-radius:var(--radius-lg); padding:14px 16px; margin-bottom:16px;
+}
+.contract-avatar {
+  width:40px; height:40px; border-radius:50%;
+  background:linear-gradient(135deg,var(--green),#66BB6A);
+  display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:800; color:#fff; flex-shrink:0;
+}
+.contract-parties-info { flex:1; }
+.contract-parties-name  { font-size:15px; font-weight:700; color:var(--text); }
+.contract-parties-role  { font-size:12px; color:var(--text-3); }
+.contract-value-badge {
+  text-align:right;
+}
+.contract-value-badge .val { font-size:22px; font-weight:800; color:var(--text); }
+.contract-value-badge .lbl { font-size:11px; color:var(--text-3); }
+
+.contract-items { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+.contract-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 14px; background:var(--bg);
+  border-radius:var(--radius); border:1px solid var(--border-2);
+  font-size:13px;
+}
+.contract-item-label { color:var(--text-3); }
+.contract-item-value { font-weight:600; color:var(--text); }
+
+.contract-terms {
+  background:#f0fdf4; border:1px solid #bbf7d0;
+  border-radius:var(--radius); padding:12px 14px;
+  font-size:12px; color:#166534; margin-bottom:16px; line-height:1.6;
+}
+
+/* Escrow banner */
+.escrow-banner {
+  background:linear-gradient(135deg,#1a1a2e,#0f3460);
+  border-radius:var(--radius-lg); padding:16px 18px;
+  display:flex; align-items:center; gap:14px; margin-bottom:20px;
+}
+.escrow-banner-icon { font-size:28px; flex-shrink:0; }
+.escrow-banner-text .title { font-size:15px; font-weight:800; color:#fff; margin-bottom:3px; }
+.escrow-banner-text .sub   { font-size:12px; color:#94a3b8; line-height:1.5; }
+.escrow-badge-row {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px;
+}
+.escrow-badge {
+  display:flex; align-items:center; gap:5px;
+  background:#f0fdf4; border:1px solid #bbf7d0;
+  border-radius:20px; padding:4px 10px;
+  font-size:11px; font-weight:600; color:#15803d;
+}
+
+/* Payment tabs (reuse .pay-tab) */
+.escrow-pay-tabs { display:flex; border-bottom:1.5px solid var(--border); margin-bottom:0; }
+
+/* Active contract / timeline */
+.contract-active-header {
+  text-align:center; padding:16px 0 20px;
+}
+.contract-active-icon {
+  width:64px; height:64px; background:#dcfce7; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:30px; margin:0 auto 10px; animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+.contract-timeline {
+  display:flex; flex-direction:column; gap:0; margin-bottom:20px; position:relative;
+}
+.contract-timeline::before {
+  content:''; position:absolute; left:15px; top:0; bottom:0;
+  width:2px; background:var(--border);
+}
+.ct-step {
+  display:flex; align-items:flex-start; gap:14px; padding:10px 0; position:relative; z-index:1;
+}
+.ct-dot {
+  width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; background:var(--surface); border:2px solid var(--border);
+}
+.ct-dot.done   { background:var(--green); border-color:var(--green); }
+.ct-dot.active { background:#fff; border-color:var(--green); box-shadow:0 0 0 3px rgba(46,125,50,.15); }
+.ct-dot.pending{ background:var(--bg); border-color:var(--border); color:var(--text-4); }
+.ct-info       { padding-top:5px; }
+.ct-title      { font-size:14px; font-weight:700; color:var(--text); }
+.ct-sub        { font-size:12px; color:var(--text-3); margin-top:2px; }
+.ct-sub.active { color:var(--green); font-weight:600; }
+
+/* Approval step */
+.star-rating-row {
+  display:flex; gap:6px; justify-content:center; margin:12px 0;
+}
+.star-rating-btn {
+  font-size:28px; background:none; border:none; cursor:pointer;
+  opacity:.35; transition:all .15s; filter:grayscale(1);
+}
+.star-rating-btn.on { opacity:1; filter:none; }
+.approve-summary {
+  background:#f0fdf4; border:1px solid #bbf7d0;
+  border-radius:var(--radius-lg); padding:14px 16px; margin:16px 0;
+  text-align:center;
+}
+.approve-summary .amount { font-size:26px; font-weight:800; color:var(--green); }
+.approve-summary .label  { font-size:13px; color:#166534; margin-top:3px; }
 </style>
 </head>
 <body>
@@ -2821,7 +2960,7 @@ section { padding: 64px 0; }
             <div class="fl-stats">312 <span data-pt="projetos" data-es="proyectos">projetos</span></div>
           </div>
           <div style="display:flex;gap:8px;margin-top:12px;">
-            <button class="btn btn-green btn-sm" onclick="openModal('invite')" data-pt="Convidar" data-es="Invitar">Convidar</button>
+            <button class="btn btn-green btn-sm" onclick="openContractModal({name:name,role:specialty,value:rate*40,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Convidar" data-es="Invitar">Convidar</button>
             <button class="btn btn-outline btn-sm" onclick="showPage('freelancers')" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
           </div>
         </div>
@@ -3379,7 +3518,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 120<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Carlos Almeida',role:'Desenvolvedor Full Stack',value:4800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -3407,7 +3546,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 95<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Marina Lima',role:'Designer UI/UX',value:3800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -3435,7 +3574,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 80<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Rafael Pereira',role:'Especialista em Marketing Digital',value:3200,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -3464,7 +3603,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 70<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Juliana Santos',role:'Redatora & Copywriter',value:2800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -3492,7 +3631,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 110<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Fernando Melo',role:'Desenvolvedor Mobile',value:4400,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -3520,7 +3659,7 @@ section { padding: 64px 0; }
             <div class="fl-list-right">
               <div class="fl-list-rate">R$ 85<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
-              <button class="btn btn-green btn-sm" data-pt="Convidar" data-es="Invitar">Convidar</button>
+              <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Tatiane Carvalho',role:'Editora de Vídeo & Motion Design',value:3400,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
               <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
             </div>
           </div>
@@ -5251,6 +5390,289 @@ section { padding: 64px 0; }
 
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: CONTRATAR + ESCROW (4 ETAPAS)
+═══════════════════════════════════════ -->
+<div class="overlay" id="overlay-contract" onclick="if(event.target===this)closeModal('contract')">
+  <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
+
+    <div class="modal-header" style="padding:18px 28px 14px;border-bottom:1px solid var(--border-2);">
+      <div>
+        <div class="modal-title" id="contract-modal-title">Contratar Freelancer</div>
+        <div class="modal-subtitle" id="contract-modal-sub">Revise os termos e finalize com pagamento seguro</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('contract')">&#x2715;</button>
+    </div>
+
+    <!-- Stepper -->
+    <div class="contract-stepper" id="contract-stepper">
+      <div class="contract-step-item">
+        <div class="contract-step-circle active" id="cstep-1">1</div>
+        <div class="contract-step-label active" id="cstep-lbl-1">Contrato</div>
+      </div>
+      <div class="contract-step-line" id="cline-1"></div>
+      <div class="contract-step-item">
+        <div class="contract-step-circle" id="cstep-2">2</div>
+        <div class="contract-step-label" id="cstep-lbl-2">Pagamento</div>
+      </div>
+      <div class="contract-step-line" id="cline-2"></div>
+      <div class="contract-step-item">
+        <div class="contract-step-circle" id="cstep-3">&#9201;</div>
+        <div class="contract-step-label" id="cstep-lbl-3">Em andamento</div>
+      </div>
+      <div class="contract-step-line" id="cline-3"></div>
+      <div class="contract-step-item">
+        <div class="contract-step-circle" id="cstep-4">&#10003;</div>
+        <div class="contract-step-label" id="cstep-lbl-4">Aprovação</div>
+      </div>
+    </div>
+
+    <div class="contract-body">
+
+      <!-- ── ETAPA 1: DETALHES DO CONTRATO ── -->
+      <div class="contract-panel active" id="cpanel-1">
+        <div class="contract-parties">
+          <div class="contract-avatar" id="c-avatar">C</div>
+          <div class="contract-parties-info">
+            <div class="contract-parties-name" id="c-fl-name">Freelancer</div>
+            <div class="contract-parties-role" id="c-fl-role">Desenvolvedor Full Stack</div>
+          </div>
+          <div class="contract-value-badge">
+            <div class="val">R$ <span id="c-value">0</span></div>
+            <div class="lbl">valor acordado</div>
+          </div>
+        </div>
+
+        <div class="contract-items">
+          <div class="contract-item">
+            <span class="contract-item-label">&#128203; Projeto</span>
+            <span class="contract-item-value" id="c-proj-name">Projeto</span>
+          </div>
+          <div class="contract-item">
+            <span class="contract-item-label">&#128197; Prazo de entrega</span>
+            <span class="contract-item-value" id="c-deadline">30 dias</span>
+          </div>
+          <div class="contract-item">
+            <span class="contract-item-label">&#128181; Taxa da plataforma (8%)</span>
+            <span class="contract-item-value" id="c-fee">R$ 0</span>
+          </div>
+          <div class="contract-item" style="border-color:var(--green);background:#f0fdf4;">
+            <span class="contract-item-label" style="color:#166534;font-weight:600;">&#128176; Total a depositar em escrow</span>
+            <span class="contract-item-value" style="color:var(--green);font-size:16px;" id="c-total">R$ 0</span>
+          </div>
+        </div>
+
+        <div class="contract-terms">
+          &#128274; <strong>Proteção Escrow HereWork:</strong> O pagamento ser&aacute; retido com seguran&ccedil;a em nossa plataforma e s&oacute; ser&aacute; liberado ao freelancer ap&oacute;s voc&ecirc; <strong>aprovar a entrega</strong>. Em caso de disputa, nossa equipe medeia o processo.
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+          <input type="checkbox" id="contract-agree" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
+          <label for="contract-agree" style="font-size:13px;color:var(--text-2);cursor:pointer;">
+            Li e aceito os <a onclick="openInfoPage('terms')" style="color:var(--green);">Termos de Uso</a> e a pol&iacute;tica de escrow da HereWork.
+          </label>
+        </div>
+        <div class="form-error" id="err-contract-agree" style="margin-bottom:12px;"></div>
+
+        <button class="btn btn-primary btn-block btn-lg" onclick="contractStep2()">
+          Avan&ccedil;ar para Pagamento &rarr;
+        </button>
+      </div>
+
+      <!-- ── ETAPA 2: PAGAMENTO ESCROW ── -->
+      <div class="contract-panel" id="cpanel-2">
+        <div class="escrow-banner">
+          <div class="escrow-banner-icon">&#128274;</div>
+          <div class="escrow-banner-text">
+            <div class="title">Pagamento Protegido por Escrow</div>
+            <div class="sub">Seu dinheiro fica retido com seguran&ccedil;a. S&oacute; &eacute; liberado ao freelancer quando voc&ecirc; aprovar a entrega.</div>
+          </div>
+        </div>
+        <div class="escrow-badge-row">
+          <div class="escrow-badge">&#9989; 100% Seguro</div>
+          <div class="escrow-badge">&#128274; Criptografia SSL</div>
+          <div class="escrow-badge">&#9878;&#65039; Mediação em disputas</div>
+          <div class="escrow-badge">&#9889; PIX instantâneo</div>
+        </div>
+
+        <!-- Mini tabs PIX / Cartão -->
+        <div class="pay-tabs" style="margin-bottom:0;">
+          <button class="pay-tab active" id="ctab-pix" onclick="switchContractPayTab('pix')">
+            <span>&#9889;</span> PIX
+          </button>
+          <button class="pay-tab" id="ctab-card" onclick="switchContractPayTab('card')">
+            <span>&#128179;</span> Cart&atilde;o de Cr&eacute;dito
+          </button>
+        </div>
+
+        <div id="cpay-body" style="padding:18px 0 0;">
+          <!-- PIX -->
+          <div id="cpay-pix" style="display:block;">
+            <div style="text-align:center;margin-bottom:14px;">
+              <div style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Escaneie o QR Code ou copie o c&oacute;digo PIX</div>
+              <div style="display:inline-flex;background:#fff;border:2px solid var(--border);border-radius:10px;padding:10px;">
+                <svg width="140" height="140" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="10" y="10" width="50" height="50" rx="4" fill="#000"/><rect x="16" y="16" width="38" height="38" rx="2" fill="#fff"/><rect x="22" y="22" width="26" height="26" rx="1" fill="#000"/>
+                  <rect x="120" y="10" width="50" height="50" rx="4" fill="#000"/><rect x="126" y="16" width="38" height="38" rx="2" fill="#fff"/><rect x="132" y="22" width="26" height="26" rx="1" fill="#000"/>
+                  <rect x="10" y="120" width="50" height="50" rx="4" fill="#000"/><rect x="16" y="126" width="38" height="38" rx="2" fill="#fff"/><rect x="22" y="132" width="26" height="26" rx="1" fill="#000"/>
+                  <rect x="70" y="10" width="6" height="6" fill="#000"/><rect x="82" y="10" width="6" height="6" fill="#000"/>
+                  <rect x="70" y="22" width="6" height="6" fill="#000"/><rect x="82" y="28" width="6" height="6" fill="#000"/>
+                  <rect x="94" y="22" width="6" height="6" fill="#000"/><rect x="70" y="40" width="6" height="6" fill="#000"/>
+                  <rect x="94" y="40" width="6" height="6" fill="#000"/><rect x="76" y="52" width="6" height="6" fill="#000"/>
+                  <rect x="88" y="58" width="6" height="6" fill="#000"/><rect x="70" y="64" width="6" height="6" fill="#000"/>
+                  <rect x="82" y="82" width="6" height="6" fill="#000"/><rect x="100" y="88" width="6" height="6" fill="#000"/>
+                  <rect x="70" y="94" width="6" height="6" fill="#000"/><rect x="88" y="94" width="6" height="6" fill="#000"/>
+                  <rect x="118" y="70" width="6" height="6" fill="#000"/><rect x="130" y="76" width="6" height="6" fill="#000"/>
+                  <rect x="118" y="100" width="6" height="6" fill="#000"/><rect x="130" y="106" width="6" height="6" fill="#000"/>
+                  <rect x="118" y="118" width="6" height="6" fill="#000"/><rect x="136" y="142" width="6" height="6" fill="#000"/>
+                  <rect x="76" y="76" width="28" height="28" rx="4" fill="#32BCAD"/>
+                  <text x="90" y="96" font-family="Arial" font-weight="bold" font-size="14" fill="white" text-anchor="middle">PIX</text>
+                </svg>
+              </div>
+              <div style="margin-top:10px;display:flex;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+                <div style="flex:1;padding:9px 12px;font-size:11px;font-family:monospace;color:var(--text-3);word-break:break-all;">
+                  00020126580014BR.GOV.BCB.PIX0136escrow@herework.com.br5204000053039865406<span id="c-pix-amount">0</span>5802BR5910HereWork6304B3C1
+                </div>
+                <button onclick="contractCopyPix()" style="flex-shrink:0;padding:9px 14px;background:var(--green);color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;">Copiar</button>
+              </div>
+            </div>
+            <button class="btn btn-green btn-block" id="c-pix-sim-btn" onclick="contractSimulatePix()">
+              &#9889; Simular Pagamento PIX (Demo)
+            </button>
+          </div>
+
+          <!-- Cartão -->
+          <div id="cpay-card" style="display:none;">
+            <div class="form-group">
+              <label class="form-label">N&uacute;mero do Cart&atilde;o</label>
+              <input class="form-input" id="c-card-num" type="text" maxlength="19" placeholder="0000 0000 0000 0000" oninput="formatCardNumber(this)" onfocus="flipCard(false)">
+              <div class="form-error" id="err-c-card-num"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Nome no Cart&atilde;o</label>
+              <input class="form-input" id="c-card-name" type="text" placeholder="Como aparece no cart&atilde;o">
+              <div class="form-error" id="err-c-card-name"></div>
+            </div>
+            <div class="card-row">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Validade</label>
+                <input class="form-input" id="c-card-exp" type="text" maxlength="5" placeholder="MM/AA" oninput="formatCardExpiry(this)">
+                <div class="form-error" id="err-c-card-exp"></div>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">CVV</label>
+                <input class="form-input" id="c-card-cvv" type="text" maxlength="4" placeholder="&bull;&bull;&bull;">
+                <div class="form-error" id="err-c-card-cvv"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-block" style="margin-top:16px;" id="c-card-btn" onclick="contractPayCard()">
+              &#128274; Depositar R$ <span id="c-card-total">0</span> em Escrow
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ETAPA 3: CONTRATO ATIVO ── -->
+      <div class="contract-panel" id="cpanel-3">
+        <div class="contract-active-header">
+          <div class="contract-active-icon">&#128274;</div>
+          <div style="font-size:18px;font-weight:800;color:var(--text);">Contrato Ativo!</div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:4px;">
+            R$ <strong id="c-escrow-display" style="color:var(--green);">0</strong> em escrow &mdash; aguardando entrega
+          </div>
+        </div>
+        <div class="contract-timeline">
+          <div class="ct-step">
+            <div class="ct-dot done">&#10003;</div>
+            <div class="ct-info">
+              <div class="ct-title">Contrato assinado</div>
+              <div class="ct-sub">Agora mesmo</div>
+            </div>
+          </div>
+          <div class="ct-step">
+            <div class="ct-dot done">&#10003;</div>
+            <div class="ct-info">
+              <div class="ct-title">Pagamento em escrow</div>
+              <div class="ct-sub">Valor retido com segurança</div>
+            </div>
+          </div>
+          <div class="ct-step">
+            <div class="ct-dot active">&#9201;</div>
+            <div class="ct-info">
+              <div class="ct-title">Em desenvolvimento</div>
+              <div class="ct-sub active">Freelancer trabalhando no projeto...</div>
+            </div>
+          </div>
+          <div class="ct-step">
+            <div class="ct-dot pending">4</div>
+            <div class="ct-info">
+              <div class="ct-title">Entrega para aprovação</div>
+              <div class="ct-sub">Aguardando entrega do freelancer</div>
+            </div>
+          </div>
+          <div class="ct-step">
+            <div class="ct-dot pending">5</div>
+            <div class="ct-info">
+              <div class="ct-title">Pagamento liberado</div>
+              <div class="ct-sub">Após sua aprovação</div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary btn-block" onclick="contractStep4()">
+            &#9989; Aprovar Entrega e Liberar
+          </button>
+          <button class="btn btn-outline" style="min-width:140px;" onclick="contractRevision()">
+            &#9998; Pedir Revis&atilde;o
+          </button>
+        </div>
+        <div style="font-size:11px;color:var(--text-4);text-align:center;margin-top:10px;">
+          Prazo para aprovar: <strong id="c-deadline-display">30 dias</strong> &nbsp;&middot;&nbsp; Em caso de disputa, abra um chamado no suporte
+        </div>
+      </div>
+
+      <!-- ── ETAPA 4: APROVAÇÃO E LIBERAÇÃO ── -->
+      <div class="contract-panel" id="cpanel-4">
+        <div style="text-align:center;margin-bottom:18px;">
+          <div style="font-size:40px;margin-bottom:8px;">&#127775;</div>
+          <div style="font-size:17px;font-weight:800;color:var(--text);">Avaliar e Liberar Pagamento</div>
+          <div style="font-size:13px;color:var(--text-3);margin-top:4px);">Confirme a entrega e avalie o trabalho do freelancer</div>
+        </div>
+
+        <div class="approve-summary">
+          <div class="amount">R$ <span id="c-release-amount">0</span></div>
+          <div class="label">&#128274; ser&aacute; liberado do escrow para <strong id="c-release-name">freelancer</strong></div>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:8px;text-align:center;">Como foi o trabalho?</div>
+          <div class="star-rating-row" id="contract-stars">
+            <button class="star-rating-btn" onclick="contractRate(1)">&#11088;</button>
+            <button class="star-rating-btn" onclick="contractRate(2)">&#11088;</button>
+            <button class="star-rating-btn" onclick="contractRate(3)">&#11088;</button>
+            <button class="star-rating-btn" onclick="contractRate(4)">&#11088;</button>
+            <button class="star-rating-btn" onclick="contractRate(5)">&#11088;</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Deixe um depoimento (opcional)</label>
+          <textarea class="form-textarea" id="contract-review-text" placeholder="Conte como foi trabalhar com este profissional..." style="min-height:80px;"></textarea>
+        </div>
+        <div class="form-error" id="err-contract-stars" style="margin-bottom:10px;text-align:center;"></div>
+
+        <button class="btn btn-primary btn-block btn-lg" id="c-approve-btn" onclick="contractApprove()">
+          &#9989; Confirmar e Liberar R$ <span id="c-approve-amount">0</span>
+        </button>
+        <button class="btn btn-outline btn-block" style="margin-top:8px;" onclick="contractRevision()">
+          &#9998; N&atilde;o aprovei &mdash; Pedir Revis&atilde;o
+        </button>
+      </div>
+
+    </div><!-- /contract-body -->
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -6361,6 +6783,8 @@ document.addEventListener('click', function(e) {
       { openModal('login'); return; }
     if (/Cadastrar|Registrar|Começar|Gratis|Empezar|Começar/.test(txt) || pt === 'Cadastrar-se')
       { openModal('register'); return; }
+    if (/^Contratar$/.test(txt))
+      { openContractModal({name:'Freelancer',role:'Profissional',value:2000,project:'Meu Projeto',deadline:'30 dias'}); return; }
     if (/Assinar|Suscribirse/.test(txt))
       { openPaymentModal(149, 'Plano HereWork', ''); return; }
     if (/Publicar Projeto|Publicar Proyecto/.test(txt) || /Publicar/.test(pt))
@@ -7872,6 +8296,187 @@ function pdfRemove2(e) {
   if (err)  { err.textContent = ''; err.classList.remove('show'); }
 }
 function _pdfReset2() { pdfRemove2({ stopPropagation: function(){} }); }
+
+/* ═══════════════════════════════════════════════════════
+   CONTRACT + ESCROW SYSTEM
+═══════════════════════════════════════════════════════ */
+var _contractCtx = { name:'', role:'', value:0, project:'', deadline:'30 dias', rating:0 };
+
+function openContractModal(opts) {
+  opts = opts || {};
+  _contractCtx = {
+    name:     opts.name     || 'Freelancer',
+    role:     opts.role     || 'Profissional',
+    value:    opts.value    || 2000,
+    project:  opts.project  || 'Meu Projeto',
+    deadline: opts.deadline || '30 dias',
+    rating:   0
+  };
+
+  var fee   = Math.round(_contractCtx.value * 0.08);
+  var total = _contractCtx.value + fee;
+  var fmt   = function(n){ return n.toLocaleString('pt-BR'); };
+
+  // Populate step 1
+  var el;
+  el = document.getElementById('c-avatar');        if(el) el.textContent = _contractCtx.name.charAt(0).toUpperCase();
+  el = document.getElementById('c-fl-name');       if(el) el.textContent = _contractCtx.name;
+  el = document.getElementById('c-fl-role');       if(el) el.textContent = _contractCtx.role;
+  el = document.getElementById('c-value');         if(el) el.textContent = fmt(_contractCtx.value);
+  el = document.getElementById('c-proj-name');     if(el) el.textContent = _contractCtx.project;
+  el = document.getElementById('c-deadline');      if(el) el.textContent = _contractCtx.deadline;
+  el = document.getElementById('c-fee');           if(el) el.textContent = 'R$ ' + fmt(fee);
+  el = document.getElementById('c-total');         if(el) el.textContent = 'R$ ' + fmt(total);
+  el = document.getElementById('c-pix-amount');    if(el) el.textContent = total;
+  el = document.getElementById('c-card-total');    if(el) el.textContent = fmt(total);
+  el = document.getElementById('c-escrow-display');if(el) el.textContent = fmt(_contractCtx.value);
+  el = document.getElementById('c-deadline-display');if(el) el.textContent = _contractCtx.deadline;
+  el = document.getElementById('c-release-amount');if(el) el.textContent = fmt(_contractCtx.value);
+  el = document.getElementById('c-release-name');  if(el) el.textContent = _contractCtx.name;
+  el = document.getElementById('c-approve-amount');if(el) el.textContent = fmt(_contractCtx.value);
+  el = document.getElementById('contract-modal-title'); if(el) el.textContent = 'Contratar ' + _contractCtx.name;
+
+  // Reset
+  var agree = document.getElementById('contract-agree');
+  if(agree) agree.checked = false;
+  var err = document.getElementById('err-contract-agree');
+  if(err) { err.textContent=''; err.classList.remove('show'); }
+  contractRate(0);
+  switchContractPayTab('pix');
+  _goContractStep(1);
+  openModal('contract');
+}
+
+function _goContractStep(n) {
+  [1,2,3,4].forEach(function(i) {
+    var panel  = document.getElementById('cpanel-'  + i);
+    var circle = document.getElementById('cstep-'   + i);
+    var label  = document.getElementById('cstep-lbl-'+i);
+    var line   = document.getElementById('cline-'   + (i < 4 ? i : 3));
+    if(panel)  panel.classList.toggle('active', i === n);
+    if(circle) {
+      circle.className = 'contract-step-circle ' + (i < n ? 'done' : i === n ? 'active' : '');
+      if(i < n) circle.textContent = '✓';
+      else if(i === 1) circle.textContent = '1';
+      else if(i === 2) circle.textContent = '2';
+      else if(i === 3) circle.textContent = '⏱';
+      else circle.textContent = '✓';
+    }
+    if(label)  label.className = 'contract-step-label' + (i === n ? ' active' : '');
+    if(line && i < 4) line.className = 'contract-step-line' + (i < n ? ' done' : '');
+  });
+}
+
+function contractStep2() {
+  var agree = document.getElementById('contract-agree');
+  var err   = document.getElementById('err-contract-agree');
+  if(!agree || !agree.checked) {
+    if(err) { err.textContent = 'Você precisa aceitar os termos para continuar.'; err.classList.add('show'); }
+    return;
+  }
+  if(err) { err.textContent=''; err.classList.remove('show'); }
+  _goContractStep(2);
+}
+
+function contractStep4() { _goContractStep(4); }
+
+function switchContractPayTab(tab) {
+  ['pix','card'].forEach(function(t) {
+    var btn = document.getElementById('ctab-' + t);
+    var pnl = document.getElementById('cpay-' + t);
+    if(btn) btn.className = 'pay-tab' + (t === tab ? ' active' : '');
+    if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+function contractCopyPix() {
+  var el = document.querySelector('#cpay-pix [style*="monospace"]');
+  if(!el) return;
+  var txt = el.textContent || el.innerText;
+  if(navigator.clipboard) {
+    navigator.clipboard.writeText(txt).then(function(){ showToast('⚡ Código PIX copiado!','success'); });
+  } else { showToast('⚡ Código PIX copiado!','success'); }
+}
+
+function contractSimulatePix() {
+  var btn = document.getElementById('c-pix-sim-btn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Confirmando...'; }
+  setTimeout(function(){
+    if(btn){ btn.disabled=false; btn.textContent='⚡ Simular Pagamento PIX (Demo)'; }
+    _goContractStep(3);
+    showToast('⚡ PIX confirmado! Pagamento em escrow. Projeto iniciado!','success');
+  }, 1800);
+}
+
+function contractPayCard() {
+  var numEl  = document.getElementById('c-card-num');
+  var nameEl = document.getElementById('c-card-name');
+  var expEl  = document.getElementById('c-card-exp');
+  var cvvEl  = document.getElementById('c-card-cvv');
+  var btn    = document.getElementById('c-card-btn');
+
+  ['err-c-card-num','err-c-card-name','err-c-card-exp','err-c-card-cvv'].forEach(function(id){
+    var e = document.getElementById(id); if(e){ e.textContent=''; e.classList.remove('show'); }
+  });
+  var ok = true;
+  var num = numEl ? numEl.value.replace(/\s/g,'') : '';
+  if(!num || num.length < 15) {
+    var e=document.getElementById('err-c-card-num'); if(e){e.textContent='Número inválido.';e.classList.add('show');} ok=false;
+  } else if(!_luhn(num)) {
+    var e=document.getElementById('err-c-card-num'); if(e){e.textContent='Número de cartão inválido.';e.classList.add('show');} ok=false;
+  }
+  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
+    var e=document.getElementById('err-c-card-name'); if(e){e.textContent='Nome completo obrigatório.';e.classList.add('show');} ok=false;
+  }
+  var exp = expEl ? expEl.value : '';
+  if(!/^\d{2}\/\d{2}$/.test(exp)) {
+    var e=document.getElementById('err-c-card-exp'); if(e){e.textContent='Validade inválida.';e.classList.add('show');} ok=false;
+  }
+  if(!cvvEl || cvvEl.value.length < 3) {
+    var e=document.getElementById('err-c-card-cvv'); if(e){e.textContent='CVV inválido.';e.classList.add('show');} ok=false;
+  }
+  if(!ok) return;
+
+  _setBtnLoading(btn, true);
+  setTimeout(function(){
+    _setBtnLoading(btn, false);
+    _goContractStep(3);
+    showToast('💳 Pagamento aprovado! Valor em escrow. Projeto iniciado!','success');
+  }, 2000);
+}
+
+function contractRate(n) {
+  _contractCtx.rating = n;
+  document.querySelectorAll('#contract-stars .star-rating-btn').forEach(function(btn, i){
+    btn.classList.toggle('on', i < n);
+  });
+}
+
+function contractApprove() {
+  var errEl = document.getElementById('err-contract-stars');
+  if(_contractCtx.rating === 0) {
+    if(errEl){ errEl.textContent='Por favor, avalie o trabalho antes de liberar o pagamento.'; errEl.classList.add('show'); }
+    return;
+  }
+  if(errEl){ errEl.textContent=''; errEl.classList.remove('show'); }
+
+  var btn = document.getElementById('c-approve-btn');
+  _setBtnLoading(btn, true);
+  setTimeout(function(){
+    _setBtnLoading(btn, false);
+    closeModal('contract');
+    var amt = _contractCtx.value.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    showToast(
+      '🎉 Entrega aprovada! R$ ' + amt + ' liberados para ' + _contractCtx.name + '. Obrigado pela avaliação!',
+      'success'
+    );
+  }, 1200);
+}
+
+function contractRevision() {
+  closeModal('contract');
+  showToast('📝 Revisão solicitada! O freelancer foi notificado e tem 48h para reenviar.', 'info');
+}
 </script>
 </body>
 </html>
