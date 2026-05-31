@@ -9298,7 +9298,7 @@ function _renderDashClientActive() {
         '<div class="dash-proj-actions">' +
           (isReview
             ? '<button class="btn btn-primary btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\''+p.freelancerRole+'\',value:'+p.value+',project:\''+p.title+'\',deadline:\''+p.deadline+'\'});contractStep4()">✅ Aprovar Entrega</button>'
-            : '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.freelancer,myRole:'client'})">💬 Chat</button>') +
+            : '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.freelancer,myRole:\'client\'})">💬 Chat</button>') +
           '<button class="btn btn-outline btn-sm" onclick="contractRevision()">📝 Revisão</button>' +
         '</div>' +
       '</div>' +
@@ -9384,7 +9384,7 @@ function _renderDashFLActive() {
         _personChip(p.client, 'Cliente') +
         '<div class="dash-proj-actions">' +
           '<button class="btn btn-primary btn-sm" onclick="openDeliveryModal({id:p.id,title:p.title,client:p.client,value:p.value})">&#128228; Enviar Entrega</button>' +
-          '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.client||'Cliente',myRole:'freelancer'})">💬 Chat</button>' +
+          '<button class="btn btn-outline btn-sm" onclick="openChatModal({projectId:p.id,projectTitle:p.title,withName:p.client||\'Cliente\',myRole:\'freelancer\'})">💬 Chat</button>' +
         '</div>' +
       '</div>' +
     '</div>';
