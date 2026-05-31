@@ -2852,6 +2852,34 @@ section { padding: 64px 0; }
   padding: 4px; border-radius: 6px; transition: background .1s;
 }
 .chat-emoji-btn:hover { background: var(--bg); }
+/* ═══════════════════════════════════════
+   MODAL: SOLICITAR REVISÃO
+═══════════════════════════════════════ */
+.revision-type-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 18px;
+}
+.revision-type-btn {
+  padding: 12px 10px; border: 2px solid var(--border);
+  border-radius: var(--radius-lg); background: var(--bg);
+  cursor: pointer; text-align: center; transition: all var(--transition);
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+}
+.revision-type-btn:hover   { border-color: var(--orange); color: var(--orange); background: #fff7ed; }
+.revision-type-btn.selected{ border-color: var(--orange); color: var(--orange); background: #fff7ed; }
+.revision-type-btn .icon   { font-size: 22px; display: block; margin-bottom: 5px; }
+.revision-urgency-row      { display: flex; gap: 8px; margin-bottom: 18px; }
+.revision-urgency-btn {
+  flex: 1; padding: 8px 6px; border: 1.5px solid var(--border);
+  border-radius: var(--radius-full); background: var(--bg);
+  font-size: 12px; font-weight: 600; color: var(--text-3);
+  cursor: pointer; text-align: center; transition: all var(--transition);
+}
+.revision-urgency-btn.low    { }
+.revision-urgency-btn.medium { }
+.revision-urgency-btn.high   { }
+.revision-urgency-btn.sel-low    { border-color:#22c55e; color:#16a34a; background:#f0fdf4; }
+.revision-urgency-btn.sel-medium { border-color:#f59e0b; color:#d97706; background:#fffbeb; }
+.revision-urgency-btn.sel-high   { border-color:#ef4444; color:#dc2626; background:#fef2f2; }
 </style>
 </head>
 <body>
@@ -6301,6 +6329,95 @@ section { padding: 64px 0; }
 
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: SOLICITAR REVISÃO
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-revision" onclick="if(event.target===this)closeModal('revision')">
+  <div class="modal" style="max-width:500px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">&#9998; Solicitar Revisão</div>
+        <div class="modal-subtitle" id="rev-proj-subtitle">Descreva o que precisa ser ajustado</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('revision')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Tipo de revisão -->
+      <div class="form-group">
+        <label class="form-label">Tipo de revisão</label>
+        <div class="revision-type-grid">
+          <button class="revision-type-btn" id="rtype-scope" onclick="selectRevType('scope',this)">
+            <span class="icon">&#128203;</span>Escopo / Conteúdo
+          </button>
+          <button class="revision-type-btn" id="rtype-quality" onclick="selectRevType('quality',this)">
+            <span class="icon">&#127775;</span>Qualidade / Acabamento
+          </button>
+          <button class="revision-type-btn" id="rtype-bug" onclick="selectRevType('bug',this)">
+            <span class="icon">&#128027;</span>Erro / Bug
+          </button>
+          <button class="revision-type-btn" id="rtype-other" onclick="selectRevType('other',this)">
+            <span class="icon">&#128172;</span>Outro
+          </button>
+        </div>
+        <div class="form-error" id="err-rev-type"></div>
+      </div>
+
+      <!-- Urgência -->
+      <div class="form-group">
+        <label class="form-label">Urgência</label>
+        <div class="revision-urgency-row">
+          <button class="revision-urgency-btn low" id="rurg-low" onclick="selectRevUrgency('low')">
+            &#128994; Baixa
+          </button>
+          <button class="revision-urgency-btn medium" id="rurg-medium" onclick="selectRevUrgency('medium')">
+            &#128993; Média
+          </button>
+          <button class="revision-urgency-btn high" id="rurg-high" onclick="selectRevUrgency('high')">
+            &#128308; Alta
+          </button>
+        </div>
+        <div class="form-error" id="err-rev-urgency"></div>
+      </div>
+
+      <!-- Descrição -->
+      <div class="form-group">
+        <label class="form-label">Descreva o que precisa ser corrigido <span style="color:#ef4444;">*</span></label>
+        <textarea class="form-textarea" id="rev-description"
+          placeholder="Ex: O logotipo ficou em baixa resolução (precisa de no mínimo 300dpi para impressão). O arquivo editável do Illustrator também não foi enviado conforme combinado..."
+          style="min-height:120px;" oninput="revDescCount(this)"></textarea>
+        <div style="display:flex;justify-content:space-between;margin-top:4px;">
+          <div class="form-error" id="err-rev-desc" style="flex:1;"></div>
+          <span style="font-size:11px;color:var(--text-4);" id="rev-desc-count">0 / 30 mín.</span>
+        </div>
+      </div>
+
+      <!-- Prazo sugerido -->
+      <div class="form-group">
+        <label class="form-label">Prazo para correção</label>
+        <select class="form-select" id="rev-deadline">
+          <option value="24h">24 horas</option>
+          <option value="48h" selected>48 horas (padrão)</option>
+          <option value="72h">72 horas</option>
+          <option value="7d">7 dias</option>
+          <option value="custom">Combinar com freelancer</option>
+        </select>
+      </div>
+
+      <!-- Aviso escrow -->
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius);padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:18px;display:flex;gap:8px;">
+        <span>&#128274;</span>
+        <span>O pagamento permanece <strong>retido em escrow</strong> durante a revisão. Será liberado somente após sua aprovação final.</span>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" id="rev-submit-btn" onclick="submitRevision()">
+        &#128228; Enviar Solicitação de Revisão
+      </button>
+
+    </div>
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -9105,7 +9222,7 @@ function contractApprove() {
 
 function contractRevision() {
   closeModal('contract');
-  showToast('📝 Revisão solicitada! O freelancer foi notificado e tem 48h para reenviar.', 'info');
+  openRevisionModal('');
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -9246,8 +9363,10 @@ function switchDashTab(tab) {
 /* ── Render helpers ── */
 function _statusBadge(status, label) {
   var cls = { active:'status-active', review:'status-review', escrow:'status-escrow',
-              waiting:'status-waiting', done:'status-done', sent:'status-sent', rejected:'status-rejected' };
-  var icons = { active:'⚡', review:'👁', escrow:'🔒', waiting:'⏳', done:'✅', sent:'📩', rejected:'❌' };
+              waiting:'status-waiting', done:'status-done', sent:'status-sent', rejected:'status-rejected',
+              'review-pending':'status-review' };
+  var icons = { active:'⚡', review:'👁', escrow:'🔒', waiting:'⏳', done:'✅', sent:'📩', rejected:'❌',
+                'review-pending':'📝' };
   return '<span class="status-badge ' + (cls[status]||'status-waiting') + '">' +
     (icons[status]||'') + ' ' + label + '</span>';
 }
@@ -9277,8 +9396,16 @@ function _escrowBar(progress, value) {
 var _dashProj = {};
 
 function dashAction(action, id) {
+  /* revision nao precisa de dados do projeto */
+  if (action === 'revision') {
+    openRevisionModal(id);
+    return;
+  }
   var p = _dashProj[id];
-  if (!p) return;
+  if (!p) {
+    showToast('Projeto não encontrado. Recarregue o painel.', 'info');
+    return;
+  }
   if (action === 'deliver') {
     openDeliveryModal({ id: p.id, title: p.title, client: p.client, value: p.value });
   } else if (action === 'chat-fl') {
@@ -9288,8 +9415,6 @@ function dashAction(action, id) {
   } else if (action === 'approve') {
     openContractModal({ name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline });
     setTimeout(function(){ contractStep4(); }, 100);
-  } else if (action === 'revision') {
-    showToast('📝 Revisão solicitada! O freelancer foi notificado e tem 48h para reenviar.', 'info');
   }
 }
 
@@ -9981,6 +10106,114 @@ function chatInsertEmoji(em) {
   inp.selectionStart = inp.selectionEnd = pos + em.length;
   chatAutoResize(inp);
   document.getElementById('chat-emoji-picker').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOLICITAR REVISÃO
+═══════════════════════════════════════════════════════════ */
+var _revCtx = { type: '', urgency: '', projId: '' };
+
+function openRevisionModal(projId) {
+  _revCtx = { type: '', urgency: '', projId: projId || '' };
+
+  /* Populate subtitle */
+  var p = _dashProj[projId];
+  var sub = document.getElementById('rev-proj-subtitle');
+  if (sub) sub.textContent = p ? 'Projeto: ' + p.title : 'Descreva o que precisa ser ajustado';
+
+  /* Reset form */
+  ['rtype-scope','rtype-quality','rtype-bug','rtype-other'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.classList.remove('selected');
+  });
+  ['rurg-low','rurg-medium','rurg-high'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.className = 'revision-urgency-btn ' + id.replace('rurg-',''); }
+  });
+  var desc = document.getElementById('rev-description'); if(desc) desc.value = '';
+  var dl   = document.getElementById('rev-deadline');    if(dl)   dl.value = '48h';
+  var cnt  = document.getElementById('rev-desc-count');  if(cnt)  cnt.textContent = '0 / 30 mín.';
+  ['err-rev-type','err-rev-urgency','err-rev-desc'].forEach(function(id){
+    var el = document.getElementById(id); if(el){ el.textContent=''; el.classList.remove('show'); }
+  });
+
+  openModal('revision');
+}
+
+function selectRevType(type, btn) {
+  _revCtx.type = type;
+  ['rtype-scope','rtype-quality','rtype-bug','rtype-other'].forEach(function(id){
+    var el = document.getElementById(id); if(el) el.classList.remove('selected');
+  });
+  if(btn) btn.classList.add('selected');
+  var err = document.getElementById('err-rev-type');
+  if(err){ err.textContent=''; err.classList.remove('show'); }
+}
+
+function selectRevUrgency(level) {
+  _revCtx.urgency = level;
+  var classes = { low:'sel-low', medium:'sel-medium', high:'sel-high' };
+  ['low','medium','high'].forEach(function(l){
+    var el = document.getElementById('rurg-'+l);
+    if(!el) return;
+    el.className = 'revision-urgency-btn ' + l + (l===level ? ' ' + classes[l] : '');
+  });
+  var err = document.getElementById('err-rev-urgency');
+  if(err){ err.textContent=''; err.classList.remove('show'); }
+}
+
+function revDescCount(el) {
+  var len = el.value.length;
+  var cnt = document.getElementById('rev-desc-count');
+  if(cnt){ cnt.textContent = len + ' / 30 mín.'; cnt.style.color = len>=30 ? 'var(--green)' : 'var(--text-4)'; }
+}
+
+function submitRevision() {
+  var ok = true;
+
+  if(!_revCtx.type) {
+    var e = document.getElementById('err-rev-type');
+    if(e){ e.textContent='Selecione o tipo de revisão.'; e.classList.add('show'); }
+    ok = false;
+  }
+  if(!_revCtx.urgency) {
+    var e = document.getElementById('err-rev-urgency');
+    if(e){ e.textContent='Selecione a urgência.'; e.classList.add('show'); }
+    ok = false;
+  }
+  var desc = document.getElementById('rev-description');
+  if(!desc || desc.value.trim().length < 30) {
+    var e = document.getElementById('err-rev-desc');
+    if(e){ e.textContent='Descreva a revisão com pelo menos 30 caracteres.'; e.classList.add('show'); }
+    ok = false;
+  }
+  if(!ok) return;
+
+  var btn = document.getElementById('rev-submit-btn');
+  _setBtnLoading(btn, true);
+
+  setTimeout(function(){
+    _setBtnLoading(btn, false);
+    closeModal('revision');
+
+    /* Update project status in dashboard */
+    var p = _dashProj[_revCtx.projId];
+    if(p) {
+      p.status      = 'review-pending';
+      p.statusLabel = 'Revisão solicitada';
+      _renderDashClientActive();
+      _renderDashFLActive();
+    }
+
+    var deadline = document.getElementById('rev-deadline');
+    var dlText = deadline ? deadline.options[deadline.selectedIndex].text : '48 horas';
+    var p2 = _dashProj[_revCtx.projId];
+    var who = p2 ? (p2.freelancer || p2.client || 'O profissional') : 'O profissional';
+
+    showToast(
+      '📝 Revisão solicitada! ' + who + ' foi notificado e tem ' + dlText + ' para reenviar. Pagamento permanece em escrow.',
+      'success'
+    );
+  }, 900);
 }
 </script>
 </body>
