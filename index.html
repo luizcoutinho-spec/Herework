@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.herework.com.br; frame-ancestors 'none';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com https://api.herework.com.br; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none';">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -3060,7 +3060,49 @@ section { padding: 64px 0; }
 .sec-log-line.warn  { color: #fbbf24; }
 .sec-log-line.info  { color: #60a5fa; }
 .sec-log-line.cmd   { color: #e2e8f0; font-weight: 700; }
+/* ═══════════════════════════════════════
+   STRIPE ELEMENTS
+═══════════════════════════════════════ */
+.stripe-element-wrap {
+  border: 1.5px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); padding: 11px 14px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+.stripe-element-wrap.StripeElement--focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(46,125,50,.1);
+}
+.stripe-element-wrap.StripeElement--invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239,68,68,.08);
+}
+.stripe-element-wrap.StripeElement--complete { border-color: var(--green); }
+.stripe-badge {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 11px; color: var(--text-4); margin-top: 10px;
+}
+.stripe-badge img { height: 18px; opacity: .7; }
+.stripe-powered {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11px; color: var(--text-4);
+}
+.stripe-card-brands {
+  display: flex; gap: 5px; align-items: center; flex-wrap: wrap;
+  margin-top: 8px;
+}
+.stripe-brand-badge {
+  background: var(--bg); border: 1px solid var(--border-2);
+  border-radius: 4px; padding: 2px 7px; font-size: 11px;
+  font-weight: 700; color: var(--text-3); letter-spacing: .3px;
+}
+.stripe-pix-waiting {
+  background: var(--bg); border: 1.5px solid #bbf7d0;
+  border-radius: var(--radius-lg); padding: 18px; text-align: center;
+  display: none;
+}
+.stripe-pix-waiting.show { display: block; }
 </style>
+  <script src="https://js.stripe.com/v3/" defer></script>
 </head>
 <body>
 
@@ -6189,69 +6231,33 @@ section { padding: 64px 0; }
         <!-- ─── PAINEL CARTÃO ─── -->
         <div class="pay-panel" id="pay-panel-card">
 
-          <!-- Visualização do cartão -->
-          <div class="card-preview-wrap">
-            <div class="card-preview" id="card-preview">
-              <div class="card-face card-front" id="card-front-face">
-                <div class="card-logo-row">
-                  <div class="card-chip"></div>
-                  <div class="card-brand-logo" id="card-brand-disp"></div>
-                </div>
-                <div class="card-number-disp" id="card-number-disp">•••• •••• •••• ••••</div>
-                <div class="card-bottom-row">
-                  <div>
-                    <div class="card-holder-lbl">Nome do titular</div>
-                    <div class="card-holder-val" id="card-name-disp">NOME SOBRENOME</div>
-                  </div>
-                  <div style="text-align:right;">
-                    <div class="card-holder-lbl">Validade</div>
-                    <div class="card-expiry-val" id="card-expiry-disp">MM/AA</div>
-                  </div>
-                </div>
-              </div>
-              <div class="card-face card-back">
-                <div class="card-back-stripe"></div>
-                <div class="card-cvv-band">
-                  <div class="card-cvv-val" id="card-cvv-disp">•••</div>
-                </div>
-                <div style="text-align:right;font-size:10px;opacity:.5;margin-top:6px;">CVV</div>
-              </div>
+          <div class="form-group">
+            <label class="form-label">Nome no cart&atilde;o</label>
+            <input class="form-input" id="stripe-holder-name" type="text" maxlength="60"
+              placeholder="Como aparece no cart&atilde;o" autocomplete="cc-name" spellcheck="false">
+            <div class="field-error" id="err-stripe-holder"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">N&uacute;mero do cart&atilde;o</label>
+            <div class="stripe-element-wrap" id="stripe-num-wrap">
+              <div id="stripe-card-number"></div>
             </div>
-          </div>
-
-          <!-- Formulário -->
-          <div class="form-group">
-            <label class="form-label">Número do Cartão</label>
-            <input class="form-input" id="card-number-input" type="text" maxlength="19"
-              placeholder="0000 0000 0000 0000" autocomplete="cc-number"
-              oninput="formatCardNumber(this)" onfocus="flipCard(false)">
-            <div class="field-error" id="err-card-number"></div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Nome no Cartão</label>
-            <input class="form-input" id="card-name-input" type="text" maxlength="26"
-              placeholder="Como aparece no cartão"
-              oninput="document.getElementById('card-name-disp').textContent=(this.value.toUpperCase()||'NOME SOBRENOME')"
-              onfocus="flipCard(false)">
-            <div class="field-error" id="err-card-name"></div>
+            <div class="field-error" id="err-stripe-number"></div>
           </div>
 
           <div class="card-row">
             <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">Validade</label>
-              <input class="form-input" id="card-expiry-input" type="text" maxlength="5"
-                placeholder="MM/AA" autocomplete="cc-exp"
-                oninput="formatCardExpiry(this)" onfocus="flipCard(false)">
-              <div class="field-error" id="err-card-expiry"></div>
+              <div class="stripe-element-wrap" id="stripe-exp-wrap">
+                <div id="stripe-card-expiry"></div>
+              </div>
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label class="form-label">CVV</label>
-              <input class="form-input" id="card-cvv-input" type="text" maxlength="4"
-                placeholder="•••" autocomplete="cc-csc"
-                oninput="var v=this.value.replace(/\D/g,'');this.value=v;document.getElementById('card-cvv-disp').textContent=v||'•••'"
-                onfocus="flipCard(true)" onblur="flipCard(false)">
-              <div class="field-error" id="err-card-cvv"></div>
+              <div class="stripe-element-wrap" id="stripe-cvc-wrap">
+                <div id="stripe-card-cvc"></div>
+              </div>
             </div>
           </div>
 
@@ -6269,20 +6275,17 @@ section { padding: 64px 0; }
           <div class="field-error" id="err-card-general" style="margin-bottom:8px;"></div>
 
           <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="card-pay-btn" onclick="submitCardPayment()">
-            🔒 Pagar R$ <span id="card-pay-amount">149,00</span>
+            &#128274; Pagar R$ <span id="card-pay-amount">149,00</span>
           </button>
 
-          <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;flex-wrap:wrap;">
-            <span style="font-size:11px;color:var(--text-4);">Aceito:</span>
-            <span style="font-size:20px;" title="Visa">💳</span>
-            <span style="font-size:12px;font-weight:700;color:var(--text-3);">VISA</span>
-            <span style="font-size:12px;font-weight:700;color:var(--text-3);">MASTERCARD</span>
-            <span style="font-size:12px;font-weight:700;color:var(--text-3);">ELO</span>
-            <span style="font-size:12px;font-weight:700;color:var(--text-3);">AMEX</span>
-            <span style="font-size:12px;font-weight:700;color:var(--text-3);">HIPERCARD</span>
-          </div>
-          <div style="text-align:center;font-size:11px;color:var(--text-4);margin-top:6px;">
-            🔒 Pagamentos processados com segurança via <strong>Stripe</strong>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;flex-wrap:wrap;gap:6px;">
+            <div class="stripe-card-brands">
+              <span class="stripe-brand-badge">VISA</span>
+              <span class="stripe-brand-badge">MASTERCARD</span>
+              <span class="stripe-brand-badge">ELO</span>
+              <span class="stripe-brand-badge">AMEX</span>
+            </div>
+            <div class="stripe-powered">&#128274; Powered by <strong style="color:#635bff;">stripe</strong></div>
           </div>
 
         </div><!-- /card panel -->
@@ -6446,30 +6449,24 @@ section { padding: 64px 0; }
           <!-- Cartão -->
           <div id="cpay-card" style="display:none;">
             <div class="form-group">
-              <label class="form-label">N&uacute;mero do Cart&atilde;o</label>
-              <input class="form-input" id="c-card-num" type="text" maxlength="19" placeholder="0000 0000 0000 0000" oninput="formatCardNumber(this)" onfocus="flipCard(false)">
-              <div class="form-error" id="err-c-card-num"></div>
+              <label class="form-label">Nome no cart&atilde;o</label>
+              <input class="form-input" id="c-stripe-name" type="text" maxlength="60"
+                placeholder="Como aparece no cart&atilde;o" autocomplete="cc-name" spellcheck="false">
+              <div class="form-error" id="err-c-stripe-name"></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Nome no Cart&atilde;o</label>
-              <input class="form-input" id="c-card-name" type="text" placeholder="Como aparece no cart&atilde;o">
-              <div class="form-error" id="err-c-card-name"></div>
-            </div>
-            <div class="card-row">
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label">Validade</label>
-                <input class="form-input" id="c-card-exp" type="text" maxlength="5" placeholder="MM/AA" oninput="formatCardExpiry(this)">
-                <div class="form-error" id="err-c-card-exp"></div>
+              <label class="form-label">Dados do cart&atilde;o</label>
+              <div class="stripe-element-wrap" id="c-stripe-card-wrap">
+                <div id="c-stripe-card-element"></div>
               </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label">CVV</label>
-                <input class="form-input" id="c-card-cvv" type="text" maxlength="4" placeholder="&bull;&bull;&bull;">
-                <div class="form-error" id="err-c-card-cvv"></div>
-              </div>
+              <div class="form-error" id="err-c-stripe-card"></div>
             </div>
             <button class="btn btn-primary btn-block" style="margin-top:16px;" id="c-card-btn" onclick="contractPayCard()">
               &#128274; Depositar R$ <span id="c-card-total">0</span> em Escrow
             </button>
+            <div class="stripe-powered" style="justify-content:center;margin-top:8px;">
+              &#128274; Processado por <strong style="color:#635bff;">stripe</strong> &mdash; PCI DSS Level 1
+            </div>
           </div>
         </div>
       </div>
@@ -11203,6 +11200,278 @@ function secSimulate(type){
     dos:function(){var t=Date.now();for(var i=0;i<500;i++)_sanitize('<x'+i+'>');var ms=Date.now()-t;_secTerminal('SIMUL DoS: 500 ops em '+ms+'ms = '+Math.round(500000/ms)+' ops/s','cmd');showToast('DoS: '+ms+'ms - sem degradacao','success');}
   };
   if(a[type])a[type]();
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   STRIPE INTEGRATION — HereWork
+   Publishable Key: pk_live_51RGy77HXgU6QiY3Xe6fsOvl...
+   NOTE: Secret key must NEVER be in frontend.
+         Backend required for actual charges.
+═══════════════════════════════════════════════════════════ */
+
+var _stripe       = null;
+var _stripeElements = null;
+var _stripeCardNum  = null;
+var _stripeCardExp  = null;
+var _stripeCardCvc  = null;
+var _stripeCardEl   = null; /* unified element for contract modal */
+var _stripeReady    = false;
+
+/* Stripe style matching HereWork theme */
+var _stripeStyle = {
+  base: {
+    color: '#1a202c',
+    fontFamily: '"Inter", "Segoe UI", sans-serif',
+    fontSize: '14px',
+    fontSmoothing: 'antialiased',
+    '::placeholder': { color: '#9ca3af' },
+    iconColor: '#6b7280'
+  },
+  invalid: {
+    color: '#ef4444',
+    iconColor: '#ef4444'
+  },
+  complete: {
+    color: '#166534',
+    iconColor: '#22c55e'
+  }
+};
+
+/* Init Stripe when Stripe.js is loaded */
+function _initStripe() {
+  if (_stripeReady) return;
+  if (typeof Stripe === 'undefined') {
+    setTimeout(_initStripe, 500);
+    return;
+  }
+  try {
+    _stripe = Stripe('pk_live_51RGy77HXgU6QiY3Xe6fsOvl67arEu34VSxG6FKHXVxoPnKzN3Y1tu1H2MFulddCoP2JOHz8ypsxRC8GNd7SW83rf00oDZTxhzB');
+    _stripeElements = _stripe.elements({ locale: 'pt-BR' });
+    _stripeReady = true;
+    _secLog('STRIPE_INIT', 'Stripe.js inicializado — pk_live');
+    console.log('[HereWork] Stripe inicializado com sucesso.');
+  } catch(e) {
+    console.error('[HereWork] Erro ao inicializar Stripe:', e);
+  }
+}
+
+/* Mount Stripe Elements into the main payment modal card tab */
+function _mountStripePaymentModal() {
+  if (!_stripeReady || !_stripe) { _initStripe(); setTimeout(_mountStripePaymentModal, 600); return; }
+  if (_stripeCardNum) return; /* already mounted */
+
+  _stripeCardNum = _stripeElements.create('cardNumber', { style: _stripeStyle, placeholder: '0000 0000 0000 0000', showIcon: true });
+  _stripeCardExp = _stripeElements.create('cardExpiry', { style: _stripeStyle });
+  _stripeCardCvc = _stripeElements.create('cardCvc',    { style: _stripeStyle });
+
+  var numEl = document.getElementById('stripe-card-number');
+  var expEl = document.getElementById('stripe-card-expiry');
+  var cvcEl = document.getElementById('stripe-card-cvc');
+
+  if (numEl) _stripeCardNum.mount('#stripe-card-number');
+  if (expEl) _stripeCardExp.mount('#stripe-card-expiry');
+  if (cvcEl) _stripeCardCvc.mount('#stripe-card-cvc');
+
+  /* Add event listeners for real-time validation */
+  _stripeCardNum.on('change', function(ev) {
+    _updateStripeWrap('stripe-num-wrap', ev);
+    if (ev.brand) _showStripeBrand(ev.brand);
+    var err = document.getElementById('err-stripe-number');
+    if (err) err.textContent = ev.error ? ev.error.message : '';
+  });
+  _stripeCardExp.on('change', function(ev) {
+    _updateStripeWrap('stripe-exp-wrap', ev);
+    var err = document.getElementById('err-stripe-expiry');
+    if (err) err.textContent = ev.error ? ev.error.message : '';
+  });
+  _stripeCardCvc.on('change', function(ev) {
+    _updateStripeWrap('stripe-cvc-wrap', ev);
+  });
+}
+
+/* Mount Stripe Elements into the contract modal */
+function _mountStripeContractModal() {
+  if (!_stripeReady || !_stripe) { _initStripe(); setTimeout(_mountStripeContractModal, 600); return; }
+  if (_stripeCardEl) return;
+
+  _stripeCardEl = _stripeElements.create('card', {
+    style: _stripeStyle,
+    hidePostalCode: true,
+    iconStyle: 'solid'
+  });
+  var el = document.getElementById('c-stripe-card-element');
+  if (el) _stripeCardEl.mount('#c-stripe-card-element');
+
+  _stripeCardEl.on('change', function(ev) {
+    _updateStripeWrap('c-stripe-card-wrap', ev);
+    var err = document.getElementById('err-c-stripe-card');
+    if (err) err.textContent = ev.error ? ev.error.message : '';
+  });
+}
+
+function _updateStripeWrap(wrapId, ev) {
+  var wrap = document.getElementById(wrapId);
+  if (!wrap) return;
+  wrap.classList.toggle('StripeElement--focus',    false);
+  wrap.classList.toggle('StripeElement--invalid',  !!ev.error);
+  wrap.classList.toggle('StripeElement--complete', !!ev.complete);
+}
+
+function _showStripeBrand(brand) {
+  var brands = { visa:'VISA', mastercard:'MASTERCARD', amex:'AMEX', elo:'ELO',
+                 discover:'DISCOVER', jcb:'JCB', diners:'DINERS', unknown:'' };
+  var el = document.getElementById('card-brand-disp');
+  if (el) el.textContent = brands[brand] || '';
+}
+
+/* ── Override submitCardPayment to use Stripe ── */
+var _origSubmitCard = window.submitCardPayment;
+window.submitCardPayment = async function() {
+  if (!_stripeReady || !_stripeCardNum) {
+    showToast('Stripe ainda carregando. Aguarde um momento.', 'info');
+    _mountStripePaymentModal();
+    return;
+  }
+
+  var nameEl = document.getElementById('stripe-holder-name');
+  var errH   = document.getElementById('err-stripe-holder');
+  var errG   = document.getElementById('err-card-general');
+  var btn    = document.getElementById('card-pay-btn');
+
+  if (errH) errH.textContent = '';
+  if (errG) errG.textContent = '';
+
+  if (!nameEl || nameEl.value.trim().split(' ').length < 2) {
+    if (errH) errH.textContent = 'Informe o nome completo como aparece no cartão.';
+    return;
+  }
+
+  _setBtnLoading(btn, true);
+
+  try {
+    /* createPaymentMethod validates the card with Stripe servers */
+    var result = await _stripe.createPaymentMethod({
+      type: 'card',
+      card: _stripeCardNum,
+      billing_details: {
+        name: nameEl.value.trim()
+      }
+    });
+
+    _setBtnLoading(btn, false);
+
+    if (result.error) {
+      /* Stripe returned a validation error */
+      if (errG) errG.textContent = result.error.message;
+      _secLog('STRIPE_ERROR', result.error.message);
+      return;
+    }
+
+    /* PaymentMethod created — in production, send result.paymentMethod.id to backend */
+    var pm = result.paymentMethod;
+    _secLog('STRIPE_PM_OK', 'PaymentMethod: ' + pm.id + ' | ' + pm.card.brand.toUpperCase() + ' ****' + pm.card.last4);
+    console.log('[HereWork] PaymentMethod criado:', pm.id, '| Cartão:', pm.card.brand, '****' + pm.card.last4);
+
+    /* Show success — backend would now create+confirm PaymentIntent */
+    _showPaySuccess('card');
+
+    /* Instruções para conectar ao backend */
+    console.log('%c[HereWork] Para processar o pagamento real:', 'color:#635bff;font-weight:bold;');
+    console.log('POST /api/create-payment-intent  →  { paymentMethodId: "' + pm.id + '", amount: ' + (_payCtx.amount * 100) + ' }');
+
+  } catch(e) {
+    _setBtnLoading(btn, false);
+    if (errG) errG.textContent = 'Erro de conexão com Stripe. Verifique sua internet.';
+    console.error('[HereWork] Stripe error:', e);
+  }
+};
+
+/* ── Override contractPayCard to use Stripe ── */
+var _origContractPayCard = window.contractPayCard;
+window.contractPayCard = async function() {
+  if (!_stripeReady || !_stripeCardEl) {
+    showToast('Stripe ainda carregando. Aguarde um momento.', 'info');
+    _mountStripeContractModal();
+    return;
+  }
+
+  var nameEl = document.getElementById('c-stripe-name');
+  var errN   = document.getElementById('err-c-stripe-name');
+  var errC   = document.getElementById('err-c-stripe-card');
+  var btn    = document.getElementById('c-card-btn');
+
+  if (errN) errN.textContent = '';
+  if (errC) errC.textContent = '';
+
+  if (!nameEl || nameEl.value.trim().length < 3) {
+    if (errN) errN.textContent = 'Informe o nome no cartão.';
+    return;
+  }
+
+  _setBtnLoading(btn, true);
+
+  try {
+    var result = await _stripe.createPaymentMethod({
+      type: 'card',
+      card: _stripeCardEl,
+      billing_details: { name: nameEl.value.trim() }
+    });
+
+    _setBtnLoading(btn, false);
+
+    if (result.error) {
+      if (errC) errC.textContent = result.error.message;
+      return;
+    }
+
+    var pm = result.paymentMethod;
+    _secLog('STRIPE_ESCROW_PM', 'Escrow PaymentMethod: ' + pm.id + ' | ' + pm.card.brand + ' ****' + pm.card.last4);
+    _goContractStep(3);
+    showToast('💳 Cartão validado pelo Stripe! Valor em escrow. Projeto iniciado!', 'success');
+    console.log('[HereWork] Escrow PM criado:', pm.id, '| Backend: POST /api/create-payment-intent com escrow flag');
+
+  } catch(e) {
+    _setBtnLoading(btn, false);
+    if (errC) errC.textContent = 'Erro ao processar. Tente novamente.';
+  }
+};
+
+/* ── Mount elements when modals open ── */
+var _origOpenModal = window.openModal;
+window.openModal = function(id) {
+  _origOpenModal(id);
+  if (id === 'payment') {
+    setTimeout(function() {
+      if (document.getElementById('pay-panel-card').classList.contains('active') || true) {
+        _mountStripePaymentModal();
+      }
+    }, 200);
+  }
+  if (id === 'contract') {
+    setTimeout(_mountStripeContractModal, 200);
+  }
+};
+
+/* ── Override switchPayTab to mount on tab switch ── */
+var _origSwitchPayTab = window.switchPayTab;
+window.switchPayTab = function(tab) {
+  _origSwitchPayTab(tab);
+  if (tab === 'card') setTimeout(_mountStripePaymentModal, 150);
+};
+
+var _origSwitchContractPayTab = window.switchContractPayTab;
+window.switchContractPayTab = function(tab) {
+  _origSwitchContractPayTab(tab);
+  if (tab === 'card') setTimeout(_mountStripeContractModal, 150);
+};
+
+/* ── Auto-init ── */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', _initStripe);
+} else {
+  setTimeout(_initStripe, 100);
 }
 
 </script>
