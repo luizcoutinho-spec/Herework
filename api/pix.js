@@ -4,21 +4,11 @@
  * Cria um PaymentIntent com método PIX via Stripe.
  * Retorna o QR Code e o código Pix Copia e Cola gerados pelo Stripe.
  *
- * Nota: Stripe suporta PIX no Brasil desde 2022.
- * O QR code expira em 1 hora (configurável até 24h).
- *
- * Body: {
- *   amount:      number  — Valor em R$
- *   description: string  — Descrição (ex: "Plano Profissional HereWork")
- * }
+ * Body: { amount: number, description: string }
  *
  * Resposta: {
- *   paymentIntentId:  string
- *   clientSecret:     string   — Para confirmar no frontend
- *   pixQrCode:        string   — Código Pix Copia e Cola (texto)
- *   pixQrCodeImage:   string   — URL da imagem PNG do QR Code (Stripe CDN)
- *   pixHostedPage:    string   — Link para página de pagamento hospedada
- *   expiresAt:        number   — Timestamp de expiração
+ *   paymentIntentId, clientSecret, pixQrCode,
+ *   pixQrCodeImage, pixHostedPage, expiresAt
  * }
  */
 
@@ -39,44 +29,50 @@ module.exports = async function handler(req, res) {
 
   try {
     const stripe    = getStripe();
-    const expiresAt = Math.floor(Date.now() / 1000) + 3600; /* 1 hora */
+    const expiresAt = Math.floor(Date.now() / 1000) + 3600;
 
+    /* 1. Cria o PaymentIntent PIX */
     const paymentIntent = await stripe.paymentIntents.create({
       amount:               toCents(amount),
       currency:             'brl',
       payment_method_types: ['pix'],
       description:          description,
       payment_method_options: {
-        pix: {
-          expires_after_seconds: 3600  /* QR Code válido por 1 hora */
-        }
+        pix: { expires_after_seconds: 3600 }
       },
-      metadata: {
-        platform: 'HereWork',
-        method:   'pix'
-      }
+      metadata: { platform: 'HereWork', method: 'pix' }
     });
 
-    /* Confirma o PaymentIntent para gerar o QR Code */
+    /* 2. Confirma para gerar o QR Code
+       NOTA: use payment_method_data (não payment_method) para PIX */
     const confirmed = await stripe.paymentIntents.confirm(paymentIntent.id, {
-      payment_method: { type: 'pix' }
+      payment_method_data: { type: 'pix' }
     });
 
-    /* Extrai os dados do PIX da resposta do Stripe */
     const pixData = confirmed.next_action?.pix_display_qr_code;
 
     return respond(res, 200, {
       paymentIntentId: confirmed.id,
       clientSecret:    confirmed.client_secret,
       status:          confirmed.status,
-      pixQrCode:       pixData?.data              || '',   /* Pix Copia e Cola */
-      pixQrCodeImage:  pixData?.image_url_png     || '',   /* Imagem PNG do QR */
+      pixQrCode:       pixData?.data                    || '',
+      pixQrCodeImage:  pixData?.image_url_png           || '',
       pixHostedPage:   pixData?.hosted_instructions_url || '',
       expiresAt:       expiresAt
     });
 
   } catch (err) {
-    console.error('[HereWork] Stripe PIX error:', err);
-    return respond(res, 500, { error: 'Erro ao criar pagamento PIX. Tente novamente.' });
+    console.error('[HereWork] Stripe PIX error:', err.message);
+
+    /* PIX não habilitado na conta Stripe */
+    if (err.message && err.message.includes('pix')) {
+      return respond(res, 402, {
+        error: 'PIX não está habilitado na sua conta Stripe. Ative em: Dashboard → Payments → Payment methods → PIX.'
+      });
+    }
+
+    return respond(res, 500, {
+      error: 'Erro ao criar pagamento PIX: ' + err.message
+    });
   }
 };

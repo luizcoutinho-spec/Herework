@@ -6442,7 +6442,7 @@ section { padding: 64px 0; }
               </div>
             </div>
             <button class="btn btn-green btn-block" id="c-pix-sim-btn" onclick="contractSimulatePix()">
-              &#9889; Simular Pagamento PIX (Demo)
+              &#9889; Gerar QR Code PIX
             </button>
           </div>
 
@@ -8803,7 +8803,7 @@ var _pixPollingInterval = null;
 
 async function simulatePixPayment() {
   var btn = document.getElementById('pix-simulate-btn');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PIX...'; }
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando QR Code...'; }
 
   try {
     /* Chama backend para criar PaymentIntent PIX com QR Code real */
@@ -8845,6 +8845,30 @@ async function simulatePixPayment() {
 
     if (btn) { btn.disabled = false; btn.textContent = '⚡ PIX gerado! Copie o código'; }
     showToast('✅ QR Code PIX gerado! Abra seu app bancário para pagar.', 'success');
+
+    /* Em modo de teste: mostra botão para simular pagamento aprovado */
+    var isTestMode = typeof _stripe !== 'undefined' && _stripe._keyMode === 'test';
+    var testBtn = document.getElementById('pix-test-confirm-btn');
+    if (!testBtn) {
+      testBtn = document.createElement('button');
+      testBtn.id = 'pix-test-confirm-btn';
+      testBtn.className = 'btn btn-outline btn-block';
+      testBtn.style.marginTop = '8px';
+      testBtn.style.fontSize = '12px';
+      testBtn.style.color = 'var(--text-3)';
+      testBtn.textContent = '🧪 Modo teste: simular pagamento aprovado';
+      testBtn.onclick = function() {
+        clearInterval(_pixPollingInterval);
+        clearInterval(_pixTimerInterval);
+        _showPaySuccess('pix');
+        showToast('✅ Pagamento PIX simulado com sucesso! (modo teste)', 'success');
+      };
+      var simulateBtn = document.getElementById('pix-simulate-btn');
+      if (simulateBtn && simulateBtn.parentNode) {
+        simulateBtn.parentNode.insertBefore(testBtn, simulateBtn.nextSibling);
+      }
+    }
+    testBtn.style.display = '';
 
     /* Polling: verifica a cada 3s se o pagamento foi confirmado */
     _pixPollingInterval = setInterval(async function() {
