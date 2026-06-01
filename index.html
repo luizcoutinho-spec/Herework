@@ -11270,7 +11270,7 @@ function secSimulate(type){
 
 /* ═══════════════════════════════════════════════════════════
    STRIPE INTEGRATION — HereWork
-   Publishable Key: pk_live_51RGy77HXgU6QiY3Xe6fsOvl...
+   Publishable Key: pk_test_51RGy77... (TEST MODE)
    NOTE: Secret key must NEVER be in frontend.
          Backend required for actual charges.
 ═══════════════════════════════════════════════════════════ */
@@ -11311,7 +11311,7 @@ function _initStripe() {
     return;
   }
   try {
-    _stripe = Stripe('pk_live_51RGy77HXgU6QiY3Xe6fsOvl67arEu34VSxG6FKHXVxoPnKzN3Y1tu1H2MFulddCoP2JOHz8ypsxRC8GNd7SW83rf00oDZTxhzB');
+    _stripe = Stripe('pk_test_51RGy77HXgU6QiY3XrT1keE1SfjecManQV1dbPCX33ATgNpdAGWITIBhnNdPNnJCIo2kjYr8dZ66AReZqcr228Eqf00JqF3j7Lr');
     _stripeElements = _stripe.elements({ locale: 'pt-BR' });
     _stripeReady = true;
     _secLog('STRIPE_INIT', 'Stripe.js inicializado — pk_live');
