@@ -2,14 +2,11 @@
  * POST /api/pix
  *
  * Cria um PaymentIntent com método PIX via Stripe.
- * Retorna o QR Code e o código Pix Copia e Cola gerados pelo Stripe.
+ * Suporta contas BR, EU, US e demais países onde o Stripe aceita PIX.
+ *
+ * Ref: https://docs.stripe.com/payments/pix
  *
  * Body: { amount: number, description: string }
- *
- * Resposta: {
- *   paymentIntentId, clientSecret, pixQrCode,
- *   pixQrCodeImage, pixHostedPage, expiresAt
- * }
  */
 
 const { getStripe, respond, handleCors, toCents } = require('./_helpers');
@@ -31,20 +28,24 @@ module.exports = async function handler(req, res) {
     const stripe    = getStripe();
     const expiresAt = Math.floor(Date.now() / 1000) + 3600;
 
-    /* 1. Cria o PaymentIntent PIX */
+    /* 1. Cria o PaymentIntent PIX
+       amount_includes_iof: 'never' = cliente paga o IOF de 3,5%
+       Para absorver o IOF use 'always'                              */
     const paymentIntent = await stripe.paymentIntents.create({
       amount:               toCents(amount),
       currency:             'brl',
       payment_method_types: ['pix'],
       description:          description,
       payment_method_options: {
-        pix: { expires_after_seconds: 3600 }
+        pix: {
+          expires_after_seconds:  3600,
+          amount_includes_iof:    'never'   /* IOF cobrado do cliente */
+        }
       },
       metadata: { platform: 'HereWork', method: 'pix' }
     });
 
-    /* 2. Confirma para gerar o QR Code
-       NOTA: use payment_method_data (não payment_method) para PIX */
+    /* 2. Confirma para gerar o QR Code */
     const confirmed = await stripe.paymentIntents.confirm(paymentIntent.id, {
       payment_method_data: { type: 'pix' }
     });
@@ -64,10 +65,11 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     console.error('[HereWork] Stripe PIX error:', err.message);
 
-    /* PIX não habilitado na conta Stripe */
-    if (err.message && err.message.includes('pix')) {
+    if (err.code === 'payment_method_unactivated' ||
+        (err.message && (err.message.toLowerCase().includes('pix') ||
+                         err.message.toLowerCase().includes('unactivated')))) {
       return respond(res, 402, {
-        error: 'PIX não está habilitado na sua conta Stripe. Ative em: Dashboard → Payments → Payment methods → PIX.'
+        error: 'PIX não está ativado na conta Stripe. Ative em: Dashboard → Settings → Payment Methods → PIX (modo live).'
       });
     }
 
