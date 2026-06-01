@@ -8797,14 +8797,78 @@ function copyPixKey() {
   }
 }
 
-/* ── Simulate PIX payment (demo only) ── */
-function simulatePixPayment() {
+/* ── PIX via Stripe — geração de QR Code real ── */
+var _pixPaymentIntentId = null;
+var _pixPollingInterval = null;
+
+async function simulatePixPayment() {
   var btn = document.getElementById('pix-simulate-btn');
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
-  setTimeout(function() {
-    clearInterval(_pixTimerInterval);
-    _showPaySuccess('pix');
-  }, 1800);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando PIX...'; }
+
+  try {
+    /* Chama backend para criar PaymentIntent PIX com QR Code real */
+    var res = await fetch('/api/pix', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount:      _payCtx.amount,
+        description: 'HereWork — ' + (_payCtx.desc || 'Plano')
+      })
+    });
+
+    var data = await res.json();
+
+    if (!res.ok || data.error) {
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Tentar novamente'; }
+      showToast(data.error || 'Erro ao gerar PIX. Tente novamente.', 'info');
+      return;
+    }
+
+    _pixPaymentIntentId = data.paymentIntentId;
+
+    /* Atualiza QR Code com dados reais do Stripe */
+    if (data.pixQrCode) {
+      var keyEl = document.getElementById('pix-key-display');
+      if (keyEl) keyEl.textContent = data.pixQrCode;
+
+      var amtEl = document.getElementById('pix-amount-inline');
+      if (amtEl) amtEl.textContent = _payCtx.amount;
+    }
+
+    /* Substitui QR code SVG por imagem real do Stripe */
+    if (data.pixQrCodeImage) {
+      var qrBox = document.querySelector('.pix-qr-box');
+      if (qrBox) {
+        qrBox.innerHTML = '<img src="' + data.pixQrCodeImage + '" alt="QR Code PIX" style="width:180px;height:180px;display:block;">';
+      }
+    }
+
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ PIX gerado! Copie o código'; }
+    showToast('✅ QR Code PIX gerado! Abra seu app bancário para pagar.', 'success');
+
+    /* Polling: verifica a cada 3s se o pagamento foi confirmado */
+    _pixPollingInterval = setInterval(async function() {
+      if (!_pixPaymentIntentId) { clearInterval(_pixPollingInterval); return; }
+      try {
+        var statusRes  = await fetch('/api/status?id=' + _pixPaymentIntentId);
+        var statusData = await statusRes.json();
+        if (statusData.succeeded) {
+          clearInterval(_pixPollingInterval);
+          clearInterval(_pixTimerInterval);
+          _showPaySuccess('pix');
+          _secLog('STRIPE_PIX_OK', 'R$ ' + _payCtx.amount + ' | PaymentIntent: ' + _pixPaymentIntentId);
+        }
+      } catch(e) { /* silent */ }
+    }, 3000);
+
+    /* Para o polling após 1h (expiração do PIX) */
+    setTimeout(function(){ clearInterval(_pixPollingInterval); }, 3600000);
+
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡ Tentar novamente'; }
+    showToast('Erro de conexão ao gerar PIX. Verifique sua internet.', 'info');
+    console.error('[HereWork] PIX error:', e);
+  }
 }
 
 /* ── Credit Card ── */
@@ -11326,7 +11390,7 @@ function _showStripeBrand(brand) {
   if (el) el.textContent = brands[brand] || '';
 }
 
-/* ── Override submitCardPayment to use Stripe ── */
+/* ── submitCardPayment — integração completa com backend ── */
 var _origSubmitCard = window.submitCardPayment;
 window.submitCardPayment = async function() {
   if (!_stripeReady || !_stripeCardNum) {
@@ -11351,40 +11415,73 @@ window.submitCardPayment = async function() {
   _setBtnLoading(btn, true);
 
   try {
-    /* createPaymentMethod validates the card with Stripe servers */
-    var result = await _stripe.createPaymentMethod({
+    /* 1. Cria PaymentMethod no frontend (sem dados sensíveis no servidor) */
+    var pmResult = await _stripe.createPaymentMethod({
       type: 'card',
       card: _stripeCardNum,
-      billing_details: {
-        name: nameEl.value.trim()
-      }
+      billing_details: { name: nameEl.value.trim() }
     });
 
-    _setBtnLoading(btn, false);
-
-    if (result.error) {
-      /* Stripe returned a validation error */
-      if (errG) errG.textContent = result.error.message;
-      _secLog('STRIPE_ERROR', result.error.message);
+    if (pmResult.error) {
+      _setBtnLoading(btn, false);
+      if (errG) errG.textContent = pmResult.error.message;
+      _secLog('STRIPE_PM_ERROR', pmResult.error.message);
       return;
     }
 
-    /* PaymentMethod created — in production, send result.paymentMethod.id to backend */
-    var pm = result.paymentMethod;
-    _secLog('STRIPE_PM_OK', 'PaymentMethod: ' + pm.id + ' | ' + pm.card.brand.toUpperCase() + ' ****' + pm.card.last4);
-    console.log('[HereWork] PaymentMethod criado:', pm.id, '| Cartão:', pm.card.brand, '****' + pm.card.last4);
+    var pm = pmResult.paymentMethod;
+    _secLog('STRIPE_PM_OK', pm.id + ' | ' + pm.card.brand.toUpperCase() + ' ****' + pm.card.last4);
 
-    /* Show success — backend would now create+confirm PaymentIntent */
+    /* 2. Envia PM ID ao backend para criar e confirmar o PaymentIntent */
+    var instSel = document.getElementById('card-installments');
+    var installments = instSel ? parseInt(instSel.value) || 1 : 1;
+
+    var apiRes = await fetch('/api/create-payment-intent', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        paymentMethodId: pm.id,
+        amount:          _payCtx.amount,
+        description:     'HereWork — ' + (_payCtx.desc || 'Pagamento'),
+        planId:          _payCtx.plan  || '',
+        installments:    installments
+      })
+    });
+
+    var data = await apiRes.json();
+    _setBtnLoading(btn, false);
+
+    if (!apiRes.ok || data.error) {
+      if (errG) errG.textContent = data.error || 'Pagamento recusado. Verifique os dados do cartão.';
+      _secLog('STRIPE_API_ERROR', data.error || 'HTTP ' + apiRes.status);
+      return;
+    }
+
+    /* 3. Pagamento requer 3D Secure */
+    if (data.requiresAction) {
+      _setBtnLoading(btn, true);
+      var confirmResult = await _stripe.handleNextAction({ clientSecret: data.clientSecret });
+      _setBtnLoading(btn, false);
+
+      if (confirmResult.error) {
+        if (errG) errG.textContent = confirmResult.error.message;
+        return;
+      }
+      if (confirmResult.paymentIntent.status !== 'succeeded') {
+        if (errG) errG.textContent = 'Autenticação 3D Secure não concluída. Tente novamente.';
+        return;
+      }
+    }
+
+    /* 4. Sucesso! */
+    _secLog('STRIPE_CHARGE_OK', 'R$ ' + _payCtx.amount + ' | ' + pm.card.brand + ' ****' + pm.card.last4);
     _showPaySuccess('card');
-
-    /* Instruções para conectar ao backend */
-    console.log('%c[HereWork] Para processar o pagamento real:', 'color:#635bff;font-weight:bold;');
-    console.log('POST /api/create-payment-intent  →  { paymentMethodId: "' + pm.id + '", amount: ' + (_payCtx.amount * 100) + ' }');
 
   } catch(e) {
     _setBtnLoading(btn, false);
-    if (errG) errG.textContent = 'Erro de conexão com Stripe. Verifique sua internet.';
+    if (errG) errG.textContent = 'Erro de conexão. Verifique sua internet e tente novamente.';
     console.error('[HereWork] Stripe error:', e);
+    _secLog('STRIPE_EXCEPTION', e.message);
   }
 };
 

@@ -1,0 +1,9 @@
+{
+  "name": "herework",
+  "version": "1.0.0",
+  "description": "HereWork — Plataforma de freelancers",
+  "engines": { "node": "18.x" },
+  "dependencies": {
+    "stripe": "^14.25.0"
+  }
+}
