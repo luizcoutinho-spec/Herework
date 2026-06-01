@@ -6099,10 +6099,10 @@ section { padding: 64px 0; }
     <div id="pay-content">
       <!-- Tabs -->
       <div class="pay-tabs">
-        <button class="pay-tab active" id="pay-tab-pix" onclick="switchPayTab('pix')">
+        <button class="pay-tab" id="pay-tab-pix" onclick="switchPayTab('pix')">
           <span class="pay-tab-icon">⚡</span> PIX
         </button>
-        <button class="pay-tab" id="pay-tab-card" onclick="switchPayTab('card')">
+        <button class="pay-tab active" id="pay-tab-card" onclick="switchPayTab('card')">
           <span class="pay-tab-icon">💳</span> Cartão de Crédito
         </button>
       </div>
@@ -6110,126 +6110,10 @@ section { padding: 64px 0; }
       <div class="pay-body">
 
         <!-- ─── PAINEL PIX ─── -->
-        <div class="pay-panel active" id="pay-panel-pix">
-          <div class="pix-qr-wrap">
-
-            <!-- Timer -->
-            <div class="pix-timer">
-              <span class="pix-timer-dot"></span>
-              Expira em <strong id="pix-countdown">15:00</strong>
-            </div>
-
-            <!-- QR Code SVG -->
-            <div class="pix-qr-box">
-              <svg width="180" height="180" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
-                <!-- Finder patterns (cantos) -->
-                <rect x="10" y="10" width="50" height="50" rx="4" fill="#000"/>
-                <rect x="16" y="16" width="38" height="38" rx="2" fill="#fff"/>
-                <rect x="22" y="22" width="26" height="26" rx="1" fill="#000"/>
-                <!-- Finder top-right -->
-                <rect x="120" y="10" width="50" height="50" rx="4" fill="#000"/>
-                <rect x="126" y="16" width="38" height="38" rx="2" fill="#fff"/>
-                <rect x="132" y="22" width="26" height="26" rx="1" fill="#000"/>
-                <!-- Finder bottom-left -->
-                <rect x="10" y="120" width="50" height="50" rx="4" fill="#000"/>
-                <rect x="16" y="126" width="38" height="38" rx="2" fill="#fff"/>
-                <rect x="22" y="132" width="26" height="26" rx="1" fill="#000"/>
-                <!-- Timing patterns -->
-                <rect x="70" y="10" width="6" height="6" fill="#000"/>
-                <rect x="82" y="10" width="6" height="6" fill="#000"/>
-                <rect x="94" y="10" width="6" height="6" fill="#000"/>
-                <rect x="70" y="164" width="6" height="6" fill="#000"/>
-                <rect x="82" y="164" width="6" height="6" fill="#000"/>
-                <rect x="10" y="70" width="6" height="6" fill="#000"/>
-                <rect x="10" y="82" width="6" height="6" fill="#000"/>
-                <rect x="10" y="94" width="6" height="6" fill="#000"/>
-                <rect x="164" y="70" width="6" height="6" fill="#000"/>
-                <rect x="164" y="82" width="6" height="6" fill="#000"/>
-                <!-- Data modules (centro — padrão aleatório fixo) -->
-                <rect x="70" y="22" width="6" height="6" fill="#000"/>
-                <rect x="82" y="28" width="6" height="6" fill="#000"/>
-                <rect x="94" y="22" width="6" height="6" fill="#000"/>
-                <rect x="106" y="34" width="6" height="6" fill="#000"/>
-                <rect x="70" y="40" width="6" height="6" fill="#000"/>
-                <rect x="94" y="40" width="6" height="6" fill="#000"/>
-                <rect x="76" y="52" width="6" height="6" fill="#000"/>
-                <rect x="100" y="52" width="6" height="6" fill="#000"/>
-                <rect x="70" y="64" width="6" height="6" fill="#000"/>
-                <rect x="88" y="58" width="6" height="6" fill="#000"/>
-                <rect x="112" y="64" width="6" height="6" fill="#000"/>
-                <rect x="76" y="70" width="6" height="6" fill="#000"/>
-                <rect x="94" y="70" width="6" height="6" fill="#000"/>
-                <rect x="106" y="76" width="6" height="6" fill="#000"/>
-                <rect x="82" y="82" width="6" height="6" fill="#000"/>
-                <rect x="100" y="88" width="6" height="6" fill="#000"/>
-                <rect x="70" y="94" width="6" height="6" fill="#000"/>
-                <rect x="88" y="94" width="6" height="6" fill="#000"/>
-                <rect x="112" y="94" width="6" height="6" fill="#000"/>
-                <rect x="76" y="106" width="6" height="6" fill="#000"/>
-                <rect x="94" y="106" width="6" height="6" fill="#000"/>
-                <rect x="70" y="118" width="6" height="6" fill="#000"/>
-                <rect x="100" y="112" width="6" height="6" fill="#000"/>
-                <rect x="82" y="124" width="6" height="6" fill="#000"/>
-                <rect x="106" y="118" width="6" height="6" fill="#000"/>
-                <rect x="118" y="70" width="6" height="6" fill="#000"/>
-                <rect x="130" y="76" width="6" height="6" fill="#000"/>
-                <rect x="124" y="88" width="6" height="6" fill="#000"/>
-                <rect x="136" y="82" width="6" height="6" fill="#000"/>
-                <rect x="118" y="100" width="6" height="6" fill="#000"/>
-                <rect x="130" y="106" width="6" height="6" fill="#000"/>
-                <rect x="142" y="94" width="6" height="6" fill="#000"/>
-                <rect x="118" y="118" width="6" height="6" fill="#000"/>
-                <rect x="130" y="124" width="6" height="6" fill="#000"/>
-                <rect x="142" y="112" width="6" height="6" fill="#000"/>
-                <rect x="154" y="118" width="6" height="6" fill="#000"/>
-                <rect x="118" y="136" width="6" height="6" fill="#000"/>
-                <rect x="136" y="142" width="6" height="6" fill="#000"/>
-                <rect x="148" y="136" width="6" height="6" fill="#000"/>
-                <rect x="22" y="70" width="6" height="6" fill="#000"/>
-                <rect x="34" y="76" width="6" height="6" fill="#000"/>
-                <rect x="46" y="70" width="6" height="6" fill="#000"/>
-                <rect x="28" y="88" width="6" height="6" fill="#000"/>
-                <rect x="52" y="82" width="6" height="6" fill="#000"/>
-                <rect x="22" y="100" width="6" height="6" fill="#000"/>
-                <rect x="40" y="94" width="6" height="6" fill="#000"/>
-                <rect x="34" y="106" width="6" height="6" fill="#000"/>
-                <rect x="46" y="112" width="6" height="6" fill="#000"/>
-                <!-- Logo PIX centro -->
-                <rect x="76" y="76" width="28" height="28" rx="4" fill="#32BCAD"/>
-                <text x="90" y="96" font-family="Arial" font-weight="bold" font-size="14" fill="white" text-anchor="middle">PIX</text>
-              </svg>
-            </div>
-
-            <!-- Chave Pix Copia e Cola -->
-            <div class="pix-copy-wrap">
-              <div class="pix-copy-key" id="pix-key-display">00020126580014BR.GOV.BCB.PIX0136herework@pagamentos.com.br520400005303986540<span id="pix-amount-inline">149</span>5802BR5910HereWork6009SAOPAULO62070503***6304A8B2</div>
-              <button class="pix-copy-btn" onclick="copyPixKey()">📋 Copiar</button>
-            </div>
-
-            <!-- Instruções -->
-            <div class="pix-steps">
-              <div class="pix-step"><span class="pix-step-num">1</span><span>Abra o app do seu banco e acesse a área <strong>Pix</strong></span></div>
-              <div class="pix-step"><span class="pix-step-num">2</span><span>Escaneie o QR Code ou cole o código <strong>Pix Copia e Cola</strong></span></div>
-              <div class="pix-step"><span class="pix-step-num">3</span><span>Confirme o pagamento de <strong>R$ <span class="pix-amount-ref">149,00</span></strong> para <strong>HereWork</strong></span></div>
-              <div class="pix-step"><span class="pix-step-num">4</span><span>A confirmação é <strong>instantânea</strong> — você receberá um e-mail</span></div>
-            </div>
-
-            <!-- Status aguardando -->
-            <div class="pix-waiting">
-              <div class="pix-spinner"></div>
-              Aguardando confirmação do pagamento...
-            </div>
-
-            <!-- Botão simular (demo) -->
-            <button class="btn btn-green" style="width:100%;" id="pix-simulate-btn" onclick="simulatePixPayment()">
-              ✅ Simular Pagamento PIX (Demo)
-            </button>
-
-          </div>
-        </div><!-- /pix panel -->
+        <div class="pay-panel" id="pay-panel-pix"><div style="text-align:center;padding:32px 20px;"><div style="font-size:48px;margin-bottom:14px;">⚡</div><div style="font-size:17px;font-weight:800;color:var(--text);margin-bottom:8px;">PIX em breve</div><div style="font-size:13px;color:var(--text-3);line-height:1.6;max-width:300px;margin:0 auto;">O pagamento via PIX estará disponível em breve. Por enquanto, utilize o <strong>Cartão de Crédito</strong> para finalizar sua assinatura.</div><button class="btn btn-outline" style="margin-top:18px;" onclick="switchPayTab('card')">💳 Pagar com Cartão</button></div></div><!-- /pix panel -->
 
         <!-- ─── PAINEL CARTÃO ─── -->
-        <div class="pay-panel" id="pay-panel-card">
+        <div class="pay-panel active" id="pay-panel-card">
 
           <div class="form-group">
             <label class="form-label">Nome no cart&atilde;o</label>
@@ -6402,17 +6286,17 @@ section { padding: 64px 0; }
 
         <!-- Mini tabs PIX / Cartão -->
         <div class="pay-tabs" style="margin-bottom:0;">
-          <button class="pay-tab active" id="ctab-pix" onclick="switchContractPayTab('pix')">
+          <button class="pay-tab" id="ctab-pix" onclick="switchContractPayTab('pix')">
             <span>&#9889;</span> PIX
           </button>
-          <button class="pay-tab" id="ctab-card" onclick="switchContractPayTab('card')">
+          <button class="pay-tab active" id="ctab-card" onclick="switchContractPayTab('card')">
             <span>&#128179;</span> Cart&atilde;o de Cr&eacute;dito
           </button>
         </div>
 
         <div id="cpay-body" style="padding:18px 0 0;">
           <!-- PIX -->
-          <div id="cpay-pix" style="display:block;">
+          <div id="cpay-pix" style="display:none;">
             <div style="text-align:center;margin-bottom:14px;">
               <div style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Escaneie o QR Code ou copie o c&oacute;digo PIX</div>
               <div style="display:inline-flex;background:#fff;border:2px solid var(--border);border-radius:10px;padding:10px;">
@@ -6447,7 +6331,7 @@ section { padding: 64px 0; }
           </div>
 
           <!-- Cartão -->
-          <div id="cpay-card" style="display:none;">
+          <div id="cpay-card" style="display:block;">
             <div class="form-group">
               <label class="form-label">Nome no cart&atilde;o</label>
               <input class="form-input" id="c-stripe-name" type="text" maxlength="60"
