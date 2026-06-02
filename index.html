@@ -9196,8 +9196,8 @@ function openPaymentModal(amount, desc, plan) {
   // Build installments
   _buildInstallments(_payCtx.amount);
 
-  // Reset to PIX tab + hide success
-  switchPayTab('pix');
+  // Reset to card tab (PIX nao disponivel) + hide success
+  switchPayTab('card');
   var suc = document.getElementById('pay-success');    if(suc){ suc.classList.remove('show'); suc.style.display='none'; }
   var cnt = document.getElementById('pay-content');    if(cnt) cnt.style.display='block';
 
@@ -10355,7 +10355,7 @@ function openDashboard() {
   var done   = _dashData.client.done.length + _dashData.freelancer.done.length;
   var active = _dashData.client.active.length + _dashData.freelancer.active.length;
   el = document.getElementById('ds-active'); if(el) el.textContent = active;
-  el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR');
+  el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
   el = document.getElementById('ds-done');   if(el) el.textContent = done;
 
   el = document.getElementById('dash-profile-avatar'); if(el) el.textContent = name.charAt(0).toUpperCase();
@@ -10389,9 +10389,10 @@ function switchDashPanel(panel) {
 }
 
 function switchContractView(view) {
+  var panelMap = { client: 'dcontracts-client', freelancer: 'dcontracts-fl' };
   ['client','freelancer'].forEach(function(v) {
     var btn = document.getElementById('dct-' + v);
-    var pnl = document.getElementById('dcontracts-' + v);
+    var pnl = document.getElementById(panelMap[v]);
     if(btn) btn.classList.toggle('active', v === view);
     if(pnl) pnl.style.display = v === view ? 'block' : 'none';
   });
@@ -12169,7 +12170,7 @@ function _updatePaymentSummary() {
 
   var el;
   el = document.getElementById('pay-total-paid');     if(el) el.textContent = 'R$ ' + paid.toLocaleString('pt-BR');
-  el = document.getElementById('pay-total-escrow');   if(el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR');
+  el = document.getElementById('pay-total-escrow');   if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
   el = document.getElementById('pay-total-received'); if(el) el.textContent = 'R$ ' + received.toLocaleString('pt-BR');
 }
 </script>
