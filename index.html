@@ -8704,10 +8704,9 @@ function applyAllFilters(prefix) {
     sidebar.querySelectorAll('.filter-option input[type=checkbox]:checked').forEach(function(cb) {
       var lbl = cb.closest('.filter-option').querySelector('span');
       if (!lbl) return;
-      /* Prefer data-cat-key (exact ID) over normalized text */
       var key = lbl.getAttribute('data-cat-key');
-      if (key) { selCats.push(key); return; }
-      selCats.push(_norm(lbl.textContent.trim()));
+      /* ONLY add categories with data-cat-key — skip 'Outros filtros' (Top, Verificado, etc.) */
+      if (key) selCats.push(key);
     });
   }
 
