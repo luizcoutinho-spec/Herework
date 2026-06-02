@@ -11547,6 +11547,17 @@ var _dashData = {
   }
 };
 
+/* ── Empty data for new users — demo data only for test accounts ── */
+var _EMPTY_DASH = {
+  client:     { active:[], waiting:[], done:[] },
+  freelancer: { active:[], proposals:[], done:[] }
+};
+function _getViewData() {
+  var email = _session ? (_session.email || '') : '';
+  var isTest = email.indexOf('teste@') !== -1 || email.indexOf('test@') !== -1;
+  return isTest ? _dashData : _EMPTY_DASH;
+}
+
 function openDashboard() {
   if (!_session) { openModal('login'); return; }
   var name  = _session.name  || 'Usuário';
@@ -11557,18 +11568,19 @@ function openDashboard() {
   el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
   el = document.getElementById('ds-plan');        if(el) el.textContent = 'Gratuito';
 
-  var garantia = _dashData.client.active.reduce(function(s,p){return s+p.value;},0);
-  var done   = _dashData.client.done.length + _dashData.freelancer.done.length;
-  var active = _dashData.client.active.length + _dashData.freelancer.active.length;
-  var waiting = _dashData.client.waiting.length;
+  var _vd = _getViewData();
+  var garantia = _vd.client.active.reduce(function(s,p){return s+p.value;},0);
+  var done   = _vd.client.done.length + _vd.freelancer.done.length;
+  var active = _vd.client.active.length + _vd.freelancer.active.length;
+  var waiting = _vd.client.waiting.length;
   el = document.getElementById('ds-active'); if(el) el.textContent = active;
   el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
   el = document.getElementById('ds-done');   if(el) el.textContent = done;
   /* Update contract badges */
   el = document.getElementById('dct-client-count');
-  if(el) el.textContent = _dashData.client.active.length + _dashData.client.waiting.length + _dashData.client.done.length;
+  if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
   el = document.getElementById('dct-fl-count');
-  if(el) el.textContent = _dashData.freelancer.active.length + _dashData.freelancer.proposals.length + _dashData.freelancer.done.length;
+  if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
 
   el = document.getElementById('dash-profile-avatar'); if(el) el.textContent = name.charAt(0).toUpperCase();
   el = document.getElementById('dash-profile-name');   if(el) el.textContent = name;
@@ -11583,12 +11595,12 @@ function openDashboard() {
   el = document.getElementById('dct-client-count'); if(el) el.textContent = _dashData.client.active.length + _dashData.client.done.length;
   el = document.getElementById('dct-fl-count');     if(el) el.textContent = _dashData.freelancer.active.length + _dashData.freelancer.done.length;
 
-  _renderDashClientActive();
-  _renderDashClientWaiting();
-  _renderDashClientDone();
-  _renderDashFLActive();
-  _renderDashFLProposals();
-  _renderDashFLDone();
+  _renderDashClientActive(_vd);
+  _renderDashClientWaiting(_vd);
+  _renderDashClientDone(_vd);
+  _renderDashFLActive(_vd);
+  _renderDashFLProposals(_vd);
+  _renderDashFLDone(_vd);
 
   switchDashPanel('profile');
   showPage('dashboard');
@@ -11766,10 +11778,10 @@ function dashAction(action, id) {
   }
 }
 
-function _renderDashClientActive() {
+function _renderDashClientActive(data) {
   var el = document.getElementById('dash-client-active');
   if (!el) return;
-  var d = _dashData.client.active;
+  var d = (data || _dashData).client.active;
   if (!d.length) { el.innerHTML = _emptyState('🔒','Nenhum contrato ativo','Contrate um freelancer para começar'); return; }
   el.innerHTML = d.map(function(p) {
     _dashProj[p.id] = p;
@@ -11799,10 +11811,10 @@ function _renderDashClientActive() {
     '</div>';
   }).join('');
 }
-function _renderDashClientWaiting() {
+function _renderDashClientWaiting(data) {
   var el = document.getElementById('dash-client-waiting');
   if(!el) return;
-  var d = _dashData.client.waiting;
+  var d = (data || _dashData).client.waiting;
   if(!d.length) { el.innerHTML = _emptyState('📋','Nenhum projeto publicado','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openModal(\'publish\')">+ Publicar Projeto</button>'); return; }
   el.innerHTML = d.map(function(p) {
     return '<div class="dash-proj-card">' +
@@ -11827,10 +11839,10 @@ function _renderDashClientWaiting() {
   }).join('');
 }
 
-function _renderDashClientDone() {
+function _renderDashClientDone(data) {
   var el = document.getElementById('dash-client-done');
   if(!el) return;
-  var d = _dashData.client.done;
+  var d = (data || _dashData).client.done;
   if(!d.length) { el.innerHTML = _emptyState('✅','Nenhum projeto concluído ainda','Seus projetos finalizados aparecerão aqui'); return; }
   el.innerHTML = d.map(function(p) {
     return '<div class="dash-proj-card" style="opacity:.85;">' +
@@ -11852,10 +11864,10 @@ function _renderDashClientDone() {
   }).join('');
 }
 
-function _renderDashFLActive() {
+function _renderDashFLActive(data) {
   var el = document.getElementById('dash-fl-active');
   if (!el) return;
-  var d = _dashData.freelancer.active;
+  var d = (data || _dashData).freelancer.active;
   if (!d.length) { el.innerHTML = _emptyState('⚡','Nenhum contrato ativo','Envie propostas para começar a trabalhar'); return; }
   el.innerHTML = d.map(function(p) {
     _dashProj[p.id] = p;
@@ -11885,10 +11897,10 @@ function _renderDashFLActive() {
     '</div>';
   }).join('');
 }
-function _renderDashFLProposals() {
+function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
   if(!el) return;
-  var d = _dashData.freelancer.proposals;
+  var d = (data || _dashData).freelancer.proposals;
   if(!d.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
   el.innerHTML = d.map(function(p) {
     return '<div class="dash-proj-card">' +
@@ -11908,10 +11920,10 @@ function _renderDashFLProposals() {
   }).join('');
 }
 
-function _renderDashFLDone() {
+function _renderDashFLDone(data) {
   var el = document.getElementById('dash-fl-done');
   if(!el) return;
-  var d = _dashData.freelancer.done;
+  var d = (data || _dashData).freelancer.done;
   if(!d.length) { el.innerHTML = _emptyState('🏆','Nenhum trabalho concluído','Conclua projetos para construir seu histórico'); return; }
   el.innerHTML = d.map(function(p) {
     return '<div class="dash-proj-card" style="opacity:.85;">' +
