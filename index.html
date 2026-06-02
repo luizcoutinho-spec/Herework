@@ -15305,6 +15305,160 @@ document.addEventListener('DOMContentLoaded', function() {
   faqCarouselInit('faqc-client');
   faqCarouselInit('faqc-fl');
 });
+
+
+/* ═══════════════════════════════════════════════════════════
+   PERFIS DOS FREELANCERS REAIS — CV Completo
+═══════════════════════════════════════════════════════════ */
+var _flProfiles = {
+  'carlos-almeida': {
+    name:'Carlos Almeida', init:'CA', title:'DESENVOLVEDOR FULL STACK', rate:120,
+    location:'São Paulo, SP', rating:5.0, reviews:148, projects:312, recs:287,
+    since:'2016', ranking:3, verified:true, topFreelancer:true,
+    color:'linear-gradient(135deg,#2E7D32,#66BB6A)',
+    badges:[{icon:'🏆',label:'Top Freelancer',bg:'#fef3c7'},{icon:'✅',label:'Verificado',bg:'#e0f2fe'},{icon:'🔥',label:'+300 projetos',bg:'#fee2e2'}],
+    achievements:[{ico:'🥇',label:'Top 3 da plataforma'},{ico:'💯',label:'5,0 estrelas'},{ico:'🚀',label:'312 projetos'},{ico:'⭐',label:'148 avaliações'},{ico:'🔒',label:'Verificado'}],
+    about:'<p>Desenvolvedor <strong>Full Stack</strong> com mais de 8 anos de experiência em React, Node.js e arquitetura de microsserviços.</p><p>Já trabalhei com startups e grandes empresas como Magazine Luiza, iFood, Nubank e mais de 300 PMEs. Entrego código limpo, documentado e testado — sempre dentro do prazo.</p><p><strong>Emito Nota Fiscal</strong> para contratos acima de R$ 1.000.</p>',
+    experience:'<p><strong>8+ anos</strong> em desenvolvimento web e mobile.</p><ul><li>Frontend: React, Next.js, TypeScript, Vue.js</li><li>Backend: Node.js, Python, PostgreSQL, MongoDB</li><li>Cloud: AWS, GCP, Docker, Kubernetes</li><li>Metodologias: Scrum, CI/CD, TDD</li></ul>',
+    skills:['React','Node.js','TypeScript','PostgreSQL','AWS','Docker','GraphQL','Next.js','MongoDB','Redis'],
+    portfolio:[{ico:'🛒',bg:'#e0f2fe',l:'E-commerce'},{ico:'📱',bg:'#f0fdf4',l:'App Mobile'},{ico:'📊',bg:'#fff7ed',l:'Dashboard'},{ico:'🔗',bg:'#fdf4ff',l:'API REST'},{ico:'⚡',bg:'#f0fdf4',l:'SaaS'},{ico:'🤖',bg:'#ecfdf5',l:'Automação'}],
+    reviewsList:[{name:'Tech Solutions',init:'T',date:'Mar 2025',rating:5,text:'Carlos entregou antes do prazo com qualidade excepcional. Comunicação impecável.'},{name:'Startup Fintech',init:'S',date:'Fev 2025',rating:5,text:'Melhor desenvolvedor que já contratei. Soluções elegantes para problemas complexos.'},{name:'EduPlus',init:'E',date:'Jan 2025',rating:5,text:'Profissionalismo e expertise acima das expectativas. Recomendo fortemente.'}]
+  },
+  'marina-lima': {
+    name:'Marina Lima', init:'ML', title:'DESIGNER UI/UX', rate:95,
+    location:'Rio de Janeiro, RJ', rating:4.9, reviews:203, projects:278, recs:241,
+    since:'2017', ranking:5, verified:true, topFreelancer:true,
+    color:'linear-gradient(135deg,#F4511E,#FF8A65)',
+    badges:[{icon:'🏆',label:'Top Freelancer',bg:'#fef3c7'},{icon:'🎨',label:'Design Expert',bg:'#fdf4ff'},{icon:'✅',label:'Verificada',bg:'#e0f2fe'}],
+    achievements:[{ico:'🥇',label:'Top Designer'},{ico:'🎨',label:'278 projetos'},{ico:'⭐',label:'4,9 estrelas'},{ico:'🏅',label:'Portfólio premiado'},{ico:'✅',label:'Verificada'}],
+    about:'<p>Designer <strong>UI/UX</strong> com especialidade em identidade visual e experiência do usuário. Atendo marcas de todos os tamanhos — de startups a empresas nacionais reconhecidas.</p><p>Portfólio premiado internacionalmente. Especialista em Figma, Adobe Creative Suite e Design Systems.</p><p><strong>Emito Nota Fiscal</strong>.</p>',
+    experience:'<p><strong>7+ anos</strong> em design gráfico e digital.</p><ul><li>Identidade visual e branding estratégico</li><li>Design de interfaces (Web e Mobile)</li><li>Design Systems e componentes</li><li>UX Research e prototipagem</li><li>Motion design e animações</li></ul>',
+    skills:['Figma','Adobe XD','Illustrator','Photoshop','After Effects','Branding','UI Design','UX Research','Sketch','Design System'],
+    portfolio:[{ico:'💎',bg:'#fdf4ff',l:'Branding'},{ico:'📱',bg:'#f0fdf4',l:'App Design'},{ico:'🌐',bg:'#e0f2fe',l:'Web Design'},{ico:'📦',bg:'#fff7ed',l:'Embalagem'},{ico:'🎬',bg:'#fce7f3',l:'Motion'},{ico:'📊',bg:'#ecfdf5',l:'Dashboard'}],
+    reviewsList:[{name:'Natura',init:'N',date:'Mar 2025',rating:5,text:'Marina entregou identidade visual incrível. Processo criativo muito bem conduzido.'},{name:'App Fintech',init:'A',date:'Fev 2025',rating:5,text:'Design moderno, funcional e alinhado com nossa marca. Superou as expectativas.'},{name:'Startup E-com',init:'S',date:'Dez 2024',rating:4,text:'Ótima designer, profissional. Pequeno atraso mas qualidade excelente.'}]
+  },
+  'rafael-pereira': {
+    name:'Rafael Pereira', init:'RP', title:'ESPECIALISTA EM SEO & MARKETING DIGITAL', rate:80,
+    location:'Curitiba, PR', rating:4.8, reviews:167, projects:245, recs:198,
+    since:'2018', ranking:8, verified:true, topFreelancer:false,
+    color:'linear-gradient(135deg,#1565C0,#42A5F5)',
+    badges:[{icon:'📈',label:'Growth Expert',bg:'#e0f2fe'},{icon:'✅',label:'Verificado',bg:'#f0fdf4'}],
+    achievements:[{ico:'📈',label:'245 projetos'},{ico:'🎯',label:'ROI médio +340%'},{ico:'⭐',label:'4,8 estrelas'},{ico:'🔍',label:'SEO Expert'},{ico:'✅',label:'Verificado'}],
+    about:'<p>Especialista em <strong>SEO, tráfego pago e estratégias de crescimento digital</strong> com 6 anos de experiência.</p><p>Já gerenciei mais de R$ 2 milhões em verba de mídia com ROI médio de 380%. Trabalho com e-commerces, SaaS, clínicas e negócios locais.</p><p><strong>Emito Nota Fiscal</strong>. Contratos mensais com relatórios semanais.</p>',
+    experience:'<p><strong>6 anos</strong> em marketing digital e crescimento.</p><ul><li>Google Ads (Search, Display, Shopping, YouTube)</li><li>Meta Ads (Facebook e Instagram)</li><li>SEO técnico e de conteúdo</li><li>Analytics e atribuição de resultados</li><li>Email marketing e automações</li></ul>',
+    skills:['SEO','Google Ads','Meta Ads','Analytics','Search Console','Email Marketing','CRO','Copywriting','HubSpot','Power BI'],
+    portfolio:[{ico:'📊',bg:'#e0f2fe',l:'Dashboard'},{ico:'📈',bg:'#f0fdf4',l:'SEO'},{ico:'🎯',bg:'#fff7ed',l:'Campanha'},{ico:'✉️',bg:'#fdf4ff',l:'Email Mkt'},{ico:'🛒',bg:'#ecfdf5',l:'E-com Ads'},{ico:'📱',bg:'#fce7f3',l:'Social Ads'}],
+    reviewsList:[{name:'Loja Bella Moda',init:'L',date:'Mar 2025',rating:5,text:'Rafael aumentou nossas vendas em 80% com SEO e tráfego pago. Excelente!'},{name:'Tech SaaS',init:'T',date:'Jan 2025',rating:5,text:'CAC reduziu 40% em 3 meses. Gestão de anúncios precisa e focada em resultado.'},{name:'E-com Store',init:'E',date:'Dez 2024',rating:4,text:'Bom trabalho no geral. Comunicação poderia ser mais frequente.'}]
+  },
+  'juliana-santos': {
+    name:'Juliana Santos', init:'JS', title:'REDATORA & COPYWRITER', rate:70,
+    location:'Belo Horizonte, MG', rating:4.9, reviews:215, projects:389, recs:398,
+    since:'2016', ranking:4, verified:true, topFreelancer:true,
+    color:'linear-gradient(135deg,#7B1FA2,#BA68C8)',
+    badges:[{icon:'🏆',label:'Top Freelancer',bg:'#fef3c7'},{icon:'✍️',label:'Copywriting Pro',bg:'#fdf4ff'},{icon:'✅',label:'Verificada',bg:'#e0f2fe'}],
+    achievements:[{ico:'🏆',label:'Top Redatora'},{ico:'✍️',label:'389 projetos'},{ico:'⭐',label:'4,9 estrelas'},{ico:'🎯',label:'Alta conversão'},{ico:'✅',label:'Verificada'}],
+    about:'<p><strong>Redatora e Copywriter</strong> com 9 anos de experiência em conteúdo que converte. Especialista em textos persuasivos, SEO e storytelling para marcas.</p><p>Já escrevi para mais de 300 marcas, ajudando-as a aumentar engajamento, tráfego orgânico e vendas.</p><p><strong>Emito Nota Fiscal</strong>. Contratos mensais com desconto.</p>',
+    experience:'<p><strong>9 anos</strong> em redação e copywriting.</p><ul><li>Copywriting para landing pages e vendas</li><li>Artigos SEO (Google Top 3)</li><li>Roteiros para vídeos e podcasts</li><li>E-mail marketing e newsletters</li><li>Gestão editorial de blogs corporativos</li></ul>',
+    skills:['Copywriting','SEO Writing','Content Marketing','Email Marketing','Storytelling','UX Writing','Blog','Landing Pages','Roteiro','WordPress'],
+    portfolio:[{ico:'📝',bg:'#fdf4ff',l:'Blog'},{ico:'📧',bg:'#e0f2fe',l:'Email Mkt'},{ico:'🎯',bg:'#f0fdf4',l:'Landing Page'},{ico:'📹',bg:'#fff7ed',l:'Roteiro'},{ico:'📰',bg:'#fce7f3',l:'Press Release'},{ico:'📱',bg:'#ecfdf5',l:'Social Copy'}],
+    reviewsList:[{name:'Revista Digital',init:'R',date:'Mar 2025',rating:5,text:'Juliana escreve com qualidade impressionante. Textos que realmente vendem.'},{name:'E-com Fashion',init:'E',date:'Fev 2025',rating:5,text:'Nossa taxa de conversão aumentou 60% com os copies dela. Incrível.'},{name:'Portal Saúde',init:'P',date:'Jan 2025',rating:5,text:'Conteúdo técnico e acessível. Exatamente o que precisávamos.'}]
+  },
+  'fernando-melo': {
+    name:'Fernando Melo', init:'FM', title:'DESENVOLVEDOR MOBILE (iOS/Android)', rate:110,
+    location:'Porto Alegre, RS', rating:4.8, reviews:132, projects:187, recs:128,
+    since:'2017', ranking:7, verified:true, topFreelancer:false,
+    color:'linear-gradient(135deg,#E65100,#FF8F00)',
+    badges:[{icon:'📱',label:'Mobile Expert',bg:'#fff7ed'},{icon:'✅',label:'Verificado',bg:'#e0f2fe'}],
+    achievements:[{ico:'📱',label:'187 apps criados'},{ico:'⭐',label:'4,8 estrelas'},{ico:'🍎',label:'iOS Expert'},{ico:'🤖',label:'Android Expert'},{ico:'✅',label:'Verificado'}],
+    about:'<p>Desenvolvedor <strong>Mobile</strong> especializado em Flutter e React Native com 7 anos de experiência.</p><p>Mais de 50 aplicativos publicados nas lojas App Store e Google Play, com mais de 2 milhões de downloads combinados.</p><p><strong>Emito Nota Fiscal</strong>.</p>',
+    experience:'<p><strong>7 anos</strong> em desenvolvimento mobile.</p><ul><li>Flutter e Dart (iOS e Android)</li><li>React Native</li><li>Swift (iOS nativo) e Kotlin (Android nativo)</li><li>Firebase, REST API, Push Notifications</li><li>Publicação App Store e Google Play</li></ul>',
+    skills:['Flutter','React Native','Swift','Kotlin','Dart','Firebase','Redux','REST API','SQLite','Push Notifications'],
+    portfolio:[{ico:'🛒',bg:'#fff7ed',l:'E-com App'},{ico:'🍔',bg:'#f0fdf4',l:'Delivery'},{ico:'💰',bg:'#e0f2fe',l:'Fintech'},{ico:'🏥',bg:'#fce7f3',l:'Saúde'},{ico:'📚',bg:'#fdf4ff',l:'EAD'},{ico:'🎮',bg:'#ecfdf5',l:'Games'}],
+    reviewsList:[{name:'App Delivery',init:'A',date:'Fev 2025',rating:5,text:'App entregue com qualidade nativa. Performance excelente em iOS e Android.'},{name:'Fintech App',init:'F',date:'Jan 2025',rating:5,text:'Fernando domina Flutter como poucos. Resultado profissional no prazo.'},{name:'Health Startup',init:'H',date:'Nov 2024',rating:4,text:'Ótimo desenvolvedor. App funciona bem, poucos ajustes pós-entrega.'}]
+  },
+  'tatiane-carvalho': {
+    name:'Tatiane Carvalho', init:'TC', title:'EDITORA DE VÍDEO & MOTION DESIGN', rate:85,
+    location:'Fortaleza, CE', rating:5.0, reviews:98, projects:156, recs:90,
+    since:'2019', ranking:6, verified:false, topFreelancer:true,
+    color:'linear-gradient(135deg,#880E4F,#E91E63)',
+    badges:[{icon:'🏆',label:'Top Freelancer',bg:'#fef3c7'},{icon:'🎬',label:'Video Expert',bg:'#fce7f3'}],
+    achievements:[{ico:'🎬',label:'156 vídeos'},{ico:'⭐',label:'5,0 estrelas'},{ico:'🏆',label:'Top Criativa'},{ico:'✨',label:'Motion Expert'},{ico:'🎥',label:'Premiada'}],
+    about:'<p>Editora de vídeo e <strong>Motion Designer</strong> com 6 anos de experiência em produção audiovisual de alto impacto.</p><p>Trabalho com marcas que querem se destacar através de vídeos dinâmicos e criativos para YouTube, Instagram e campanhas publicitárias.</p>',
+    experience:'<p><strong>6 anos</strong> em edição e motion design.</p><ul><li>Premiere Pro, After Effects, DaVinci Resolve</li><li>Motion graphics e animações 2D/3D</li><li>Color grading profissional</li><li>Vídeos para redes sociais (Reels, TikTok)</li><li>Trilha sonora e design de som</li></ul>',
+    skills:['Premiere Pro','After Effects','DaVinci Resolve','Cinema 4D','Illustrator','Audition','Final Cut','Motion','Reels','YouTube'],
+    portfolio:[{ico:'🎬',bg:'#fce7f3',l:'Institucional'},{ico:'📱',bg:'#fdf4ff',l:'Reels'},{ico:'✨',bg:'#fff7ed',l:'Motion'},{ico:'🎵',bg:'#e0f2fe',l:'Clipe'},{ico:'📺',bg:'#f0fdf4',l:'TVC'},{ico:'🎓',bg:'#ecfdf5',l:'EAD'}],
+    reviewsList:[{name:'Corporativo SA',init:'C',date:'Mar 2025',rating:5,text:'Vídeo institucional ficou incrível! Tatiane captou perfeitamente nossa essência.'},{name:'Canal YouTube',init:'Y',date:'Fev 2025',rating:5,text:'Edição criativa e dinâmica. Engajamento dobrou após trabalhar com ela.'},{name:'Startup Tech',init:'S',date:'Jan 2025',rating:5,text:'Motion graphics de altíssima qualidade. Superou todas as expectativas.'}]
+  }
+};
+
+var _flProfileMap = {
+  'Carlos Almeida': 'carlos-almeida',
+  'Marina Lima':    'marina-lima',
+  'Rafael Pereira': 'rafael-pereira',
+  'Juliana Santos': 'juliana-santos',
+  'Fernando Melo':  'fernando-melo',
+  'Tatiane Carvalho':'tatiane-carvalho'
+};
+
+function openFreelancerProfile(profileId) {
+  var p = _flProfiles[profileId];
+  if(!p) { showToast('Perfil não encontrado.','info'); return; }
+
+  var el;
+  var av = document.getElementById('flp-avatar');
+  if(av){ av.style.background=p.color; av.innerHTML=p.init; }
+
+  el=document.getElementById('flp-name');  if(el) el.textContent=p.name;
+  el=document.getElementById('flp-title'); if(el) el.textContent=p.title;
+  el=document.getElementById('flp-verified-icon'); if(el) el.textContent=p.verified?'✅':'';
+
+  var bd=document.getElementById('flp-badges');
+  if(bd) bd.innerHTML=p.badges.map(function(b){ return '<span class="fl-profile-badge" style="background:'+b.bg+';color:#374151;">'+b.icon+' '+b.label+'</span>'; }).join('');
+
+  el=document.getElementById('flp-stars');   if(el) el.textContent='★'.repeat(Math.round(p.rating))+'☆'.repeat(5-Math.round(p.rating));
+  el=document.getElementById('flp-rating');  if(el) el.textContent=p.rating.toFixed(1).replace('.',',');
+  el=document.getElementById('flp-reviews'); if(el) el.textContent='('+p.reviews+' avaliações)';
+  el=document.getElementById('flp-rating-summary'); if(el) el.textContent='— '+p.reviews+' avaliações · média '+p.rating.toFixed(1).replace('.',',');
+
+  el=document.getElementById('flp-stats');
+  if(el) el.innerHTML='<div class="fl-stat-item">Ranking: <strong>#'+p.ranking+'</strong></div>'+
+    '<div class="fl-stat-item">Projetos: <strong>'+p.projects+'</strong></div>'+
+    '<div class="fl-stat-item">Recomendações: <strong>'+p.recs+'</strong></div>'+
+    '<div class="fl-stat-item">Desde: <strong>'+p.since+'</strong></div>';
+
+  var ac=document.getElementById('flp-achievements');
+  var colors=['#fef3c7','#e0f2fe','#f0fdf4','#fce7f3','#fdf4ff'];
+  if(ac) ac.innerHTML=p.achievements.map(function(a,i){ return '<div class="fl-achievement" style="background:'+colors[i%5]+';" title="'+a.label+'">'+a.ico+'</div>'; }).join('');
+
+  el=document.getElementById('flp-about');      if(el) el.innerHTML=p.about;
+  el=document.getElementById('flp-experience'); if(el) el.innerHTML=p.experience;
+
+  var sk=document.getElementById('flp-skills');
+  if(sk) sk.innerHTML=p.skills.map(function(s){ return '<span class="fl-skill-tag">'+s+'</span>'; }).join('');
+
+  var po=document.getElementById('flp-portfolio');
+  if(po) po.innerHTML=(p.portfolio||[]).map(function(item){ return '<div class="fl-portfolio-item" style="background:'+item.bg+';" title="'+item.l+'" onclick="openFLPortfolioItem(this)">'+item.ico+'</div>'; }).join('');
+
+  var rl=document.getElementById('flp-reviews-list');
+  if(rl) rl.innerHTML=(p.reviewsList||[]).map(function(r){
+    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name">'+r.name+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
+  }).join('');
+
+  el=document.getElementById('flp-rate');     if(el) el.textContent=p.rate;
+  el=document.getElementById('flp-location'); if(el) el.textContent=p.location;
+
+  var hb=document.getElementById('flp-hire-btn');
+  if(hb) hb.onclick=function(){ closeModal('fl-profile'); openContractModal({name:p.name,role:p.title,value:p.rate*40,project:'Meu Projeto',deadline:'30 dias'}); };
+
+  openModal('fl-profile');
+}
+
+function openProfileByName(name) {
+  var id = _flProfileMap[name];
+  if(id) openFreelancerProfile(id);
+  else showToast('Perfil em breve!', 'info');
+}
+
 </script>
 </body>
 </html>
