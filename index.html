@@ -7565,10 +7565,18 @@ var _session = null; // { name, email, type }
 function _setSession(name, email, type) {
   _session = { name: name, email: email, type: type };
 
-  // Show user chip, hide login/register buttons
-  var chip    = document.getElementById('nav-user-chip');
-  var loginBtn= document.getElementById('nav-login-btn');
-  var regBtn  = document.getElementById('nav-register-btn');
+  /* Persiste no localStorage para sobreviver ao refresh */
+  try {
+    localStorage.setItem('hw_session', JSON.stringify({
+      name: name, email: email, type: type,
+      ts: Date.now()
+    }));
+  } catch(e) {}
+
+  /* Atualiza navbar */
+  var chip     = document.getElementById('nav-user-chip');
+  var loginBtn = document.getElementById('nav-login-btn');
+  var regBtn   = document.getElementById('nav-register-btn');
 
   if (loginBtn) loginBtn.style.display = 'none';
   if (regBtn)   regBtn.style.display   = 'none';
@@ -7580,15 +7588,60 @@ function _setSession(name, email, type) {
     if (avEl)   avEl.textContent   = name.charAt(0).toUpperCase();
   }
 }
+
 function _clearSession() {
   _session = null;
-  var chip    = document.getElementById('nav-user-chip');
-  var loginBtn= document.getElementById('nav-login-btn');
-  var regBtn  = document.getElementById('nav-register-btn');
+
+  /* Remove do localStorage */
+  try { localStorage.removeItem('hw_session'); } catch(e) {}
+
+  var chip     = document.getElementById('nav-user-chip');
+  var loginBtn = document.getElementById('nav-login-btn');
+  var regBtn   = document.getElementById('nav-register-btn');
   if (chip)     chip.style.display     = 'none';
   if (loginBtn) loginBtn.style.display = '';
   if (regBtn)   regBtn.style.display   = '';
 }
+
+/* Restaura a sessão do localStorage ao carregar a página */
+function _restoreSession() {
+  try {
+    var saved = localStorage.getItem('hw_session');
+    if (!saved) return;
+    var data = JSON.parse(saved);
+    if (!data || !data.name || !data.email) return;
+
+    /* Expira após 30 dias */
+    var maxAge = 30 * 24 * 60 * 60 * 1000;
+    if (data.ts && (Date.now() - data.ts) > maxAge) {
+      localStorage.removeItem('hw_session');
+      return;
+    }
+
+    /* Restaura silenciosamente — sem redirect para dashboard */
+    _session = { name: data.name, email: data.email, type: data.type || 'client' };
+
+    var chip     = document.getElementById('nav-user-chip');
+    var loginBtn = document.getElementById('nav-login-btn');
+    var regBtn   = document.getElementById('nav-register-btn');
+
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (regBtn)   regBtn.style.display   = 'none';
+    if (chip) {
+      chip.style.display = 'flex';
+      var nameEl = document.getElementById('nav-user-name');
+      var avEl   = document.getElementById('nav-user-avatar');
+      if (nameEl) nameEl.textContent = data.name.split(' ')[0];
+      if (avEl)   avEl.textContent   = data.name.charAt(0).toUpperCase();
+    }
+
+    /* Atualiza nome no dashboard se estiver visível */
+    var dashName = document.getElementById('dash-user-name');
+    if (dashName) dashName.textContent = data.name.split(' ')[0];
+
+  } catch(e) { /* silently ignore */ }
+}
+
 function submitRegister() {
   var n    = document.getElementById('reg-name');
   var e    = document.getElementById('reg-email');
@@ -11084,6 +11137,7 @@ if(window.self !== window.top) {
 document.addEventListener('DOMContentLoaded', function() {
   _enforceInputLimits();
   _securePasswordFields();
+  _restoreSession();   /* Restaura sessão salva no localStorage */
   _secLog('PAGE_LOAD', 'HereWork carregado — ' + navigator.userAgent.substring(0,60));
 });
 
