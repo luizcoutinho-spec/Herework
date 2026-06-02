@@ -4331,25 +4331,89 @@ section { padding: 64px 0; }
     <!-- ─── PAINEL: PAGAMENTOS ─── -->
     <div id="dpanel-payments" style="display:none;">
 
-      <!-- Cards de resumo -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">
-        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:18px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:var(--green);" id="pay-total-paid">R$ 0</div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Total Contratado</div>
-          <div style="font-size:10px;color:var(--text-4);margin-top:2px;">Como cliente</div>
-        </div>
-        <div style="background:var(--surface);border:1.5px solid #fed7aa;border-radius:var(--radius-lg);padding:18px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:#f97316;" id="pay-total-escrow">R$ 0</div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Em Garantia</div>
-          <div style="font-size:10px;color:var(--text-4);margin-top:2px;">Aguardando aprova&ccedil;&atilde;o</div>
-        </div>
-        <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:18px;text-align:center;">
-          <div style="font-size:22px;font-weight:800;color:var(--green);" id="pay-total-received">R$ 0</div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Total Recebido</div>
-          <div style="font-size:10px;color:var(--text-4);margin-top:2px;">Como freelancer</div>
-        </div>
-      </div>
+      <!-- Cards de resumo expandido -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:20px;">
 
+        <!-- Total Geral -->
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;grid-column:1/-1;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Volume Total Movimentado</div>
+              <div style="font-size:30px;font-weight:900;color:#fff;" id="pay-total-all">R$ 0</div>
+              <div style="font-size:11px;color:#64748b;margin-top:3px;">Soma de todos os contratos (pagamentos + recebimentos)</div>
+            </div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;">
+              <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+                <div style="font-size:16px;font-weight:800;color:#4ade80;" id="pay-summary-liberado">R$ 0</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Liberados</div>
+              </div>
+              <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+                <div style="font-size:16px;font-weight:800;color:#fb923c;" id="pay-summary-garantia">R$ 0</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Em Garantia</div>
+              </div>
+              <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+                <div style="font-size:16px;font-weight:800;color:#60a5fa;" id="pay-summary-pendente">R$ 0</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Aguardando</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Como Cliente -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">&#127968;</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text);">Como Cliente</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Total contratado</span>
+              <span style="font-size:13px;font-weight:800;color:var(--green);" id="pay-total-paid">R$ 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Valores pagos (liberados)</span>
+              <span style="font-size:13px;font-weight:700;color:var(--green);" id="pay-client-liberado">R$ 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Em garantia (retido)</span>
+              <span style="font-size:13px;font-weight:700;color:#f97316;" id="pay-total-escrow">R$ 0</span>
+            </div>
+            <div style="height:1px;background:var(--border-2);margin:2px 0;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-4);">N&ordm; de contratos</span>
+              <span style="font-size:12px;font-weight:600;color:var(--text-3);" id="pay-client-count">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Como Freelancer -->
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+            <span style="font-size:18px;">&#129489;&#8205;&#128187;</span>
+            <span style="font-size:12px;font-weight:700;color:var(--text);">Como Freelancer</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Total recebido</span>
+              <span style="font-size:13px;font-weight:800;color:var(--green);" id="pay-total-received">R$ 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Valores pagos na conta</span>
+              <span style="font-size:13px;font-weight:700;color:var(--green);" id="pay-fl-recebido">R$ 0</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-3);">Aguardando aprova&ccedil;&atilde;o</span>
+              <span style="font-size:13px;font-weight:700;color:#3b82f6;" id="pay-fl-pendente">R$ 0</span>
+            </div>
+            <div style="height:1px;background:var(--border-2);margin:2px 0;"></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <span style="font-size:11px;color:var(--text-4);">N&ordm; de trabalhos</span>
+              <span style="font-size:12px;font-weight:600;color:var(--text-3);" id="pay-fl-count">0</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
       <!-- Tabs -->
       <div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:20px;">
         <button class="pay-tab active" id="ptab-out" onclick="switchPayHistory('out')" style="flex:1;padding:12px 8px;font-size:13px;">
@@ -12271,15 +12335,47 @@ function switchPayHistory(tab) {
 
 /* ─── Update payment summary cards ─── */
 function _updatePaymentSummary() {
-  var contracted = _dashData.client.active.reduce(function(s,p){ return s+(p.value||0); }, 0)
-                 + _dashData.client.done.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var inGarantia = _dashData.client.active.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var received   = _dashData.freelancer.done.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var fmt = function(n){ return 'R\$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2}); };
 
+  /* ── CLIENTE ── */
+  var clientActive    = _dashData.client.active;
+  var clientDone      = _dashData.client.done;
+  var clientLiberado  = clientDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var clientGarantia  = clientActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var clientTotal     = clientLiberado + clientGarantia;
+  var clientCount     = clientActive.length + clientDone.length;
+
+  /* ── FREELANCER ── */
+  var flActive   = _dashData.freelancer.active;
+  var flDone     = _dashData.freelancer.done;
+  var flRecebido = flDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var flPendente = flActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var flTotal    = flRecebido + flPendente;
+  var flCount    = flActive.length + flDone.length;
+
+  /* ── TOTAIS GERAIS ── */
+  var totalAll      = clientTotal + flTotal;
+  var totalLiberado = clientLiberado + flRecebido;
+  var totalGarantia = clientGarantia;
+  var totalPendente = flPendente;
+
+  /* Update DOM */
   var el;
-  el = document.getElementById('pay-total-paid');     if(el) el.textContent = 'R\$ ' + contracted.toLocaleString('pt-BR');
-  el = document.getElementById('pay-total-escrow');   if(el) el.textContent = 'R\$ ' + inGarantia.toLocaleString('pt-BR');
-  el = document.getElementById('pay-total-received'); if(el) el.textContent = 'R\$ ' + received.toLocaleString('pt-BR');
+  /* Banner geral */
+  el = document.getElementById('pay-total-all');        if(el) el.textContent = fmt(totalAll);
+  el = document.getElementById('pay-summary-liberado'); if(el) el.textContent = fmt(totalLiberado);
+  el = document.getElementById('pay-summary-garantia'); if(el) el.textContent = fmt(totalGarantia);
+  el = document.getElementById('pay-summary-pendente'); if(el) el.textContent = fmt(totalPendente);
+  /* Como cliente */
+  el = document.getElementById('pay-total-paid');       if(el) el.textContent = fmt(clientTotal);
+  el = document.getElementById('pay-client-liberado');  if(el) el.textContent = fmt(clientLiberado);
+  el = document.getElementById('pay-total-escrow');     if(el) el.textContent = fmt(clientGarantia);
+  el = document.getElementById('pay-client-count');     if(el) el.textContent = clientCount + ' contrato' + (clientCount !== 1 ? 's' : '');
+  /* Como freelancer */
+  el = document.getElementById('pay-total-received');   if(el) el.textContent = fmt(flTotal);
+  el = document.getElementById('pay-fl-recebido');      if(el) el.textContent = fmt(flRecebido);
+  el = document.getElementById('pay-fl-pendente');      if(el) el.textContent = fmt(flPendente);
+  el = document.getElementById('pay-fl-count');         if(el) el.textContent = flCount + ' trabalho' + (flCount !== 1 ? 's' : '');
 
   _renderMyPayments();
   _renderMyReceived();
