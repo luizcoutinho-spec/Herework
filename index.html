@@ -3552,6 +3552,122 @@ section { padding: 64px 0; }
 }
 .blog-newsletter-input::placeholder { color: rgba(255,255,255,.4); }
 .blog-newsletter-input:focus { background: rgba(255,255,255,.18); }
+/* ═══════════════════════════════════════
+   MODAL: PERFIL DO FREELANCER
+═══════════════════════════════════════ */
+#overlay-fl-profile .modal {
+  max-width: 780px; padding: 0; overflow: hidden;
+  max-height: 90vh; display: flex; flex-direction: column;
+}
+.fl-profile-body { overflow-y: auto; flex: 1; }
+.fl-profile-body::-webkit-scrollbar { width: 5px; }
+.fl-profile-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Hero */
+.fl-profile-hero {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  padding: 24px 28px; display: flex; gap: 20px; align-items: flex-start; position: relative;
+}
+.fl-profile-avatar {
+  width: 88px; height: 88px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 34px; font-weight: 900; color: #fff; border: 3px solid rgba(255,255,255,.2);
+  overflow: hidden; background: linear-gradient(135deg,var(--green),#66BB6A);
+}
+.fl-profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.fl-profile-info { flex: 1; }
+.fl-profile-name { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.fl-profile-title { font-size: 13px; color: #94a3b8; font-weight: 600; letter-spacing: .5px; text-transform: uppercase; margin-bottom: 10px; }
+.fl-badge-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.fl-profile-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+.fl-badge-top    { background: #fef3c7; color: #92400e; }
+.fl-badge-verify { background: #e0f2fe; color: #075985; }
+.fl-badge-plus   { background: linear-gradient(90deg,#7c3aed,#4f46e5); color: #fff; }
+
+.fl-profile-stars { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+.fl-stars-val  { font-size: 16px; font-weight: 800; color: #fbbf24; }
+.fl-stars-ico  { color: #fbbf24; font-size: 15px; }
+.fl-stars-count{ font-size: 12px; color: #94a3b8; }
+
+.fl-profile-stats { display: flex; gap: 16px; flex-wrap: wrap; }
+.fl-stat-item  { font-size: 12px; color: #94a3b8; }
+.fl-stat-item strong { color: #e2e8f0; font-weight: 700; }
+
+.fl-profile-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+.fl-report-btn {
+  background: none; border: 1px solid rgba(255,255,255,.2);
+  color: #94a3b8; padding: 5px 12px; border-radius: var(--radius);
+  font-size: 11px; cursor: pointer; transition: all var(--transition);
+}
+.fl-report-btn:hover { border-color: #ef4444; color: #ef4444; }
+
+/* Achievement badges */
+.fl-achievements { padding: 16px 28px 0; display: flex; gap: 8px; flex-wrap: wrap; }
+.fl-achievement {
+  width: 42px; height: 42px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer; transition: transform .2s;
+  position: relative;
+}
+.fl-achievement:hover { transform: scale(1.15); }
+.fl-achievement::after {
+  content: attr(title); position: absolute; bottom: calc(100% + 6px); left: 50%;
+  transform: translateX(-50%); background: var(--text); color: #fff;
+  font-size: 10px; padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+  opacity: 0; transition: opacity .2s; pointer-events: none;
+}
+.fl-achievement:hover::after { opacity: 1; }
+
+/* Sections */
+.fl-profile-section { padding: 20px 28px; border-top: 1px solid var(--border-2); }
+.fl-section-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 7px; }
+.fl-section-body  { font-size: 14px; color: var(--text-2); line-height: 1.8; }
+.fl-section-body p { margin-bottom: 10px; }
+.fl-skills-cloud  { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 10px; }
+.fl-skill-tag {
+  padding: 5px 12px; border-radius: var(--radius-full);
+  background: var(--bg); border: 1.5px solid var(--border);
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  transition: all var(--transition);
+}
+.fl-skill-tag:hover { border-color: var(--green); color: var(--green); }
+
+/* Portfolio */
+.fl-portfolio-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-top: 10px; }
+.fl-portfolio-item {
+  border-radius: var(--radius); overflow: hidden; cursor: pointer;
+  aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; transition: transform .2s;
+}
+.fl-portfolio-item:hover { transform: scale(1.03); }
+
+/* Reviews */
+.fl-review-item { padding: 14px 0; border-bottom: 1px solid var(--border-2); }
+.fl-review-item:last-child { border-bottom: none; }
+.fl-review-header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.fl-review-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg,#1565c0,#42a5f5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.fl-review-meta  { flex: 1; }
+.fl-review-name  { font-size: 13px; font-weight: 700; color: var(--text); }
+.fl-review-date  { font-size: 11px; color: var(--text-4); }
+.fl-review-stars { color: #fbbf24; font-size: 12px; }
+.fl-review-text  { font-size: 13px; color: var(--text-2); line-height: 1.6; }
+
+/* Footer actions */
+.fl-profile-footer {
+  padding: 16px 28px; border-top: 1.5px solid var(--border-2);
+  background: var(--bg); display: flex; gap: 10px; align-items: center;
+  flex-shrink: 0;
+}
+.fl-rate-display { font-size: 22px; font-weight: 900; color: var(--text); }
+.fl-rate-label   { font-size: 11px; color: var(--text-4); margin-top: 1px; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -5188,7 +5304,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 120<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Carlos Almeida',role:'Desenvolvedor Full Stack',value:4800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('carlos-almeida')">Ver Perfil</button>
             </div>
           </div>
 
@@ -5216,7 +5332,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 95<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Marina Lima',role:'Designer UI/UX',value:3800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('marina-lima')">Ver Perfil</button>
             </div>
           </div>
 
@@ -5244,7 +5360,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 80<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Rafael Pereira',role:'Especialista em Marketing Digital',value:3200,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('rafael-pereira')">Ver Perfil</button>
             </div>
           </div>
 
@@ -5273,7 +5389,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 70<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,9</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Juliana Santos',role:'Redatora & Copywriter',value:2800,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('juliana-santos')">Ver Perfil</button>
             </div>
           </div>
 
@@ -5301,7 +5417,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 110<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 4,8</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Fernando Melo',role:'Desenvolvedor Mobile',value:4400,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('fernando-melo')">Ver Perfil</button>
             </div>
           </div>
 
@@ -5329,7 +5445,7 @@ section { padding: 64px 0; }
               <div class="fl-list-rate">R$ 85<small data-pt="/hora" data-es="/hora">/hora</small></div>
               <div class="fl-list-rating"><span class="stars">★★★★★</span> 5,0</div>
               <button class="btn btn-green btn-sm" onclick="openContractModal({name:'Tatiane Carvalho',role:'Editora de Vídeo & Motion Design',value:3400,project:'Meu Projeto',deadline:'30 dias'})" data-pt="Contratar" data-es="Contratar">Contratar</button>
-              <button class="btn btn-outline btn-sm" data-pt="Ver Perfil" data-es="Ver Perfil">Ver Perfil</button>
+              <button class="btn btn-outline btn-sm" onclick="openFreelancerProfile('tatiane-carvalho')">Ver Perfil</button>
             </div>
           </div>
 
@@ -8055,6 +8171,88 @@ section { padding: 64px 0; }
         N&uacute;mero de protocolo gerado ap&oacute;s envio &nbsp;&middot;&nbsp; Acompanhe pelo e-mail cadastrado
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: PERFIL DO FREELANCER (CV)
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-fl-profile" onclick="if(event.target===this)closeModal('fl-profile')">
+  <div class="modal" style="max-width:780px;padding:0;overflow:hidden;display:flex;flex-direction:column;max-height:90vh;">
+
+    <!-- Hero do perfil -->
+    <div class="fl-profile-hero">
+      <div class="fl-profile-avatar" id="flp-avatar">F</div>
+      <div class="fl-profile-info">
+        <div class="fl-profile-name">
+          <span id="flp-name">Freelancer</span>
+          <span style="font-size:18px;" id="flp-verified-icon"></span>
+        </div>
+        <div class="fl-profile-title" id="flp-title">Profissional</div>
+        <div class="fl-badge-row" id="flp-badges"></div>
+        <div class="fl-profile-stars">
+          <span class="fl-stars-ico" id="flp-stars">★★★★★</span>
+          <span class="fl-stars-val" id="flp-rating">5,0</span>
+          <span class="fl-stars-count" id="flp-reviews">(0 avalia&ccedil;&otilde;es)</span>
+        </div>
+        <div class="fl-profile-stats" id="flp-stats"></div>
+      </div>
+      <div class="fl-profile-actions">
+        <button class="modal-close" style="color:#94a3b8;" onclick="closeModal('fl-profile')">&#x2715;</button>
+        <button class="fl-report-btn" onclick="showToast('Denúncia registrada. Nossa equipe irá analisar.','info')">&#9888; Denunciar</button>
+      </div>
+    </div>
+
+    <!-- Badges de conquista -->
+    <div class="fl-achievements" id="flp-achievements"></div>
+
+    <!-- Corpo scrollável -->
+    <div class="fl-profile-body">
+
+      <!-- Sobre mim -->
+      <div class="fl-profile-section">
+        <div class="fl-section-title"><span>&#128100;</span> Sobre mim</div>
+        <div class="fl-section-body" id="flp-about"></div>
+      </div>
+
+      <!-- Resumo profissional -->
+      <div class="fl-profile-section" id="flp-experience-section">
+        <div class="fl-section-title"><span>&#128188;</span> Resumo da Experi&ecirc;ncia Profissional</div>
+        <div class="fl-section-body" id="flp-experience"></div>
+      </div>
+
+      <!-- Especialidades -->
+      <div class="fl-profile-section">
+        <div class="fl-section-title"><span>&#127919;</span> Especialidades &amp; Habilidades</div>
+        <div class="fl-skills-cloud" id="flp-skills"></div>
+      </div>
+
+      <!-- Portfólio -->
+      <div class="fl-profile-section" id="flp-portfolio-section">
+        <div class="fl-section-title"><span>&#128196;</span> Portf&oacute;lio</div>
+        <div class="fl-portfolio-grid" id="flp-portfolio"></div>
+      </div>
+
+      <!-- Avaliações -->
+      <div class="fl-profile-section">
+        <div class="fl-section-title"><span>&#11088;</span> Avalia&ccedil;&otilde;es <span style="font-size:12px;color:var(--text-4);font-weight:400;" id="flp-rating-summary"></span></div>
+        <div id="flp-reviews-list"></div>
+      </div>
+
+    </div>
+
+    <!-- Footer com taxa e botão contratar -->
+    <div class="fl-profile-footer">
+      <div>
+        <div class="fl-rate-display">R$ <span id="flp-rate">0</span><small style="font-size:13px;font-weight:400;color:var(--text-3);">/hora</small></div>
+        <div class="fl-rate-label">Valor por hora &nbsp;&#183;&nbsp; <span id="flp-location">Brasil</span></div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:10px;">
+        <button class="btn btn-outline" onclick="openChatModal({projectId:'direct',projectTitle:'Chat direto',withName:document.getElementById('flp-name').textContent,myRole:'client'});closeModal('fl-profile')">&#128172; Mensagem</button>
+        <button class="btn btn-primary btn-lg" id="flp-hire-btn">&#128274; Contratar</button>
+      </div>
+    </div>
+
   </div>
 </div>
 <!-- MODAL: ADMIN LOGIN -->
