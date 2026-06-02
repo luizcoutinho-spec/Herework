@@ -3668,6 +3668,68 @@ section { padding: 64px 0; }
 }
 .fl-rate-display { font-size: 22px; font-weight: 900; color: var(--text); }
 .fl-rate-label   { font-size: 11px; color: var(--text-4); margin-top: 1px; }
+/* ═══════════════════════════════════════
+   FAQ CARDS — Horizontal Scrollable
+═══════════════════════════════════════ */
+.faq-cards-wrap {
+  background: #1a1a2e; border-radius: var(--radius-lg);
+  padding: 0; overflow: hidden; margin: 28px 0;
+}
+.faq-cards-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 22px; cursor: pointer; user-select: none;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  transition: background var(--transition);
+}
+.faq-cards-header:hover { background: rgba(255,255,255,.04); }
+.faq-cards-header-title {
+  font-size: 15px; font-weight: 700; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+}
+.faq-cards-toggle { color: #94a3b8; font-size: 18px; transition: transform .3s; }
+.faq-cards-toggle.open { transform: rotate(180deg); }
+
+.faq-cards-body { display: none; }
+.faq-cards-body.show { display: block; }
+
+/* Cards row */
+.faq-cards-row {
+  display: flex; gap: 0; overflow-x: auto; padding: 0;
+  scrollbar-width: none;
+}
+.faq-cards-row::-webkit-scrollbar { display: none; }
+.faq-card-btn {
+  flex: 0 0 160px; min-height: 90px;
+  background: rgba(255,255,255,.05); border: none; border-right: 1px solid rgba(255,255,255,.08);
+  padding: 14px 14px 12px; cursor: pointer; text-align: left;
+  transition: background var(--transition); color: #e2e8f0;
+  display: flex; flex-direction: column; justify-content: flex-start;
+}
+.faq-card-btn:last-child { border-right: none; }
+.faq-card-btn:hover { background: rgba(255,255,255,.1); }
+.faq-card-btn.active { background: var(--green); }
+.faq-card-prefix {
+  font-size: 11px; font-weight: 800; color: rgba(255,255,255,.5);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px;
+}
+.faq-card-btn.active .faq-card-prefix { color: rgba(255,255,255,.7); }
+.faq-card-question {
+  font-size: 12px; font-weight: 600; color: #e2e8f0; line-height: 1.4;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.faq-card-btn.active .faq-card-question { color: #fff; }
+
+/* Answer area */
+.faq-cards-answer {
+  padding: 18px 22px; background: rgba(255,255,255,.04);
+  border-top: 1px solid rgba(255,255,255,.08); display: none;
+}
+.faq-cards-answer.show { display: block; }
+.faq-answer-prefix {
+  font-size: 11px; font-weight: 800; color: var(--green);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+}
+.faq-answer-text { font-size: 14px; color: #cbd5e1; line-height: 1.7; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -5873,51 +5935,47 @@ section { padding: 64px 0; }
         </div>
       </div>
 
-      <!-- FAQ -->
-      <div class="hiw-faq">
-        <div class="faq-title" data-pt="Perguntas Frequentes" data-es="Preguntas Frecuentes">Perguntas Frequentes</div>
-
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Quanto custa publicar um projeto?" data-es="¿Cuánto cuesta publicar un proyecto?">Quanto custa publicar um projeto?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Publicar projetos na HereWork é 100% gratuito. Você só paga uma comissão quando contratar um freelancer e o projeto for concluído com sucesso. A taxa de comissão varia conforme o plano escolhido." data-es="Publicar proyectos en HereWork es 100% gratuito. Solo pagas una comisión cuando contratas un freelancer y el proyecto se completa con éxito. La tasa de comisión varía según el plan elegido.">Publicar projetos na HereWork é 100% gratuito. Você só paga uma comissão quando contratar um freelancer e o projeto for concluído com sucesso. A taxa de comissão varia conforme o plano escolhido.</div>
+      <!-- FAQ CARDS — Para Clientes -->
+      <div class="faq-cards-wrap" id="faq-cards-client">
+        <div class="faq-cards-header" onclick="toggleFaqCards('faq-cards-client')">
+          <div class="faq-cards-header-title">&#128172; Perguntas Frequentes</div>
+          <span class="faq-cards-toggle open" id="faq-cards-client-arrow">&#8964;</span>
         </div>
-
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Como funciona o sistema de Garantia?" data-es="¿Cómo funciona el sistema de Garantia?">Como funciona o sistema de Garantia?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de garantia. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional. Isso protege tanto o cliente quanto o freelancer." data-es="Cuando contratas a un freelancer, el valor acordado se deposita en nuestra cuenta de escrow. El dinero queda retenido de forma segura hasta que apruebes el trabajo entregado. Solo entonces se libera el pago al profesional.">Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de garantia. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional.</div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="O que acontece se eu não gostar do trabalho entregue?" data-es="¿Qué pasa si no me gusta el trabajo entregado?">O que acontece se eu não gostar do trabalho entregue?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Você pode solicitar revisões conforme combinado no contrato. Se o trabalho não atender ao escopo original, você pode abrir uma disputa. Nossa equipe irá analisar o caso e mediar uma solução justa para ambas as partes. O pagamento só é liberado com sua aprovação." data-es="Puedes solicitar revisiones según lo acordado en el contrato. Si el trabajo no cumple con el alcance original, puedes abrir una disputa. Nuestro equipo analizará el caso y mediará una solución justa.">Você pode solicitar revisões conforme combinado no contrato. Se o trabalho não atender ao escopo original, você pode abrir uma disputa. Nossa equipe irá analisar o caso e mediar uma solução justa para ambas as partes.</div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Quais formas de pagamento são aceitas?" data-es="¿Qué formas de pago se aceptan?">Quais formas de pagamento são aceitas?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Aceitamos Pix, cartão de crédito (Visa, Mastercard, Elo), boleto bancário. Para clientes internacionais, também aceitamos pagamento via cartão internacional ." data-es="Aceptamos Pix, tarjeta de crédito (Visa, Mastercard, Elo), boleto bancario y transferencia bancaria. Para clientes internacionales, también aceptamos tarjeta internacional.">Aceitamos Pix, cartão de crédito (Visa, Mastercard, Elo), boleto bancário. Para clientes internacionais, também aceitamos pagamento via cartão internacional .</div>
-        </div>
-
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Posso contratar o mesmo freelancer em projetos futuros?" data-es="¿Puedo contratar al mismo freelancer en proyectos futuros?">Posso contratar o mesmo freelancer em projetos futuros?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Sim! Você pode salvar freelancers como favoritos e contratá-los diretamente em novos projetos, sem necessidade de publicar uma nova vaga. Basta acessar seu painel, ir em 'Meus Freelancers' e enviar um convite." data-es="¡Sí! Puedes guardar freelancers como favoritos y contratarlos directamente en nuevos proyectos, sin necesidad de publicar una nueva vacante.">Sim! Você pode salvar freelancers como favoritos e contratá-los diretamente em novos projetos, sem necessidade de publicar uma nova vaga. Basta acessar seu painel, ir em 'Meus Freelancers' e enviar um convite.</div>
+        <div class="faq-cards-body show" id="faq-cards-client-body">
+          <div class="faq-cards-row">
+            <button class="faq-card-btn active" onclick="selectFaqCard(this,'faq-ans-client',0)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Publicar um projeto custa alguma coisa?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-client',1)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Como funciona o pagamento em Garantia?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-client',2)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">E se eu n&atilde;o gostar do trabalho entregue?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-client',3)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Quais formas de pagamento s&atilde;o aceitas?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-client',4)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Posso contratar o mesmo freelancer novamente?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-client',5)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Pessoa F&iacute;sica pode contratar?</div>
+            </button>
+          </div>
+          <div class="faq-cards-answer show" id="faq-ans-client">
+            <div class="faq-answer-prefix">R.</div>
+            <div class="faq-answer-text" id="faq-ans-client-text">Publicar projetos &eacute; 100% gratuito. Voc&ecirc; s&oacute; paga uma comiss&atilde;o de servi&ccedil;o quando o projeto for conclu&iacute;do com sucesso. A taxa varia conforme o plano escolhido (8% no gratuito, at&eacute; 4% no Premium).</div>
+          </div>
         </div>
       </div>
-    </div><!-- /hiw-companies -->
+
+      </div><!-- /hiw-companies -->
 
     <!-- TAB: Freelancers -->
     <div class="hiw-tab-content" id="hiw-freelancers-page">
@@ -5960,29 +6018,46 @@ section { padding: 64px 0; }
         </div>
       </div>
 
-      <div class="hiw-faq">
-        <div class="faq-title" data-pt="Perguntas Frequentes para Freelancers" data-es="Preguntas Frecuentes para Freelancers">Perguntas Frequentes para Freelancers</div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Quanto custa ser freelancer na HereWork?" data-es="¿Cuánto cuesta ser freelancer en HereWork?">Quanto custa ser freelancer na HereWork?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="O cadastro e uso básico da plataforma são gratuitos. Quando você fecha um projeto, a HereWork cobra uma comissão de 10% a 20% sobre o valor recebido (dependendo do seu plano). Planos premium reduzem essa taxa e oferecem benefícios adicionais." data-es="El registro y uso básico de la plataforma son gratuitos. Cuando cierras un proyecto, HereWork cobra una comisión del 10% al 20% sobre el valor recibido (dependiendo de tu plan). Los planes premium reducen esta tasa.">O cadastro e uso básico da plataforma são gratuitos. Quando você fecha um projeto, a HereWork cobra uma comissão de 10% a 20% sobre o valor recibido (dependendo do seu plano).</div>
+      <!-- FAQ CARDS — Para Freelancers -->
+      <div class="faq-cards-wrap" id="faq-cards-fl">
+        <div class="faq-cards-header" onclick="toggleFaqCards('faq-cards-fl')">
+          <div class="faq-cards-header-title">&#128172; Perguntas Frequentes</div>
+          <span class="faq-cards-toggle open" id="faq-cards-fl-arrow">&#8964;</span>
         </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Como e quando recebo meu pagamento?" data-es="¿Cómo y cuándo recibo mi pago?">Como e quando recebo meu pagamento?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="Após o cliente aprovar a entrega, o valor é creditado automaticamente na sua carteira HereWork. Você pode solicitar saque a qualquer momento. Saques via Pix são processados em minutos." data-es="Tras la aprobación del cliente, el valor se acredita automáticamente en tu billetera HereWork. Puedes solicitar retiro en cualquier momento. Los retiros por Pix se procesan en minutos.">Após o cliente aprovar a entrega, o valor é creditado automaticamente na sua carteira HereWork. Você pode solicitar saque a qualquer momento. Saques via Pix são processados em minutos.</div>
+        <div class="faq-cards-body show" id="faq-cards-fl-body">
+          <div class="faq-cards-row">
+            <button class="faq-card-btn active" onclick="selectFaqCard(this,'faq-ans-fl',0)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Quanto custa ser freelancer na HereWork?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-fl',1)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Como e quando recebo meu pagamento?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-fl',2)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Como me tornar um Top Freelancer?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-fl',3)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Como encontrar projetos para o meu perfil?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-fl',4)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">Preciso de CNPJ para trabalhar?</div>
+            </button>
+            <button class="faq-card-btn" onclick="selectFaqCard(this,'faq-ans-fl',5)">
+              <div class="faq-card-prefix">P.</div>
+              <div class="faq-card-question">O que fazer se o cliente n&atilde;o aprovar?</div>
+            </button>
+          </div>
+          <div class="faq-cards-answer show" id="faq-ans-fl">
+            <div class="faq-answer-prefix">R.</div>
+            <div class="faq-answer-text" id="faq-ans-fl-text">O cadastro &eacute; 100% gratuito. A HereWork cobra uma comiss&atilde;o apenas quando voc&ecirc; fecha um projeto &mdash; 8% no plano Gratuito, at&eacute; 4% no Profissional. Sem mensalidade obrigat&oacute;ria.</div>
+          </div>
         </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Como me tornar um Top Freelancer?" data-es="¿Cómo convertirme en Top Freelancer?">Como me tornar um Top Freelancer?</span>
-            <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
-          </button>
-          <div class="faq-answer" data-pt="O badge 'Top Freelancer' é concedido automaticamente pela plataforma com base em: manutenção de avaliação média acima de 4,7 estrelas, mínimo de 20 projetos concluídos, taxa de resposta acima de 90% e perfil completo com portfólio atualizado." data-es="El badge 'Top Freelancer' es concedido automáticamente por la plataforma en base a: calificación promedio superior a 4,7 estrellas, mínimo de 20 proyectos completados, tasa de respuesta superior al 90% y perfil completo con portafolio actualizado.">O badge 'Top Freelancer' é concedido automaticamente pela plataforma com base em: manutenção de avaliação média acima de 4,7 estrelas, mínimo de 20 projetos concluídos, taxa de resposta acima de 90% e perfil completo com portfólio atualizado.</div>
-        </div>
+      </div>
+
       </div>
     </div><!-- /hiw-freelancers-page -->
 
@@ -14938,6 +15013,59 @@ window.openDashboard = function() {
   }, 300);
 };
 
+
+/* ═══════════════════════════════════════════════════════════
+   FAQ CARDS — Interactive Q&A
+═══════════════════════════════════════════════════════════ */
+
+var _faqAnswers = {
+  'faq-ans-client': [
+    'Publicar projetos é 100% gratuito. Você só paga uma comissão de serviço quando o projeto for concluído com sucesso. A taxa varia conforme o plano: 8% no Gratuito, até 4% no Profissional.',
+    'Quando você contrata um freelancer, o valor acordado vai para nossa conta de Garantia. O dinheiro fica retido até você aprovar a entrega. Só então o pagamento é liberado ao profissional — protegendo ambos os lados.',
+    'Você pode solicitar quantas revisões foram combinadas no contrato. Se o trabalho não atender ao escopo original, abra uma disputa. Nossa equipe analisa o caso e media uma solução justa. O pagamento só é liberado com sua aprovação.',
+    'Aceitamos cartão de crédito (Visa, Mastercard, Elo, Amex, Hipercard) parcelado em até 12x. O pagamento vai direto para o sistema de Garantia — só liberado após sua aprovação da entrega.',
+    'Sim! Você pode contratar o mesmo freelancer diretamente em novos projetos sem publicar uma nova vaga. Acesse o histórico de contratos no seu painel e envie um convite direto.',
+    'Sim! Qualquer pessoa física ou jurídica pode publicar projetos e contratar freelancers na HereWork. Não é preciso ter CNPJ — basta criar uma conta gratuita.'
+  ],
+  'faq-ans-fl': [
+    'O cadastro é 100% gratuito. A HereWork cobra uma comissão apenas quando você fecha um projeto — 8% no plano Gratuito, até 4% no Profissional. Sem mensalidade obrigatória para começar.',
+    'Após o cliente aprovar a entrega, o valor é creditado automaticamente na sua carteira HereWork. Saque a qualquer momento via Pix — processado em minutos. Não há diferença de prazo por plano.',
+    'O badge Top Freelancer é concedido automaticamente com base em: avaliação média ≥ 4,7 estrelas, mínimo de 20 projetos concluídos, taxa de resposta ≥ 90% e perfil completo. Sem candidatura necessária.',
+    'Complete seu perfil com foto, bio, portfólio e habilidades. Ative as notificações de projetos por e-mail na aba Configurações para receber alertas de projetos que combinam com seu perfil assim que forem publicados.',
+    'Não! Qualquer pessoa física pode trabalhar como freelancer na HereWork. Você não precisa de CNPJ ou MEI para começar. Basta criar sua conta, montar seu perfil e enviar propostas.',
+    'Se o cliente não aprovar e não responder em 7 dias, o pagamento é liberado automaticamente para você. Se houver disputa, nossa equipe media o caso com base nos termos do contrato e nas evidências apresentadas.'
+  ]
+};
+
+function selectFaqCard(btn, answerId, index) {
+  /* Update active card */
+  var row = btn.closest('.faq-cards-row');
+  if(row) row.querySelectorAll('.faq-card-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+
+  /* Update answer */
+  var ansEl  = document.getElementById(answerId);
+  var textEl = document.getElementById(answerId + '-text');
+  var answers = _faqAnswers[answerId] || [];
+
+  if(textEl && answers[index] !== undefined) {
+    textEl.textContent = answers[index];
+  }
+  if(ansEl) {
+    ansEl.classList.add('show');
+    ansEl.style.display = 'block';
+  }
+}
+
+function toggleFaqCards(wrapId) {
+  var body   = document.getElementById(wrapId + '-body');
+  var arrow  = document.getElementById(wrapId + '-arrow');
+  if(!body) return;
+  var isOpen = body.classList.contains('show');
+  body.classList.toggle('show', !isOpen);
+  body.style.display = isOpen ? 'none' : 'block';
+  if(arrow) arrow.classList.toggle('open', !isOpen);
+}
 </script>
 </body>
 </html>
