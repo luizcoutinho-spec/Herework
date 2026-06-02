@@ -2350,7 +2350,7 @@ section { padding: 64px 0; }
 }
 .pdf-file-remove:hover { background: #fee2e2; color: #ef4444; }
 /* ═══════════════════════════════════════
-   CONTRATO + ESCROW — MODAL
+   CONTRATO + GARANTIA — MODAL
 ═══════════════════════════════════════ */
 #overlay-contract .modal { max-width:560px; padding:0; overflow:hidden; }
 
@@ -2418,7 +2418,7 @@ section { padding: 64px 0; }
   font-size:12px; color:#166534; margin-bottom:16px; line-height:1.6;
 }
 
-/* Escrow banner */
+/* Garantia banner */
 .escrow-banner {
   background:linear-gradient(135deg,#1a1a2e,#0f3460);
   border-radius:var(--radius-lg); padding:16px 18px;
@@ -2575,7 +2575,7 @@ section { padding: 64px 0; }
 .status-sent      { background: #fff7ed; color: #c2410c; }
 .status-rejected  { background: #fee2e2; color: #991b1b; }
 
-/* Escrow progress bar */
+/* Garantia progress bar */
 .escrow-progress {
   background: var(--bg); border: 1px solid var(--border-2);
   border-radius: var(--radius); padding: 10px 14px; margin-bottom: 12px;
@@ -3801,8 +3801,8 @@ section { padding: 64px 0; }
 
         <div class="testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p class="testi-text" data-pt='"Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de escrow me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."' data-es='"Encontré al desarrollador ideal en menos de 24 horas. El sistema de escrow me dio total seguridad para pagar. Sin duda lo usaré siempre."'>
-            "Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de escrow me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."
+          <p class="testi-text" data-pt='"Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de Garantia me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."' data-es='"Encontré al desarrollador ideal en menos de 24 horas. El sistema de Garantia me dio total seguridad para pagar. Sin duda lo usaré siempre."'>
+            "Encontrei o desenvolvedor ideal em menos de 24 horas. O sistema de Garantia me deu total segurança para fazer o pagamento. Com certeza vou usar sempre."
           </p>
           <div class="testi-author">
             <div class="testi-avatar" style="background:linear-gradient(135deg,#2E7D32,#66BB6A);">FS</div>
@@ -3871,9 +3871,9 @@ section { padding: 64px 0; }
           <span class="trust-icon">🔒</span>
           <div class="trust-title" data-pt="Pagamento Seguro" data-es="Pago Seguro">Pagamento Seguro</div>
           <div class="trust-desc"
-            data-pt="Seu pagamento fica protegido em escrow e só é liberado quando você aprovar a entrega do projeto."
-            data-es="Tu pago queda protegido en escrow y solo se libera cuando apruebas la entrega del proyecto.">
-            Seu pagamento fica protegido em escrow e só é liberado quando você aprovar a entrega do projeto.
+            data-pt="Seu pagamento fica protegido em garantia e só é liberado quando você aprovar a entrega do projeto."
+            data-es="Tu pago queda protegido en garantía y solo se libera cuando apruebas la entrega del proyecto.">
+            Seu pagamento fica protegido em garantia e só é liberado quando você aprovar a entrega do projeto.
           </div>
         </div>
         <div class="trust-card">
@@ -4058,7 +4058,7 @@ section { padding: 64px 0; }
         </div>
         <div class="dash-stat">
           <div class="dash-stat-val" id="ds-escrow">R$ 0</div>
-          <div class="dash-stat-lbl">Em escrow</div>
+          <div class="dash-stat-lbl">Em Garantia</div>
         </div>
         <div class="dash-stat">
           <div class="dash-stat-val" id="ds-done">0</div>
@@ -4187,7 +4187,7 @@ section { padding: 64px 0; }
           <div class="plan-feature"><span class="plan-feature-check">&#10003;</span> Publicar até 3 projetos por mês</div>
           <div class="plan-feature"><span class="plan-feature-check">&#10003;</span> Enviar até 5 propostas por mês</div>
           <div class="plan-feature"><span class="plan-feature-check">&#10003;</span> Chat integrado</div>
-          <div class="plan-feature"><span class="plan-feature-check">&#10003;</span> Escrow básico</div>
+          <div class="plan-feature"><span class="plan-feature-check">&#10003;</span> Garantia básica</div>
         </div>
       </div>
 
@@ -4195,7 +4195,7 @@ section { padding: 64px 0; }
       <div class="plan-upgrade-card">
         <div style="font-size:28px;margin-bottom:8px;">&#128640;</div>
         <div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;">Desbloqueie todo o potencial</div>
-        <div style="font-size:13px;color:var(--text-3);margin-bottom:18px;">Acesse projetos ilimitados, propostas prioritárias e escrow com milestones.</div>
+        <div style="font-size:13px;color:var(--text-3);margin-bottom:18px;">Acesse projetos ilimitados, propostas prioritárias e garantia com etapas.</div>
         <button class="btn btn-primary" onclick="showPage('pricing')">
           &#11088; Ver Todos os Planos
         </button>
@@ -4231,7 +4231,7 @@ section { padding: 64px 0; }
 
       <div id="dcontracts-client">
         <div class="dash-section">
-          <div class="dash-section-title"><span>&#128274;</span> Contratos Ativos &mdash; Pagamento em Escrow</div>
+          <div class="dash-section-title"><span>&#128274;</span> Contratos Ativos &mdash; Pagamento em Garantia</div>
           <div id="dash-client-active"></div>
         </div>
         <div class="dash-section">
@@ -4265,7 +4265,7 @@ section { padding: 64px 0; }
         </div>
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
           <div style="font-size:22px;font-weight:800;color:#f97316;" id="pay-total-escrow">R$ 0</div>
-          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Em Escrow</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Em Garantia</div>
         </div>
         <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
           <div style="font-size:22px;font-weight:800;color:var(--green);" id="pay-total-received">R$ 0</div>
@@ -4288,10 +4288,10 @@ section { padding: 64px 0; }
         <div class="profile-card" style="padding:0;overflow:hidden;">
           <div style="padding:14px 18px;border-bottom:1px solid var(--border-2);display:flex;align-items:center;justify-content:space-between;">
             <div style="font-size:13px;font-weight:700;color:var(--text);">Pagamentos Realizados</div>
-            <div style="font-size:11px;color:var(--text-4);">Valores pagos a freelancers via Escrow</div>
+            <div style="font-size:11px;color:var(--text-4);">Valores pagos a freelancers via Garantia</div>
           </div>
           <div style="padding:0 18px;">
-            <!-- Escrow ativo -->
+            <!-- Garantia ativo -->
             <div class="payment-item">
               <div class="payment-icon" style="background:#fff7ed;">&#128274;</div>
               <div class="payment-info">
@@ -4300,7 +4300,7 @@ section { padding: 64px 0; }
               </div>
               <div>
                 <div class="payment-amount pending">R$ 4.800</div>
-                <div style="font-size:10px;color:#f97316;text-align:right;margin-top:2px;">Em escrow</div>
+                <div style="font-size:10px;color:#f97316;text-align:right;margin-top:2px;">Em Garantia</div>
               </div>
             </div>
             <!-- Liberado -->
@@ -5248,7 +5248,7 @@ section { padding: 64px 0; }
           <div class="hiw-step-num-big">4</div>
           <div class="hiw-step-icon-big">🤝</div>
           <div class="hiw-step-title-big" data-pt="Contrate com segurança" data-es="Contrata con seguridad">Contrate com segurança</div>
-          <div class="hiw-step-desc-big" data-pt="Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de escrow para proteger seu pagamento." data-es="Conversa con los candidatos, negocia los términos y contrata al mejor. Firma el contrato digital y deposita en el sistema de escrow para proteger tu pago.">Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de escrow para proteger seu pagamento.</div>
+          <div class="hiw-step-desc-big" data-pt="Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de Garantia para proteger seu pagamento." data-es="Conversa con los candidatos, negocia los términos y contrata al mejor. Firma el contrato digital y deposita en el sistema de Garantia para proteger tu pago.">Converse com os candidatos, negocie os termos e contrate o melhor. Assine o contrato digital e faça o depósito no sistema de Garantia para proteger seu pagamento.</div>
         </div>
         <div class="hiw-step-full">
           <div class="hiw-step-num-big">5</div>
@@ -5268,7 +5268,7 @@ section { padding: 64px 0; }
       <div style="background:var(--green-light);border:1.5px solid rgba(46,125,50,0.2);border-radius:var(--radius-lg);padding:36px;display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-bottom:56px;">
         <div style="text-align:center;">
           <div style="font-size:36px;margin-bottom:10px;">🔒</div>
-          <div style="font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:6px;" data-pt="Escrow Seguro" data-es="Escrow Seguro">Escrow Seguro</div>
+          <div style="font-size:15px;font-weight:800;color:var(--green-dark);margin-bottom:6px;" data-pt="Garantia Segura" data-es="Garantia Segura">Garantia Segura</div>
           <div style="font-size:13px;color:var(--text-2);" data-pt="Seu dinheiro só é liberado após aprovação do trabalho entregue." data-es="Tu dinero solo se libera tras la aprobación del trabajo entregado.">Seu dinheiro só é liberado após aprovação do trabalho entregue.</div>
         </div>
         <div style="text-align:center;">
@@ -5297,10 +5297,10 @@ section { padding: 64px 0; }
 
         <div class="faq-item">
           <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-pt="Como funciona o sistema de escrow?" data-es="¿Cómo funciona el sistema de escrow?">Como funciona o sistema de escrow?</span>
+            <span data-pt="Como funciona o sistema de Garantia?" data-es="¿Cómo funciona el sistema de Garantia?">Como funciona o sistema de Garantia?</span>
             <svg fill="none" stroke-width="2.5" stroke="currentColor" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
           </button>
-          <div class="faq-answer" data-pt="Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de escrow. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional. Isso protege tanto o cliente quanto o freelancer." data-es="Cuando contratas a un freelancer, el valor acordado se deposita en nuestra cuenta de escrow. El dinero queda retenido de forma segura hasta que apruebes el trabajo entregado. Solo entonces se libera el pago al profesional.">Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de escrow. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional.</div>
+          <div class="faq-answer" data-pt="Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de garantia. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional. Isso protege tanto o cliente quanto o freelancer." data-es="Cuando contratas a un freelancer, el valor acordado se deposita en nuestra cuenta de escrow. El dinero queda retenido de forma segura hasta que apruebes el trabajo entregado. Solo entonces se libera el pago al profesional.">Quando você contrata um freelancer, o valor acordado é depositado em nossa conta de garantia. O dinheiro fica retido com segurança até que você aprove o trabalho entregue. Só então o pagamento é liberado ao profissional.</div>
         </div>
 
         <div class="faq-item">
@@ -5354,7 +5354,7 @@ section { padding: 64px 0; }
           <div class="hiw-step-num-big">4</div>
           <div class="hiw-step-icon-big">💬</div>
           <div class="hiw-step-title-big" data-pt="Negocie e seja contratado" data-es="Negocia y sé contratado">Negocie e seja contratado</div>
-          <div class="hiw-step-desc-big" data-pt="Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato. O pagamento fica em escrow garantindo seu recebimento." data-es="Conversa con el cliente por el chat integrado, aclara dudas, ajusta el alcance si es necesario y cierra el contrato. El pago queda en escrow garantizando tu cobro.">Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato.</div>
+          <div class="hiw-step-desc-big" data-pt="Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato. O pagamento fica em garantia garantindo seu recebimento." data-es="Conversa con el cliente por el chat integrado, aclara dudas, ajusta el alcance si es necesario y cierra el contrato. El pago queda en garantía garantizando tu cobro.">Converse com o cliente pelo chat integrado, tire dúvidas, ajuste o escopo se necessário e feche o contrato.</div>
         </div>
         <div class="hiw-step-full">
           <div class="hiw-step-num-big">5</div>
@@ -5446,7 +5446,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Publicação de até 3 projetos/mês" data-es="Publicación de hasta 3 proyectos/mes">Publicação de até 3 projetos/mês</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Acesso à base de freelancers" data-es="Acceso a la base de freelancers">Acesso à base de freelancers</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Chat com candidatos" data-es="Chat con candidatos">Chat com candidatos</span></li>
-              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Escrow básico" data-es="Escrow básico">Escrow básico</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Garantia básica" data-es="Garantia básica">Garantia básica</span></li>
               <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
               <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Convites diretos a freelancers" data-es="Invitaciones directas a freelancers">Convites diretos a freelancers</span></li>
               <li class="pricing-feature"><span class="pricing-cross">✗</span><span style="color:var(--text-3);" data-pt="Relatórios avançados" data-es="Reportes avanzados">Relatórios avançados</span></li>
@@ -5466,7 +5466,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Projetos ilimitados" data-es="Proyectos ilimitados">Projetos ilimitados</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Convites diretos a freelancers" data-es="Invitaciones directas a freelancers">Convites diretos a freelancers</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário (resposta em 4h)" data-es="Soporte prioritario (respuesta en 4h)">Suporte prioritário (resposta em 4h)</span></li>
-              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Escrow com milestones" data-es="Escrow con milestones">Escrow com milestones</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Garantia com etapas" data-es="Garantía con etapas">Garantia com etapas</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Relatórios e métricas avançadas" data-es="Reportes y métricas avanzadas">Relatórios e métricas avançadas</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gestão de equipes" data-es="Gestión de equipos">Gestão de equipes</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Contratos digitais personalizados" data-es="Contratos digitales personalizados">Contratos digitais personalizados</span></li>
@@ -5588,13 +5588,13 @@ section { padding: 64px 0; }
             </tr>
             <tr><td class="compare-section-row" colspan="4" data-pt="Pagamentos & Segurança" data-es="Pagamentos & Seguridad">Pagamentos & Segurança</td></tr>
             <tr>
-              <td data-pt="Escrow seguro" data-es="Escrow seguro">Escrow seguro</td>
+              <td data-pt="Garantia Segura" data-es="Garantia Segura">Garantia Segura</td>
               <td><span class="compare-yes">✓</span></td>
               <td><span class="compare-yes">✓</span></td>
               <td><span class="compare-yes">✓</span></td>
             </tr>
             <tr>
-              <td data-pt="Escrow com milestones" data-es="Escrow con milestones">Escrow com milestones</td>
+              <td data-pt="Garantia com etapas" data-es="Garantía con etapas">Garantia com etapas</td>
               <td><span class="compare-no">✗</span></td>
               <td><span class="compare-yes">✓</span></td>
               <td><span class="compare-yes">✓</span></td>
@@ -5737,7 +5737,7 @@ section { padding: 64px 0; }
     </div>
 
     <!-- Monitor de Contratos -->
-    <div class="admin-section-title"><span>&#128274;</span> Monitor de Contratos &amp; Escrow</div>
+    <div class="admin-section-title"><span>&#128274;</span> Monitor de Contratos &amp; Garantia</div>
 
     <!-- Tabs -->
     <div class="adm-contracts-tabs">
@@ -5763,7 +5763,7 @@ section { padding: 64px 0; }
         <span>Projeto</span>
         <span>&#127968; Cliente</span>
         <span>&#129489;&#8205;&#128187; Freelancer</span>
-        <span>&#128274; Escrow</span>
+        <span>&#128274; Garantia</span>
         <span>Prazo</span>
         <span>A&ccedil;&atilde;o</span>
       </div>
@@ -5903,7 +5903,7 @@ section { padding: 64px 0; }
       <div class="admin-stat-card blue">
         <div class="admin-stat-icon">⏳</div>
         <div class="admin-stat-val">R$ 1,1M</div>
-        <div class="admin-stat-label">Em escrow (aguardando)</div>
+        <div class="admin-stat-label">Em Garantia (aguardando)</div>
         <span class="admin-stat-delta delta-up">+3,2% ↑</span>
       </div>
       <div class="admin-stat-card purple">
@@ -6332,7 +6332,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-proj-pdf"></div>
       </div>
       <button class="btn btn-primary btn-block btn-lg" onclick="submitProject()" data-pt="🚀 Publicar Projeto Agora" data-es="🚀 Publicar Proyecto Ahora">🚀 Publicar Projeto Agora</button>
-      <div class="modal-switch-link" style="font-size:12px;color:var(--text-3);margin-top:10px;" data-pt="Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow" data-es="Publicación gratuita · Recibe propuestas en minutos · Pago seguro vía escrow">Publicação gratuita · Receba propostas em minutos · Pagamento seguro via escrow</div>
+      <div class="modal-switch-link" style="font-size:12px;color:var(--text-3);margin-top:10px;" data-pt="Publicação gratuita · Receba propostas em minutos · Pagamento seguro via Garantia" data-es="Publicación gratuita · Recibe propuestas en minutos · Pago seguro vía escrow">Publicação gratuita · Receba propostas em minutos · Pagamento seguro via Garantia</div>
     </div>
   </div>
 </div>
@@ -6660,7 +6660,7 @@ section { padding: 64px 0; }
 </div>
 
 <!-- ═══════════════════════════════════════
-     MODAL: CONTRATAR + ESCROW (4 ETAPAS)
+     MODAL: CONTRATAR + GARANTIA (4 ETAPAS)
 ═══════════════════════════════════════ -->
 <div class="overlay" id="overlay-contract" onclick="if(event.target===this)closeModal('contract')">
   <div class="modal" style="max-width:560px;padding:0;overflow:hidden;">
@@ -6726,19 +6726,19 @@ section { padding: 64px 0; }
             <span class="contract-item-value" id="c-fee">R$ 0</span>
           </div>
           <div class="contract-item" style="border-color:var(--green);background:#f0fdf4;">
-            <span class="contract-item-label" style="color:#166534;font-weight:600;">&#128176; Total a depositar em escrow</span>
+            <span class="contract-item-label" style="color:#166534;font-weight:600;">&#128176; Total a depositar em garantia</span>
             <span class="contract-item-value" style="color:var(--green);font-size:16px;" id="c-total">R$ 0</span>
           </div>
         </div>
 
         <div class="contract-terms">
-          &#128274; <strong>Proteção Escrow HereWork:</strong> O pagamento ser&aacute; retido com seguran&ccedil;a em nossa plataforma e s&oacute; ser&aacute; liberado ao freelancer ap&oacute;s voc&ecirc; <strong>aprovar a entrega</strong>. Em caso de disputa, nossa equipe medeia o processo.
+          &#128274; <strong>Proteção Garantia HereWork:</strong> O pagamento ser&aacute; retido com seguran&ccedil;a em nossa plataforma e s&oacute; ser&aacute; liberado ao freelancer ap&oacute;s voc&ecirc; <strong>aprovar a entrega</strong>. Em caso de disputa, nossa equipe medeia o processo.
         </div>
 
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
           <input type="checkbox" id="contract-agree" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
           <label for="contract-agree" style="font-size:13px;color:var(--text-2);cursor:pointer;">
-            Li e aceito os <a onclick="openInfoPage('terms')" style="color:var(--green);">Termos de Uso</a> e a pol&iacute;tica de escrow da HereWork.
+            Li e aceito os <a onclick="openInfoPage('terms')" style="color:var(--green);">Termos de Uso</a> e a pol&iacute;tica de garantia da HereWork.
           </label>
         </div>
         <div class="form-error" id="err-contract-agree" style="margin-bottom:12px;"></div>
@@ -6748,12 +6748,12 @@ section { padding: 64px 0; }
         </button>
       </div>
 
-      <!-- ── ETAPA 2: PAGAMENTO ESCROW ── -->
+      <!-- ── ETAPA 2: PAGAMENTO GARANTIA ── -->
       <div class="contract-panel" id="cpanel-2">
         <div class="escrow-banner">
           <div class="escrow-banner-icon">&#128274;</div>
           <div class="escrow-banner-text">
-            <div class="title">Pagamento Protegido por Escrow</div>
+            <div class="title">Pagamento Protegido por Garantia</div>
             <div class="sub">Seu dinheiro fica retido com seguran&ccedil;a. S&oacute; &eacute; liberado ao freelancer quando voc&ecirc; aprovar a entrega.</div>
           </div>
         </div>
@@ -6826,7 +6826,7 @@ section { padding: 64px 0; }
               <div class="form-error" id="err-c-stripe-card"></div>
             </div>
             <button class="btn btn-primary btn-block" style="margin-top:16px;" id="c-card-btn" onclick="contractPayCard()">
-              &#128274; Depositar R$ <span id="c-card-total">0</span> em Escrow
+              &#128274; Depositar R$ <span id="c-card-total">0</span> em Garantia
             </button>
             <div class="stripe-powered" style="justify-content:center;margin-top:8px;">
               &#128274; Processado por <strong style="color:#635bff;">stripe</strong> &mdash; PCI DSS Level 1
@@ -6841,7 +6841,7 @@ section { padding: 64px 0; }
           <div class="contract-active-icon">&#128274;</div>
           <div style="font-size:18px;font-weight:800;color:var(--text);">Contrato Ativo!</div>
           <div style="font-size:13px;color:var(--text-3);margin-top:4px;">
-            R$ <strong id="c-escrow-display" style="color:var(--green);">0</strong> em escrow &mdash; aguardando entrega
+            R$ <strong id="c-escrow-display" style="color:var(--green);">0</strong> em garantia &mdash; aguardando entrega
           </div>
         </div>
         <div class="contract-timeline">
@@ -6855,7 +6855,7 @@ section { padding: 64px 0; }
           <div class="ct-step">
             <div class="ct-dot done">&#10003;</div>
             <div class="ct-info">
-              <div class="ct-title">Pagamento em escrow</div>
+              <div class="ct-title">Pagamento em Garantia</div>
               <div class="ct-sub">Valor retido com segurança</div>
             </div>
           </div>
@@ -6904,7 +6904,7 @@ section { padding: 64px 0; }
 
         <div class="approve-summary">
           <div class="amount">R$ <span id="c-release-amount">0</span></div>
-          <div class="label">&#128274; ser&aacute; liberado do escrow para <strong id="c-release-name">freelancer</strong></div>
+          <div class="label">&#128274; ser&aacute; liberado do garantia para <strong id="c-release-name">freelancer</strong></div>
         </div>
 
         <div style="margin-bottom:16px;">
@@ -6947,7 +6947,7 @@ section { padding: 64px 0; }
       <div class="delivery-header-icon">📤</div>
       <div class="delivery-header-info">
         <div class="title" id="delivery-proj-title">Enviar Entrega do Projeto</div>
-        <div class="sub">Para: <strong id="delivery-client-name" style="color:#fff;">Cliente</strong> &nbsp;·&nbsp; R$ <span id="delivery-value" style="color:#66BB6A;font-weight:700;">0</span> em escrow</div>
+        <div class="sub">Para: <strong id="delivery-client-name" style="color:#fff;">Cliente</strong> &nbsp;·&nbsp; R$ <span id="delivery-value" style="color:#66BB6A;font-weight:700;">0</span> em garantia</div>
       </div>
       <button class="modal-close" style="color:#fff;margin-left:auto;" onclick="closeModal('delivery')">&#x2715;</button>
     </div>
@@ -7168,10 +7168,10 @@ section { padding: 64px 0; }
         </select>
       </div>
 
-      <!-- Aviso escrow -->
+      <!-- Aviso garantia -->
       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:var(--radius);padding:10px 14px;font-size:12px;color:#92400e;margin-bottom:18px;display:flex;gap:8px;">
         <span>&#128274;</span>
-        <span>O pagamento permanece <strong>retido em escrow</strong> durante a revisão. Será liberado somente após sua aprovação final.</span>
+        <span>O pagamento permanece <strong>retido em garantia</strong> durante a revisão. Será liberado somente após sua aprovação final.</span>
       </div>
 
       <button class="btn btn-primary btn-block btn-lg" id="rev-submit-btn" onclick="submitRevision()">
@@ -8533,7 +8533,7 @@ _IP.api = {
        '<li>POST /projects &mdash; Publicar projeto</li>' +
        '<li>GET /freelancers &mdash; Buscar profissionais</li>' +
        '<li>POST /contracts &mdash; Criar contrato</li>' +
-       '<li>POST /payments &mdash; Pagamento via escrow</li></ul></div>' +
+       '<li>POST /payments &mdash; Pagamento via Garantia</li></ul></div>' +
        '<button class="btn btn-green btn-block" onclick="showToast(\'Documenta&ccedil;&atilde;o enviada!\',\'success\')">Solicitar acesso &rarr;</button>'
   },
   es: { t: 'API para Empresas',
@@ -8608,7 +8608,7 @@ _IP.guide = {
        '<ul style="font-size:13px;color:var(--text-2);padding-left:16px;line-height:2;margin:0;">' +
        '<li>Inclua revis&otilde;es no pre&ccedil;o base</li>' +
        '<li>Cobre por entregável em projetos fechados</li>' +
-       '<li>Use escrow para garantir recebimento</li>' +
+       '<li>Use garantia para garantir recebimento</li>' +
        '<li>Cases reais aumentam convers&atilde;o em 3&times;</li></ul></div>' +
        '<div style="background:var(--green-light);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:13px;">' +
        '<b style="color:var(--green-dark);">Taxa:</b> 12% &bull; Plano Pro: 8% &bull; Elite: 5%</div>' +
@@ -8619,7 +8619,7 @@ _IP.guide = {
        '<b>&#128161; Consejos</b>' +
        '<ul style="font-size:13px;color:var(--text-2);padding-left:16px;line-height:2;margin:6px 0 0;">' +
        '<li>Incluye revisiones en el precio base</li>' +
-       '<li>Usa escrow para cobros seguros</li>' +
+       '<li>Usa garantia para cobros seguros</li>' +
        '<li>Casos reales multiplican conversiones 3&times;</li></ul></div>' +
        '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planes y comisiones &rarr;</button>'
   }
@@ -8689,7 +8689,7 @@ _IP.security = {
     b: '<p style="color:var(--text-2);margin-bottom:16px;">Padr&otilde;es internacionais para proteger seus dados e transa&ccedil;&otilde;es.</p>' +
        '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128274;</span><div><b>SSL 256-bit + TLS 1.3</b><div style="font-size:13px;color:var(--text-3);">Comunica&ccedil;&atilde;o criptografada de ponta a ponta</div></div></div>' +
-       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Escrow Seguro</b><div style="font-size:13px;color:var(--text-3);">Valores retidos at&eacute; aprova&ccedil;&atilde;o da entrega</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Garantia Segura</b><div style="font-size:13px;color:var(--text-3);">Valores retidos at&eacute; aprova&ccedil;&atilde;o da entrega</div></div></div>' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128203;</span><div><b>Conformidade LGPD</b><div style="font-size:13px;color:var(--text-3);">Dados tratados conforme Lei Geral de Prote&ccedil;&atilde;o de Dados</div></div></div>' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#9989;</span><div><b>KYC obrigat&oacute;rio</b><div style="font-size:13px;color:var(--text-3);">Verifica&ccedil;&atilde;o de CPF + documento para freelancers</div></div></div>' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128737;&#65039;</span><div><b>Antifraude por IA</b><div style="font-size:13px;color:var(--text-3);">Monitoramento 24/7 de transa&ccedil;&otilde;es e perfis</div></div></div>' +
@@ -8701,7 +8701,7 @@ _IP.security = {
   es: { t: 'Seguridad HereWork',
     b: '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128274;</span><div><b>SSL 256-bit + TLS 1.3</b><div style="font-size:13px;color:var(--text-3);">Comunicaci&oacute;n cifrada de extremo a extremo</div></div></div>' +
-       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Escrow Seguro</b><div style="font-size:13px;color:var(--text-3);">Fondos retenidos hasta tu aprobaci&oacute;n</div></div></div>' +
+       '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#127970;</span><div><b>Garantia Segura</b><div style="font-size:13px;color:var(--text-3);">Fondos retenidos hasta tu aprobaci&oacute;n</div></div></div>' +
        '<div style="display:flex;gap:12px;background:var(--surface);border-radius:var(--radius);padding:14px;"><span style="font-size:22px;">&#128203;</span><div><b>LGPD/RGPD</b><div style="font-size:13px;color:var(--text-3);">Datos tratados conforme ley de protecci&oacute;n</div></div></div>' +
        '</div>' +
        '<div style="background:var(--green-light);border-radius:var(--radius);padding:14px;text-align:center;"><b style="color:var(--green-dark);">Certificaci&oacute;n PCI-DSS Level 1</b></div>'
@@ -8716,7 +8716,7 @@ _IP.status = {
        '<div style="font-size:13px;color:var(--text-3);margin-top:4px;">100% uptime nas &uacute;ltimas 72h</div></div>' +
        '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>API / Plataforma</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
-       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagamentos / Escrow</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagamentos / Garantia</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Notifica&ccedil;&otilde;es / E-mail</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Chat em tempo real</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>CDN / Upload de arquivos</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
@@ -8730,7 +8730,7 @@ _IP.status = {
        '<div style="font-size:13px;color:var(--text-3);margin-top:4px;">100% uptime en las &uacute;ltimas 72h</div></div>' +
        '<div style="display:flex;flex-direction:column;gap:6px;">' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>API / Plataforma</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
-       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagos / Escrow</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
+       '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Pagos / Garantia</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
        '<div style="display:flex;justify-content:space-between;background:var(--surface);border-radius:var(--radius);padding:12px 16px;"><b>Chat en tiempo real</b><span style="color:var(--green);font-weight:700;font-size:13px;">&#9679; Operacional</span></div>' +
        '</div>'
   }
@@ -10080,7 +10080,7 @@ function pdfRemove2(e) {
 function _pdfReset2() { pdfRemove2({ stopPropagation: function(){} }); }
 
 /* ═══════════════════════════════════════════════════════
-   CONTRACT + ESCROW SYSTEM
+   CONTRACT + GARANTIA SYSTEM
 ═══════════════════════════════════════════════════════ */
 var _contractCtx = { name:'', role:'', value:0, project:'', deadline:'30 dias', rating:0 };
 
@@ -10186,7 +10186,7 @@ function contractSimulatePix() {
   setTimeout(function(){
     if(btn){ btn.disabled=false; btn.textContent='⚡ Simular Pagamento PIX (Demo)'; }
     _goContractStep(3);
-    showToast('⚡ PIX confirmado! Pagamento em escrow. Projeto iniciado!','success');
+    showToast('⚡ PIX confirmado! Pagamento em Garantia. Projeto iniciado!','success');
   }, 1800);
 }
 
@@ -10223,7 +10223,7 @@ function contractPayCard() {
   setTimeout(function(){
     _setBtnLoading(btn, false);
     _goContractStep(3);
-    showToast('💳 Pagamento aprovado! Valor em escrow. Projeto iniciado!','success');
+    showToast('💳 Pagamento aprovado! Valor em garantia. Projeto iniciado!','success');
   }, 2000);
 }
 
@@ -10351,7 +10351,7 @@ function openDashboard() {
   el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
   el = document.getElementById('ds-plan');        if(el) el.textContent = 'Gratuito';
 
-  var escrow = _dashData.client.active.reduce(function(s,p){return s+p.value;},0);
+  var garantia = _dashData.client.active.reduce(function(s,p){return s+p.value;},0);
   var done   = _dashData.client.done.length + _dashData.freelancer.done.length;
   var active = _dashData.client.active.length + _dashData.freelancer.active.length;
   el = document.getElementById('ds-active'); if(el) el.textContent = active;
@@ -10496,7 +10496,7 @@ function _escrowBar(progress, value) {
   var fmt = value.toLocaleString('pt-BR', {minimumFractionDigits:2});
   return '<div class="escrow-progress">' +
     '<div class="escrow-progress-label">' +
-    '<span>🔒 R$ ' + fmt + ' em escrow</span>' +
+    '<span>🔒 R$ ' + fmt + ' em garantia</span>' +
     '<span>' + progress + '% concluído</span></div>' +
     '<div class="escrow-progress-bar"><div class="escrow-progress-fill" style="width:'+progress+'%"></div></div>' +
     '</div>';
@@ -10627,7 +10627,7 @@ function _renderDashFLActive() {
         _statusBadge('active','Em andamento') +
       '</div>' +
       '<div class="dash-proj-meta">' +
-        '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' em escrow</span>' +
+        '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' em garantia</span>' +
         '<span>📅 ' + p.deadline + '</span>' +
         '<span>📊 ' + p.progress + '% concluído</span>' +
       '</div>' +
@@ -11330,7 +11330,7 @@ function submitRevision() {
     }
 
     showToast(
-      '📝 Revisão solicitada! ' + who + ' foi notificado e tem ' + dlText + ' para corrigir. Pagamento permanece em escrow.',
+      '📝 Revisão solicitada! ' + who + ' foi notificado e tem ' + dlText + ' para corrigir. Pagamento permanece em garantia.',
       'success'
     );
   }, 900);
@@ -11515,8 +11515,8 @@ function renderAdminContracts(tab) {
         '<div><div class="adm-person-name">' + c.freelancer.name + '</div>' +
         '<div class="adm-person-role">' + c.freelancer.role + '</div></div>' +
       '</div>' +
-      /* Escrow */ '<div><div class="adm-escrow-val">R$ ' + c.value.toLocaleString('pt-BR') + '</div>' +
-        '<div class="adm-escrow-sub">em escrow</div></div>' +
+      /* Garantia */ '<div><div class="adm-escrow-val">R$ ' + c.value.toLocaleString('pt-BR') + '</div>' +
+        '<div class="adm-escrow-sub">em garantia</div></div>' +
       /* Deadline */ '<div class="' + c.deadlineClass + '">' + c.deadline + '</div>' +
       /* Actions */ '<div>' + actions + '</div>' +
     '</div>';
@@ -12103,8 +12103,8 @@ window.contractPayCard = async function() {
     var pm = result.paymentMethod;
     _secLog('STRIPE_ESCROW_PM', 'Escrow PaymentMethod: ' + pm.id + ' | ' + pm.card.brand + ' ****' + pm.card.last4);
     _goContractStep(3);
-    showToast('💳 Cartão validado pelo Stripe! Valor em escrow. Projeto iniciado!', 'success');
-    console.log('[HereWork] Escrow PM criado:', pm.id, '| Backend: POST /api/create-payment-intent com escrow flag');
+    showToast('💳 Cartão validado pelo Stripe! Valor em garantia. Projeto iniciado!', 'success');
+    console.log('[HereWork] Garantia PM criado:', pm.id, '| Backend: POST /api/create-payment-intent com garantia flag');
 
   } catch(e) {
     _setBtnLoading(btn, false);
@@ -12164,7 +12164,7 @@ function _updatePaymentSummary() {
   /* Totals from _dashData */
   var paid     = _dashData.client.done.reduce(function(s,p){ return s+(p.value||0); }, 0)
                + _dashData.client.active.filter(function(p){ return p.status!=='review'; }).reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var escrow   = _dashData.client.active.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var garantia   = _dashData.client.active.reduce(function(s,p){ return s+(p.value||0); }, 0);
   var received = _dashData.freelancer.done.reduce(function(s,p){ return s+(p.value||0); }, 0);
 
   var el;
