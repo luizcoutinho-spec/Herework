@@ -10813,7 +10813,7 @@ function _flCard(cat, idx) {
     '<div class="fl-list-right">' +
       '<div class="fl-list-rate">R$ ' + rate + '<small>/hora</small></div>' +
       '<div class="fl-list-rating"><span class="stars">★★★★' + (rat >= 4.8 ? '★' : '☆') + '</span> ' + rat.toFixed(1) + '</div>' +
-      '<button class="btn btn-green btn-sm" onclick="openModal(\'invite\')">Convidar</button>' +
+      '<button class="btn btn-outline btn-sm" onclick="openDemoProfile(this)">Ver Perfil</button>' +
       '<button class="btn btn-outline btn-sm" onclick="showPage(\'freelancers\')">Ver Perfil</button>' +
     '</div>' +
     '</div>';
@@ -14573,6 +14573,223 @@ window.showPage = function(name) {
   if(name === 'dashboard') setTimeout(_restoreCommPrefs, 200);
 };
 
+
+
+/* ═══════════════════════════════════════════════════════════
+   PERFIL DINAMICO PARA FREELANCERS DEMO
+═══════════════════════════════════════════════════════════ */
+
+/* Templates de "Sobre mim" por categoria */
+var _ABOUT_TPL = {
+  design: ['Especialista em design gráfico e identidade visual com sólida experiência criando marcas que se destacam no mercado. Meu processo une pesquisa, criatividade e estratégia para entregar soluções visuais que realmente comunicam e convertem.','Designer apaixonado por criar experiências visuais impactantes. Trabalho com marcas de todos os tamanhos, sempre buscando o equilíbrio perfeito entre estética e funcionalidade. Portfolio disponível mediante solicitação.','Criativo especializado em UI/UX e branding. Já ajudei mais de 100 empresas a construir sua identidade visual de forma consistente e memorável. Emito nota fiscal e ofereço suporte pós-projeto.'],
+  web: ['Desenvolvedor full stack apaixonado por transformar ideias em produtos digitais de alta performance. Especialista em arquiteturas escaláveis e experiências de usuário que convertem. Código limpo, documentado e testado.','Engenheiro de software com foco em soluções web modernas e performáticas. Entrego projetos com qualidade enterprise, sempre dentro do prazo e orçamento. Disponível para projetos de curto e longo prazo.','Dev full stack especializado em React e Node.js. Já construí mais de 80 aplicações web para empresas de diferentes segmentos. Sou organizado, comunicativo e entrego com excelência.'],
+  marketing: ['Especialista em marketing digital e growth com foco em resultados mensuráveis. Já gerenciei mais de R$1M em verba de mídia com ROI médio de 350%. Trabalho com transparência e relatórios semanais detalhados.','Profissional de marketing digital apaixonado por dados. Combino análise quantitativa com criatividade para criar campanhas que geram resultados reais. Especialidade em funis de aquisição e retenção.','Estrategista de marketing com expertise em tráfego pago e orgânico. Ajudo empresas a crescer de forma sustentável, construindo presença digital sólida e gerando leads qualificados.'],
+  redacao: ['Redatora e copywriter com especialidade em textos que vendem. Minha escrita combina técnica SEO com storytelling persuasivo para criar conteúdo que engaja, informa e converte.','Escritora criativa e estratégica especializada em content marketing. Crio textos que conectam marcas com suas audiências de forma autêntica e memorável. Sempre entrego com revisão incluída.','Copywriter com foco em conversão. Especialista em landing pages, e-mails e anúncios que geram resultado. Cada palavra é escolhida com intenção para maximizar o impacto na sua audiência.'],
+  video: ['Editora de vídeo e motion designer especializada em conteúdo que prende atenção do primeiro ao último segundo. Domino todas as etapas da pós-produção com olho clínico para ritmo e narrativa visual.','Produtor audiovisual apaixonado por contar histórias através de imagens. Da edição ao motion graphics, entrego projetos com qualidade cinematográfica para marcas que querem se destacar.','Editora criativa especializada em vídeos para redes sociais e YouTube. Sei criar conteúdo que viraliza e engaja. Trabalho rápido sem abrir mão da qualidade.'],
+  ti: ['Especialista em infraestrutura e segurança de TI com experiência em ambientes corporativos complexos. Implanto soluções cloud, otimizo redes e garanto a continuidade operacional de empresas de todos os portes.','Engenheiro de TI com foco em cloud computing e DevOps. Ajudo empresas a modernizar sua infraestrutura, reduzir custos e aumentar a resiliência dos sistemas críticos.','Profissional de TI generalista com profundidade em segurança da informação. Já migrei dezenas de empresas para a nuvem e implementei políticas de segurança alinhadas às melhores práticas do mercado.'],
+  apps: ['Desenvolvedor mobile especializado em Flutter e React Native. Crio aplicativos nativos que combinam performance excepcional com interfaces deslumbrantes. Já publiquei mais de 30 apps nas lojas.','Engenheiro mobile full stack. Do backend ao app store, cuido de todo o ecossistema do seu aplicativo. Especialidade em apps de alta performance com milhares de usuários simultâneos.','Dev mobile apaixonado por criar experiências mobile que encantam usuários. Domino todo o ciclo de desenvolvimento, desde o protótipo até a publicação e manutenção nas lojas.'],
+  dados: ['Cientista de dados com experiência em transformar volumes massivos de dados em insights acionáveis que impulsionam decisões de negócio. Domino Python, SQL e as principais ferramentas de BI.','Engenheiro de dados especializado em construir pipelines robustos e dashboards executivos que realmente informam decisões. Trabalho com todas as principais plataformas cloud.','Analista de dados com foco em negócios. Traduzo números complexos em narrativas claras que líderes entendem e agem. Especialidade em Power BI, Python e modelagem preditiva.'],
+  ia: ['Especialista em IA e Machine Learning com experiência em levar modelos do laboratório para produção. Construo soluções de IA generativa, NLP e visão computacional que geram impacto real.','Engenheiro de ML apaixonado por resolver problemas complexos com inteligência artificial. Da análise exploratória ao deploy em produção, cuido de todo o ciclo de vida dos modelos.','Cientista de IA especializado em LLMs e soluções generativas. Ajudo empresas a integrar IA em seus processos, automações e produtos de forma ética e eficiente.'],
+  consultoria: ['Consultor de negócios com vasta experiência em estratégia, processos e gestão. Já apoiei mais de 80 empresas em momentos críticos de crescimento, transformação e crise.','Especialista em gestão e estratégia empresarial. Combino visão analítica com pragmatismo para criar planos que realmente saem do papel. Metodologia ágil e foco em resultados.','Consultor estratégico com background em finanças e operações. Ajudo empresas a identificar oportunidades, eliminar ineficiências e construir vantagens competitivas sustentáveis.'],
+  ecommerce: ['Especialista em e-commerce com foco em crescimento e rentabilidade. Já gerenciei operações de lojas virtuais que faturam milhões mensais em diversas plataformas.','Profissional de e-commerce com expertise em toda a cadeia: da loja às conversões, da logística ao pós-venda. Transformo lojas em máquinas de venda eficientes.','Consultor de e-commerce e marketplaces. Ajudo marcas a construir presença digital robusta e lucrativa, com estratégia omnichannel integrada e métricas bem definidas.'],
+  suporte: ['Especialista em Customer Success e suporte ao cliente com foco em reduzir churn e aumentar satisfação. Já implementei estruturas de CS em dezenas de SaaS.','Profissional de atendimento e sucesso do cliente com experiência em escalar operações de suporte sem perder qualidade. Especialidade em Zendesk, Intercom e automações.','Especialista em jornada do cliente e onboarding digital. Crio experiências que reduzem atritos, aumentam ativação e transformam clientes em promotores da marca.'],
+  seo: ['Especialista em SEO técnico e de conteúdo com histórico comprovado de ranquear sites na primeira página do Google. Trabalho com análise profunda de dados e execução meticulosa.','Profissional de SEO com foco em resultados orgânicos de longo prazo. Combino auditoria técnica, criação de conteúdo e link building para construir autoridade real.','Consultor de SEO especializado em e-commerce e sites corporativos. Minha abordagem data-driven já aumentou o tráfego orgânico de clientes em até 400% em 12 meses.'],
+  educacao: ['Designer instrucional especializado em criar experiências de aprendizagem engajadoras e eficazes. Transformo conteúdo denso em cursos que as pessoas realmente terminam.','Produtor de conteúdo educacional com experiência em e-learning, treinamentos corporativos e cursos online. Domino as principais plataformas LMS e ferramentas de autoria.','Especialista em educação corporativa e desenvolvimento de talentos. Crio programas de capacitação alinhados à estratégia do negócio com métricas claras de impacto.'],
+  engenharia: ['Engenheiro com ampla experiência em projetos industriais e de construção civil. Entrego projetos completos, dentro das normas técnicas, com documentação impecável e ART incluída.','Especialista em automação industrial e projetos de engenharia. Combino conhecimento técnico profundo com gestão eficiente para entregar projetos no prazo e orçamento.','Engenheiro multidisciplinar com foco em otimização e inovação. Já participei de projetos que geraram economia de milhões para indústrias de diferentes segmentos.'],
+  idiomas: ['Tradutor e intérprete profissional com especialização em textos técnicos, jurídicos e de negócios. Trabalho com precisão terminológica e entrego dentro do prazo.','Especialista em localização e adaptação cultural de conteúdo. Além de traduzir palavras, traduzo contextos para garantir que a mensagem ressoe da mesma forma no novo idioma.','Professora de idiomas e tradutora especializada em inglês e espanhol para negócios. Ajudo profissionais e empresas a se comunicar com excelência no mercado global.'],
+  juridico: ['Advogado especializado em direito empresarial e contratos com foco em proteger negócios de riscos jurídicos. Atuo de forma preventiva e estratégica para gerar segurança jurídica.','Consultor tributário com expertise em planejamento fiscal e otimização de carga tributária. Ajudo empresas a pagar apenas o tributo devido, dentro da absoluta legalidade.','Advogado trabalhista especializado em adequação de empresas à legislação, prevenindo passivos trabalhistas e otimizando a estrutura de pessoal.'],
+  fotografia: ['Fotógrafo profissional especializado em fotografias comerciais e corporativas de alto impacto. Meu trabalho une técnica, luz e criatividade para criar imagens que vendem.','Fotógrafo e produtor visual com 8 anos de experiência em fotografia de produto, gastronomia e eventos corporativos. Equipe completa disponível para produções maiores.','Fotógrafo especializado em retratos corporativos e branding visual. Crio imagens autênticas que transmitem os valores e a personalidade da sua marca.'],
+  rh: ['Especialista em RH estratégico e recrutamento com foco em tecnologia. Já ajudei mais de 100 empresas a construir times de alta performance com processos ágeis e eficazes.','Consultora de RH com expertise em desenvolvimento organizacional, cultura empresarial e gestão de talentos. Ajudo empresas a atrair, desenvolver e reter os melhores profissionais.','Headhunter especializado em posições de tecnologia e liderança. Combino metodologia rigorosa com rede de contatos qualificada para encontrar o candidato certo.'],
+  arquitetura: ['Arquiteta e urbanista com especialização em projetos residenciais e comerciais de alto padrão. Criatividade, funcionalidade e sustentabilidade são os pilares do meu trabalho.','Designer de interiores e arquiteta focada em criar ambientes que combinam beleza e funcionalidade. Entrego projetos completos com gerenciamento de obra incluso.','Arquiteto especializado em projetos comerciais e franquias. Já desenvolvi projetos-padrão para redes nacionais e sei equilibrar identidade da marca com viabilidade de execução.'],
+  jogos: ['Desenvolvedor de games com expertise em Unity e Unreal Engine. Já lancei mais de 10 jogos nas principais plataformas com millions de downloads combinados.','Game designer apaixonado por criar experiências interativas memoráveis. Especialidade em mecânicas de engajamento, monetização e gamificação corporativa.','Artista de games especializado em arte 2D e 3D para mobile e PC. Criativo, organizado e acostumado com pipelines de produção de grandes estúdios.'],
+  musica: ['Produtor musical e engenheiro de áudio com estúdio próprio. Já produzi para artistas com milhões de streams e marcas reconhecidas nacionalmente.','Compositor e arranjador com experiência em trilhas sonoras, jingles e podcasts. Transformo briefings em músicas que ficam na cabeça do ouvinte.','Músico e produtor especializado em conteúdo para redes sociais, games e marcas. Entrego áudio profissional no prazo, sempre alinhado à visão criativa do cliente.'],
+  blockchain: ['Desenvolvedor blockchain especializado em smart contracts Solidity e DeFi. Já auditei e deployei contratos que movimentaram milhões de dólares em produção.','Engenheiro Web3 com expertise em NFTs, DeFi e soluções de tokenização. Acompanho as tendências do ecossistema e entrego soluções seguras e inovadoras.','Consultor de blockchain com visão de negócio. Ajudo empresas tradicionais a entender e implementar tecnologia blockchain de forma prática e com ROI mensurável.'],
+  saude: ['Profissional de saúde especializado em bem-estar corporativo e saúde preventiva. Desenvolvo programas personalizados que reduzem afastamentos e aumentam a produtividade.','Nutricionista clínica e esportiva com foco em resultados sustentáveis. Combino ciência da nutrição com tecnologia para criar planos alimentares personalizados e eficazes.','Personal trainer e coach de saúde integrada. Trabalho de forma holística para transformar o estilo de vida de clientes e equipes, com resultados mensuráveis e duradouros.']
+};
+
+var _EXP_TPL = {
+  design: '<p><strong>7+ anos</strong> em design gráfico e UI/UX.</p><ul><li>Identidade visual e branding estratégico</li><li>Design de interfaces digitais (Web e Mobile)</li><li>Design Systems e componentes reutilizáveis</li><li>Apresentações e materiais comerciais</li><li>Embalagem e design editorial</li></ul>',
+  web: '<p><strong>6+ anos</strong> em desenvolvimento web.</p><ul><li>Frontend: React, Vue.js, Next.js, TypeScript</li><li>Backend: Node.js, Python, PHP</li><li>Banco de dados: PostgreSQL, MongoDB</li><li>Cloud: AWS, GCP, Vercel, Heroku</li><li>Metodologias ágeis e versionamento Git</li></ul>',
+  marketing: '<p><strong>5+ anos</strong> em marketing digital.</p><ul><li>Tráfego pago: Google Ads, Meta Ads, LinkedIn Ads</li><li>SEO orgânico e content marketing</li><li>Email marketing e automações</li><li>Analytics e atribuição de resultados</li><li>Growth hacking e experimentação A/B</li></ul>',
+  redacao: '<p><strong>6+ anos</strong> em redação e copywriting.</p><ul><li>Copywriting persuasivo para conversão</li><li>Artigos SEO e content marketing</li><li>Roteiros para vídeo e podcast</li><li>E-mail marketing e newsletters</li><li>Traduções técnicas e jurídicas</li></ul>',
+  video: '<p><strong>5+ anos</strong> em produção audiovisual.</p><ul><li>Edição em Premiere Pro e DaVinci Resolve</li><li>Motion graphics no After Effects</li><li>Color grading e pós-produção</li><li>Vídeos para YouTube e redes sociais</li><li>Animação 2D e motion design</li></ul>',
+  ti: '<p><strong>8+ anos</strong> em TI corporativa.</p><ul><li>Cloud: AWS, Azure, Google Cloud</li><li>Redes e segurança da informação</li><li>DevOps e CI/CD (Docker, Kubernetes)</li><li>LGPD e compliance de segurança</li><li>Suporte N1, N2 e N3</li></ul>',
+  apps: '<p><strong>6+ anos</strong> em desenvolvimento mobile.</p><ul><li>Flutter e React Native</li><li>iOS nativo (Swift) e Android (Kotlin)</li><li>Integração com APIs REST e GraphQL</li><li>Publicação App Store e Google Play</li><li>Firebase, push notifications, analytics</li></ul>',
+  dados: '<p><strong>5+ anos</strong> em dados e analytics.</p><ul><li>Python, R, SQL avançado</li><li>Power BI, Tableau, Looker</li><li>Machine Learning (sklearn, TensorFlow)</li><li>Big Data: Spark, Hadoop, BigQuery</li><li>Engenharia de dados e ETL</li></ul>',
+  ia: '<p><strong>4+ anos</strong> em IA e Machine Learning.</p><ul><li>NLP e LLMs (GPT, Claude, LLaMA)</li><li>Computer Vision e processamento de imagem</li><li>MLOps e deploy de modelos em produção</li><li>Frameworks: PyTorch, TensorFlow, Hugging Face</li><li>IA Generativa e Fine-tuning de modelos</li></ul>',
+  consultoria: '<p><strong>10+ anos</strong> em consultoria e gestão.</p><ul><li>Estratégia empresarial e planejamento</li><li>Gestão de projetos (PMP, Agile, Scrum)</li><li>Análise financeira e valuation</li><li>Processos e otimização operacional</li><li>Transformação digital</li></ul>',
+  ecommerce: '<p><strong>6+ anos</strong> em e-commerce e marketplaces.</p><ul><li>Shopify, VTEX, Magento, WooCommerce</li><li>Gestão de marketplaces (ML, Amazon, Shopee)</li><li>CRO e otimização de checkout</li><li>Logística e operações de fulfillment</li><li>Customer acquisition e retenção</li></ul>',
+  suporte: '<p><strong>5+ anos</strong> em Customer Success e suporte.</p><ul><li>Zendesk, Intercom, HubSpot Service</li><li>Criação de base de conhecimento e FAQs</li><li>Definição e monitoramento de SLAs</li><li>Onboarding e ativação de clientes</li><li>Métricas: NPS, CSAT, CES, Churn</li></ul>',
+  seo: '<p><strong>7+ anos</strong> em SEO e busca orgânica.</p><ul><li>SEO técnico e Core Web Vitals</li><li>Pesquisa de palavras-chave e arquitetura</li><li>Link building e autoridade de domínio</li><li>SEO local e Google Meu Negócio</li><li>Ferramentas: Semrush, Ahrefs, Search Console</li></ul>',
+  educacao: '<p><strong>6+ anos</strong> em educação corporativa e EAD.</p><ul><li>Design instrucional e LXD</li><li>Produção de videoaulas e podcasts</li><li>Plataformas LMS (Moodle, TalentLMS)</li><li>Ferramentas de autoria (Articulate, Captivate)</li><li>Gamificação e aprendizado adaptativo</li></ul>',
+  engenharia: '<p><strong>10+ anos</strong> em engenharia.</p><ul><li>Projetos civis, industriais e mecânicos</li><li>AutoCAD, Revit e softwares BIM</li><li>Normas ABNT e regulamentações técnicas</li><li>Gestão de projetos e cronogramas</li><li>Vistorias, laudos e ARTs</li></ul>',
+  idiomas: '<p><strong>8+ anos</strong> em tradução e ensino de idiomas.</p><ul><li>Inglês, Espanhol, Francês e Alemão</li><li>Tradução técnica, jurídica e literária</li><li>Interpretação simultânea e consecutiva</li><li>Localização de software e games</li><li>Business English para executivos</li></ul>',
+  juridico: '<p><strong>8+ anos</strong> em direito e consultoria jurídica.</p><ul><li>Contratos comerciais e societários</li><li>Direito trabalhista e compliance</li><li>LGPD e proteção de dados</li><li>Planejamento tributário</li><li>M&A e due diligence</li></ul>',
+  fotografia: '<p><strong>8+ anos</strong> em fotografia profissional.</p><ul><li>Fotografia de produto e e-commerce</li><li>Retratos corporativos e branding</li><li>Fotografia gastronômica</li><li>Edição em Lightroom e Photoshop</li><li>Cobertura de eventos corporativos</li></ul>',
+  rh: '<p><strong>7+ anos</strong> em Recursos Humanos estratégico.</p><ul><li>Recrutamento e seleção (técnico e executivo)</li><li>Estruturação de áreas de RH</li><li>Avaliação de desempenho e PDI</li><li>Cultura organizacional e employer branding</li><li>Remuneração e benefícios</li></ul>',
+  arquitetura: '<p><strong>9+ anos</strong> em arquitetura e design de interiores.</p><ul><li>Projetos residenciais e comerciais</li><li>Modelagem BIM (Revit, ArchiCAD)</li><li>Aprovação em prefeituras e órgãos</li><li>Gerenciamento de obra</li><li>Projetos sustentáveis e certificações</li></ul>',
+  jogos: '<p><strong>5+ anos</strong> em desenvolvimento de games.</p><ul><li>Unity e Unreal Engine</li><li>Game design e mecânicas de gameplay</li><li>Arte 2D e 3D para games</li><li>Publicação em Steam, App Store e Google Play</li><li>Monetização e live ops</li></ul>',
+  musica: '<p><strong>10+ anos</strong> em produção musical e áudio.</p><ul><li>Produção, mixagem e masterização</li><li>Composição e arranjos</li><li>Pro Tools, Ableton Live, Logic Pro</li><li>Trilhas sonoras para filmes e games</li><li>Jingles e identidade sonora de marcas</li></ul>',
+  blockchain: '<p><strong>4+ anos</strong> em desenvolvimento blockchain.</p><ul><li>Smart contracts em Solidity (Ethereum, Polygon)</li><li>Desenvolvimento DeFi e NFT</li><li>Auditorias de segurança de contratos</li><li>Web3 Frontend (ethers.js, wagmi)</li><li>Layer 2 e soluções de escalabilidade</li></ul>',
+  saude: '<p><strong>7+ anos</strong> em saúde e bem-estar.</p><ul><li>Nutrição clínica e esportiva</li><li>Personal training e educação física</li><li>Saúde mental e psicologia organizacional</li><li>Programas de qualidade de vida corporativa</li><li>Telemedicina e plataformas digitais de saúde</li></ul>'
+};
+
+var _PORTFOLIO_TPL = {
+  design:      [{ico:'🎨',bg:'#fdf4ff',l:'Branding'},{ico:'📱',bg:'#e0f2fe',l:'UI Design'},{ico:'🌐',bg:'#f0fdf4',l:'Web Design'},{ico:'📦',bg:'#fff7ed',l:'Embalagem'},{ico:'📊',bg:'#ecfdf5',l:'Dashboard'},{ico:'✨',bg:'#fce7f3',l:'Motion'}],
+  web:         [{ico:'🌐',bg:'#e0f2fe',l:'Website'},{ico:'🛒',bg:'#f0fdf4',l:'E-commerce'},{ico:'📊',bg:'#fff7ed',l:'Dashboard'},{ico:'⚙️',bg:'#fdf4ff',l:'API REST'},{ico:'📱',bg:'#ecfdf5',l:'PWA'},{ico:'🔗',bg:'#fce7f3',l:'Integração'}],
+  marketing:   [{ico:'📈',bg:'#f0fdf4',l:'Campanha'},{ico:'🎯',bg:'#e0f2fe',l:'Ads'},{ico:'📧',bg:'#fff7ed',l:'Email Mkt'},{ico:'📊',bg:'#fdf4ff',l:'Analytics'},{ico:'🔍',bg:'#fce7f3',l:'SEO'},{ico:'🚀',bg:'#ecfdf5',l:'Growth'}],
+  redacao:     [{ico:'📝',bg:'#fdf4ff',l:'Blog'},{ico:'📧',bg:'#e0f2fe',l:'Email'},{ico:'🎯',bg:'#f0fdf4',l:'Copy'},{ico:'📹',bg:'#fff7ed',l:'Roteiro'},{ico:'📰',bg:'#fce7f3',l:'Press'},{ico:'📱',bg:'#ecfdf5',l:'Social'}],
+  video:       [{ico:'🎬',bg:'#fce7f3',l:'Institucional'},{ico:'📱',bg:'#fdf4ff',l:'Reels'},{ico:'✨',bg:'#fff7ed',l:'Motion'},{ico:'🎵',bg:'#e0f2fe',l:'Clipe'},{ico:'📺',bg:'#f0fdf4',l:'TVC'},{ico:'🎓',bg:'#ecfdf5',l:'EAD'}],
+  ti:          [{ico:'☁️',bg:'#e0f2fe',l:'Cloud'},{ico:'🔒',bg:'#f0fdf4',l:'Segurança'},{ico:'🌐',bg:'#fff7ed',l:'Rede'},{ico:'⚙️',bg:'#fdf4ff',l:'DevOps'},{ico:'🖥️',bg:'#fce7f3',l:'Infraestrutura'},{ico:'📊',bg:'#ecfdf5',l:'Monitoramento'}],
+  apps:        [{ico:'📱',bg:'#f0fdf4',l:'App Mobile'},{ico:'🛒',bg:'#e0f2fe',l:'E-com App'},{ico:'🍔',bg:'#fff7ed',l:'Delivery'},{ico:'💰',bg:'#fdf4ff',l:'Fintech'},{ico:'🏥',bg:'#fce7f3',l:'Saúde'},{ico:'🎓',bg:'#ecfdf5',l:'EAD'}],
+  dados:       [{ico:'📊',bg:'#e0f2fe',l:'Dashboard'},{ico:'🤖',bg:'#f0fdf4',l:'ML Model'},{ico:'📈',bg:'#fff7ed',l:'Analytics'},{ico:'🔄',bg:'#fdf4ff',l:'ETL'},{ico:'💡',bg:'#fce7f3',l:'Insights'},{ico:'📉',bg:'#ecfdf5',l:'Previsão'}],
+  ia:          [{ico:'🤖',bg:'#f0fdf4',l:'Chatbot'},{ico:'🧠',bg:'#e0f2fe',l:'NLP'},{ico:'👁️',bg:'#fff7ed',l:'Visão IA'},{ico:'📝',bg:'#fdf4ff',l:'LLM App'},{ico:'⚡',bg:'#fce7f3',l:'MLOps'},{ico:'🎯',bg:'#ecfdf5',l:'Recomendação'}],
+  consultoria: [{ico:'📋',bg:'#fdf4ff',l:'Estratégia'},{ico:'💰',bg:'#e0f2fe',l:'Financeiro'},{ico:'⚙️',bg:'#f0fdf4',l:'Processos'},{ico:'🚀',bg:'#fff7ed',l:'Startup'},{ico:'🏢',bg:'#fce7f3',l:'Corporativo'},{ico:'📊',bg:'#ecfdf5',l:'Relatórios'}],
+  ecommerce:   [{ico:'🛒',bg:'#e0f2fe',l:'Loja Virtual'},{ico:'📦',bg:'#f0fdf4',l:'Marketplace'},{ico:'📈',bg:'#fff7ed',l:'CRO'},{ico:'🎯',bg:'#fdf4ff',l:'Ads'},{ico:'📊',bg:'#fce7f3',l:'Analytics'},{ico:'🔄',bg:'#ecfdf5',l:'Automação'}],
+  suporte:     [{ico:'💬',bg:'#f0fdf4',l:'Chat'},{ico:'📚',bg:'#e0f2fe',l:'Base de Conhecimento'},{ico:'🎯',bg:'#fff7ed',l:'Onboarding'},{ico:'📊',bg:'#fdf4ff',l:'Métricas'},{ico:'🤖',bg:'#fce7f3',l:'Automação'},{ico:'⭐',bg:'#ecfdf5',l:'NPS'}],
+  seo:         [{ico:'🔍',bg:'#e0f2fe',l:'Auditoria'},{ico:'📈',bg:'#f0fdf4',l:'Rankings'},{ico:'🔗',bg:'#fff7ed',l:'Link Building'},{ico:'📝',bg:'#fdf4ff',l:'Conteúdo'},{ico:'⚡',bg:'#fce7f3',l:'Técnico'},{ico:'📍',bg:'#ecfdf5',l:'SEO Local'}],
+  educacao:    [{ico:'🎓',bg:'#f0fdf4',l:'Curso EAD'},{ico:'📹',bg:'#e0f2fe',l:'Videoaula'},{ico:'🎮',bg:'#fff7ed',l:'Gamificação'},{ico:'📋',bg:'#fdf4ff',l:'Onboarding'},{ico:'📊',bg:'#fce7f3',l:'Trilha'},{ico:'🏆',bg:'#ecfdf5',l:'Certificação'}],
+  engenharia:  [{ico:'🏗️',bg:'#e0f2fe',l:'Projeto Civil'},{ico:'⚙️',bg:'#f0fdf4',l:'Industrial'},{ico:'🔌',bg:'#fff7ed',l:'Elétrico'},{ico:'💧',bg:'#fdf4ff',l:'Hidráulico'},{ico:'🤖',bg:'#fce7f3',l:'Automação'},{ico:'📐',bg:'#ecfdf5',l:'BIM'}],
+  idiomas:     [{ico:'📜',bg:'#fdf4ff',l:'Tradução'},{ico:'🌍',bg:'#e0f2fe',l:'Localização'},{ico:'🎙️',bg:'#f0fdf4',l:'Interpretação'},{ico:'📚',bg:'#fff7ed',l:'Ensino'},{ico:'💼',bg:'#fce7f3',l:'Business'},{ico:'🎬',bg:'#ecfdf5',l:'Legendagem'}],
+  juridico:    [{ico:'📋',bg:'#fdf4ff',l:'Contratos'},{ico:'⚖️',bg:'#e0f2fe',l:'Compliance'},{ico:'🔒',bg:'#f0fdf4',l:'LGPD'},{ico:'💰',bg:'#fff7ed',l:'Tributário'},{ico:'👥',bg:'#fce7f3',l:'Trabalhista'},{ico:'🏢',bg:'#ecfdf5',l:'Societário'}],
+  fotografia:  [{ico:'📸',bg:'#fff7ed',l:'Produto'},{ico:'👔',bg:'#fdf4ff',l:'Corporativo'},{ico:'🍽️',bg:'#f0fdf4',l:'Gastronomia'},{ico:'🏢',bg:'#e0f2fe',l:'Arquitetura'},{ico:'🎉',bg:'#fce7f3',l:'Eventos'},{ico:'✈️',bg:'#ecfdf5',l:'Lifestyle'}],
+  rh:          [{ico:'🎯',bg:'#f0fdf4',l:'Recrutamento'},{ico:'📊',bg:'#e0f2fe',l:'Avaliação'},{ico:'🏢',bg:'#fff7ed',l:'Cultura'},{ico:'📈',bg:'#fdf4ff',l:'Performance'},{ico:'🎓',bg:'#fce7f3',l:'T&D'},{ico:'💼',bg:'#ecfdf5',l:'Remuneração'}],
+  arquitetura: [{ico:'🏠',bg:'#f0fdf4',l:'Residencial'},{ico:'🏢',bg:'#e0f2fe',l:'Comercial'},{ico:'🛋️',bg:'#fff7ed',l:'Interiores'},{ico:'🌿',bg:'#fdf4ff',l:'Sustentável'},{ico:'🏗️',bg:'#fce7f3',l:'Obra'},{ico:'📐',bg:'#ecfdf5',l:'BIM'}],
+  jogos:       [{ico:'🎮',bg:'#e0f2fe',l:'Jogo Mobile'},{ico:'🖥️',bg:'#f0fdf4',l:'PC Game'},{ico:'🎨',bg:'#fff7ed',l:'Arte 2D'},{ico:'🌍',bg:'#fdf4ff',l:'3D'},{ico:'🎯',bg:'#fce7f3',l:'Serious Game'},{ico:'⚡',bg:'#ecfdf5',l:'Hipercasual'}],
+  musica:      [{ico:'🎵',bg:'#fce7f3',l:'Produção'},{ico:'🎤',bg:'#fdf4ff',l:'Gravação'},{ico:'🎬',bg:'#e0f2fe',l:'Trilha'},{ico:'📣',bg:'#f0fdf4',l:'Jingle'},{ico:'🎧',bg:'#fff7ed',l:'Podcast'},{ico:'🎸',bg:'#ecfdf5',l:'Mix'}],
+  blockchain:  [{ico:'⛓️',bg:'#f0fdf4',l:'Smart Contract'},{ico:'🏦',bg:'#e0f2fe',l:'DeFi'},{ico:'🖼️',bg:'#fff7ed',l:'NFT'},{ico:'🔒',bg:'#fdf4ff',l:'Auditoria'},{ico:'🌐',bg:'#fce7f3',l:'Web3'},{ico:'💱',bg:'#ecfdf5',l:'Token'}],
+  saude:       [{ico:'🥗',bg:'#f0fdf4',l:'Nutrição'},{ico:'💪',bg:'#e0f2fe',l:'Treino'},{ico:'🧠',bg:'#fff7ed',l:'Mental'},{ico:'🏃',bg:'#fdf4ff',l:'Fitness'},{ico:'🏥',bg:'#fce7f3',l:'Corporativo'},{ico:'📊',bg:'#ecfdf5',l:'Acompanhamento'}]
+};
+
+var _REVIEW_NAMES = ['Tech Soluções','Digital Agency','Startup BR','Empresa XYZ','E-com Store','Group SA','Holding Ltd','Dev Studio','Consulting Co','Marca Premium'];
+var _REVIEW_TEXTS = [
+  'Profissional excepcional! Entregou o projeto antes do prazo com qualidade acima do esperado. Comunicação impecável durante todo o processo.',
+  'Trabalho incrível! Soube entender exatamente o que precisávamos e trouxe soluções criativas que superaram nossas expectativas.',
+  'Muito profissional e dedicado. Excelente comunicação, prazo cumprido e resultado de alta qualidade. Recomendo sem hesitar.',
+  'Fantástico! Domínio técnico impressionante, proatividade em identificar melhorias e entrega impecável. Com certeza trabalharei novamente.',
+  'Parceiro de negócio confiável. Transparência em todo o processo, entregas pontuais e qualidade consistente. Nota máxima!'
+];
+
+function openDemoProfile(btnEl) {
+  var card = btnEl ? btnEl.closest('.fl-list-card') : null;
+  if(!card) { showToast('Perfil não disponível.', 'info'); return; }
+
+  /* Extract data from card DOM */
+  var name    = (card.querySelector('.fl-list-name') || {}).textContent || 'Freelancer';
+  var role    = (card.querySelector('.fl-list-role') || {}).textContent || '';
+  var rate    = parseFloat(card.getAttribute('data-rate') || '80');
+  var rating  = parseFloat(card.getAttribute('data-rating') || '4.8');
+  var recs    = parseInt(card.getAttribute('data-recs') || '50');
+  var verified= card.getAttribute('data-verified') === 'true';
+  var top     = card.getAttribute('data-top') === 'true';
+  var cat     = card.getAttribute('data-cat') || 'web';
+  var skills  = Array.from(card.querySelectorAll('.fl-skill')).map(function(s){ return s.textContent; });
+
+  /* Extract meta */
+  var metaSpans = Array.from(card.querySelectorAll('.fl-list-meta span'));
+  var reviews = 50, projects = 80, since = 2020;
+  metaSpans.forEach(function(s){
+    var t = s.textContent;
+    if(t.includes('avaliações')) { var m=t.match(/d+/); if(m) reviews=parseInt(m[0]); }
+    if(t.includes('projetos'))   { var m=t.match(/d+/); if(m) projects=parseInt(m[0]); }
+    if(t.includes('Desde'))      { var m=t.match(/d{4}/); if(m) since=parseInt(m[0]); }
+  });
+
+  /* Build location from role */
+  var city = role.split('—')[1] ? role.split('—')[1].trim() : 'Brasil';
+  var title = role.split('—')[0] ? role.split('—')[0].trim().toUpperCase() : cat.toUpperCase();
+
+  /* Generate profile data from templates */
+  var aboutArr = _ABOUT_TPL[cat] || _ABOUT_TPL.web;
+  var seed     = name.length % aboutArr.length;
+  var about    = '<p>' + aboutArr[seed] + '</p>';
+
+  var exp = _EXP_TPL[cat] || _EXP_TPL.web;
+
+  /* Populate modal */
+  var color    = card.querySelector('.fl-list-avatar').style.background || 'linear-gradient(135deg,var(--green),#66BB6A)';
+  var init     = (card.querySelector('.fl-list-avatar') || {}).textContent || name.charAt(0).toUpperCase();
+
+  /* Avatar */
+  var av = document.getElementById('flp-avatar');
+  if(av) { av.style.background = color; av.innerHTML = init; }
+
+  /* Basic info */
+  var el;
+  el=document.getElementById('flp-name');  if(el) el.textContent = name;
+  el=document.getElementById('flp-title'); if(el) el.textContent = title;
+  el=document.getElementById('flp-verified-icon'); if(el) el.textContent = verified ? '✅' : '';
+
+  /* Badges */
+  var badges = [];
+  if(top) badges.push({icon:'🏆',label:'Top Freelancer',bg:'#fef3c7'});
+  if(verified) badges.push({icon:'✅',label:'Verificado',bg:'#e0f2fe'});
+  badges.push({icon:'💼',label: projects + ' projetos',bg:'#f0fdf4'});
+  var bd=document.getElementById('flp-badges');
+  if(bd) bd.innerHTML = badges.map(function(b){ return '<span class="fl-profile-badge" style="background:'+b.bg+';color:#374151;">'+b.icon+' '+b.label+'</span>'; }).join('');
+
+  /* Stars */
+  el=document.getElementById('flp-stars');   if(el) el.textContent='★'.repeat(Math.round(rating))+'☆'.repeat(5-Math.round(rating));
+  el=document.getElementById('flp-rating');  if(el) el.textContent=rating.toFixed(1).replace('.',',');
+  el=document.getElementById('flp-reviews'); if(el) el.textContent='('+reviews+' avaliações)';
+  el=document.getElementById('flp-rating-summary'); if(el) el.textContent='— '+reviews+' avaliações · média '+rating.toFixed(1).replace('.',',');
+
+  /* Stats */
+  el=document.getElementById('flp-stats');
+  if(el) el.innerHTML='<div class="fl-stat-item">Projetos: <strong>'+projects+'</strong></div>'+
+    '<div class="fl-stat-item">Recomendações: <strong>'+recs+'</strong></div>'+
+    '<div class="fl-stat-item">Desde: <strong>'+since+'</strong></div>';
+
+  /* Achievements */
+  var ach=[{ico:'💼',l:'Projetos entregues'},{ico:'⭐',l:'Alta avaliação'},{ico:'👍',l:recs+' recomendações'},{ico:'✅',l:'Perfil verificado'},{ico:'🚀',l:'Desde '+since}];
+  el=document.getElementById('flp-achievements');
+  var colors=['#fef3c7','#e0f2fe','#f0fdf4','#fce7f3','#fdf4ff'];
+  if(el) el.innerHTML=ach.map(function(a,i){ return '<div class="fl-achievement" style="background:'+colors[i]+';" title="'+a.l+'">'+a.ico+'</div>'; }).join('');
+
+  /* About */
+  el=document.getElementById('flp-about'); if(el) el.innerHTML=about;
+
+  /* Experience */
+  el=document.getElementById('flp-experience'); if(el) el.innerHTML=exp;
+
+  /* Skills */
+  el=document.getElementById('flp-skills');
+  if(el) el.innerHTML=skills.map(function(s){ return '<span class="fl-skill-tag">'+s+'</span>'; }).join('');
+
+  /* Portfolio */
+  var po=_PORTFOLIO_TPL[cat]||_PORTFOLIO_TPL.web;
+  el=document.getElementById('flp-portfolio');
+  if(el) el.innerHTML=po.map(function(item){ return '<div class="fl-portfolio-item" style="background:'+item.bg+';\" title="'+item.l+'\" onclick="openFLPortfolioItem(this)">'+item.ico+'</div>'; }).join('');
+
+  /* Reviews — 3 generated */
+  var revs=[];
+  for(var i=0;i<3;i++){
+    var ni=(name.length+i)%_REVIEW_NAMES.length;
+    var ti=(name.length+i+2)%_REVIEW_TEXTS.length;
+    var r=4+(i===0?1:0);
+    revs.push({name:_REVIEW_NAMES[ni],init:_REVIEW_NAMES[ni].charAt(0),rating:Math.min(5,r),text:_REVIEW_TEXTS[ti],date:['Mar 2025','Fev 2025','Jan 2025'][i]});
+  }
+  el=document.getElementById('flp-reviews-list');
+  if(el) el.innerHTML=revs.map(function(r){
+    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name">'+r.name+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
+  }).join('');
+
+  /* Rate & location */
+  el=document.getElementById('flp-rate');     if(el) el.textContent=rate;
+  el=document.getElementById('flp-location'); if(el) el.textContent=city;
+
+  /* Hire button */
+  var hb=document.getElementById('flp-hire-btn');
+  if(hb) hb.onclick=function(){ closeModal('fl-profile'); openContractModal({name:name,role:title,value:rate*40,project:'Meu Projeto',deadline:'30 dias'}); };
+
+  openModal('fl-profile');
+}
+
+
+function openFLPortfolioItem(el) {
+  var label = el ? (el.getAttribute('title') || 'Portfolio') : 'Portfolio';
+  showToast('Portfolio: ' + label, 'info');
+}
 </script>
 </body>
 </html>
