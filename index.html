@@ -3230,6 +3230,62 @@ section { padding: 64px 0; }
 .profile-avatar-big img {
   width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
 }
+/* ═══════════════════════════════════════
+   MODAL: CARREIRAS
+═══════════════════════════════════════ */
+#overlay-careers .modal { max-width: 760px; }
+.careers-hero {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 28px 28px 24px; margin: -24px -24px 24px;
+  color: #fff;
+}
+.careers-hero-title { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+.careers-hero-sub   { font-size: 14px; color: #94a3b8; line-height: 1.6; max-width: 480px; }
+.careers-stats {
+  display: flex; gap: 24px; margin-top: 18px; flex-wrap: wrap;
+}
+.careers-stat { text-align: center; }
+.careers-stat .val { font-size: 22px; font-weight: 800; color: #4ade80; }
+.careers-stat .lbl { font-size: 11px; color: #94a3b8; margin-top: 1px; }
+
+.careers-section-title {
+  font-size: 13px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .5px;
+  margin: 20px 0 10px;
+}
+.job-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 16px; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--radius-lg);
+  margin-bottom: 8px; cursor: pointer; transition: all var(--transition);
+}
+.job-card:hover { border-color: var(--green); background: #f0fdf4; transform: translateX(3px); }
+.job-icon {
+  width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.job-info { flex: 1; }
+.job-title   { font-size: 14px; font-weight: 700; color: var(--text); }
+.job-meta    { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.job-tag {
+  font-size: 10px; font-weight: 600; padding: 2px 8px;
+  border-radius: 20px; border: 1px solid var(--border-2);
+  color: var(--text-3); background: var(--surface);
+}
+.job-tag.remote  { color: #16a34a; background: #f0fdf4; border-color: #bbf7d0; }
+.job-tag.hybrid  { color: #d97706; background: #fffbeb; border-color: #fde68a; }
+.job-tag.new     { color: #7c3aed; background: #f5f3ff; border-color: #ddd6fe; }
+
+/* Apply form */
+.apply-header {
+  background: var(--green); border-radius: var(--radius-lg);
+  padding: 16px 18px; margin-bottom: 20px; color: #fff;
+  display: flex; align-items: center; gap: 12px;
+}
+.apply-header-icon { font-size: 28px; }
+.apply-header-title { font-size: 16px; font-weight: 800; }
+.apply-header-sub   { font-size: 12px; opacity: .85; margin-top: 2px; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -7226,6 +7282,259 @@ section { padding: 64px 0; }
     </div>
   </div>
 </div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CARREIRAS
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-careers" onclick="if(event.target===this)closeModal('careers')">
+  <div class="modal" style="max-width:760px;max-height:90vh;overflow-y:auto;padding:24px;">
+
+    <!-- Hero -->
+    <div class="careers-hero">
+      <button class="modal-close" style="position:absolute;top:16px;right:16px;color:#fff;" onclick="closeModal('careers')">&#x2715;</button>
+      <div style="font-size:13px;color:#4ade80;font-weight:600;margin-bottom:8px;">&#128640; Venha crescer com a gente</div>
+      <div class="careers-hero-title">Trabalhe na HereWork</div>
+      <div class="careers-hero-sub">Somos uma startup de tecnologia que est&aacute; transformando o mercado de trabalho freelancer no Brasil. Buscamos pessoas apaixonadas por inovar.</div>
+      <div class="careers-stats">
+        <div class="careers-stat"><div class="val">47</div><div class="lbl">pessoas no time</div></div>
+        <div class="careers-stat"><div class="val">100%</div><div class="lbl">remote-first</div></div>
+        <div class="careers-stat"><div class="val">12</div><div class="lbl">vagas abertas</div></div>
+        <div class="careers-stat"><div class="val">4,9&#x2605;</div><div class="lbl">Glassdoor</div></div>
+      </div>
+    </div>
+
+    <!-- Benefícios -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:8px;">
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#128187;</div><b>Home Office</b><div style="color:var(--text-3);margin-top:2px;">100% remoto</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#127970;</div><b>Aux&iacute;lio R$ 300</b><div style="color:var(--text-3);margin-top:2px;">Home office</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#127891;</div><b>Bolsa estudos</b><div style="color:var(--text-3);margin-top:2px;">R$ 500/m&ecirc;s</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#129657;</div><b>Plano de Sa&uacute;de</b><div style="color:var(--text-3);margin-top:2px;">Unimed nacional</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#9889;</div><b>Stock Options</b><div style="color:var(--text-3);margin-top:2px;">Para todos</div>
+      </div>
+      <div style="background:var(--bg);border-radius:var(--radius);padding:12px;text-align:center;font-size:12px;">
+        <div style="font-size:22px;margin-bottom:4px;">&#127774;</div><b>Sexta flex</b><div style="color:var(--text-3);margin-top:2px;">Sai &agrave;s 14h</div>
+      </div>
+    </div>
+
+    <!-- Vagas -->
+    <div class="careers-section-title">&#128187; Tecnologia & Produto</div>
+
+    <div class="job-card" onclick="openJobApply('Engenheiro(a) Frontend Sênior','Tecnologia','React, TypeScript, Next.js')">
+      <div class="job-icon" style="background:#e0f2fe;">&#128187;</div>
+      <div class="job-info">
+        <div class="job-title">Engenheiro(a) Frontend S&ecirc;nior</div>
+        <div class="job-meta">
+          <span class="job-tag remote">&#127968; Remoto</span>
+          <span class="job-tag">CLT ou PJ</span>
+          <span class="job-tag new">&#10024; Nova</span>
+          <span class="job-tag">React &bull; TypeScript &bull; Next.js</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="job-card" onclick="openJobApply('Engenheiro(a) Backend Pleno','Tecnologia','Node.js, PostgreSQL, AWS')">
+      <div class="job-icon" style="background:#f0fdf4;">&#9881;&#65039;</div>
+      <div class="job-info">
+        <div class="job-title">Engenheiro(a) Backend Pleno</div>
+        <div class="job-meta">
+          <span class="job-tag remote">&#127968; Remoto</span>
+          <span class="job-tag">CLT ou PJ</span>
+          <span class="job-tag">Node.js &bull; PostgreSQL &bull; AWS</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="job-card" onclick="openJobApply('Product Manager','Produto','Growth, Métricas, Agile')">
+      <div class="job-icon" style="background:#fdf4ff;">&#128202;</div>
+      <div class="job-info">
+        <div class="job-title">Product Manager</div>
+        <div class="job-meta">
+          <span class="job-tag hybrid">&#127970; H&iacute;brido SP</span>
+          <span class="job-tag">CLT</span>
+          <span class="job-tag new">&#10024; Nova</span>
+          <span class="job-tag">Growth &bull; M&eacute;tricas &bull; Agile</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="job-card" onclick="openJobApply('Designer de Produto (UI/UX)','Design','Figma, Design System, Pesquisa')">
+      <div class="job-icon" style="background:#fff7ed;">&#127912;</div>
+      <div class="job-info">
+        <div class="job-title">Designer de Produto (UI/UX)</div>
+        <div class="job-meta">
+          <span class="job-tag remote">&#127968; Remoto</span>
+          <span class="job-tag">CLT ou PJ</span>
+          <span class="job-tag">Figma &bull; Design System &bull; Pesquisa</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="job-card" onclick="openJobApply('DevOps / SRE','Tecnologia','AWS, Kubernetes, CI/CD')">
+      <div class="job-icon" style="background:#f0fdf4;">&#9728;&#65039;</div>
+      <div class="job-info">
+        <div class="job-title">DevOps / SRE</div>
+        <div class="job-meta">
+          <span class="job-tag remote">&#127968; Remoto</span>
+          <span class="job-tag">PJ</span>
+          <span class="job-tag">AWS &bull; Kubernetes &bull; CI/CD</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="careers-section-title">&#128200; Comercial & Marketing</div>
+
+    <div class="job-card" onclick="openJobApply('Customer Success Manager','Comercial','CRM, Suporte, Onboarding')">
+      <div class="job-icon" style="background:#ecfdf5;">&#129309;</div>
+      <div class="job-info">
+        <div class="job-title">Customer Success Manager</div>
+        <div class="job-meta">
+          <span class="job-tag hybrid">&#127970; H&iacute;brido SP</span>
+          <span class="job-tag">CLT</span>
+          <span class="job-tag">CRM &bull; Suporte &bull; Onboarding</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="job-card" onclick="openJobApply('Especialista em Growth Marketing','Marketing','SEO, Paid Media, Analytics')">
+      <div class="job-icon" style="background:#eff6ff;">&#128293;</div>
+      <div class="job-info">
+        <div class="job-title">Especialista em Growth Marketing</div>
+        <div class="job-meta">
+          <span class="job-tag remote">&#127968; Remoto</span>
+          <span class="job-tag">CLT ou PJ</span>
+          <span class="job-tag new">&#10024; Nova</span>
+          <span class="job-tag">SEO &bull; Paid Media &bull; Analytics</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div class="careers-section-title">&#127979; Juridico & Financeiro</div>
+
+    <div class="job-card" onclick="openJobApply('Analista Financeiro Pleno','Financeiro','Excel, Power BI, Contabilidade')">
+      <div class="job-icon" style="background:#fff7ed;">&#128181;</div>
+      <div class="job-info">
+        <div class="job-title">Analista Financeiro Pleno</div>
+        <div class="job-meta">
+          <span class="job-tag hybrid">&#127970; H&iacute;brido SP</span>
+          <span class="job-tag">CLT</span>
+          <span class="job-tag">Excel &bull; Power BI &bull; Contabilidade</span>
+        </div>
+      </div>
+      <span style="font-size:18px;color:var(--green);">&#8594;</span>
+    </div>
+
+    <div style="text-align:center;padding:20px 0 4px;">
+      <div style="font-size:13px;color:var(--text-3);">N&atilde;o encontrou sua vaga? Envie seu curr&iacute;culo para</div>
+      <a href="mailto:talentos@herework.com.br" style="color:var(--green);font-weight:600;font-size:14px;">talentos@herework.com.br</a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CANDIDATURA À VAGA
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-job-apply" onclick="if(event.target===this)closeModal('job-apply')">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">&#128196; Candidatura</div>
+        <div class="modal-subtitle" id="job-apply-subtitle">Envie seu curr&iacute;culo para esta vaga</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('job-apply')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Vaga selecionada -->
+      <div class="apply-header" id="job-apply-header">
+        <div class="apply-header-icon">&#128203;</div>
+        <div>
+          <div class="apply-header-title" id="job-apply-title">Vaga</div>
+          <div class="apply-header-sub" id="job-apply-dept">Departamento &bull; Remoto</div>
+        </div>
+      </div>
+
+      <!-- Formulário -->
+      <div class="form-group">
+        <label class="form-label">Nome completo <span style="color:#ef4444;">*</span></label>
+        <input class="form-input" id="apply-name" type="text" maxlength="80" placeholder="Seu nome completo">
+        <div class="form-error" id="err-apply-name"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">E-mail <span style="color:#ef4444;">*</span></label>
+        <input class="form-input" id="apply-email" type="email" maxlength="120" placeholder="seu@email.com">
+        <div class="form-error" id="err-apply-email"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Telefone / WhatsApp</label>
+        <input class="form-input" id="apply-phone" type="tel" maxlength="20" placeholder="(11) 99999-9999">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">LinkedIn (opcional)</label>
+        <input class="form-input" id="apply-linkedin" type="url" maxlength="200" placeholder="https://linkedin.com/in/seuperfil">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Por que voc&ecirc; quer trabalhar na HereWork? <span style="color:#ef4444;">*</span></label>
+        <textarea class="form-textarea" id="apply-motivation" maxlength="1000" placeholder="Conte um pouco sobre voc&ecirc;, sua experi&ecirc;ncia e por que se identifica com nossa miss&atilde;o..." style="min-height:100px;"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:3px;">
+          <span style="font-size:11px;color:var(--text-4);" id="apply-motivation-count">0 / 100 m&iacute;n.</span>
+        </div>
+        <div class="form-error" id="err-apply-motivation"></div>
+      </div>
+
+      <!-- Upload CV -->
+      <div class="form-group">
+        <label class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
+        <div class="pdf-upload-area" id="apply-cv-zone" onclick="document.getElementById('apply-cv-input').click()"
+          ondragover="applyDragOver(event)" ondragleave="applyDragLeave(event)" ondrop="applyDrop(event)">
+          <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" onchange="applyCVSelected(this)">
+          <div id="apply-cv-placeholder">
+            <div class="pdf-upload-icon">&#128196;</div>
+            <div class="pdf-upload-text">Clique ou arraste seu curr&iacute;culo aqui</div>
+            <div class="pdf-upload-sub">Apenas .pdf &bull; M&aacute;x. 5 MB</div>
+          </div>
+        </div>
+        <div class="pdf-file-preview" id="apply-cv-preview">
+          <span class="pdf-file-icon">&#128213;</span>
+          <div class="pdf-file-info">
+            <div class="pdf-file-name" id="apply-cv-name">curriculo.pdf</div>
+            <div class="pdf-file-size" id="apply-cv-size">0 KB</div>
+          </div>
+          <button type="button" class="pdf-file-remove" onclick="applyCVRemove(event)">&#x2715;</button>
+        </div>
+        <div class="form-error" id="err-apply-cv"></div>
+      </div>
+
+      <button class="btn btn-primary btn-block btn-lg" id="apply-submit-btn" onclick="submitJobApplication()">
+        &#128228; Enviar Candidatura
+      </button>
+      <div style="font-size:11px;color:var(--text-4);text-align:center;margin-top:8px;">
+        Retorno em at&eacute; 7 dias &uacute;teis &nbsp;&middot;&nbsp; Seus dados s&atilde;o tratados conforme a LGPD
+      </div>
+
+    </div>
+  </div>
+</div>
 <!-- MODAL: ADMIN LOGIN -->
 <div class="overlay" id="overlay-admin-login" onclick="if(event.target===this)return;">
   <div class="modal" style="max-width:400px;">
@@ -7355,7 +7664,7 @@ section { padding: 64px 0; }
         <div class="footer-col-title" data-pt="Empresa" data-es="Empresa">Empresa</div>
         <ul class="footer-links">
           <li><a href="#" onclick="openInfoPage('about');return false;" data-pt="Sobre Nós" data-es="Sobre Nosotros">Sobre Nós</a></li>
-          <li><a href="#" onclick="openInfoPage('careers');return false;" data-pt="Carreiras" data-es="Carreras">Carreiras</a></li>
+          <li><a href="#" onclick="openModal('careers');return false;" data-pt="Carreiras" data-es="Carreras">Carreiras</a></li>
 
           <li><a href="#" onclick="openModal('contact');return false;" data-pt="Contato" data-es="Contacto">Contato</a></li>
           <li><a href="#" onclick="openInfoPage('partners');return false;" data-pt="Parcerias" data-es="Alianzas">Parcerias</a></li>
@@ -12583,6 +12892,156 @@ function _renderMyReceived() {
     '</div>';
   }).join('');
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   CARREIRAS — Job listings & Application
+═══════════════════════════════════════════════════════════ */
+var _currentJob = { title: '', dept: '', skills: '' };
+
+function openJobApply(title, dept, skills) {
+  _currentJob = { title: title, dept: dept, skills: skills };
+
+  var el;
+  el = document.getElementById('job-apply-title');    if(el) el.textContent = title;
+  el = document.getElementById('job-apply-dept');     if(el) el.textContent = dept + ' · Remoto / Híbrido';
+  el = document.getElementById('job-apply-subtitle'); if(el) el.textContent = 'Candidatura para: ' + title;
+
+  /* Pre-fill if logged in */
+  if(_session) {
+    var nameEl = document.getElementById('apply-name');
+    var emailEl = document.getElementById('apply-email');
+    if(nameEl && !nameEl.value)  nameEl.value  = _session.name  || '';
+    if(emailEl && !emailEl.value) emailEl.value = _session.email || '';
+  }
+
+  /* Reset CV */
+  applyCVRemove({ stopPropagation: function(){} });
+
+  /* Clear errors */
+  ['err-apply-name','err-apply-email','err-apply-motivation','err-apply-cv'].forEach(function(id) {
+    var e = document.getElementById(id); if(e){ e.textContent=''; e.classList.remove('show'); }
+  });
+
+  /* Reset motivation counter */
+  var m = document.getElementById('apply-motivation');
+  var c = document.getElementById('apply-motivation-count');
+  if(m) m.value = '';
+  if(c) c.textContent = '0 / 100 mín.';
+
+  /* Close careers list modal, open apply modal */
+  closeModal('careers');
+  setTimeout(function(){ openModal('job-apply'); }, 200);
+}
+
+/* ── Motivation counter ── */
+document.addEventListener('DOMContentLoaded', function() {
+  var ta = document.getElementById('apply-motivation');
+  if(ta) ta.addEventListener('input', function() {
+    var len = ta.value.length;
+    var c = document.getElementById('apply-motivation-count');
+    if(c) {
+      c.textContent = len + ' / 100 mín.';
+      c.style.color = len >= 100 ? 'var(--green)' : 'var(--text-4)';
+    }
+  });
+});
+
+/* ── CV Upload ── */
+function applyCVSelected(input) {
+  if(input.files && input.files[0]) _applyCVSet(input.files[0]);
+}
+function applyDragOver(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('apply-cv-zone'); if(z) z.classList.add('drag-over');
+}
+function applyDragLeave(e) {
+  var z = document.getElementById('apply-cv-zone'); if(z) z.classList.remove('drag-over');
+}
+function applyDrop(e) {
+  e.preventDefault(); e.stopPropagation();
+  var z = document.getElementById('apply-cv-zone'); if(z) z.classList.remove('drag-over');
+  var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+  if(f) _applyCVSet(f);
+}
+function _applyCVSet(f) {
+  var err = document.getElementById('err-apply-cv');
+  if(err){ err.textContent=''; err.classList.remove('show'); }
+
+  if(f.type !== 'application/pdf' && !f.name.toLowerCase().endsWith('.pdf')) {
+    if(err){ err.textContent='Apenas arquivos PDF são aceitos.'; err.classList.add('show'); } return;
+  }
+  if(f.size > 5 * 1024 * 1024) {
+    if(err){ err.textContent='O currículo deve ter no máximo 5 MB.'; err.classList.add('show'); } return;
+  }
+  var kb = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/(1024*1024)).toFixed(1)+' MB';
+  var nm = document.getElementById('apply-cv-name');    if(nm) nm.textContent = f.name;
+  var sz = document.getElementById('apply-cv-size');    if(sz) sz.textContent = kb;
+  var pv = document.getElementById('apply-cv-preview'); if(pv) pv.classList.add('show');
+  var zn = document.getElementById('apply-cv-zone');    if(zn) zn.classList.add('has-file');
+  var ph = document.getElementById('apply-cv-placeholder'); if(ph) ph.style.display = 'none';
+}
+function applyCVRemove(e) {
+  e.stopPropagation();
+  var inp = document.getElementById('apply-cv-input');   if(inp) inp.value = '';
+  var pv  = document.getElementById('apply-cv-preview'); if(pv)  pv.classList.remove('show');
+  var zn  = document.getElementById('apply-cv-zone');    if(zn)  zn.classList.remove('has-file');
+  var ph  = document.getElementById('apply-cv-placeholder'); if(ph) ph.style.display = '';
+  var err = document.getElementById('err-apply-cv'); if(err){ err.textContent=''; err.classList.remove('show'); }
+}
+
+/* ── Submit Application ── */
+function submitJobApplication() {
+  var nameEl  = document.getElementById('apply-name');
+  var emailEl = document.getElementById('apply-email');
+  var motivEl = document.getElementById('apply-motivation');
+  var cvInput = document.getElementById('apply-cv-input');
+  var btn     = document.getElementById('apply-submit-btn');
+  var ok = true;
+
+  /* Clear errors */
+  ['err-apply-name','err-apply-email','err-apply-motivation','err-apply-cv'].forEach(function(id){
+    var e=document.getElementById(id); if(e){e.textContent='';e.classList.remove('show');}
+  });
+
+  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
+    var e=document.getElementById('err-apply-name');
+    if(e){e.textContent='Informe seu nome completo.';e.classList.add('show');} ok=false;
+  }
+  if(!emailEl || !/^[^s@]+@[^s@]+.[^s@]+$/.test(emailEl.value.trim())) {
+    var e=document.getElementById('err-apply-email');
+    if(e){e.textContent='Informe um e-mail válido.';e.classList.add('show');} ok=false;
+  }
+  if(!motivEl || motivEl.value.trim().length < 100) {
+    var e=document.getElementById('err-apply-motivation');
+    if(e){e.textContent='Escreva pelo menos 100 caracteres.';e.classList.add('show');} ok=false;
+  }
+  if(!cvInput || !cvInput.files || !cvInput.files.length) {
+    var e=document.getElementById('err-apply-cv');
+    if(e){e.textContent='Anexe seu currículo em PDF.';e.classList.add('show');} ok=false;
+  }
+  if(!ok) return;
+
+  _setBtnLoading(btn, true);
+
+  setTimeout(function() {
+    _setBtnLoading(btn, false);
+    closeModal('job-apply');
+
+    var name = nameEl ? nameEl.value.trim().split(' ')[0] : '';
+    showToast(
+      '🎉 Candidatura enviada, ' + name + '! Retornaremos em até 7 dias úteis. Boa sorte!',
+      'success'
+    );
+
+    /* Clear form */
+    if(nameEl)  nameEl.value  = '';
+    if(emailEl) emailEl.value = '';
+    if(motivEl) motivEl.value = '';
+    applyCVRemove({ stopPropagation: function(){} });
+  }, 1000);
+}
+
 </script>
 </body>
 </html>
