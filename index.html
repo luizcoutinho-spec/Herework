@@ -10635,8 +10635,18 @@ function closeUserMenu() {
 }
 function userLogout() {
   _clearSession();
-  showToast(lang()==='pt' ? 'Sessão encerrada. Até logo!' : 'Sesión cerrada. ¡Hasta luego!', 'info');
+  closeUserMenu();
+  showPage('home');
+  document.querySelectorAll('.overlay.open').forEach(function(o){ o.classList.remove('open'); });
+  document.body.style.overflow = '';
+  ['profile-name','profile-email','profile-title','profile-bio','profile-phone','profile-url'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.value='';
+  });
+  var sel=document.getElementById('profile-state'); if(sel) sel.value='';
+  var city=document.getElementById('profile-city'); if(city) city.innerHTML='<option value="">Selecione o estado primeiro...</option>';
+  showToast(lang()==='pt' ? '&#128075; At&#233; logo! Volte sempre.' : '&#128075; &#xa1;Hasta luego!', 'info');
 }
+
 // Close dropdown when clicking outside
 document.addEventListener('click', function(ev) {
   var chip = document.getElementById('nav-user-chip');
