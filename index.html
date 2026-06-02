@@ -3286,6 +3286,137 @@ section { padding: 64px 0; }
 .apply-header-icon { font-size: 28px; }
 .apply-header-title { font-size: 16px; font-weight: 800; }
 .apply-header-sub   { font-size: 12px; opacity: .85; margin-top: 2px; }
+/* ═══════════════════════════════════════
+   CENTRAL DE AJUDA
+═══════════════════════════════════════ */
+#overlay-help-center .modal {
+  max-width: 820px; padding: 0; overflow: hidden;
+  display: flex; flex-direction: column; height: 88vh; max-height: 720px;
+}
+.hc-layout { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.hc-sidebar {
+  width: 220px; flex-shrink: 0; background: var(--bg);
+  border-right: 1px solid var(--border-2);
+  overflow-y: auto; padding: 12px 0;
+}
+.hc-sidebar::-webkit-scrollbar { width: 4px; }
+.hc-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.hc-cat-btn {
+  width: 100%; text-align: left; padding: 10px 16px;
+  border: none; background: none; cursor: pointer;
+  font-size: 13px; color: var(--text-2);
+  display: flex; align-items: center; gap: 9px;
+  transition: all var(--transition); border-radius: 0;
+}
+.hc-cat-btn:hover  { background: var(--surface); color: var(--text); }
+.hc-cat-btn.active { background: var(--surface); color: var(--green); font-weight: 700;
+  border-right: 3px solid var(--green); }
+.hc-cat-icon { font-size: 16px; flex-shrink: 0; }
+.hc-cat-count {
+  margin-left: auto; background: var(--border); border-radius: 20px;
+  padding: 1px 7px; font-size: 10px; color: var(--text-3);
+}
+.hc-cat-btn.active .hc-cat-count { background: #dcfce7; color: var(--green); }
+
+/* Main content */
+.hc-main { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.hc-main::-webkit-scrollbar { width: 5px; }
+.hc-main::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* Header */
+.hc-header {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  padding: 20px 24px; flex-shrink: 0;
+}
+.hc-header-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+.hc-search-wrap  { position: relative; }
+.hc-search-input {
+  width: 100%; height: 40px; border-radius: var(--radius-full);
+  border: none; padding: 0 16px 0 40px; font-size: 14px;
+  background: rgba(255,255,255,.12); color: #fff; outline: none;
+}
+.hc-search-input::placeholder { color: rgba(255,255,255,.45); }
+.hc-search-input:focus { background: rgba(255,255,255,.18); }
+.hc-search-ico {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 15px; pointer-events: none;
+}
+.hc-close-btn {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; color: #94a3b8; font-size: 18px;
+  cursor: pointer; line-height: 1;
+}
+
+/* Article list */
+.hc-article-list { padding: 16px 20px; }
+.hc-article-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 14px; border-radius: var(--radius-lg);
+  cursor: pointer; transition: all var(--transition);
+  border: 1px solid transparent;
+}
+.hc-article-item:hover { background: var(--bg); border-color: var(--border-2); }
+.hc-article-icon { font-size: 20px; flex-shrink: 0; margin-top: 1px; }
+.hc-article-info {}
+.hc-article-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+.hc-article-desc  { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+.hc-article-tags  { display: flex; gap: 5px; margin-top: 5px; flex-wrap: wrap; }
+.hc-article-tag   {
+  font-size: 10px; padding: 1px 7px; border-radius: 20px;
+  background: var(--bg); border: 1px solid var(--border-2); color: var(--text-4);
+}
+
+/* Article detail */
+.hc-article-detail { padding: 20px 24px; flex: 1; }
+.hc-breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--text-3); margin-bottom: 16px;
+}
+.hc-breadcrumb a { color: var(--green); cursor: pointer; text-decoration: none; }
+.hc-detail-title  { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.hc-detail-meta   { font-size: 11px; color: var(--text-4); margin-bottom: 20px; display: flex; gap: 12px; }
+.hc-detail-body   { font-size: 14px; color: var(--text-2); line-height: 1.8; }
+.hc-detail-body h3 { font-size: 15px; font-weight: 700; color: var(--text); margin: 18px 0 8px; }
+.hc-detail-body p  { margin-bottom: 12px; }
+.hc-detail-body ul { padding-left: 18px; margin-bottom: 12px; }
+.hc-detail-body li { margin-bottom: 5px; }
+.hc-detail-body .tip {
+  background: #f0fdf4; border-left: 3px solid var(--green);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 14px; margin: 12px 0; font-size: 13px; color: #166534;
+}
+.hc-detail-body .warn {
+  background: #fffbeb; border-left: 3px solid #f59e0b;
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 10px 14px; margin: 12px 0; font-size: 13px; color: #92400e;
+}
+.hc-feedback {
+  margin-top: 28px; padding-top: 18px;
+  border-top: 1px solid var(--border-2); text-align: center;
+}
+.hc-feedback-title { font-size: 13px; color: var(--text-3); margin-bottom: 10px; }
+.hc-feedback-btns  { display: flex; gap: 8px; justify-content: center; }
+.hc-feedback-btn {
+  padding: 7px 18px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 13px; cursor: pointer; transition: all var(--transition);
+}
+.hc-feedback-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* Search results */
+.hc-search-results { padding: 16px 20px; }
+.hc-no-results { text-align: center; padding: 40px 20px; color: var(--text-3); }
+
+/* Footer */
+.hc-footer {
+  padding: 14px 20px; border-top: 1px solid var(--border-2);
+  background: var(--bg); display: flex; align-items: center;
+  justify-content: space-between; gap: 10px; flex-shrink: 0;
+}
+.hc-footer-text { font-size: 12px; color: var(--text-3); }
+.hc-contact-btns { display: flex; gap: 8px; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -3297,7 +3428,7 @@ section { padding: 64px 0; }
 <div class="topbar">
   <div class="topbar-inner">
     <div class="topbar-left">
-      <a href="#" class="topbar-link" onclick="openInfoPage('help');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
+      <a href="#" class="topbar-link" onclick="openModal('help-center');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
       <span class="topbar-sep">·</span>
       <a href="#" class="topbar-link" onclick="openInfoPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a>
       <span class="topbar-sep">·</span>
@@ -7532,6 +7663,161 @@ section { padding: 64px 0; }
         Retorno em at&eacute; 7 dias &uacute;teis &nbsp;&middot;&nbsp; Seus dados s&atilde;o tratados conforme a LGPD
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: CENTRAL DE AJUDA
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-help-center" onclick="if(event.target===this)closeModal('help-center')">
+  <div class="modal" style="max-width:820px;padding:0;overflow:hidden;display:flex;flex-direction:column;height:88vh;max-height:720px;">
+
+    <!-- Header com busca -->
+    <div class="hc-header">
+      <button class="hc-close-btn" onclick="closeModal('help-center')">&#x2715;</button>
+      <div class="hc-header-title">&#129497; Como podemos ajudar?</div>
+      <div class="hc-search-wrap">
+        <span class="hc-search-ico">&#128269;</span>
+        <input class="hc-search-input" id="hc-search" type="text" maxlength="100"
+          placeholder="Buscar artigos, perguntas frequentes..."
+          oninput="hcSearch(this.value)">
+      </div>
+    </div>
+
+    <!-- Layout sidebar + conteúdo -->
+    <div class="hc-layout">
+
+      <!-- Sidebar de categorias -->
+      <div class="hc-sidebar" id="hc-sidebar">
+        <div style="padding:8px 16px 6px;font-size:10px;font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:.5px;">Categorias</div>
+        <button class="hc-cat-btn active" id="hccat-start" onclick="hcShowCategory('start')">
+          <span class="hc-cat-icon">&#128640;</span> Primeiros Passos <span class="hc-cat-count">6</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-account" onclick="hcShowCategory('account')">
+          <span class="hc-cat-icon">&#128100;</span> Conta &amp; Perfil <span class="hc-cat-count">5</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-contracts" onclick="hcShowCategory('contracts')">
+          <span class="hc-cat-icon">&#128274;</span> Contratos <span class="hc-cat-count">6</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-payments" onclick="hcShowCategory('payments')">
+          <span class="hc-cat-icon">&#128179;</span> Pagamentos <span class="hc-cat-count">7</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-freelancer" onclick="hcShowCategory('freelancer')">
+          <span class="hc-cat-icon">&#129489;&#8205;&#128187;</span> Para Freelancers <span class="hc-cat-count">5</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-client" onclick="hcShowCategory('client')">
+          <span class="hc-cat-icon">&#127968;</span> Para Clientes <span class="hc-cat-count">5</span>
+        </button>
+        <button class="hc-cat-btn" id="hccat-security" onclick="hcShowCategory('security')">
+          <span class="hc-cat-icon">&#128274;</span> Seguran&ccedil;a <span class="hc-cat-count">4</span>
+        </button>
+        <div style="padding:8px 16px 6px;margin-top:8px;font-size:10px;font-weight:700;color:var(--text-4);text-transform:uppercase;letter-spacing:.5px;border-top:1px solid var(--border-2);">Suporte</div>
+        <button class="hc-cat-btn" onclick="hcOpenTicket()">
+          <span class="hc-cat-icon">&#128222;</span> Abrir Chamado
+        </button>
+        <button class="hc-cat-btn" onclick="hcOpenChat()">
+          <span class="hc-cat-icon">&#128172;</span> Chat ao Vivo
+        </button>
+      </div>
+
+      <!-- Conteúdo principal -->
+      <div class="hc-main" id="hc-main">
+        <!-- Preenchido por JS -->
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="hc-footer">
+      <span class="hc-footer-text">&#128222; suporte@herework.com.br &nbsp;&middot;&nbsp; Seg-Sex 9h&ndash;18h</span>
+      <div class="hc-contact-btns">
+        <button class="btn btn-outline btn-sm" onclick="hcOpenTicket()">&#128196; Abrir chamado</button>
+        <button class="btn btn-primary btn-sm" onclick="hcOpenChat()">&#128172; Chat ao vivo</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL: ABRIR CHAMADO DE SUPORTE
+═══════════════════════════════════════════ -->
+<div class="overlay" id="overlay-support-ticket" onclick="if(event.target===this)closeModal('support-ticket')">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">&#128196; Abrir Chamado de Suporte</div>
+        <div class="modal-subtitle">Nossa equipe responde em at&eacute; 24h &uacute;teis</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('support-ticket')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Nome completo</label>
+        <input class="form-input" id="ticket-name" type="text" maxlength="80" placeholder="Seu nome">
+        <div class="form-error" id="err-ticket-name"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" id="ticket-email" type="email" maxlength="120" placeholder="seu@email.com">
+        <div class="form-error" id="err-ticket-email"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria do problema</label>
+        <select class="form-select" id="ticket-category">
+          <option value="">Selecione...</option>
+          <option>Conta e acesso</option>
+          <option>Pagamento e fatura</option>
+          <option>Contrato e entrega</option>
+          <option>Perfil e configura&ccedil;&otilde;es</option>
+          <option>Bug / erro no sistema</option>
+          <option>Seguran&ccedil;a e fraude</option>
+          <option>Outro</option>
+        </select>
+        <div class="form-error" id="err-ticket-category"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prioridade</label>
+        <div style="display:flex;gap:8px;">
+          <label style="flex:1;cursor:pointer;">
+            <input type="radio" name="ticket-priority" value="low" checked style="accent-color:var(--green);">
+            <span style="font-size:13px;margin-left:5px;">&#128994; Baixa</span>
+          </label>
+          <label style="flex:1;cursor:pointer;">
+            <input type="radio" name="ticket-priority" value="medium" style="accent-color:#f59e0b;">
+            <span style="font-size:13px;margin-left:5px;">&#128993; M&eacute;dia</span>
+          </label>
+          <label style="flex:1;cursor:pointer;">
+            <input type="radio" name="ticket-priority" value="high" style="accent-color:#ef4444;">
+            <span style="font-size:13px;margin-left:5px;">&#128308; Alta</span>
+          </label>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descreva o problema <span style="color:#ef4444;">*</span></label>
+        <textarea class="form-textarea" id="ticket-desc" maxlength="2000"
+          placeholder="Descreva o problema com o m&aacute;ximo de detalhes. Inclua etapas para reproduzir, mensagens de erro, etc."
+          style="min-height:120px;"></textarea>
+        <div class="form-error" id="err-ticket-desc"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
+        <div class="pdf-upload-area" id="ticket-file-zone" style="padding:12px;"
+          onclick="document.getElementById('ticket-file-input').click()">
+          <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" onchange="ticketFileSelected(this)">
+          <div id="ticket-file-ph" style="text-align:center;font-size:12px;color:var(--text-4);">
+            &#128206; Clique para anexar arquivo (PDF ou imagem &bull; m&aacute;x. 5 MB)
+          </div>
+          <div id="ticket-file-preview" style="display:none;font-size:12px;color:var(--green);font-weight:600;"></div>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-block btn-lg" id="ticket-submit-btn" onclick="submitSupportTicket()">
+        &#128228; Enviar Chamado
+      </button>
+      <div style="font-size:11px;color:var(--text-4);text-align:center;margin-top:8px;">
+        N&uacute;mero de protocolo gerado ap&oacute;s envio &nbsp;&middot;&nbsp; Acompanhe pelo e-mail cadastrado
+      </div>
     </div>
   </div>
 </div>
@@ -13041,6 +13327,470 @@ function submitJobApplication() {
     applyCVRemove({ stopPropagation: function(){} });
   }, 1000);
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   CENTRAL DE AJUDA — Complete Help Center
+═══════════════════════════════════════════════════════════ */
+
+/* ── Articles database ── */
+var _hcArticles = {
+
+  start: [
+    { id:'s1', icon:'🚀', title:'Como criar minha conta na HereWork',
+      desc:'Passo a passo completo para se cadastrar e ativar sua conta.',
+      tags:['Cadastro','Conta'],
+      body: '<h3>Criando sua conta</h3><p>Acesse herework.vercel.app e clique em <strong>Cadastrar-se</strong> no canto superior direito.</p><ul><li>Escolha seu perfil: <strong>Empresa/Cliente</strong> ou <strong>Freelancer</strong></li><li>Preencha nome completo, e-mail e senha (mín. 6 caracteres)</li><li>Clique em "Criar conta grátis"</li></ul><div class="tip">✅ Sua conta é ativada na hora — sem confirmação de e-mail necessária!</div><h3>Após o cadastro</h3><p>Você será redirecionado automaticamente para o seu painel pessoal (Dashboard). Complete seu perfil em <strong>Meu Painel → Meu Perfil</strong> para aumentar suas chances de contratação.</p>' },
+
+    { id:'s2', icon:'🔑', title:'Como fazer login na plataforma',
+      desc:'Acesse sua conta com e-mail e senha ou via Google.',
+      tags:['Login','Acesso'],
+      body: '<h3>Fazendo login</h3><p>Clique em <strong>Entrar</strong> no menu superior e informe seu e-mail e senha cadastrados.</p><div class="tip">💡 Sua sessão fica salva por 30 dias — você não precisa fazer login toda vez.</div><h3>Esqueci minha senha</h3><p>Na tela de login, clique em <strong>"Esqueci minha senha"</strong> com seu e-mail preenchido. Um link de redefinição será enviado para seu e-mail.</p><h3>Login com Google</h3><p>Clique em <strong>"Continuar com Google"</strong> para entrar com sua conta Google automaticamente. (Em breve)</p>' },
+
+    { id:'s3', icon:'📋', title:'Como publicar seu primeiro projeto',
+      desc:'Publique um projeto e comece a receber propostas em minutos.',
+      tags:['Projeto','Publicar'],
+      body: '<h3>Publicando um projeto</h3><p>Clique em <strong>Publicar Projeto</strong> no menu superior. Preencha:</p><ul><li><strong>Título:</strong> seja descritivo (ex: "Desenvolvimento de site em React")</li><li><strong>Categoria:</strong> escolha a área mais adequada</li><li><strong>Orçamento:</strong> valor estimado para o projeto</li><li><strong>Descrição:</strong> detalhe objetivos, entregas e referências</li><li><strong>Briefing PDF:</strong> anexe documentos técnicos (opcional)</li></ul><div class="tip">💡 Projetos mais detalhados recebem propostas melhores. Inclua prazos e exemplos de referência.</div><h3>Após publicar</h3><p>Seu projeto aparece para freelancers da categoria escolhida. Você começa a receber propostas em minutos. Acompanhe tudo em <strong>Meu Painel → Contratos → Aguardando Propostas</strong>.</p>' },
+
+    { id:'s4', icon:'🔍', title:'Como encontrar freelancers',
+      desc:'Use filtros e busca para encontrar o profissional ideal.',
+      tags:['Busca','Filtros'],
+      body: '<h3>Buscando freelancers</h3><p>Acesse <strong>Menu → Encontrar Freelancers</strong>. Você pode:</p><ul><li>Buscar por nome, habilidade ou serviço na barra de pesquisa</li><li>Filtrar por <strong>categoria</strong> (24 categorias disponíveis)</li><li>Filtrar por <strong>avaliação mínima</strong> (3, 4 ou 5 estrelas)</li><li>Filtrar por <strong>valor por hora</strong> (min e max)</li><li>Filtrar por número de <strong>recomendações</strong></li></ul><div class="tip">⭐ Freelancers com badge "Top Freelancer" são os mais bem avaliados da plataforma.</div><h3>Contratando diretamente</h3><p>Clique em <strong>Contratar</strong> no card do freelancer para iniciar o fluxo de contratação com pagamento em garantia.</p>' },
+
+    { id:'s5', icon:'📩', title:'Como enviar uma proposta para um projeto',
+      desc:'Candidate-se a projetos e mostre seu trabalho com a proposta certa.',
+      tags:['Proposta','Freelancer'],
+      body: '<h3>Enviando sua proposta</h3><p>Na página <strong>Encontrar Projetos</strong>, clique em <strong>"Enviar Proposta"</strong> no projeto desejado.</p><ul><li><strong>Valor:</strong> quanto você cobra pelo projeto</li><li><strong>Prazo:</strong> em quantos dias entrega</li><li><strong>Carta de apresentação:</strong> destaque sua experiência (mín. 50 chars)</li><li><strong>Portfólio PDF:</strong> anexe trabalhos similares (opcional)</li></ul><div class="warn">⚠️ Escreva uma carta personalizada para cada projeto. Propostas genéricas têm menor taxa de aprovação.</div><h3>Acompanhando sua proposta</h3><p>Veja o status em <strong>Meu Painel → Contratos → Propostas Enviadas</strong>.</p>' },
+
+    { id:'s6', icon:'💬', title:'Como usar o chat integrado',
+      desc:'Comunique-se com clientes e freelancers pelo chat da plataforma.',
+      tags:['Chat','Mensagens'],
+      body: '<h3>Acessando o chat</h3><p>O chat fica disponível em contratos ativos. No Dashboard, clique em <strong>💬 Chat</strong> no card do contrato.</p><h3>Funcionalidades</h3><ul><li>Mensagens com histórico salvo por projeto</li><li>Enviar arquivos PDF pelo ícone do clipe 📎</li><li>Emojis: clique no ícone 😀</li><li><strong>Enter</strong> envia · <strong>Shift+Enter</strong> nova linha</li><li>✓ = entregue · ✓✓ azul = lido</li></ul><div class="tip">💡 Use o chat para alinhar expectativas, tirar dúvidas e compartilhar atualizações do projeto.</div>' }
+  ],
+
+  account: [
+    { id:'a1', icon:'👤', title:'Como editar meu perfil',
+      desc:'Atualize seus dados, foto e informações profissionais.',
+      tags:['Perfil','Dados'],
+      body: '<h3>Editando seu perfil</h3><p>Acesse <strong>Meu Painel → Meu Perfil</strong>. Você pode editar:</p><ul><li>Nome completo e e-mail</li><li>Profissão e título profissional</li><li>Sobre mim / Bio</li><li>Telefone e localização (estado)</li><li>LinkedIn ou portfólio</li></ul><h3>Foto de perfil</h3><p>Clique sobre o avatar circular para selecionar uma imagem. Formatos aceitos: JPG, PNG, WebP. Tamanho máximo: 5 MB.</p><div class="tip">✅ Perfis com foto têm até 3x mais chances de ser contratados.</div>' },
+
+    { id:'a2', icon:'🔒', title:'Como alterar minha senha',
+      desc:'Redefina sua senha com segurança.',
+      tags:['Senha','Segurança'],
+      body: '<h3>Alterando a senha</h3><p>Em <strong>Meu Painel → Meu Perfil</strong>, role até a seção <strong>"Alterar Senha"</strong>:</p><ul><li>Informe a senha atual</li><li>Digite a nova senha (mínimo 6 caracteres)</li><li>Confirme a nova senha</li></ul><div class="warn">⚠️ Use uma senha forte: misture letras maiúsculas, minúsculas, números e símbolos.</div>' },
+
+    { id:'a3', icon:'🔔', title:'Gerenciar notificações',
+      desc:'Configure quais e-mails e alertas você deseja receber.',
+      tags:['Notificações','E-mail'],
+      body: '<h3>Configurações de notificação</h3><p>Acesse <strong>Meu Painel → Configurações → Notificações</strong> para ativar ou desativar:</p><ul><li>E-mail de propostas recebidas</li><li>E-mail de novas mensagens no chat</li><li>E-mail de atualizações de contratos</li><li>Newsletter HereWork</li></ul>' },
+
+    { id:'a4', icon:'🌐', title:'Alterar idioma da plataforma',
+      desc:'Disponível em Português e Espanhol.',
+      tags:['Idioma'],
+      body: '<h3>Trocando o idioma</h3><p>No canto superior direito da página, clique em <strong>PT</strong> ou <strong>ES</strong> na barra de idiomas. A interface inteira é traduzida instantaneamente.</p>' },
+
+    { id:'a5', icon:'🗑️', title:'Como excluir minha conta',
+      desc:'Encerre sua conta permanentemente.',
+      tags:['Conta','Exclusão'],
+      body: '<h3>Excluindo sua conta</h3><p>Acesse <strong>Meu Painel → Configurações → Zona de Perigo → Excluir Conta</strong>.</p><div class="warn">⚠️ Esta ação é irreversível. Todos os seus dados, contratos e histórico serão removidos permanentemente. Contratos ativos devem ser finalizados antes da exclusão.</div>' }
+  ],
+
+  contracts: [
+    { id:'c1', icon:'🔒', title:'O que é o sistema de Garantia de Pagamento?',
+      desc:'Entenda como o pagamento em garantia protege você.',
+      tags:['Garantia','Segurança'],
+      body: '<h3>Como funciona a Garantia</h3><p>Ao contratar um freelancer, o valor é depositado em nossa conta de garantia. O dinheiro fica retido com segurança até você <strong>aprovar a entrega</strong>. Só então é liberado ao profissional.</p><ul><li>✅ Você nunca perde dinheiro se o trabalho não for entregue</li><li>✅ O freelancer tem garantia de receber após entregar</li><li>✅ Nossa equipe media disputas em caso de conflito</li></ul><div class="tip">🔒 O sistema de Garantia protege ambos os lados do contrato.</div>' },
+
+    { id:'c2', icon:'📋', title:'Como contratar um freelancer',
+      desc:'Passo a passo do fluxo completo de contratação.',
+      tags:['Contratar','Fluxo'],
+      body: '<h3>Etapas da contratação</h3><p><strong>Etapa 1 — Contrato:</strong> Revise os termos, valor, prazo e taxa da plataforma (8%). Aceite os termos de uso.</p><p><strong>Etapa 2 — Pagamento:</strong> Pague via Cartão de Crédito. O valor vai para a Garantia.</p><p><strong>Etapa 3 — Em andamento:</strong> O freelancer trabalha no projeto. Use o chat para acompanhar.</p><p><strong>Etapa 4 — Aprovação:</strong> O freelancer entrega. Você avalia e libera o pagamento.</p>' },
+
+    { id:'c3', icon:'✅', title:'Como aprovar uma entrega',
+      desc:'Avalie e libere o pagamento após receber o trabalho.',
+      tags:['Aprovação','Entrega'],
+      body: '<h3>Aprovando a entrega</h3><p>No Dashboard, quando o freelancer enviar a entrega, clique em <strong>✅ Aprovar Entrega</strong>:</p><ul><li>Dê uma avaliação de 1 a 5 estrelas (obrigatório)</li><li>Deixe um depoimento (opcional)</li><li>Confirme — o pagamento é liberado imediatamente</li></ul><div class="warn">⚠️ Se não aprovar em 7 dias, o pagamento é liberado automaticamente.</div>' },
+
+    { id:'c4', icon:'📝', title:'Como solicitar uma revisão',
+      desc:'Peça correções quando o trabalho não atender ao combinado.',
+      tags:['Revisão','Correção'],
+      body: '<h3>Solicitando revisão</h3><p>No Dashboard, clique em <strong>📝 Revisão</strong> no contrato ativo. Escolha:</p><ul><li>Tipo: Escopo, Qualidade, Erro ou Outro</li><li>Urgência: Baixa, Média ou Alta</li><li>Descreva detalhadamente o que precisa ser corrigido</li><li>Defina o prazo para correção</li></ul><p>O pagamento permanece em garantia durante a revisão.</p>' },
+
+    { id:'c5', icon:'🚨', title:'Como abrir uma disputa',
+      desc:'Em caso de conflito com o freelancer.',
+      tags:['Disputa','Conflito'],
+      body: '<h3>Abrindo uma disputa</h3><p>Se não conseguir resolver com o freelancer pelo chat, abra um chamado em <strong>Central de Ajuda → Abrir Chamado</strong> com categoria "Contrato e entrega".</p><p>Nossa equipe mediará o processo e tomará uma decisão em até 5 dias úteis com base nas evidências.</p>' },
+
+    { id:'c6', icon:'💰', title:'Taxa da plataforma',
+      desc:'Entenda as comissões cobradas pela HereWork.',
+      tags:['Taxa','Comissão'],
+      body: '<h3>Taxa da plataforma</h3><p>A HereWork cobra uma taxa de <strong>8% sobre o valor de cada contrato</strong>, descontada no momento do pagamento em garantia.</p><ul><li>Plano Gratuito: 8%</li><li>Plano Premium: 6%</li><li>Plano Elite: 5%</li><li>Plano Profissional: 4%</li></ul><div class="tip">💡 Assine um plano pago para reduzir sua taxa e maximizar seus ganhos.</div>' }
+  ],
+
+  payments: [
+    { id:'p1', icon:'💳', title:'Formas de pagamento aceitas',
+      desc:'Cartão de crédito Visa, Mastercard, Elo, Amex e Hipercard.',
+      tags:['Cartão','Pagamento'],
+      body: '<h3>Métodos aceitos</h3><ul><li>💳 Cartão de crédito: Visa, Mastercard, Elo, Amex, Hipercard</li><li>⚡ PIX (em breve)</li></ul><h3>Parcelas</h3><p>Parcelamos em até 12x. Parcelas acima de 3x têm juros de 2,99% a.m.</p><div class="tip">🔒 Todos os pagamentos são processados via Stripe com criptografia SSL e conformidade PCI DSS Level 1.</div>' },
+
+    { id:'p2', icon:'🔒', title:'Quando o valor é liberado ao freelancer',
+      desc:'Entenda quando e como o pagamento é transferido.',
+      tags:['Garantia','Liberação'],
+      body: '<h3>Liberação do pagamento</h3><p>O valor em garantia é liberado ao freelancer quando:</p><ul><li>✅ Você <strong>aprovar a entrega</strong> no Dashboard</li><li>⏰ 7 dias sem resposta após a entrega ser enviada (liberação automática)</li></ul><h3>Prazo de recebimento</h3><p>Após a liberação, o prazo de crédito na conta do freelancer é de 1 a 3 dias úteis.</p>' },
+
+    { id:'p3', icon:'↩️', title:'Política de reembolso',
+      desc:'Como solicitar estorno em caso de cancelamento.',
+      tags:['Reembolso','Estorno'],
+      body: '<h3>Quando posso pedir reembolso?</h3><ul><li>O freelancer não iniciou o projeto em 48h após o pagamento</li><li>O projeto foi cancelado por acordo mútuo</li><li>A entrega não correspondeu ao escopo contratado (mediante disputa)</li></ul><h3>Como solicitar</h3><p>Abra um chamado em <strong>Central de Ajuda → Abrir Chamado</strong> com categoria "Pagamento e fatura". O prazo de análise é de 5 dias úteis.</p>' },
+
+    { id:'p4', icon:'📄', title:'Como emitir nota fiscal',
+      desc:'Notas fiscais e comprovantes de pagamento.',
+      tags:['Nota Fiscal','Comprovante'],
+      body: '<h3>Nota fiscal e recibos</h3><p>Após cada pagamento confirmado, você recebe por e-mail um recibo detalhado com: valor, taxa, projeto, data e dados do freelancer.</p><p>Para nota fiscal eletrônica, entre em contato em <strong>financeiro@herework.com.br</strong>.</p>' },
+
+    { id:'p5', icon:'💰', title:'Meus recebimentos como freelancer',
+      desc:'Como visualizar e sacar seus ganhos.',
+      tags:['Recebimento','Freelancer'],
+      body: '<h3>Visualizando recebimentos</h3><p>Acesse <strong>Meu Painel → Pagamentos → Meus Recebimentos</strong> para ver:</p><ul><li>Valores pagos na conta</li><li>Valores em garantia (aguardando aprovação)</li><li>Histórico completo por projeto</li></ul><h3>Dados bancários</h3><p>Cadastre sua conta bancária em <strong>Meu Painel → Pagamentos → Dados Bancários</strong> para receber os valores.</p>' },
+
+    { id:'p6', icon:'⭐', title:'Planos e assinaturas',
+      desc:'Compare os planos e veja os benefícios de cada um.',
+      tags:['Planos','Assinatura'],
+      body: '<h3>Planos disponíveis</h3><ul><li>🆓 <strong>Gratuito:</strong> R$ 0 — funcionalidades básicas, taxa 8%</li><li>⭐ <strong>Premium:</strong> R$ 49/mês — taxa 6%, projetos ilimitados</li><li>🌟 <strong>Elite:</strong> R$ 99/mês — taxa 5%, suporte prioritário</li><li>🚀 <strong>Profissional:</strong> R$ 149/mês — taxa 4%, garantia com milestones</li></ul><p>Acesse <strong>Menu → Planos</strong> para comparar e assinar.</p>' },
+
+    { id:'p7', icon:'🧾', title:'Cancelar assinatura',
+      desc:'Como cancelar seu plano a qualquer momento.',
+      tags:['Cancelamento','Plano'],
+      body: '<h3>Cancelando sua assinatura</h3><p>Você pode cancelar a qualquer momento em <strong>Meu Painel → Meu Plano</strong>. O cancelamento entra em vigor ao final do período já pago.</p><div class="warn">⚠️ Após o cancelamento, sua conta volta para o Plano Gratuito. Contratos ativos não são afetados.</div>' }
+  ],
+
+  freelancer: [
+    { id:'f1', icon:'📩', title:'Como aumentar as chances da minha proposta ser aceita',
+      desc:'Dicas para se destacar entre os candidatos.',
+      tags:['Proposta','Dicas'],
+      body: '<h3>Propostas que vencem</h3><ul><li>✅ Personalize a carta para cada projeto — nunca use templates genéricos</li><li>✅ Mostre projetos similares no portfólio</li><li>✅ Seja específico sobre sua abordagem técnica</li><li>✅ Responda dentro de 1h após a publicação do projeto</li><li>✅ Proponha um preço justo — não o mais baixo</li></ul><div class="tip">💡 Freelancers com perfil completo (foto, bio, portfólio) têm 3x mais propostas aceitas.</div>' },
+
+    { id:'f2', icon:'📤', title:'Como enviar a entrega do projeto',
+      desc:'Processo completo de envio e aprovação.',
+      tags:['Entrega','Envio'],
+      body: '<h3>Enviando sua entrega</h3><p>No Dashboard, clique em <strong>📤 Enviar Entrega</strong> no contrato ativo:</p><ul><li>Confirme o checklist de entregáveis (mín. 3 itens)</li><li>Informe o link do trabalho (GitHub, Vercel, etc.)</li><li>Anexe arquivos PDF da entrega (máx. 10 MB cada)</li><li>Escreva uma mensagem ao cliente (mín. 20 caracteres)</li></ul><p>O cliente tem 7 dias para aprovar. Se não responder, o pagamento é liberado automaticamente.</p>' },
+
+    { id:'f3', icon:'⭐', title:'Como melhorar minha avaliação',
+      desc:'Construa uma reputação sólida na plataforma.',
+      tags:['Avaliação','Reputação'],
+      body: '<h3>Construindo sua reputação</h3><ul><li>Entregue sempre dentro do prazo combinado</li><li>Comunique proativamente pelo chat</li><li>Ofereça uma revisão gratuita se necessário</li><li>Supere as expectativas do cliente</li><li>Mantenha o perfil sempre atualizado</li></ul><div class="tip">🌟 Freelancers com avaliação 4,8+ têm 5x mais propostas aceitas e taxas menores.</div>' },
+
+    { id:'f4', icon:'💡', title:'Dicas para criar um perfil de destaque',
+      desc:'Otimize seu perfil para atrair mais clientes.',
+      tags:['Perfil','Dicas'],
+      body: '<h3>Perfil que converte</h3><ul><li>📸 Use foto profissional e real</li><li>✍️ Escreva uma bio clara e objetiva</li><li>🏷️ Liste todas as suas habilidades relevantes</li><li>💼 Adicione portfólio com 3-5 projetos de qualidade</li><li>📍 Mantenha localização e disponibilidade atualizados</li></ul>' },
+
+    { id:'f5', icon:'🏆', title:'Programa Top Freelancer',
+      desc:'Como conquistar e manter o badge de Top Freelancer.',
+      tags:['Top Freelancer','Badge'],
+      body: '<h3>Como se tornar Top Freelancer</h3><p>O badge é concedido automaticamente a freelancers que atendem <strong>todos</strong> estes critérios:</p><ul><li>Avaliação média ≥ 4,8 estrelas</li><li>Pelo menos 10 projetos concluídos</li><li>Taxa de entrega no prazo ≥ 90%</li><li>Taxa de resposta ≥ 95% em 24h</li><li>Conta ativa há mais de 6 meses</li></ul><div class="tip">🏆 Top Freelancers aparecem primeiro nas buscas e cobram em média 40% mais.</div>' }
+  ],
+
+  client: [
+    { id:'cl1', icon:'📋', title:'Como escrever um briefing eficiente',
+      desc:'Descreva seu projeto para atrair as melhores propostas.',
+      tags:['Briefing','Projeto'],
+      body: '<h3>Briefing que funciona</h3><ul><li>✅ Título claro e específico</li><li>✅ Descreva o problema, não a solução</li><li>✅ Liste entregas esperadas em bullet points</li><li>✅ Inclua referências visuais ou exemplos</li><li>✅ Informe prazos realistas</li><li>✅ Seja transparente sobre o orçamento</li></ul><div class="tip">💡 Projetos com briefing detalhado recebem 70% mais propostas qualificadas.</div>' },
+
+    { id:'cl2', icon:'🔍', title:'Como avaliar e escolher o melhor freelancer',
+      desc:'Critérios para tomar a melhor decisão de contratação.',
+      tags:['Contratar','Avaliação'],
+      body: '<h3>Avaliando propostas</h3><p>Ao receber propostas, analise:</p><ul><li>⭐ Avaliação e histórico do freelancer</li><li>💼 Portfólio com projetos similares</li><li>💬 Qualidade da carta de apresentação</li><li>💰 Relação custo-benefício (não escolha apenas o mais barato)</li><li>📅 Prazo proposto versus sua necessidade</li></ul><div class="tip">💡 Converse pelo chat antes de contratar para validar alinhamento.</div>' },
+
+    { id:'cl3', icon:'💬', title:'Como se comunicar bem com freelancers',
+      desc:'Boas práticas de comunicação durante o projeto.',
+      tags:['Comunicação','Chat'],
+      body: '<h3>Comunicação eficaz</h3><ul><li>Seja claro e objetivo nas solicitações</li><li>Responda mensagens em no máximo 24h</li><li>Forneça feedback construtivo e específico</li><li>Documente alterações de escopo no chat</li><li>Elogie bom trabalho — motivação aumenta a qualidade</li></ul>' },
+
+    { id:'cl4', icon:'📊', title:'Como acompanhar o andamento do projeto',
+      desc:'Monitorando progresso e entregas parciais.',
+      tags:['Acompanhamento','Progresso'],
+      body: '<h3>Acompanhando o projeto</h3><p>No Dashboard → Contratos Ativos, você vê:</p><ul><li>Barra de progresso do projeto</li><li>Prazo restante</li><li>Status atual (Em desenvolvimento / Aguardando aprovação)</li><li>Botão de Chat para comunicação</li></ul><p>Para projetos maiores, solicite entregas parciais (milestones) na negociação.</p>' },
+
+    { id:'cl5', icon:'⭐', title:'Como avaliar um freelancer após o projeto',
+      desc:'Deixe uma avaliação justa e construtiva.',
+      tags:['Avaliação','Feedback'],
+      body: '<h3>Deixando sua avaliação</h3><p>Ao aprovar a entrega, você avaliará o freelancer com 1 a 5 estrelas e poderá deixar um depoimento público.</p><div class="tip">💡 Avaliações honestas ajudam outros clientes a tomar melhores decisões e motivam freelancers a melhorar.</div>' }
+  ],
+
+  security: [
+    { id:'sec1', icon:'🔐', title:'Como proteger minha conta',
+      desc:'Melhores práticas de segurança para sua conta HereWork.',
+      tags:['Segurança','Senha'],
+      body: '<h3>Protegendo sua conta</h3><ul><li>Use uma senha forte e única para a HereWork</li><li>Nunca compartilhe sua senha com ninguém</li><li>A HereWork nunca pedirá sua senha por e-mail ou chat</li><li>Acesse sempre pelo endereço oficial: herework.vercel.app</li><li>Ao usar computador compartilhado, clique em "Sair" ao terminar</li></ul><div class="tip">🔒 Sessão expira automaticamente após 30 minutos de inatividade.</div>' },
+
+    { id:'sec2', icon:'🚨', title:'Como reportar fraude ou comportamento suspeito',
+      desc:'Denuncie perfis ou atividades suspeitas.',
+      tags:['Fraude','Denúncia'],
+      body: '<h3>Reportando fraude</h3><p>Se suspeitar de fraude, phishing ou comportamento inadequado:</p><ul><li>Abra um chamado em <strong>Central de Ajuda → Abrir Chamado</strong> com categoria "Segurança e fraude"</li><li>Envie evidências: prints, mensagens, links</li><li>Nossa equipe investiga em até 24h</li></ul><div class="warn">⚠️ Nunca efetue pagamentos fora da plataforma. A HereWork não se responsabiliza por transações externas.</div>' },
+
+    { id:'sec3', icon:'⚖️', title:'LGPD — Seus direitos sobre seus dados',
+      desc:'Como exercer seus direitos de privacidade.',
+      tags:['LGPD','Privacidade'],
+      body: '<h3>Seus direitos pela LGPD</h3><p>Pela Lei Geral de Proteção de Dados (Lei 13.709/2018) você tem direito a:</p><ul><li>Acessar todos os seus dados armazenados</li><li>Corrigir dados incorretos</li><li>Solicitar exclusão dos seus dados</li><li>Portabilidade dos dados</li><li>Revogar consentimento</li></ul><p>Contato: <strong>privacidade@herework.com.br</strong></p>' },
+
+    { id:'sec4', icon:'🔒', title:'Como funciona a segurança dos pagamentos',
+      desc:'Tecnologias que protegem suas transações.',
+      tags:['Pagamento','Segurança'],
+      body: '<h3>Segurança dos pagamentos</h3><ul><li>🔒 <strong>SSL 256-bit:</strong> todos os dados são criptografados</li><li>💳 <strong>PCI DSS Level 1:</strong> padrão máximo para dados de cartão</li><li>🏦 <strong>Stripe:</strong> processador de pagamentos usado por Spotify, Shopify e Airbnb</li><li>🔒 <strong>Garantia:</strong> valores retidos até aprovação da entrega</li></ul><p>Seus dados de cartão nunca são armazenados em nossos servidores.</p>' }
+  ]
+};
+
+var _hcCurrentCategory = 'start';
+var _hcCurrentArticle  = null;
+
+/* ── Open Help Center ── */
+var _origOpenInfoHelp = null;
+/* Override topbar "Central de Ajuda" link */
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[onclick*="openInfoPage(\'help\')"]').forEach(function(el) {
+    el.setAttribute('onclick', "openModal('help-center');return false;");
+  });
+});
+
+function openModal_orig_help(id) {} /* placeholder */
+
+/* ── Category view ── */
+function hcShowCategory(cat) {
+  _hcCurrentCategory = cat;
+  _hcCurrentArticle  = null;
+
+  /* Update sidebar active state */
+  document.querySelectorAll('.hc-cat-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  var activeBtn = document.getElementById('hccat-' + cat);
+  if(activeBtn) activeBtn.classList.add('active');
+
+  /* Clear search */
+  var searchEl = document.getElementById('hc-search');
+  if(searchEl) searchEl.value = '';
+
+  /* Render articles */
+  var articles = _hcArticles[cat] || [];
+  var catNames = {
+    start:'Primeiros Passos', account:'Conta & Perfil', contracts:'Contratos',
+    payments:'Pagamentos', freelancer:'Para Freelancers',
+    client:'Para Clientes', security:'Segurança'
+  };
+
+  var html = '<div class="hc-article-list">' +
+    '<div style="font-size:11px;color:var(--text-4);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">' +
+    catNames[cat] + ' — ' + articles.length + ' artigos</div>';
+
+  html += articles.map(function(a) {
+    return '<div class="hc-article-item" onclick="hcShowArticle('' + a.id + '')">' +
+      '<div class="hc-article-icon">' + a.icon + '</div>' +
+      '<div class="hc-article-info">' +
+        '<div class="hc-article-title">' + a.title + '</div>' +
+        '<div class="hc-article-desc">' + a.desc + '</div>' +
+        '<div class="hc-article-tags">' +
+          a.tags.map(function(t){ return '<span class="hc-article-tag">' + t + '</span>'; }).join('') +
+        '</div>' +
+      '</div>' +
+      '<span style="font-size:16px;color:var(--text-4);">&#8250;</span>' +
+    '</div>';
+  }).join('');
+
+  html += '</div>';
+  document.getElementById('hc-main').innerHTML = html;
+}
+
+/* ── Article detail ── */
+function hcShowArticle(id) {
+  var article = null;
+  for(var cat in _hcArticles) {
+    var found = _hcArticles[cat].filter(function(a){ return a.id === id; })[0];
+    if(found) { article = found; break; }
+  }
+  if(!article) return;
+
+  _hcCurrentArticle = id;
+  var catNames = {
+    start:'Primeiros Passos', account:'Conta & Perfil', contracts:'Contratos',
+    payments:'Pagamentos', freelancer:'Para Freelancers',
+    client:'Para Clientes', security:'Segurança'
+  };
+
+  document.getElementById('hc-main').innerHTML =
+    '<div class="hc-article-detail">' +
+      '<div class="hc-breadcrumb">' +
+        '<a onclick="hcShowCategory('' + _hcCurrentCategory + '')">&#8592; ' + catNames[_hcCurrentCategory] + '</a>' +
+        '<span>›</span>' +
+        '<span>' + article.title + '</span>' +
+      '</div>' +
+      '<div class="hc-detail-title">' + article.icon + ' ' + article.title + '</div>' +
+      '<div class="hc-detail-meta">' +
+        '<span>&#128203; Central de Ajuda</span>' +
+        '<span>&#9201; Leitura: ~2 min</span>' +
+      '</div>' +
+      '<div class="hc-detail-body">' + article.body + '</div>' +
+      '<div class="hc-feedback">' +
+        '<div class="hc-feedback-title">Este artigo foi útil?</div>' +
+        '<div class="hc-feedback-btns">' +
+          '<button class="hc-feedback-btn" onclick="hcFeedback(true)">&#128077; Sim, ajudou!</button>' +
+          '<button class="hc-feedback-btn" onclick="hcFeedback(false)">&#128078; Não encontrei o que precisava</button>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border-2);">' +
+        '<div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">Ainda com dúvidas?</div>' +
+        '<div style="display:flex;gap:8px;">' +
+          '<button class="btn btn-outline btn-sm" onclick="hcOpenTicket()">&#128196; Abrir chamado</button>' +
+          '<button class="btn btn-primary btn-sm" onclick="hcOpenChat()">&#128172; Chat ao vivo</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+}
+
+function hcFeedback(helpful) {
+  showToast(helpful ? '&#128077; Obrigado pelo feedback!' : '&#128172; Vamos melhorar. Abra um chamado para mais ajuda.', 'success');
+}
+
+/* ── Search ── */
+function hcSearch(query) {
+  var main = document.getElementById('hc-main');
+  if(!query || query.trim().length < 2) {
+    hcShowCategory(_hcCurrentCategory);
+    return;
+  }
+
+  var q = query.toLowerCase().trim();
+  var results = [];
+  for(var cat in _hcArticles) {
+    _hcArticles[cat].forEach(function(a) {
+      if(a.title.toLowerCase().includes(q) || a.desc.toLowerCase().includes(q) ||
+         a.tags.some(function(t){ return t.toLowerCase().includes(q); }) ||
+         a.body.toLowerCase().includes(q)) {
+        results.push({ article: a, cat: cat });
+      }
+    });
+  }
+
+  /* Remove sidebar active */
+  document.querySelectorAll('.hc-cat-btn').forEach(function(b){ b.classList.remove('active'); });
+
+  if(!results.length) {
+    main.innerHTML = '<div class="hc-no-results">' +
+      '<div style="font-size:36px;margin-bottom:12px;">&#128270;</div>' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text);">Nenhum resultado para "' + _sanitize(query) + '"</div>' +
+      '<div style="font-size:13px;color:var(--text-3);margin-top:6px;">Tente palavras diferentes ou abra um chamado de suporte.</div>' +
+      '<button class="btn btn-primary btn-sm" style="margin-top:14px;" onclick="hcOpenTicket()">&#128196; Abrir chamado</button>' +
+    '</div>';
+    return;
+  }
+
+  var catNames = { start:'Primeiros Passos', account:'Conta', contracts:'Contratos',
+    payments:'Pagamentos', freelancer:'Freelancers', client:'Clientes', security:'Segurança' };
+
+  main.innerHTML = '<div class="hc-search-results">' +
+    '<div style="font-size:11px;color:var(--text-4);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">' +
+    results.length + ' resultado' + (results.length !== 1 ? 's' : '') + ' para "' + _sanitize(query) + '"</div>' +
+    results.map(function(r) {
+      return '<div class="hc-article-item" onclick="hcShowArticleFromSearch('' + r.article.id + '','' + r.cat + '')">' +
+        '<div class="hc-article-icon">' + r.article.icon + '</div>' +
+        '<div class="hc-article-info">' +
+          '<div class="hc-article-title">' + r.article.title + '</div>' +
+          '<div class="hc-article-desc">' + r.article.desc + '</div>' +
+          '<div class="hc-article-tags">' +
+            '<span class="hc-article-tag" style="color:var(--green);border-color:#bbf7d0;">' + catNames[r.cat] + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<span style="font-size:16px;color:var(--text-4);">&#8250;</span>' +
+      '</div>';
+    }).join('') +
+  '</div>';
+}
+
+function hcShowArticleFromSearch(id, cat) {
+  _hcCurrentCategory = cat;
+  hcShowArticle(id);
+}
+
+/* ── Support actions ── */
+function hcOpenTicket() {
+  closeModal('help-center');
+  setTimeout(function(){ openModal('support-ticket'); }, 200);
+  /* Pre-fill if logged in */
+  if(_session) {
+    setTimeout(function() {
+      var n = document.getElementById('ticket-name');
+      var e = document.getElementById('ticket-email');
+      if(n && !n.value) n.value  = _session.name  || '';
+      if(e && !e.value) e.value  = _session.email || '';
+    }, 300);
+  }
+}
+
+function hcOpenChat() {
+  closeModal('help-center');
+  showToast('&#128172; Chat ao vivo disponível em breve! Por enquanto, abra um chamado.', 'info');
+}
+
+/* ── Init Help Center ── */
+function initHelpCenter() {
+  hcShowCategory('start');
+}
+
+/* ── Support Ticket ── */
+function ticketFileSelected(input) {
+  var f = input.files && input.files[0];
+  var ph = document.getElementById('ticket-file-ph');
+  var pv = document.getElementById('ticket-file-preview');
+  if(!f) return;
+  if(f.size > 5*1024*1024) { showToast('Arquivo muito grande (máx 5 MB)', 'info'); return; }
+  var kb = f.size < 1024*1024 ? (f.size/1024).toFixed(0)+' KB' : (f.size/(1024*1024)).toFixed(1)+' MB';
+  if(ph) ph.style.display = 'none';
+  if(pv) { pv.style.display='block'; pv.textContent = '📎 ' + f.name + ' (' + kb + ')'; }
+}
+
+function submitSupportTicket() {
+  var nameEl  = document.getElementById('ticket-name');
+  var emailEl = document.getElementById('ticket-email');
+  var catEl   = document.getElementById('ticket-category');
+  var descEl  = document.getElementById('ticket-desc');
+  var btn     = document.getElementById('ticket-submit-btn');
+  var ok = true;
+
+  ['err-ticket-name','err-ticket-email','err-ticket-category','err-ticket-desc'].forEach(function(id){
+    var e=document.getElementById(id); if(e){e.textContent='';e.classList.remove('show');}
+  });
+
+  if(!nameEl || nameEl.value.trim().length < 3) {
+    var e=document.getElementById('err-ticket-name'); if(e){e.textContent='Informe seu nome.';e.classList.add('show');} ok=false;
+  }
+  if(!emailEl || !/^[^s@]+@[^s@]+\.[^s@]+$/.test(emailEl.value.trim())) {
+    var e=document.getElementById('err-ticket-email'); if(e){e.textContent='E-mail inválido.';e.classList.add('show');} ok=false;
+  }
+  if(!catEl || !catEl.value) {
+    var e=document.getElementById('err-ticket-category'); if(e){e.textContent='Selecione a categoria.';e.classList.add('show');} ok=false;
+  }
+  if(!descEl || descEl.value.trim().length < 20) {
+    var e=document.getElementById('err-ticket-desc'); if(e){e.textContent='Descreva o problema (mín. 20 caracteres).';e.classList.add('show');} ok=false;
+  }
+  if(!ok) return;
+
+  _setBtnLoading(btn, true);
+  setTimeout(function() {
+    _setBtnLoading(btn, false);
+    var protocol = 'HW-' + Date.now().toString(36).toUpperCase().slice(-6);
+    closeModal('support-ticket');
+    showToast('✅ Chamado ' + protocol + ' aberto! Resposta em até 24h no e-mail ' + emailEl.value.trim(), 'success');
+    nameEl.value=''; emailEl.value=''; if(catEl) catEl.value=''; descEl.value='';
+  }, 900);
+}
+
+/* Trigger initHelpCenter when modal opens */
+var _origOpenModal_hc = window.openModal;
+window.openModal = function(id) {
+  _origOpenModal_hc(id);
+  if(id === 'help-center') setTimeout(initHelpCenter, 50);
+};
 
 </script>
 </body>
