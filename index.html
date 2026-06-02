@@ -3417,6 +3417,141 @@ section { padding: 64px 0; }
 }
 .hc-footer-text { font-size: 12px; color: var(--text-3); }
 .hc-contact-btns { display: flex; gap: 8px; }
+/* ═══════════════════════════════════════
+   BLOG PAGE
+═══════════════════════════════════════ */
+#page-blog { background: var(--bg); min-height: 80vh; }
+
+.blog-hero {
+  background: linear-gradient(135deg,#1a1a2e 0%,#16213e 60%,#0f3460 100%);
+  padding: 40px 0 32px; margin-bottom: 36px;
+}
+.blog-hero-title { font-size: 30px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+.blog-hero-sub   { font-size: 15px; color: #94a3b8; margin-bottom: 20px; }
+.blog-search-wrap { position: relative; max-width: 480px; }
+.blog-search-input {
+  width: 100%; height: 44px; border-radius: var(--radius-full);
+  border: none; padding: 0 16px 0 44px; font-size: 14px;
+  background: rgba(255,255,255,.12); color: #fff; outline: none;
+}
+.blog-search-input::placeholder { color: rgba(255,255,255,.4); }
+.blog-search-input:focus { background: rgba(255,255,255,.18); }
+.blog-search-ico {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 17px; pointer-events: none;
+}
+
+/* Category filter */
+.blog-cats {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px;
+}
+.blog-cat-btn {
+  padding: 7px 16px; border-radius: var(--radius-full);
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-size: 13px; font-weight: 600; color: var(--text-3);
+  cursor: pointer; transition: all var(--transition);
+}
+.blog-cat-btn:hover { border-color: var(--green); color: var(--green); }
+.blog-cat-btn.active { background: var(--green); border-color: var(--green); color: #fff; }
+
+/* Featured article */
+.blog-featured {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  display: grid; grid-template-columns: 1.4fr 1fr;
+  margin-bottom: 28px; cursor: pointer; transition: box-shadow var(--transition);
+}
+.blog-featured:hover { box-shadow: var(--shadow-lg); }
+.blog-feat-img {
+  background: linear-gradient(135deg,#1e3a5f,#1565c0);
+  min-height: 220px; display: flex; align-items: center; justify-content: center;
+  font-size: 60px;
+}
+.blog-feat-body { padding: 28px; display: flex; flex-direction: column; justify-content: center; }
+.blog-feat-tag { font-size: 11px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 8px; }
+.blog-feat-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+.blog-feat-desc  { font-size: 13px; color: var(--text-3); margin-bottom: 14px; line-height: 1.6; }
+.blog-feat-meta  { font-size: 11px; color: var(--text-4); display: flex; align-items: center; gap: 10px; }
+
+/* Article grid */
+.blog-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-bottom: 32px; }
+@media(max-width:900px){ .blog-grid { grid-template-columns: repeat(2,1fr); } }
+@media(max-width:600px){ .blog-grid { grid-template-columns: 1fr; }
+  .blog-featured { grid-template-columns: 1fr; }
+}
+.blog-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  cursor: pointer; transition: all var(--transition);
+  display: flex; flex-direction: column;
+}
+.blog-card:hover { box-shadow: var(--shadow); border-color: var(--border-2); transform: translateY(-2px); }
+.blog-card-img {
+  height: 140px; display: flex; align-items: center; justify-content: center;
+  font-size: 44px;
+}
+.blog-card-body { padding: 16px 18px; flex: 1; display: flex; flex-direction: column; }
+.blog-card-tag   { font-size: 10px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+.blog-card-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; line-height: 1.4; flex: 1; }
+.blog-card-desc  { font-size: 12px; color: var(--text-3); margin-bottom: 10px; line-height: 1.5; }
+.blog-card-meta  { font-size: 11px; color: var(--text-4); display: flex; align-items: center; gap: 8px; margin-top: auto; }
+.blog-read-time  { display: flex; align-items: center; gap: 3px; }
+
+/* Article detail */
+.blog-article-detail { max-width: 740px; margin: 0 auto; padding-bottom: 48px; }
+.blog-art-header { margin-bottom: 24px; }
+.blog-art-tag    { font-size: 12px; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 10px; }
+.blog-art-title  { font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 12px; line-height: 1.3; }
+.blog-art-meta   { display: flex; align-items: center; gap: 14px; font-size: 12px; color: var(--text-4); flex-wrap: wrap; }
+.blog-art-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg,var(--green),#66BB6A);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.blog-art-img {
+  width: 100%; height: 260px; border-radius: var(--radius-lg);
+  background: linear-gradient(135deg,#1e3a5f,#1565c0);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 80px; margin: 20px 0;
+}
+.blog-art-body   { font-size: 15px; color: var(--text-2); line-height: 1.85; }
+.blog-art-body h2 { font-size: 20px; font-weight: 800; color: var(--text); margin: 28px 0 10px; }
+.blog-art-body h3 { font-size: 16px; font-weight: 700; color: var(--text); margin: 20px 0 8px; }
+.blog-art-body p  { margin-bottom: 16px; }
+.blog-art-body ul, .blog-art-body ol { padding-left: 22px; margin-bottom: 16px; }
+.blog-art-body li { margin-bottom: 6px; }
+.blog-art-body blockquote {
+  border-left: 4px solid var(--green); padding: 12px 18px;
+  background: #f0fdf4; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 18px 0; font-style: italic; color: #166534;
+}
+.blog-art-body .tip {
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: var(--radius);
+  padding: 12px 16px; margin: 16px 0; font-size: 14px; color: #166534;
+}
+.blog-art-tags   { display: flex; gap: 7px; flex-wrap: wrap; margin: 20px 0; }
+.blog-art-tag-item {
+  padding: 4px 12px; border-radius: 20px; background: var(--bg);
+  border: 1px solid var(--border-2); font-size: 12px; color: var(--text-3);
+}
+
+/* Newsletter CTA */
+.blog-newsletter {
+  background: linear-gradient(135deg,#1a1a2e,#16213e);
+  border-radius: var(--radius-lg); padding: 32px 28px;
+  text-align: center; margin: 32px 0;
+}
+.blog-newsletter-title { font-size: 20px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.blog-newsletter-sub   { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+.blog-newsletter-form  { display: flex; gap: 10px; max-width: 440px; margin: 0 auto; }
+.blog-newsletter-input {
+  flex: 1; height: 42px; border-radius: var(--radius-full);
+  border: none; padding: 0 16px; font-size: 14px;
+  background: rgba(255,255,255,.12); color: #fff; outline: none;
+}
+.blog-newsletter-input::placeholder { color: rgba(255,255,255,.4); }
+.blog-newsletter-input:focus { background: rgba(255,255,255,.18); }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -3430,7 +3565,7 @@ section { padding: 64px 0; }
     <div class="topbar-left">
       <a href="#" class="topbar-link" onclick="openModal('help-center');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a>
       <span class="topbar-sep">·</span>
-      <a href="#" class="topbar-link" onclick="openInfoPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a>
+      <a href="#" class="topbar-link" onclick="showPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a>
       <span class="topbar-sep">·</span>
       <a href="#" class="topbar-link" onclick="showPage('how');return false;" data-pt="Para Empresas" data-es="Para Empresas">Para Empresas</a>
     </div>
@@ -4729,6 +4864,58 @@ section { padding: 64px 0; }
         </div>
       </div>
 
+      <!-- Blog & Comunicações -->
+      <div class="profile-card" style="margin-top:16px;">
+        <div class="dash-section-title" style="margin-bottom:4px;"><span>&#128221;</span> Blog &amp; Comunica&ccedil;&otilde;es por E-mail</div>
+        <div style="font-size:12px;color:var(--text-4);margin-bottom:12px;">Gerencie suas permiss&otilde;es de conte&uacute;do e e-mails da HereWork.</div>
+        <div class="settings-section">
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128231; Newsletter do Blog</div>
+              <div class="desc">Receber artigos semanais sobre freelancing, tecnologia e neg&oacute;cios</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" id="perm-blog-newsletter" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#9997;&#65039; Participar como autor do blog</div>
+              <div class="desc">Quero publicar artigos e compartilhar minha experi&ecirc;ncia na plataforma</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" id="perm-blog-author" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128203; Novos projetos por e-mail</div>
+              <div class="desc">Receber alertas de projetos que combinam com meu perfil (at&eacute; 3x por semana)</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" checked id="perm-new-projects" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128233; Novas propostas por e-mail</div>
+              <div class="desc">Receber notifica&ccedil;&atilde;o quando chegarem propostas para meus projetos</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" checked id="perm-proposals" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#127881; Oportunidades e promo&ccedil;&otilde;es</div>
+              <div class="desc">Receber ofertas especiais, descontos em planos e novidades da plataforma</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" id="perm-promotions" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128202; Relat&oacute;rio mensal de atividade</div>
+              <div class="desc">Resumo mensal com seus projetos, ganhos e desempenho na plataforma</div>
+            </div>
+            <label class="admin-toggle"><input type="checkbox" checked id="perm-report" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:var(--radius);font-size:11px;color:var(--text-4);">
+          &#9878;&#65039; Suas prefer&ecirc;ncias s&atilde;o salvas automaticamente e respeitam a LGPD.
+        </div>
+      </div>
       <div class="profile-card" style="margin-top:16px;border-color:#fca5a5;">
         <div class="dash-section-title" style="margin-bottom:4px;color:#dc2626;"><span>&#9888;&#65039;</span> Zona de Perigo</div>
         <div class="settings-section">
@@ -4753,6 +4940,55 @@ section { padding: 64px 0; }
 
   </div>
 </div><!-- /page-dashboard -->
+
+<!-- ═══════════════════════════════════════════
+     PAGE: BLOG
+═══════════════════════════════════════════ -->
+<div class="page" id="page-blog">
+
+  <!-- Hero -->
+  <div class="blog-hero">
+    <div class="container">
+      <div class="blog-hero-title">Blog HereWork &#128221;</div>
+      <div class="blog-hero-sub">Dicas, tutoriais e novidades para freelancers e empresas</div>
+      <div class="blog-search-wrap">
+        <span class="blog-search-ico">&#128269;</span>
+        <input class="blog-search-input" id="blog-search" type="text" maxlength="100"
+          placeholder="Buscar artigos..." oninput="blogSearch(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- Filtro por categoria -->
+    <div class="blog-cats" id="blog-cats">
+      <button class="blog-cat-btn active" onclick="blogFilterCat('all',this)">Todos</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('freelancer',this)">Para Freelancers</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('client',this)">Para Clientes</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('career',this)">Carreira</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('tech',this)">Tecnologia</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('business',this)">Neg&oacute;cios</button>
+      <button class="blog-cat-btn" onclick="blogFilterCat('design',this)">Design</button>
+    </div>
+
+    <!-- Conteúdo do blog (lista ou artigo) -->
+    <div id="blog-content"></div>
+
+    <!-- Newsletter CTA -->
+    <div class="blog-newsletter" id="blog-newsletter-cta">
+      <div style="font-size:32px;margin-bottom:10px;">&#128231;</div>
+      <div class="blog-newsletter-title">Receba os melhores conte&uacute;dos</div>
+      <div class="blog-newsletter-sub">Artigos sobre freelancing, tecnologia e neg&oacute;cios toda semana.<br>Mais de 12.000 profissionais j&aacute; assinaram.</div>
+      <div class="blog-newsletter-form">
+        <input class="blog-newsletter-input" id="blog-nl-email" type="email" placeholder="seu@email.com">
+        <button class="btn btn-primary" onclick="subscribeBlog()">Assinar gr&aacute;tis</button>
+      </div>
+      <div style="font-size:11px;color:#64748b;margin-top:10px;">Sem spam &nbsp;&middot;&nbsp; Cancele quando quiser &nbsp;&middot;&nbsp; Conforme a LGPD</div>
+    </div>
+
+  </div>
+</div>
 <div class="page" id="page-freelancers">
 
   <!-- Banner -->
@@ -7939,7 +8175,7 @@ section { padding: 64px 0; }
         <ul class="footer-links">
           <li><a href="#" onclick="showPage('how')" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</a></li>
           <li><a href="#" onclick="openInfoPage('help');return false;" data-pt="Central de Ajuda" data-es="Centro de Ayuda">Central de Ajuda</a></li>
-          <li><a href="#" onclick="openInfoPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a></li>
+          <li><a href="#" onclick="showPage('blog');return false;" data-pt="Blog" data-es="Blog">Blog</a></li>
           <li><a href="#" onclick="openInfoPage('security');return false;" data-pt="Segurança" data-es="Seguridad">Segurança</a></li>
           <li><a href="#" onclick="openInfoPage('status');return false;" data-pt="Status do Sistema" data-es="Estado del Sistema">Status do Sistema</a></li>
         </ul>
@@ -13790,6 +14026,324 @@ var _origOpenModal_hc = window.openModal;
 window.openModal = function(id) {
   _origOpenModal_hc(id);
   if(id === 'help-center') setTimeout(initHelpCenter, 50);
+};
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   BLOG — Complete Blog System
+═══════════════════════════════════════════════════════════ */
+
+var _blogArticles = [
+  { id:'b1', cat:'freelancer', icon:'🚀', color:'#e0f2fe',
+    tag:'Para Freelancers', featured: true,
+    title:'Como construir uma carreira sólida como freelancer em 2025',
+    desc:'Guia completo com estratégias comprovadas para crescer, precificar e fidelizar clientes no mercado freelancer.',
+    author:'Ana Lima', authorInit:'A', date:'28 Mai 2025', readTime:'8 min',
+    body: '<p>O mercado de freelancers no Brasil cresceu 40% nos últimos 2 anos. Mas como se destacar e construir uma renda estável? Este guia completo vai te mostrar o caminho.</p><h2>1. Defina seu nicho com precisão</h2><p>Freelancers generalistas competem em preço. Especialistas competem em valor. Escolha uma área onde você tem profundidade técnica e trabalhe para ser reconhecido como referência.</p><blockquote>"É melhor ser o melhor em uma coisa do que mediano em dez."</blockquote><h2>2. Construa um portfólio que vende</h2><p>Seu portfólio é sua vitrine. Inclua:</p><ul><li>3 a 5 projetos de alta qualidade</li><li>Problema → Solução → Resultado</li><li>Métricas quando possível (aumentou 40% as vendas, reduziu 60% o tempo)</li></ul><div class="tip">💡 Se não tiver projetos reais, crie projetos fictícios de alta qualidade para demonstrar sua capacidade.</div><h2>3. Precifique baseado em valor, não em hora</h2><p>A maioria dos freelancers comete o erro de cobrar por hora. Isso cria um teto de ganhos. Precifique por projeto ou por resultado entregue.</p><h2>4. Use a HereWork para crescer</h2><p>Plataformas como a HereWork conectam você a clientes qualificados com pagamento protegido. Complete seu perfil, adicione portfólio e comece a enviar propostas personalizadas.</p>' },
+
+  { id:'b2', cat:'client', icon:'📋', color:'#fdf4ff',
+    tag:'Para Clientes', featured: false,
+    title:'7 erros que empresas cometem ao contratar freelancers',
+    desc:'Evite as armadilhas mais comuns e garanta projetos bem-sucedidos com profissionais independentes.',
+    author:'João Melo', authorInit:'J', date:'24 Mai 2025', readTime:'6 min',
+    body: '<p>Contratar freelancers traz enorme agilidade e economia para empresas. Mas erros comuns podem transformar uma boa ideia em dor de cabeça.</p><h2>Erro 1: Briefing vago</h2><p>O maior assassino de projetos freelancer é um briefing incompleto. Detalhe escopo, entregas, prazo e critérios de aceite antes de iniciar.</p><h2>Erro 2: Escolher pelo menor preço</h2><p>Preço baixo quase sempre significa menor qualidade. Avalie o portfólio, avaliações e resposta às perguntas antes de decidir.</p><h2>Erro 3: Não usar sistema de garantia</h2><p>Nunca pague 100% adiantado para freelancers desconhecidos. Use sempre um sistema de garantia que proteja ambas as partes.</p><div class="tip">🔒 A HereWork mantém o pagamento em garantia até você aprovar a entrega — zero risco.</div><h2>Erro 4: Comunicação intermitente</h2><p>Freelancers precisam de feedback para entregar bem. Responda mensagens em até 24h e seja claro nas solicitações.</p>' },
+
+  { id:'b3', cat:'career', icon:'💡', color:'#f0fdf4',
+    tag:'Carreira', featured: false,
+    title:'As habilidades mais valorizadas no mercado freelancer em 2025',
+    desc:'Descubra quais competências estão em alta demanda e como se preparar para elas.',
+    author:'Carlos Tech', authorInit:'C', date:'20 Mai 2025', readTime:'5 min',
+    body: '<p>O mercado de trabalho está em constante evolução. Conheça as habilidades que mais geram oportunidades para freelancers em 2025.</p><h2>Tecnologia</h2><ul><li>🤖 IA e Machine Learning</li><li>⚛️ React, Next.js e TypeScript</li><li>☁️ AWS, GCP e Azure</li><li>🔒 Segurança da Informação</li></ul><h2>Design</h2><ul><li>🎨 UI/UX com foco em conversão</li><li>📱 Design de produto digital</li><li>🎬 Motion Design e vídeo</li></ul><h2>Marketing</h2><ul><li>📈 Growth Marketing</li><li>🎯 Performance (Google Ads, Meta)</li><li>✍️ Copywriting com IA</li></ul><div class="tip">💡 Combinar habilidades técnicas com IA multiplica sua produtividade e proposta de valor.</div>' },
+
+  { id:'b4', cat:'tech', icon:'🤖', color:'#fff7ed',
+    tag:'Tecnologia', featured: false,
+    title:'Como usar IA para multiplicar sua produtividade como freelancer',
+    desc:'Ferramentas e estratégias de inteligência artificial que estão transformando o trabalho freelancer.',
+    author:'Tech HereWork', authorInit:'T', date:'17 Mai 2025', readTime:'7 min',
+    body: '<p>Freelancers que usam IA conseguem entregar mais rápido, com mais qualidade e a preços mais competitivos. Veja como.</p><h2>Escrita e Copywriting</h2><p>ChatGPT, Claude e Gemini são aliados poderosos para rascunhar conteúdo, e-mails, propostas e relatórios. Você faz a revisão e personalização.</p><h2>Design</h2><p>Midjourney, DALL-E e Adobe Firefly geram referências visuais instantâneas. Use para explorar estilos antes de criar a versão final.</p><h2>Código</h2><p>GitHub Copilot e Cursor aceleram desenvolvimento em até 50%. Ideais para boilerplates, testes e documentação.</p><h2>Organização</h2><p>NotionAI e Mem organizam notas, rascunham documentos e respondem perguntas sobre seus próprios projetos.</p><blockquote>"IA não vai substituir freelancers. Mas freelancers que usam IA vão substituir os que não usam."</blockquote>' },
+
+  { id:'b5', cat:'business', icon:'📊', color:'#ecfdf5',
+    tag:'Negócios', featured: false,
+    title:'Como precificar seus serviços freelancer: o guia definitivo',
+    desc:'Metodologia completa para definir preços justos que valorizam seu trabalho e convencem clientes.',
+    author:'Fernanda Castro', authorInit:'F', date:'14 Mai 2025', readTime:'9 min',
+    body: '<p>Precificar é o maior desafio de todo freelancer. Cobra muito e perde o cliente. Cobra pouco e desvaloriza seu trabalho. Este guia resolve isso.</p><h2>Método 1: Custo + Margem</h2><p>Calcule seus custos mensais (moradia, internet, equipamentos, impostos) e divida pelo número de horas disponíveis. Adicione sua margem de lucro desejada.</p><h2>Método 2: Baseado no mercado</h2><p>Pesquise quanto profissionais com seu nível de experiência cobram na sua área. Posicione-se no quartil superior se tiver portfólio diferenciado.</p><h2>Método 3: Baseado em valor</h2><p>Qual é o retorno que seu trabalho gera para o cliente? Um site que gera R$100k/ano em vendas vale muito mais do que R$5.000.</p><div class="tip">💡 Aumente seus preços a cada 6 meses. Clientes que ficam valorizam mais do que clientes que buscam o mais barato.</div>' },
+
+  { id:'b6', cat:'design', icon:'🎨', color:'#fdf4ff',
+    tag:'Design', featured: false,
+    title:'Figma 2025: recursos que todo designer freelancer precisa dominar',
+    desc:'Os novos recursos do Figma que estão acelerando o trabalho de designers e times de produto.',
+    author:'Marina Design', authorInit:'M', date:'10 Mai 2025', readTime:'6 min',
+    body: '<p>O Figma continua sendo a ferramenta número 1 para designers. Em 2025, os novos recursos mudaram completamente como criamos e entregamos projetos.</p><h2>Variables e Design Tokens</h2><p>O sistema de variáveis permite criar Design Systems muito mais robustos e dinâmicos. Um arquivo, múltiplos temas.</p><h2>Dev Mode</h2><p>O modo desenvolvedor reduz em 70% o tempo de handoff. Desenvolvedores acessam especificações, tokens e código diretamente no Figma.</p><h2>AI Features</h2><p>O Figma AI sugere layouts, redimensiona automaticamente componentes e gera variações de design instantaneamente.</p><h2>Prototipagem avançada</h2><p>Animações, transições e interações que antes exigiam princípios de animação agora são configuradas visualmente.</p>' },
+
+  { id:'b7', cat:'freelancer', icon:'💰', color:'#f0fdf4',
+    tag:'Para Freelancers', featured: false,
+    title:'Gestão financeira para freelancers: do caos à estabilidade',
+    desc:'Como organizar suas finanças, pagar menos impostos e construir reserva de emergência como profissional independente.',
+    author:'Contábil HereWork', authorInit:'C', date:'7 Mai 2025', readTime:'8 min',
+    body: '<p>A liberdade do trabalho freelancer vem com uma responsabilidade: gerenciar suas próprias finanças. Veja como fazer isso de forma inteligente.</p><h2>Separar pessoa física e jurídica</h2><p>Abra um MEI ou ME para emitir notas fiscais e separar suas finanças pessoais das profissionais. Isso também reduz impostos.</p><h2>Reserva de emergência</h2><p>Freelancers têm renda variável. Mantenha 6 meses de gastos em conta de liquidez diária. Não misture com investimentos.</p><h2>Regra dos 3 terços</h2><p>De cada projeto recebido: 1/3 para custos operacionais, 1/3 para impostos e 1/3 para você.</p><div class="tip">💡 Use a HereWork para garantir o recebimento dos seus projetos com o sistema de garantia de pagamento.</div>' }
+];
+
+var _blogCurrentCat = 'all';
+var _blogCurrentArticle = null;
+
+/* ── Init Blog page ── */
+function initBlog() {
+  blogFilterCat('all', null);
+}
+
+/* ── Category filter ── */
+function blogFilterCat(cat, btn) {
+  _blogCurrentCat = cat;
+  _blogCurrentArticle = null;
+
+  /* Update button states */
+  document.querySelectorAll('.blog-cat-btn').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+
+  var articles = cat === 'all' ? _blogArticles : _blogArticles.filter(function(a){ return a.cat === cat; });
+  _renderBlogList(articles);
+
+  /* Show newsletter CTA */
+  var nlCta = document.getElementById('blog-newsletter-cta');
+  if(nlCta) nlCta.style.display = 'block';
+}
+
+/* ── Render article list ── */
+function _renderBlogList(articles) {
+  var content = document.getElementById('blog-content');
+  if(!content) return;
+
+  if(!articles.length) {
+    content.innerHTML = '<div style="text-align:center;padding:48px 20px;color:var(--text-3);">' +
+      '<div style="font-size:40px;margin-bottom:12px;">&#128221;</div>' +
+      '<div style="font-size:16px;font-weight:700;">Nenhum artigo encontrado</div></div>';
+    return;
+  }
+
+  var html = '';
+
+  /* Featured article */
+  var featured = articles.filter(function(a){ return a.featured; })[0];
+  if(featured && _blogCurrentCat === 'all') {
+    html += '<div class="blog-featured" onclick="blogShowArticle('' + featured.id + '')">' +
+      '<div class="blog-feat-img" style="background:linear-gradient(135deg,#1e3a5f,#1565c0);">' + featured.icon + '</div>' +
+      '<div class="blog-feat-body">' +
+        '<div class="blog-feat-tag">&#11088; Destaque &nbsp;·&nbsp; ' + featured.tag + '</div>' +
+        '<div class="blog-feat-title">' + featured.title + '</div>' +
+        '<div class="blog-feat-desc">' + featured.desc + '</div>' +
+        '<div class="blog-feat-meta">' +
+          '<div class="dash-person-av" style="width:24px;height:24px;font-size:10px;">' + featured.authorInit + '</div>' +
+          '<span>' + featured.author + '</span>' +
+          '<span>&#183;</span><span>' + featured.date + '</span>' +
+          '<span>&#183;</span><span>&#9201; ' + featured.readTime + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  /* Grid */
+  var gridArticles = featured && _blogCurrentCat === 'all'
+    ? articles.filter(function(a){ return !a.featured; })
+    : articles;
+
+  if(gridArticles.length) {
+    html += '<div class="blog-grid">';
+    html += gridArticles.map(function(a) {
+      return '<div class="blog-card" onclick="blogShowArticle('' + a.id + '')">' +
+        '<div class="blog-card-img" style="background:' + a.color + ';">' + a.icon + '</div>' +
+        '<div class="blog-card-body">' +
+          '<div class="blog-card-tag">' + a.tag + '</div>' +
+          '<div class="blog-card-title">' + a.title + '</div>' +
+          '<div class="blog-card-desc">' + a.desc + '</div>' +
+          '<div class="blog-card-meta">' +
+            '<div class="dash-person-av" style="width:22px;height:22px;font-size:9px;">' + a.authorInit + '</div>' +
+            '<span>' + a.author + '</span>' +
+            '<span style="margin-left:auto;">&#9201; ' + a.readTime + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    html += '</div>';
+  }
+
+  content.innerHTML = html;
+}
+
+/* ── Show article detail ── */
+function blogShowArticle(id) {
+  var article = _blogArticles.filter(function(a){ return a.id === id; })[0];
+  if(!article) return;
+
+  _blogCurrentArticle = id;
+  var content = document.getElementById('blog-content');
+  var nlCta   = document.getElementById('blog-newsletter-cta');
+  if(nlCta) nlCta.style.display = 'none';
+
+  /* Related articles */
+  var related = _blogArticles.filter(function(a){ return a.id !== id && (a.cat === article.cat || a.featured); }).slice(0,3);
+
+  content.innerHTML =
+    '<div class="blog-article-detail">' +
+      '<div style="margin-bottom:20px;">' +
+        '<button class="btn btn-outline btn-sm" onclick="blogBackToList()">&#8592; Voltar ao Blog</button>' +
+      '</div>' +
+      '<div class="blog-art-header">' +
+        '<div class="blog-art-tag">' + article.tag + '</div>' +
+        '<div class="blog-art-title">' + article.title + '</div>' +
+        '<div class="blog-art-meta">' +
+          '<div class="blog-art-avatar">' + article.authorInit + '</div>' +
+          '<span><b>' + article.author + '</b></span>' +
+          '<span>&#183;</span><span>' + article.date + '</span>' +
+          '<span>&#183;</span><span>&#9201; ' + article.readTime + ' de leitura</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="blog-art-img" style="background:linear-gradient(135deg,#1e3a5f,#1565c0);">' + article.icon + '</div>' +
+      '<div class="blog-art-body">' + article.body + '</div>' +
+
+      /* Share + Tags */
+      '<div class="blog-art-tags">' +
+        '<span class="blog-art-tag-item">' + article.tag + '</span>' +
+        '<span class="blog-art-tag-item">HereWork</span>' +
+        '<span class="blog-art-tag-item">Freelancer</span>' +
+      '</div>' +
+
+      /* CTA Newsletter inline */
+      '<div style="background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin:24px 0;text-align:center;">' +
+        '<div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;">&#128231; Gostou do artigo?</div>' +
+        '<div style="font-size:13px;color:var(--text-3);margin-bottom:14px;">Assine nossa newsletter e receba conte&uacute;do como este toda semana.</div>' +
+        '<div style="display:flex;gap:8px;max-width:380px;margin:0 auto;">' +
+          '<input class="form-input" id="blog-art-nl-email" type="email" placeholder="seu@email.com" style="flex:1;">' +
+          '<button class="btn btn-primary" onclick="subscribeBlogInline()">Assinar</button>' +
+        '</div>' +
+      '</div>' +
+
+      /* Related articles */
+      (related.length ? '<div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">Leia tamb&eacute;m</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">' +
+        related.map(function(r) {
+          return '<div onclick="blogShowArticle('' + r.id + '')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">' +
+            '<div style="font-size:24px;margin-bottom:8px;">' + r.icon + '</div>' +
+            '<div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.4;">' + r.title + '</div>' +
+            '<div style="font-size:11px;color:var(--text-4);margin-top:5px;">&#9201; ' + r.readTime + '</div>' +
+          '</div>';
+        }).join('') + '</div></div>'
+      : '') +
+    '</div>';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function blogBackToList() {
+  _blogCurrentArticle = null;
+  blogFilterCat(_blogCurrentCat, null);
+  /* Re-activate correct button */
+  document.querySelectorAll('.blog-cat-btn').forEach(function(b, i) {
+    var cats = ['all','freelancer','client','career','tech','business','design'];
+    if(cats[i] === _blogCurrentCat) b.classList.add('active');
+  });
+  var nlCta = document.getElementById('blog-newsletter-cta');
+  if(nlCta) nlCta.style.display = 'block';
+}
+
+/* ── Search ── */
+function blogSearch(q) {
+  if(!q || q.trim().length < 2) {
+    blogFilterCat(_blogCurrentCat, null); return;
+  }
+  var query = q.toLowerCase();
+  var results = _blogArticles.filter(function(a) {
+    return a.title.toLowerCase().includes(query) ||
+           a.desc.toLowerCase().includes(query) ||
+           a.tag.toLowerCase().includes(query) ||
+           a.body.toLowerCase().includes(query);
+  });
+  _renderBlogList(results);
+  var nlCta = document.getElementById('blog-newsletter-cta');
+  if(nlCta) nlCta.style.display = results.length ? 'block' : 'none';
+}
+
+/* ── Newsletter subscribe ── */
+function subscribeBlog() {
+  var emailEl = document.getElementById('blog-nl-email');
+  var email = emailEl ? emailEl.value.trim() : '';
+  if(!email || !/^[^s@]+@[^s@]+\.[^s@]+$/.test(email)) {
+    showToast('Informe um e-mail válido para assinar.', 'info');
+    if(emailEl) emailEl.focus();
+    return;
+  }
+  if(emailEl) emailEl.value = '';
+
+  /* Save preference in session/localStorage */
+  _saveBlogSubscription(email);
+
+  showToast('🎉 Inscrito com sucesso! Você receberá nossos artigos toda semana.', 'success');
+}
+
+function subscribeBlogInline() {
+  var emailEl = document.getElementById('blog-art-nl-email');
+  var email = emailEl ? emailEl.value.trim() : '';
+  if(!email || !/^[^s@]+@[^s@]+\.[^s@]+$/.test(email)) {
+    showToast('Informe um e-mail válido.', 'info'); return;
+  }
+  if(emailEl) emailEl.value = '';
+  _saveBlogSubscription(email);
+  showToast('✅ Inscrito! Artigos fresquinhos toda semana no seu e-mail.', 'success');
+}
+
+function _saveBlogSubscription(email) {
+  try {
+    var saved = JSON.parse(localStorage.getItem('hw_session') || '{}');
+    saved.blogSubscribed = true;
+    saved.blogEmail = email || (saved.email || '');
+    localStorage.setItem('hw_session', JSON.stringify(saved));
+    /* Update toggle in settings if visible */
+    var toggle = document.getElementById('perm-blog-newsletter');
+    if(toggle) toggle.checked = true;
+  } catch(e) {}
+}
+
+/* ── Communication preferences ── */
+function saveCommunicationPrefs() {
+  var prefs = {
+    blogNewsletter: document.getElementById('perm-blog-newsletter')  ? document.getElementById('perm-blog-newsletter').checked  : false,
+    blogAuthor:     document.getElementById('perm-blog-author')      ? document.getElementById('perm-blog-author').checked      : false,
+    newProjects:    document.getElementById('perm-new-projects')     ? document.getElementById('perm-new-projects').checked     : true,
+    proposals:      document.getElementById('perm-proposals')        ? document.getElementById('perm-proposals').checked        : true,
+    promotions:     document.getElementById('perm-promotions')       ? document.getElementById('perm-promotions').checked       : false,
+    report:         document.getElementById('perm-report')           ? document.getElementById('perm-report').checked           : true
+  };
+
+  try {
+    var saved = JSON.parse(localStorage.getItem('hw_session') || '{}');
+    saved.commPrefs = prefs;
+    localStorage.setItem('hw_session', JSON.stringify(saved));
+  } catch(e) {}
+
+  showToast('✅ Preferências salvas!', 'success');
+}
+
+function _restoreCommPrefs() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('hw_session') || '{}');
+    var prefs = saved.commPrefs;
+    if(!prefs) return;
+    var ids = ['perm-blog-newsletter','perm-blog-author','perm-new-projects','perm-proposals','perm-promotions','perm-report'];
+    var keys = ['blogNewsletter','blogAuthor','newProjects','proposals','promotions','report'];
+    ids.forEach(function(id, i) {
+      var el = document.getElementById(id);
+      if(el && prefs[keys[i]] !== undefined) el.checked = prefs[keys[i]];
+    });
+  } catch(e) {}
+}
+
+/* Wire blog page init */
+var _origShowPageBlog = window.showPage;
+window.showPage = function(name) {
+  _origShowPageBlog(name);
+  if(name === 'blog') setTimeout(initBlog, 50);
+  if(name === 'dashboard') setTimeout(_restoreCommPrefs, 200);
 };
 
 </script>
