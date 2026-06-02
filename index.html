@@ -1163,7 +1163,13 @@ section { padding: 64px 0; }
   overflow: hidden;
   position: sticky;
   top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
 }
+.sidebar::-webkit-scrollbar { width: 5px; }
+.sidebar::-webkit-scrollbar-track { background: var(--bg); border-radius: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--green); }
 .sidebar-header {
   padding: 16px 20px;
   border-bottom: 1px solid var(--border);
