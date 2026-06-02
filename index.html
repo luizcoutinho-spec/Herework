@@ -5715,9 +5715,9 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-login-pass"></div>
       </div>
       <div style="text-align:right;margin-bottom:20px;">
-        <a style="font-size:13px;color:var(--green);cursor:pointer;" data-pt="Esqueci minha senha" data-es="Olvidé mi contraseña">Esqueci minha senha</a>
+        <a style="font-size:13px;color:var(--green);cursor:pointer;" onclick="forgotPassword()" data-pt="Esqueci minha senha" data-es="Olvidé mi contraseña">Esqueci minha senha</a>
       </div>
-      <button class="btn btn-green btn-block btn-lg" onclick="submitLogin()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
+      <button id="login-submit-btn" class="btn btn-green btn-block btn-lg" onclick="submitLogin()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <div class="modal-switch-link">
         <span data-pt="Não tem conta?" data-es="¿No tienes cuenta?">Não tem conta?</span>
         <a onclick="switchModal('login','register')" data-pt=" Cadastre-se grátis" data-es=" Regístrate gratis"> Cadastre-se grátis</a>
@@ -5760,7 +5760,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-reg-pass"></div>
       </div>
       <div style="font-size:12px;color:var(--text-3);margin-bottom:18px;" data-pt="Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade." data-es="Al crear cuenta aceptas nuestros Términos de Uso y Política de Privacidad.">Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade.</div>
-      <button class="btn btn-green btn-block btn-lg" onclick="submitRegister()" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</button>
+      <button id="reg-submit-btn" class="btn btn-green btn-block btn-lg" onclick="submitRegister()" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</button>
       <div class="modal-switch-link">
         <span data-pt="Já tem conta?" data-es="¿Ya tienes cuenta?">Já tem conta?</span>
         <a onclick="switchModal('register','login')" data-pt=" Entrar" data-es=" Iniciar sesión"> Entrar</a>
@@ -7485,26 +7485,73 @@ function _setBtnLoading(btn, loading) {
   }
 }
 
+function forgotPassword() {
+  var emailEl = document.getElementById('login-email');
+  var email   = emailEl ? emailEl.value.trim() : '';
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    /* Ask for email first */
+    if (emailEl) { emailEl.focus(); emailEl.classList.add('error'); }
+    var errEl = document.getElementById('err-login-email');
+    if (errEl) {
+      errEl.textContent = lang()==='pt'
+        ? 'Informe seu e-mail acima para recuperar a senha.'
+        : 'Ingresa tu correo arriba para recuperar la contraseña.';
+      errEl.classList.add('show');
+    }
+    return;
+  }
+
+  if (emailEl) emailEl.classList.remove('error');
+  var errEl = document.getElementById('err-login-email');
+  if (errEl) { errEl.textContent=''; errEl.classList.remove('show'); }
+
+  showToast(
+    lang()==='pt'
+      ? '&#128231; Enviamos um link de redefinição para ' + email
+      : '&#128231; Enviamos un enlace de restablecimiento a ' + email,
+    'success'
+  );
+}
 function submitLogin() {
   var e   = document.getElementById('login-email');
   var p   = document.getElementById('login-pass');
-  var btn = document.querySelector('#overlay-login .btn-green, #overlay-login .btn-primary');
-  var ok  = (_vEmail(e,'err-login-email') & _vField(p,'err-login-pass', lang()==='pt'?'Senha obrigatória':'Contraseña obligatoria'));
+  var btn = document.getElementById('login-submit-btn');
+
+  /* Clear previous errors */
+  ['err-login-email','err-login-pass'].forEach(function(id){
+    var el=document.getElementById(id); if(el){el.textContent='';el.classList.remove('show');}
+  });
+
+  var ok = (_vEmail(e,'err-login-email') &
+            _vField(p,'err-login-pass', lang()==='pt'?'Senha obrigatória':'Contraseña obligatoria'));
   if (!ok) return;
+
   _setBtnLoading(btn, true);
+
   setTimeout(function(){
     _setBtnLoading(btn, false);
+
     var email = e ? e.value.trim() : '';
-    var name  = email.split('@')[0].replace(/[._]/g,' ').replace(/\b\w/g,function(c){return c.toUpperCase();});
+    var name  = email.split('@')[0]
+                     .replace(/[._-]/g,' ')
+                     .replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+
     _setSession(name, email, 'client');
     if (e) e.value = ''; if (p) p.value = '';
     closeModal('login');
-    showToast(lang()==='pt' ? '&#x1F44B; Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!' : '&#x1F44B; &#xa1;Bienvenido/a de regreso, ' + name.split(' ')[0] + '!', 'success');
-    setTimeout(function(){ openDashboard(); }, 500);
+
+    showToast(
+      lang()==='pt'
+        ? '&#x1F44B; Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!'
+        : '&#x1F44B; &#xa1;Bienvenido/a de regreso, ' + name.split(' ')[0] + '!',
+      'success'
+    );
+
+    setTimeout(function(){ openDashboard(); }, 400);
   }, 800);
 }
 
-var regType = 'client';
 function setRegType(type) {
   regType = type;
   var cBtn = document.getElementById('reg-type-client');
@@ -7549,10 +7596,16 @@ function submitRegister() {
   var btn  = document.getElementById('reg-submit-btn');
   var errP = document.getElementById('err-reg-pass');
 
-  var ok = (_vField(n,'err-reg-name',  lang()==='pt'?'Nome obrigatório':'Nombre obligatorio')
+  /* Clear previous errors */
+  ['err-reg-name','err-reg-email','err-reg-pass'].forEach(function(id){
+    var el=document.getElementById(id); if(el){el.textContent='';el.classList.remove('show');}
+  });
+
+  var ok = (_vField(n,'err-reg-name', lang()==='pt'?'Nome obrigatório':'Nombre obligatorio')
           & _vEmail(e,'err-reg-email')
           & _vField(p,'err-reg-pass',  lang()==='pt'?'Crie uma senha':'Crea una contraseña'));
 
+  /* Minimum 6 chars */
   if (ok && p && p.value.length < 6) {
     if (errP) { errP.textContent = lang()==='pt'?'Mínimo de 6 caracteres.':'Mínimo 6 caracteres.'; errP.classList.add('show'); }
     if (p) p.classList.add('error');
@@ -7560,25 +7613,32 @@ function submitRegister() {
   }
 
   if (!ok) return;
+
   _setBtnLoading(btn, true);
 
   setTimeout(function(){
     _setBtnLoading(btn, false);
+
     var name  = n ? n.value.trim() : '';
     var email = e ? e.value.trim() : '';
     var first = name.split(' ')[0];
-    _setSession(name, email, regType);
+    var type  = regType || 'client';
+
+    _setSession(name, email, type);
     if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
     closeModal('register');
+
     showToast(
       lang()==='pt'
-        ? '&#x1F44B; Bem-vindo(a), ' + first + '! Sua conta est&aacute; ativa.'
-        : '&#x1F44B; &#xa1;Bienvenido/a, ' + first + '! Tu cuenta est&aacute; activa.',
+        ? '&#x1F44B; Bem-vindo(a), ' + first + '! Sua conta foi criada.'
+        : '&#x1F44B; &#xa1;Bienvenido/a, ' + first + '! Tu cuenta fue creada.',
       'success'
     );
-    setTimeout(function(){ openDashboard(); }, 500);
+
+    setTimeout(function(){ openDashboard(); }, 400);
   }, 900);
 }
+
 function submitProject() {
   var t   = document.getElementById('proj-title');
   var d   = document.getElementById('proj-desc');
