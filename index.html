@@ -3730,6 +3730,52 @@ section { padding: 64px 0; }
   text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
 }
 .faq-answer-text { font-size: 14px; color: #cbd5e1; line-height: 1.7; }
+/* ═══════════════════════════════════════
+   FAQ CAROUSEL — Full-width with arrows
+═══════════════════════════════════════ */
+.faq-carousel-wrap {
+  position: relative; margin: 36px 0;
+}
+.faq-carousel-item {
+  background: var(--surface); border: 2px solid var(--green);
+  border-radius: var(--radius-lg); overflow: hidden; display: none;
+}
+.faq-carousel-item.active { display: block; }
+.faq-carousel-q {
+  padding: 18px 56px 18px 22px;
+  background: #f0fdf4; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 15px; font-weight: 700; color: var(--green-dark);
+  border-bottom: 2px solid var(--green);
+}
+.faq-carousel-arrow-icon { font-size: 16px; color: var(--green); transition: transform .3s; }
+.faq-carousel-item.open .faq-carousel-arrow-icon { transform: rotate(180deg); }
+.faq-carousel-a {
+  padding: 16px 22px; font-size: 14px; color: var(--text-2);
+  line-height: 1.8; display: none;
+}
+.faq-carousel-item.open .faq-carousel-a { display: block; }
+
+/* Navigation arrows */
+.faq-carousel-nav {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--surface); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer; color: var(--text-2);
+  transition: all var(--transition); z-index: 2; box-shadow: var(--shadow);
+}
+.faq-carousel-nav:hover { background: var(--green); color: #fff; border-color: var(--green); }
+.faq-carousel-nav.prev { left: -18px; }
+.faq-carousel-nav.next { right: -18px; }
+.faq-carousel-dots {
+  display: flex; justify-content: center; gap: 6px; margin-top: 12px;
+}
+.faq-carousel-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--border); cursor: pointer; transition: all var(--transition);
+}
+.faq-carousel-dot.active { background: var(--green); transform: scale(1.3); }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -5975,6 +6021,56 @@ section { padding: 64px 0; }
         </div>
       </div>
 
+
+      <!-- FAQ CAROUSEL — Para Clientes (mais detalhado) -->
+      <div style="padding:0 24px;">
+        <div class="faq-carousel-wrap" id="faqc-client">
+          <button class="faq-carousel-nav prev" onclick="faqCarouselNav('faqc-client',-1)">&#8249;</button>
+          <button class="faq-carousel-nav next" onclick="faqCarouselNav('faqc-client',1)">&#8250;</button>
+
+          <div class="faq-carousel-item active" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              O que acontece se eu n&atilde;o gostar do trabalho entregue?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Voc&ecirc; pode solicitar revis&otilde;es conforme combinado no contrato. Se o trabalho n&atilde;o atender ao escopo original, voc&ecirc; pode abrir uma disputa. Nossa equipe ir&aacute; analisar o caso e mediar uma solu&ccedil;&atilde;o justa para ambas as partes. <strong>O pagamento s&oacute; &eacute; liberado com sua aprova&ccedil;&atilde;o.</strong></div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              &Eacute; seguro contratar um freelancer online?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Sim! Todos os freelancers passam por verifica&ccedil;&atilde;o de identidade. O sistema de Garantia protege 100% do seu dinheiro &mdash; voc&ecirc; s&oacute; paga quando aprovar a entrega. Al&eacute;m disso, todas as comunica&ccedil;&otilde;es e contratos ficam registrados na plataforma.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Posso cancelar um projeto depois de pagar?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Sim, desde que o freelancer n&atilde;o tenha iniciado o trabalho. Se o projeto j&aacute; estiver em andamento, cancelamentos est&atilde;o sujeitos &agrave; pol&iacute;tica de reembolso e ao acordo entre as partes. Nossa equipe pode mediar o processo.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Quanto tempo leva para receber propostas?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Na maioria dos casos, voc&ecirc; come&ccedil;a a receber propostas em <strong>menos de 1 hora</strong> ap&oacute;s publicar o projeto. Projetos bem descritos e com or&ccedil;amento justo atraem propostas de qualidade mais rapidamente.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Posso conversar com o freelancer antes de contratar?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Sim! Ap&oacute;s receber as propostas, voc&ecirc; pode trocar mensagens com os candidatos pelo chat integrado para tirar d&uacute;vidas, alinhar expectativas e verificar o fit antes de fechar o contrato.</div>
+          </div>
+
+          <div class="faq-carousel-dots" id="faqc-client-dots"></div>
+        </div>
+      </div>
       </div><!-- /hiw-companies -->
 
     <!-- TAB: Freelancers -->
@@ -6058,6 +6154,56 @@ section { padding: 64px 0; }
         </div>
       </div>
 
+      </div>
+
+      <!-- FAQ CAROUSEL — Para Freelancers -->
+      <div style="padding:0 24px;">
+        <div class="faq-carousel-wrap" id="faqc-fl">
+          <button class="faq-carousel-nav prev" onclick="faqCarouselNav('faqc-fl',-1)">&#8249;</button>
+          <button class="faq-carousel-nav next" onclick="faqCarouselNav('faqc-fl',1)">&#8250;</button>
+
+          <div class="faq-carousel-item active" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              O que acontece se o cliente n&atilde;o aprovar minha entrega?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Se o cliente n&atilde;o responder em <strong>7 dias</strong> ap&oacute;s voc&ecirc; enviar a entrega, o pagamento &eacute; liberado automaticamente para voc&ecirc;. Em caso de disputa, nossa equipe analisa as evid&ecirc;ncias e medeia uma solu&ccedil;&atilde;o justa com base nos termos do contrato.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Posso trabalhar em v&aacute;rios projetos ao mesmo tempo?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Sim! N&atilde;o h&aacute; limite de projetos simult&acirc;neos na HereWork. Gerencie todos os seus contratos ativos pelo painel, com chat, entrega e pagamentos organizados por projeto.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Como aumentar minhas chances de ser contratado?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Perfis completos com foto, portf&oacute;lio e bio detalhada recebem <strong>5x mais convites</strong>. Al&eacute;m disso, personalize cada proposta para o projeto espec&iacute;fico, responda r&aacute;pido aos clientes e mantenha suas avalia&ccedil;&otilde;es altas.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              Preciso emitir nota fiscal para os clientes?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">N&atilde;o &eacute; obrigat&oacute;rio para come&ccedil;ar. Se o cliente solicitar nota fiscal, voc&ecirc; precisar&aacute; de MEI ou empresa. Para a maioria dos projetos, um recibo simples &eacute; suficiente para pessoas f&iacute;sicas trabalhando como aut&ocirc;nomas.</div>
+          </div>
+
+          <div class="faq-carousel-item" onclick="faqCarouselToggle(this)">
+            <div class="faq-carousel-q">
+              A HereWork oferece prote&ccedil;&atilde;o contra calote?
+              <span class="faq-carousel-arrow-icon">&#8963;</span>
+            </div>
+            <div class="faq-carousel-a">Sim! O sistema de Garantia garante que o dinheiro j&aacute; est&aacute; reservado antes de voc&ecirc; come&ccedil;ar a trabalhar. Voc&ecirc; nunca trabalha de gra&ccedil;a &mdash; o pagamento fica retido na plataforma e &eacute; liberado ao aprovar a entrega.</div>
+          </div>
+
+          <div class="faq-carousel-dots" id="faqc-fl-dots"></div>
+        </div>
       </div>
     </div><!-- /hiw-freelancers-page -->
 
@@ -15066,6 +15212,73 @@ function toggleFaqCards(wrapId) {
   body.style.display = isOpen ? 'none' : 'block';
   if(arrow) arrow.classList.toggle('open', !isOpen);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   FAQ CAROUSEL — Navigation & Toggle
+═══════════════════════════════════════════════════════════ */
+var _faqCarouselIdx = {};
+
+function faqCarouselInit(wrapId) {
+  var wrap  = document.getElementById(wrapId);
+  if(!wrap || wrap.dataset.init) return;
+  wrap.dataset.init = '1';
+  var items = wrap.querySelectorAll('.faq-carousel-item');
+  var dots  = document.getElementById(wrapId + '-dots');
+  if(dots && items.length > 1) {
+    dots.innerHTML = Array.from(items).map(function(_,i){
+      return '<span class="faq-carousel-dot' + (i===0?' active':'') + '" onclick="faqCarouselGoto(\'' + wrapId + '\',' + i + ')"></span>';
+    }).join('');
+  }
+  _faqCarouselIdx[wrapId] = 0;
+  /* Auto-open first item */
+  if(items[0]) items[0].classList.add('open');
+}
+
+function faqCarouselNav(wrapId, dir) {
+  var wrap  = document.getElementById(wrapId);
+  if(!wrap) return;
+  var items = wrap.querySelectorAll('.faq-carousel-item');
+  var cur   = _faqCarouselIdx[wrapId] || 0;
+  var next  = (cur + dir + items.length) % items.length;
+  faqCarouselGoto(wrapId, next);
+}
+
+function faqCarouselGoto(wrapId, idx) {
+  var wrap  = document.getElementById(wrapId);
+  if(!wrap) return;
+  var items = wrap.querySelectorAll('.faq-carousel-item');
+  var dots  = document.getElementById(wrapId + '-dots');
+  items.forEach(function(it){ it.classList.remove('active','open'); });
+  if(items[idx]) { items[idx].classList.add('active','open'); }
+  _faqCarouselIdx[wrapId] = idx;
+  if(dots) {
+    dots.querySelectorAll('.faq-carousel-dot').forEach(function(d,i){
+      d.classList.toggle('active', i === idx);
+    });
+  }
+}
+
+function faqCarouselToggle(item) {
+  item.classList.toggle('open');
+}
+
+/* Init on page show */
+var _origShowPageFaq = window.showPage;
+window.showPage = function(name) {
+  _origShowPageFaq(name);
+  if(name === 'how') {
+    setTimeout(function() {
+      faqCarouselInit('faqc-client');
+      faqCarouselInit('faqc-fl');
+    }, 100);
+  }
+};
+
+/* Also init on DOMContentLoaded */
+document.addEventListener('DOMContentLoaded', function() {
+  faqCarouselInit('faqc-client');
+  faqCarouselInit('faqc-fl');
+});
 </script>
 </body>
 </html>
