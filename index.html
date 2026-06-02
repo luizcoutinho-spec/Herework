@@ -4254,48 +4254,187 @@ section { padding: 64px 0; }
     </div><!-- /contracts panel -->
 
     <!-- ─── PAINEL: PAGAMENTOS ─── -->
+    <!-- ─── PAINEL: PAGAMENTOS ─── -->
     <div id="dpanel-payments" style="display:none;">
-      <div class="profile-card">
-        <div class="dash-section-title" style="margin-bottom:16px;"><span>&#128179;</span> Hist&oacute;rico de Pagamentos</div>
-        <div id="dash-payment-history">
-          <div class="payment-item">
-            <div class="payment-icon" style="background:#f0fdf4;">&#128179;</div>
-            <div class="payment-info">
-              <div class="payment-title">Contrato &mdash; Identidade visual startup fintech</div>
-              <div class="payment-date">Escrow liberado &middot; 28 Fev 2025</div>
-            </div>
-            <div class="payment-amount success">R$ 2.400</div>
+
+      <!-- Resumo financeiro -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;">
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--green);" id="pay-total-paid">R$ 0</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Total Pago</div>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:#f97316;" id="pay-total-escrow">R$ 0</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Em Escrow</div>
+        </div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:16px;text-align:center;">
+          <div style="font-size:22px;font-weight:800;color:var(--green);" id="pay-total-received">R$ 0</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:3px;">Total Recebido</div>
+        </div>
+      </div>
+
+      <!-- Tabs Pagamentos / Recebimentos -->
+      <div style="display:flex;border-bottom:1.5px solid var(--border);margin-bottom:20px;">
+        <button class="pay-tab active" id="ptab-out" onclick="switchPayHistory('out')" style="flex:1;padding:12px 8px;font-size:13px;">
+          &#128179; Pagamentos Realizados
+        </button>
+        <button class="pay-tab" id="ptab-in" onclick="switchPayHistory('in')" style="flex:1;padding:12px 8px;font-size:13px;">
+          &#128176; Recebimentos
+        </button>
+      </div>
+
+      <!-- Histórico de Pagamentos (saídas) -->
+      <div id="ppanel-out">
+        <div class="profile-card" style="padding:0;overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--border-2);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Pagamentos Realizados</div>
+            <div style="font-size:11px;color:var(--text-4);">Valores pagos a freelancers via Escrow</div>
           </div>
-          <div class="payment-item">
-            <div class="payment-icon" style="background:#fff7ed;">&#128274;</div>
-            <div class="payment-info">
-              <div class="payment-title">Escrow &mdash; Desenvolvimento e-commerce WooCommerce</div>
-              <div class="payment-date">Em escrow &middot; Aguardando aprova&ccedil;&atilde;o</div>
+          <div style="padding:0 18px;">
+            <!-- Escrow ativo -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#fff7ed;">&#128274;</div>
+              <div class="payment-info">
+                <div class="payment-title">Escrow &mdash; Desenvolvimento e-commerce WooCommerce</div>
+                <div class="payment-date">&#128100; Carlos Almeida &nbsp;&middot;&nbsp; Em andamento &nbsp;&middot;&nbsp; Iniciado 15 Mar 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount pending">R$ 4.800</div>
+                <div style="font-size:10px;color:#f97316;text-align:right;margin-top:2px;">Em escrow</div>
+              </div>
             </div>
-            <div class="payment-amount pending">R$ 4.800</div>
+            <!-- Liberado -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#f0fdf4;">&#9989;</div>
+              <div class="payment-info">
+                <div class="payment-title">Identidade visual para startup fintech</div>
+                <div class="payment-date">&#128100; Marina Lima &nbsp;&middot;&nbsp; Aprovado e liberado &nbsp;&middot;&nbsp; 28 Fev 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount success">R$ 3.800</div>
+                <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px;">Liberado</div>
+              </div>
+            </div>
+            <!-- Concluído -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#f0fdf4;">&#127881;</div>
+              <div class="payment-info">
+                <div class="payment-title">Gestão de redes sociais &mdash; Jan/Fev 2025</div>
+                <div class="payment-date">&#128100; Rafael Pereira &nbsp;&middot;&nbsp; Conclu&iacute;do &nbsp;&middot;&nbsp; 31 Jan 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount success">R$ 2.400</div>
+                <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px;">Liberado</div>
+              </div>
+            </div>
+            <!-- Reembolso -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#fef2f2;">&#8617;&#65039;</div>
+              <div class="payment-info">
+                <div class="payment-title">Reembolso &mdash; Projeto cancelado</div>
+                <div class="payment-date">Reembolso processado &nbsp;&middot;&nbsp; 10 Dez 2024</div>
+              </div>
+              <div>
+                <div class="payment-amount" style="color:#ef4444;">- R$ 800</div>
+                <div style="font-size:10px;color:#ef4444;text-align:right;margin-top:2px;">Reembolsado</div>
+              </div>
+            </div>
           </div>
-          <div class="payment-item">
-            <div class="payment-icon" style="background:#f0fdf4;">&#127881;</div>
-            <div class="payment-info">
-              <div class="payment-title">Campanha SEO &mdash; Janeiro/2025</div>
-              <div class="payment-date">Conclu&iacute;do &middot; 31 Jan 2025</div>
+        </div>
+
+        <!-- Método de pagamento -->
+        <div class="profile-card" style="margin-top:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">&#128179; M&eacute;todo de Pagamento</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--radius);border:1.5px dashed var(--border);">
+            <span style="font-size:24px;">&#128179;</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Nenhum cart&atilde;o salvo</div>
+              <div style="font-size:11px;color:var(--text-4);">Adicione um cart&atilde;o para facilitar pagamentos futuros</div>
             </div>
-            <div class="payment-amount success">R$ 2.400</div>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="openModal('payment')">+ Adicionar Cart&atilde;o</button>
+          </div>
+          <div style="font-size:11px;color:var(--text-4);margin-top:8px;display:flex;align-items:center;gap:4px;">
+            &#128274; Pagamentos processados com seguran&ccedil;a via <strong>Stripe</strong> &nbsp;&middot;&nbsp; PCI DSS Level 1
           </div>
         </div>
       </div>
 
-      <div class="profile-card" style="margin-top:16px;">
-        <div class="dash-section-title" style="margin-bottom:14px;"><span>&#128179;</span> M&eacute;todo de Pagamento</div>
-        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border-2);">
-          <span style="font-size:22px;">&#128179;</span>
-          <div>
-            <div style="font-size:13px;font-weight:600;">Nenhum cart&atilde;o salvo</div>
-            <div style="font-size:11px;color:var(--text-4);">Adicione um cart&atilde;o para pagamentos futuros</div>
+      <!-- Histórico de Recebimentos (entradas) -->
+      <div id="ppanel-in" style="display:none;">
+        <div class="profile-card" style="padding:0;overflow:hidden;">
+          <div style="padding:14px 18px;border-bottom:1px solid var(--border-2);display:flex;align-items:center;justify-content:space-between;">
+            <div style="font-size:13px;font-weight:700;color:var(--text);">Recebimentos</div>
+            <div style="font-size:11px;color:var(--text-4);">Valores recebidos pelos seus servi&ccedil;os</div>
           </div>
-          <button class="btn btn-outline btn-sm" style="margin-left:auto;" onclick="openModal('payment')">+ Adicionar Cart&atilde;o</button>
+          <div style="padding:0 18px;">
+            <!-- Aguardando -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#eff6ff;">&#9200;</div>
+              <div class="payment-info">
+                <div class="payment-title">Campanha SEO &mdash; Loja Bella Moda</div>
+                <div class="payment-date">&#128274; Aguardando aprova&ccedil;&atilde;o do cliente &nbsp;&middot;&nbsp; Entregue 20 Mar 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount" style="color:#3b82f6;">R$ 3.200</div>
+                <div style="font-size:10px;color:#3b82f6;text-align:right;margin-top:2px;">Aguardando</div>
+              </div>
+            </div>
+            <!-- Recebido -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#f0fdf4;">&#128176;</div>
+              <div class="payment-info">
+                <div class="payment-title">API REST para plataforma de educa&ccedil;&atilde;o &mdash; EduPlus</div>
+                <div class="payment-date">&#9989; Recebido na conta &nbsp;&middot;&nbsp; 20 Fev 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount success">R$ 6.400</div>
+                <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px;">Recebido</div>
+              </div>
+            </div>
+            <!-- Recebido -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#f0fdf4;">&#128176;</div>
+              <div class="payment-info">
+                <div class="payment-title">Landing page SaaS &mdash; TechStart Ltda</div>
+                <div class="payment-date">&#9989; Recebido na conta &nbsp;&middot;&nbsp; 15 Jan 2025</div>
+              </div>
+              <div>
+                <div class="payment-amount success">R$ 2.800</div>
+                <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px;">Recebido</div>
+              </div>
+            </div>
+            <!-- Recebido -->
+            <div class="payment-item">
+              <div class="payment-icon" style="background:#f0fdf4;">&#128176;</div>
+              <div class="payment-info">
+                <div class="payment-title">Edição de vídeo institucional &mdash; Construtora Horizonte</div>
+                <div class="payment-date">&#9989; Recebido na conta &nbsp;&middot;&nbsp; 5 Dez 2024</div>
+              </div>
+              <div>
+                <div class="payment-amount success">R$ 1.800</div>
+                <div style="font-size:10px;color:var(--green);text-align:right;margin-top:2px;">Recebido</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados bancários -->
+        <div class="profile-card" style="margin-top:16px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">&#127968; Dados Banc&aacute;rios para Recebimento</div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--radius);border:1.5px dashed var(--border);">
+            <span style="font-size:24px;">&#127968;</span>
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text);">Nenhuma conta banc&aacute;ria cadastrada</div>
+              <div style="font-size:11px;color:var(--text-4);">Cadastre seus dados banc&aacute;rios para receber pagamentos</div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="showToast('Funcionalidade em breve!','info')">+ Adicionar Conta</button>
+          </div>
+          <div style="margin-top:10px;font-size:11px;color:var(--text-4);">
+            &#9889; Os pagamentos s&atilde;o liberados ap&oacute;s aprova&ccedil;&atilde;o do cliente. O prazo de transfer&ecirc;ncia &eacute; de 1-3 dias &uacute;teis.
+          </div>
         </div>
       </div>
+
     </div><!-- /payments panel -->
 
     <!-- ─── PAINEL: CONFIGURAÇÕES ─── -->
@@ -10246,6 +10385,7 @@ function switchDashPanel(panel) {
     if(btn) btn.classList.toggle('active', p === panel);
     if(pnl) pnl.style.display = p === panel ? 'block' : 'none';
   });
+  if(panel === 'payments' && typeof _updatePaymentSummary === 'function') _updatePaymentSummary();
 }
 
 function switchContractView(view) {
@@ -12008,6 +12148,30 @@ if (document.readyState === 'loading') {
   setTimeout(_initStripe, 100);
 }
 
+
+/* ─── Payment History Tab Switch ─── */
+function switchPayHistory(tab) {
+  ['out','in'].forEach(function(t) {
+    var btn = document.getElementById('ptab-' + t);
+    var pnl = document.getElementById('ppanel-' + t);
+    if(btn) btn.classList.toggle('active', t === tab);
+    if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
+  });
+}
+
+/* ─── Update payment summary cards ─── */
+function _updatePaymentSummary() {
+  /* Totals from _dashData */
+  var paid     = _dashData.client.done.reduce(function(s,p){ return s+(p.value||0); }, 0)
+               + _dashData.client.active.filter(function(p){ return p.status!=='review'; }).reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var escrow   = _dashData.client.active.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var received = _dashData.freelancer.done.reduce(function(s,p){ return s+(p.value||0); }, 0);
+
+  var el;
+  el = document.getElementById('pay-total-paid');     if(el) el.textContent = 'R$ ' + paid.toLocaleString('pt-BR');
+  el = document.getElementById('pay-total-escrow');   if(el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR');
+  el = document.getElementById('pay-total-received'); if(el) el.textContent = 'R$ ' + received.toLocaleString('pt-BR');
+}
 </script>
 </body>
 </html>
