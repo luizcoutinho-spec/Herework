@@ -4235,6 +4235,13 @@ section { padding: 64px 0; }
           <div id="dash-client-active"></div>
         </div>
         <div class="dash-section">
+          <div class="dash-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <div><span>&#128203;</span> Projetos Publicados &mdash; Aguardando Propostas</div>
+            <button class="btn btn-primary btn-sm" onclick="openModal('publish')">+ Publicar</button>
+          </div>
+          <div id="dash-client-waiting"></div>
+        </div>
+        <div class="dash-section">
           <div class="dash-section-title"><span>&#9989;</span> Conclu&iacute;dos</div>
           <div id="dash-client-done"></div>
         </div>
@@ -4244,6 +4251,13 @@ section { padding: 64px 0; }
         <div class="dash-section">
           <div class="dash-section-title"><span>&#9889;</span> Em Desenvolvimento</div>
           <div id="dash-fl-active"></div>
+        </div>
+        <div class="dash-section">
+          <div class="dash-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+            <div><span>&#128233;</span> Propostas Enviadas &mdash; Aguardando Resposta</div>
+            <button class="btn btn-outline btn-sm" onclick="showPage('projects')">&#128269; Buscar projetos</button>
+          </div>
+          <div id="dash-fl-proposals"></div>
         </div>
         <div class="dash-section">
           <div class="dash-section-title"><span>&#127942;</span> Trabalhos Conclu&iacute;dos</div>
@@ -10266,62 +10280,147 @@ function contractRevision() {
 
 /* ── Demo data (substituída por dados reais no futuro) ── */
 var _dashData = {
+
+  /* ════════════════════════════════
+     COMO CLIENTE — projetos em que você é o contratante
+  ════════════════════════════════ */
   client: {
     active: [
       {
-        id:'c1', title:'Desenvolvimento de e-commerce com WooCommerce',
+        id:'c1', title:'Desenvolvimento de e-commerce completo com WooCommerce',
         freelancer:'Carlos Almeida', freelancerRole:'Dev Full Stack',
         value:4800, deadline:'18 dias restantes', progress:45,
         status:'active', statusLabel:'Em desenvolvimento',
-        desc:'Loja virtual com integração de pagamento (Pix, cartão, boleto), gestão de estoque e painel administrativo.',
-        skills:['WordPress','WooCommerce','PHP','CSS']
+        desc:'Loja virtual com integração de pagamento (Pix, cartão, boleto), gestão de estoque, painel administrativo e layout responsivo com identidade visual da marca.',
+        skills:['WordPress','WooCommerce','PHP','CSS','JavaScript']
       },
       {
-        id:'c2', title:'Identidade visual para startup fintech',
+        id:'c2', title:'Identidade visual completa para startup fintech',
         freelancer:'Marina Lima', freelancerRole:'Designer UI/UX',
         value:3800, deadline:'7 dias restantes', progress:80,
         status:'review', statusLabel:'Aguardando aprovação',
-        desc:'Logotipo, manual de marca, paleta de cores, tipografia e aplicações digitais.',
-        skills:['Branding','Figma','Illustrator']
+        desc:'Logotipo, manual de marca, paleta de cores, tipografia, papelaria e aplicações digitais (LinkedIn, Instagram, apresentações corporativas).',
+        skills:['Branding','Figma','Illustrator','Photoshop']
+      },
+      {
+        id:'c3', title:'Campanha Google Ads + Meta Ads para lançamento de produto',
+        freelancer:'Rafael Pereira', freelancerRole:'Especialista em Marketing Digital',
+        value:2800, deadline:'5 dias restantes', progress:60,
+        status:'active', statusLabel:'Em desenvolvimento',
+        desc:'Criação e gestão de campanhas pagas no Google e Meta para lançamento de produto SaaS, com copy, segmentação e otimização semanal.',
+        skills:['Google Ads','Meta Ads','Copywriting','Analytics']
+      },
+      {
+        id:'c4', title:'Aplicativo mobile de gestão financeira pessoal',
+        freelancer:'Fernando Melo', freelancerRole:'Desenvolvedor Mobile (iOS/Android)',
+        value:12000, deadline:'35 dias restantes', progress:20,
+        status:'active', statusLabel:'Em desenvolvimento',
+        desc:'App para controle de finanças pessoais com dashboard, categorias de gastos, alertas e sincronização com bancos via Open Finance.',
+        skills:['Flutter','Dart','Firebase','Open Finance']
       }
     ],
     waiting: [
       {
         id:'w1', title:'App de delivery para restaurante (iOS e Android)',
         proposals:8, budget:'R$ 8.000 – 15.000', posted:'Publicado há 3h',
-        desc:'Aplicativo com cardápio digital, rastreamento de pedidos e painel administrativo.',
-        skills:['Flutter','React Native','Firebase']
+        desc:'Aplicativo próprio de delivery com cardápio digital, integração de pagamento, rastreamento de pedidos em tempo real e painel administrativo.',
+        skills:['Flutter','React Native','Node.js','Firebase']
+      },
+      {
+        id:'w2', title:'Redação de 12 artigos SEO para blog corporativo',
+        proposals:14, budget:'R$ 1.200 – 2.400', posted:'Publicado há 1 dia',
+        desc:'Produção de artigos otimizados para SEO sobre mercado financeiro, com mínimo 1.500 palavras cada, pesquisa de palavras-chave incluída.',
+        skills:['Redação','SEO','WordPress','Copywriting']
+      },
+      {
+        id:'w3', title:'Consultoria e implementação de BI com Power BI',
+        proposals:5, budget:'R$ 3.000 – 6.000', posted:'Publicado há 2 dias',
+        desc:'Implementação de dashboards executivos em Power BI integrando dados de ERP, CRM e planilhas Excel. Treinamento da equipe incluso.',
+        skills:['Power BI','SQL','Excel','DAX']
       }
     ],
     done: [
       {
-        id:'d1', title:'Gestão de redes sociais — Janeiro/Fevereiro',
+        id:'d1', title:'Gestão de redes sociais — Janeiro/Fevereiro 2025',
         freelancer:'Rafael Pereira', value:2400, rating:5,
         completedAt:'Concluído em 28 Fev 2025',
-        desc:'Gestão mensal do Instagram, Facebook e LinkedIn com criação de conteúdo.'
+        desc:'Gestão mensal completa do Instagram, Facebook e LinkedIn: planejamento de conteúdo, criação de artes, agendamento e relatório de performance.'
+      },
+      {
+        id:'d2', title:'Desenvolvimento de landing page institucional em React',
+        freelancer:'Carlos Almeida', value:3200, rating:5,
+        completedAt:'Concluído em 10 Jan 2025',
+        desc:'Landing page moderna e responsiva com animações CSS, formulário de captura, integração com RD Station e otimização para SEO.'
+      },
+      {
+        id:'d3', title:'Produção de vídeo institucional 3 minutos',
+        freelancer:'Tatiane Carvalho', value:1800, rating:4,
+        completedAt:'Concluído em 5 Dez 2024',
+        desc:'Roteiro, filmagem, edição e pós-produção de vídeo institucional para apresentação da empresa em eventos e site corporativo.'
+      },
+      {
+        id:'d4', title:'Auditoria e otimização de SEO técnico',
+        freelancer:'Rafael Pereira', value:1600, rating:5,
+        completedAt:'Concluído em 20 Nov 2024',
+        desc:'Auditoria completa do site, correção de erros técnicos, otimização de velocidade (Core Web Vitals), sitemap e schema markup.'
       }
     ]
   },
+
+  /* ════════════════════════════════
+     COMO FREELANCER — projetos em que você é o prestador
+  ════════════════════════════════ */
   freelancer: {
     active: [
       {
         id:'fa1', title:'Campanha de SEO para e-commerce de moda',
-        client:'Loja Bella Moda', value:3200, deadline:'22 dias restantes',
+        client:'Loja Bella Moda', clientEmail:'marketing@bellamoda.com.br',
+        value:3200, deadline:'22 dias restantes',
         progress:30, status:'active',
-        desc:'Otimização on-page, link building e relatórios mensais de performance.',
-        skills:['SEO','Google Analytics','SEM']
+        desc:'Otimização on-page, link building, criação de conteúdo otimizado e relatórios mensais de performance (posições, CTR, conversões).',
+        skills:['SEO','Google Analytics','Search Console','Link Building']
+      },
+      {
+        id:'fa2', title:'Sistema de gestão escolar — Módulo financeiro',
+        client:'Escola Futura', clientEmail:'ti@escolafutura.edu.br',
+        value:5500, deadline:'28 dias restantes',
+        progress:50, status:'active',
+        desc:'Desenvolvimento do módulo financeiro do sistema escolar: mensalidades, bolsas, inadimplência, relatórios e integração bancária.',
+        skills:['Node.js','React','PostgreSQL','Stripe']
+      },
+      {
+        id:'fa3', title:'Criação de conteúdo para canal YouTube — Série 10 vídeos',
+        client:'Canal TechBrasil', clientEmail:'producao@techbrasil.com.br',
+        value:2200, deadline:'14 dias restantes',
+        progress:70, status:'review',
+        desc:'Roteiro, edição e thumbnail de 10 vídeos sobre tecnologia e carreira em TI. Inclui legendas e otimização para o algoritmo do YouTube.',
+        skills:['Edição de Vídeo','Premiere Pro','After Effects','YouTube SEO']
       }
     ],
     proposals: [
       {
-        id:'fp1', title:'Sistema de agendamento online para clínica',
+        id:'fp1', title:'Sistema de agendamento online para clínica médica',
         value:5500, sentAt:'Enviada há 2h', status:'sent',
-        desc:'Plataforma web com calendário interativo, notificações e integração com WhatsApp.'
+        desc:'Plataforma web com calendário interativo, notificações por WhatsApp/e-mail, prontuário digital simplificado e integração com Google Agenda.',
+        skills:['React','Node.js','PostgreSQL','WhatsApp API']
       },
       {
-        id:'fp2', title:'Redesign completo do site institucional',
+        id:'fp2', title:'Redesign completo do site institucional de escritório de advocacia',
         value:4200, sentAt:'Enviada há 1 dia', status:'sent',
-        desc:'Novo layout moderno, responsivo e otimizado para conversão.'
+        desc:'Novo layout moderno, responsivo, otimizado para conversão com blog jurídico integrado, formulário de contato e SEO local.',
+        skills:['Figma','WordPress','SEO','UI/UX']
+      },
+      {
+        id:'fp3', title:'Desenvolvimento de chatbot para atendimento ao cliente',
+        value:3800, sentAt:'Enviada há 3 dias', status:'sent',
+        desc:'Chatbot inteligente para WhatsApp e site com fluxos de atendimento, FAQ automatizado e integração com CRM da empresa.',
+        skills:['Python','Dialogflow','WhatsApp API','Node.js']
+      },
+      {
+        id:'fp4', title:'Auditoria de segurança e pentest em aplicação web',
+        value:4500, sentAt:'Enviada há 5 dias', status:'sent',
+        desc:'Teste de penetração completo (OWASP Top 10), análise de vulnerabilidades, relatório executivo e plano de remediação.',
+        skills:['Segurança','OWASP','Pentest','Kali Linux']
       }
     ],
     done: [
@@ -10329,13 +10428,31 @@ var _dashData = {
         id:'fd1', title:'Desenvolvimento de landing page para produto SaaS',
         client:'TechStart Ltda', value:2800, rating:5,
         completedAt:'Concluído em 15 Jan 2025',
-        desc:'Landing page com animações, formulário de captura e integração com CRM.'
+        desc:'Landing page de alta conversão com animações, formulário de captura, A/B testing, integração com RD Station e CRM.'
       },
       {
-        id:'fd2', title:'API REST para plataforma de educação',
-        client:'EduPlus', value:6400, rating:4,
+        id:'fd2', title:'API REST para plataforma de educação EAD',
+        client:'EduPlus', value:6400, rating:5,
         completedAt:'Concluído em 3 Dez 2024',
-        desc:'API com autenticação JWT, endpoints de cursos, alunos e pagamentos.'
+        desc:'API completa com autenticação JWT, endpoints de cursos, alunos, progresso, pagamentos e certificados. Documentação Swagger inclusa.'
+      },
+      {
+        id:'fd3', title:'Dashboard analítico para e-commerce — Power BI',
+        client:'MegaStore Online', value:3600, rating:4,
+        completedAt:'Concluído em 18 Nov 2024',
+        desc:'Dashboard executivo com KPIs de vendas, estoque, clientes e campanhas. Integração com Shopify, Google Analytics e Meta Ads.'
+      },
+      {
+        id:'fd4', title:'Automação de processos com Python + RPA',
+        client:'Contabilidade Rápida', value:4200, rating:5,
+        completedAt:'Concluído em 2 Out 2024',
+        desc:'Automação de emissão de notas fiscais, conciliação bancária e relatórios mensais, reduzindo 40h/mês de trabalho manual.'
+      },
+      {
+        id:'fd5', title:'Consultoria e implementação de CI/CD com GitHub Actions',
+        client:'DevAgency Brasil', value:2400, rating:5,
+        completedAt:'Concluído em 15 Set 2024',
+        desc:'Implementação de pipeline completo: testes automatizados, build, deploy em staging e produção com rollback automático.'
       }
     ]
   }
@@ -10354,9 +10471,15 @@ function openDashboard() {
   var garantia = _dashData.client.active.reduce(function(s,p){return s+p.value;},0);
   var done   = _dashData.client.done.length + _dashData.freelancer.done.length;
   var active = _dashData.client.active.length + _dashData.freelancer.active.length;
+  var waiting = _dashData.client.waiting.length;
   el = document.getElementById('ds-active'); if(el) el.textContent = active;
   el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
   el = document.getElementById('ds-done');   if(el) el.textContent = done;
+  /* Update contract badges */
+  el = document.getElementById('dct-client-count');
+  if(el) el.textContent = _dashData.client.active.length + _dashData.client.waiting.length + _dashData.client.done.length;
+  el = document.getElementById('dct-fl-count');
+  if(el) el.textContent = _dashData.freelancer.active.length + _dashData.freelancer.proposals.length + _dashData.freelancer.done.length;
 
   el = document.getElementById('dash-profile-avatar'); if(el) el.textContent = name.charAt(0).toUpperCase();
   el = document.getElementById('dash-profile-name');   if(el) el.textContent = name;
@@ -10370,8 +10493,10 @@ function openDashboard() {
   el = document.getElementById('dct-fl-count');     if(el) el.textContent = _dashData.freelancer.active.length + _dashData.freelancer.done.length;
 
   _renderDashClientActive();
+  _renderDashClientWaiting();
   _renderDashClientDone();
   _renderDashFLActive();
+  _renderDashFLProposals();
   _renderDashFLDone();
 
   switchDashPanel('profile');
