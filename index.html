@@ -3776,6 +3776,34 @@ section { padding: 64px 0; }
   background: var(--border); cursor: pointer; transition: all var(--transition);
 }
 .faq-carousel-dot.active { background: var(--green); transform: scale(1.3); }
+/* ═══════════════════════════════════════
+   SKILLS SELECTOR — Meu Perfil
+═══════════════════════════════════════ */
+.skills-area-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.skills-grid {
+  display:flex; flex-wrap:wrap; gap:7px; margin-top:10px;
+  max-height:200px; overflow-y:auto; padding:2px;
+}
+.skills-grid::-webkit-scrollbar { width:4px; }
+.skills-grid::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+.skill-check-btn {
+  padding:5px 12px; border-radius:20px; border:1.5px solid var(--border);
+  background:var(--bg); font-size:12px; font-weight:500; color:var(--text-2);
+  cursor:pointer; transition:all var(--transition); user-select:none;
+}
+.skill-check-btn:hover  { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+.skill-check-btn.active { border-color:var(--green); background:var(--green); color:#fff; }
+.selected-skills-wrap { min-height:40px; }
+.selected-skill-tag {
+  display:inline-flex; align-items:center; gap:5px;
+  background:var(--green); color:#fff; border-radius:20px;
+  padding:4px 10px; font-size:12px; font-weight:600; margin:3px;
+}
+.selected-skill-tag .rm-skill {
+  cursor:pointer; opacity:.7; font-size:14px; line-height:1;
+}
+.selected-skill-tag .rm-skill:hover { opacity:1; }
+.skills-count-hint { font-size:11px; color:var(--text-4); margin-top:6px; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
 </head>
@@ -4687,6 +4715,61 @@ section { padding: 64px 0; }
         <div class="form-group">
           <label class="form-label">LinkedIn / Portf&oacute;lio (opcional)</label>
           <input class="form-input" id="profile-url" type="url" placeholder="https://linkedin.com/in/seuperfil">
+        </div>
+
+        <!-- ── Área de Atuação & Habilidades ── -->
+        <div class="profile-card" style="margin:18px -4px 0;padding:18px 20px;border:1.5px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);">
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">&#127919; &Aacute;rea de Atua&ccedil;&atilde;o &amp; Especialidades</div>
+          
+          <div class="skills-area-row">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">&Aacute;rea principal</label>
+              <select class="form-select" id="profile-area" onchange="loadProfileSubareas(this.value)">
+                <option value="">Selecione a &aacute;rea...</option>
+                <option value="design">Design &amp; Cria&ccedil;&atilde;o</option>
+                <option value="web">Web &amp; Programa&ccedil;&atilde;o</option>
+                <option value="marketing">Marketing Digital</option>
+                <option value="redacao">Reda&ccedil;&atilde;o &amp; Tradu&ccedil;&atilde;o</option>
+                <option value="video">V&iacute;deo &amp; Anima&ccedil;&atilde;o</option>
+                <option value="ti">TI &amp; Sistemas</option>
+                <option value="apps">Apps &amp; Mobile</option>
+                <option value="dados">Dados &amp; Analytics</option>
+                <option value="ia">IA &amp; Machine Learning</option>
+                <option value="consultoria">Consultoria &amp; Neg&oacute;cios</option>
+                <option value="ecommerce">E-commerce &amp; Vendas</option>
+                <option value="suporte">Suporte ao Cliente</option>
+                <option value="seo">SEO &amp; Performance</option>
+                <option value="educacao">Educa&ccedil;&atilde;o &amp; Treinamento</option>
+                <option value="engenharia">Engenharia &amp; Manufatura</option>
+                <option value="idiomas">Idiomas &amp; Localiza&ccedil;&atilde;o</option>
+                <option value="juridico">Jur&iacute;dico &amp; Financeiro</option>
+                <option value="fotografia">Fotografia</option>
+                <option value="rh">RH &amp; Recrutamento</option>
+                <option value="arquitetura">Arquitetura &amp; Interiores</option>
+                <option value="jogos">Jogos &amp; Entretenimento</option>
+                <option value="musica">M&uacute;sica &amp; &Aacute;udio</option>
+                <option value="blockchain">Blockchain &amp; Web3</option>
+                <option value="saude">Sa&uacute;de &amp; Bem-estar</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Sub&aacute;rea</label>
+              <select class="form-select" id="profile-subarea" onchange="loadProfileSkillsList(document.getElementById('profile-area').value, this.value)" disabled>
+                <option value="">Selecione a &aacute;rea primeiro...</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="profile-skills-section" style="display:none;">
+            <label class="form-label" style="margin-bottom:6px;">Especialidades &amp; Habilidades <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
+            <div class="skills-grid" id="profile-skills-grid"></div>
+          </div>
+
+          <div id="profile-selected-skills-wrap" style="margin-top:12px;display:none;">
+            <label class="form-label" style="margin-bottom:4px;">Habilidades selecionadas:</label>
+            <div class="selected-skills-wrap" id="profile-selected-skills"></div>
+            <div class="skills-count-hint" id="profile-skills-hint">0 de 15 selecionadas</div>
+          </div>
         </div>
 
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
@@ -15457,6 +15540,372 @@ function openProfileByName(name) {
   if(id) openFreelancerProfile(id);
   else showToast('Perfil em breve!', 'info');
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   BANCO DE HABILIDADES — Área / Subárea / Skills
+═══════════════════════════════════════════════════════════ */
+var _SKILLS_DB = {
+  design:{ label:'Design & Criação', subareas:{
+    'id-visual':{ label:'Identidade Visual', skills:['Logotipo','Redesign de Marca','Manual de Marca','Paleta de Cores','Tipografia','Papelaria Corporativa','Embalagem','Rótulo','Assinatura Visual','Branding Estratégico'] },
+    'ui-ux':{ label:'UI/UX Design', skills:['Design de Interface','Wireframe','Prototipagem','Design System','Figma','Adobe XD','Sketch','User Research','Testes de Usabilidade','Acessibilidade Digital'] },
+    'grafico':{ label:'Design Gráfico', skills:['Flyer','Banner Digital','Post para Redes Sociais','Infográfico','Apresentação Corporativa','Cartão de Visita','Catálogo','Cardápio','Material de PDV','Folder'] },
+    'motion':{ label:'Motion Design & Animação', skills:['After Effects','Motion Graphics','Animação 2D','Lottie/JSON','Intro de Vídeo','Animação de Logo','Explainer Video','Kinetic Typography'] }
+  }},
+  web:{ label:'Web & Programação', subareas:{
+    'frontend':{ label:'Frontend', skills:['React','Next.js','Vue.js','Angular','TypeScript','JavaScript','HTML5','CSS3','Sass/SCSS','Tailwind CSS','Bootstrap','Animações CSS','SEO Técnico','Performance Web','PWA'] },
+    'backend':{ label:'Backend', skills:['Node.js','Python','PHP','Laravel','Django','FastAPI','Java','Spring Boot','Ruby on Rails','Go','REST API','GraphQL','Microsserviços','Websockets','Autenticação JWT'] },
+    'fullstack':{ label:'Full Stack', skills:['React + Node.js','MERN Stack','MEAN Stack','Next.js Full Stack','Django + React','Laravel + Vue','PostgreSQL','MySQL','MongoDB','Redis','Docker','AWS','CI/CD','Git'] },
+    'wordpress':{ label:'WordPress & CMS', skills:['WordPress','Elementor','Divi','WooCommerce','ACF','Custom Theme','Plugin Customizado','SEO WordPress','Velocidade WP','Shopify','Webflow','Wix'] }
+  }},
+  marketing:{ label:'Marketing Digital', subareas:{
+    'trafego':{ label:'Tráfego Pago', skills:['Google Ads','Meta Ads','TikTok Ads','LinkedIn Ads','YouTube Ads','Pinterest Ads','Google Shopping','Performance Max','Remarketing','Lookalike Audience','ROAS','CPA'] },
+    'social':{ label:'Redes Sociais', skills:['Instagram','Facebook','LinkedIn','TikTok','YouTube','Pinterest','Twitter/X','Calendário Editorial','Gestão de Comunidade','Stories','Reels','Social Selling'] },
+    'inbound':{ label:'Inbound Marketing', skills:['Content Marketing','Email Marketing','Automação de Marketing','Lead Generation','Funil de Vendas','RD Station','HubSpot','ActiveCampaign','Segmentação','A/B Testing'] },
+    'growth':{ label:'Growth & Analytics', skills:['Growth Hacking','Google Analytics 4','Data Studio','Hotjar','Heatmap','Funil de Conversão','CRO','KPIs','Attribution Model','UTM Parameters'] }
+  }},
+  redacao:{ label:'Redação & Tradução', subareas:{
+    'copy':{ label:'Copywriting', skills:['Copy para Landing Page','Copy para Anúncios','Email Marketing','VSL (Video Sales Letter)','Headline','CTA','Storytelling','Copy para WhatsApp','Sequência de E-mails','Carta de Vendas'] },
+    'conteudo':{ label:'Produção de Conteúdo', skills:['Artigos de Blog','Artigos SEO','Roteiro para Vídeo','Roteiro para Podcast','Newsletter','Posts para LinkedIn','Descrição de Produto','Comunicado','Ebook','Whitepaper'] },
+    'traducao':{ label:'Tradução', skills:['Inglês','Espanhol','Francês','Alemão','Italiano','Português para Inglês','Tradução Técnica','Tradução Jurídica','Tradução Médica','Localização de Software','Legendagem','Tradução Juramentada'] },
+    'revisao':{ label:'Revisão & Edição', skills:['Revisão Ortográfica','Revisão Gramatical','Edição de Texto','Normalização ABNT','Ghostwriting','Revisão Técnica','Proofreading'] }
+  }},
+  video:{ label:'Vídeo & Animação', subareas:{
+    'edicao':{ label:'Edição de Vídeo', skills:['Premiere Pro','DaVinci Resolve','Final Cut Pro','Corte e Montagem','Color Grading','Legendagem','Trilha Sonora','Vídeo Institucional','Vídeo Publicitário','Reels e Shorts'] },
+    'animacao':{ label:'Animação & Motion', skills:['After Effects','Cinema 4D','Blender 3D','Animação 2D','Motion Graphics','Explainer Video','Animação de Personagem','Stop Motion','Infográfico Animado','Whiteboard Animation'] },
+    'producao':{ label:'Produção Audiovisual', skills:['Filmagem','Direção','Roteiro','Storyboard','Drone','Iluminação','Gravação de Podcast','Cobertura de Eventos','Vídeo Testimonial','Fotojornalismo'] }
+  }},
+  ti:{ label:'TI & Sistemas', subareas:{
+    'infra':{ label:'Infraestrutura', skills:['AWS','Azure','GCP','Linux','Windows Server','Virtualização','VMware','Hyper-V','Redes TCP/IP','VPN','Firewall','DNS','DHCP','Active Directory','LDAP'] },
+    'seguranca':{ label:'Segurança da Informação', skills:['Pentest','SIEM','Antivírus Corporativo','LGPD','ISO 27001','Backup e Recuperação','Zero Trust','OWASP','Análise de Vulnerabilidades','SOC','Gestão de Acessos'] },
+    'devops':{ label:'DevOps & Cloud', skills:['Docker','Kubernetes','CI/CD','Terraform','Ansible','GitHub Actions','Jenkins','Prometheus','Grafana','ArgoCD','Helm','AWS ECS','GKE'] },
+    'suporte':{ label:'Suporte & Help Desk', skills:['Suporte N1/N2/N3','ITIL','Jira Service','Zendesk','Configuração de PCs','Active Directory','Office 365','Google Workspace','Intune','ServiceNow'] }
+  }},
+  apps:{ label:'Apps & Mobile', subareas:{
+    'flutter':{ label:'Flutter / Dart', skills:['Flutter','Dart','BLoC','Provider','Riverpod','GetX','Firebase','Push Notifications','In-App Purchase','App Store','Google Play','CI/CD Mobile'] },
+    'react-native':{ label:'React Native', skills:['React Native','JavaScript/TypeScript','Expo','Redux','React Query','Navigation','Firebase','Stripe Mobile','Detox','Jest','Fastlane'] },
+    'nativo':{ label:'iOS & Android Nativo', skills:['Swift','SwiftUI','UIKit','Kotlin','Jetpack Compose','Room','MVVM','Coroutines','Combine','ARKit','ML Kit','Core Data'] }
+  }},
+  dados:{ label:'Dados & Analytics', subareas:{
+    'bi':{ label:'Business Intelligence', skills:['Power BI','Tableau','Looker','Metabase','Google Data Studio','SQL Avançado','DAX','ETL','Modelagem Dimensional','KPIs','Dashboard Executivo'] },
+    'engenharia':{ label:'Engenharia de Dados', skills:['Python','Apache Spark','Airflow','dbt','BigQuery','Redshift','Snowflake','Kafka','MongoDB','Elasticsearch','Data Lake','Data Warehouse','dbt Core'] },
+    'ciencia':{ label:'Ciência de Dados', skills:['Python','R','Machine Learning','TensorFlow','PyTorch','Scikit-learn','NLP','Computer Vision','Séries Temporais','Feature Engineering','Modelagem Preditiva'] }
+  }},
+  ia:{ label:'IA & Machine Learning', subareas:{
+    'llm':{ label:'LLMs & IA Generativa', skills:['ChatGPT / OpenAI API','Claude','Gemini','LangChain','LlamaIndex','RAG','Fine-tuning','Embeddings','Agentes Autônomos','CrewAI','Prompt Engineering'] },
+    'ml':{ label:'Machine Learning', skills:['Supervised Learning','Unsupervised Learning','Deep Learning','Neural Networks','CNN','RNN/LSTM','XGBoost','AutoML','MLOps','MLflow','Feature Store'] },
+    'automacao':{ label:'Automação com IA', skills:['n8n','Make/Integromat','Zapier','Python Automation','RPA','UiPath','Power Automate','Chatbot','AI Workflow','Voice AI','OCR'] }
+  }},
+  consultoria:{ label:'Consultoria & Negócios', subareas:{
+    'estrategia':{ label:'Estratégia Empresarial', skills:['Planejamento Estratégico','OKRs','KPIs','Análise SWOT','BSC','Canvas de Negócio','Gestão de Mudança','M&A','Due Diligence','Valuation'] },
+    'processos':{ label:'Processos & Operações', skills:['BPM','Mapeamento de Processos','Lean','Kaizen','BPMN','VSM','ISO 9001','Six Sigma','Gestão de Qualidade','ERP'] },
+    'financeiro':{ label:'Financeiro & Controladoria', skills:['Planejamento Financeiro','Fluxo de Caixa','DRE','Balanço Patrimonial','Projeções Financeiras','Valuation','Fusões e Aquisições','Gestão de Custos','Captação de Recursos'] },
+    'agil':{ label:'Metodologias Ágeis', skills:['Scrum','Kanban','SAFe','OKR','Lean Startup','Design Sprint','Product Discovery','Roadmap','Gestão de Produto','JIRA'] }
+  }},
+  ecommerce:{ label:'E-commerce & Vendas', subareas:{
+    'gestao':{ label:'Gestão de E-commerce', skills:['Shopify','VTEX','Magento','WooCommerce','Catálogo de Produtos','Precificação','Gestão de Estoque','Fulfillment','SAC Online','Régua de Relacionamento'] },
+    'marketplace':{ label:'Marketplaces', skills:['Mercado Livre','Amazon','Shopee','Americanas','Magalu','Netshoes','Anúncios Patrocinados ML','Amazon AMS','Full/FBA','Reputação e Reviews'] },
+    'cro':{ label:'CRO & Conversão', skills:['CRO','A/B Testing','Checkout Otimizado','UX para E-commerce','Upsell & Cross-sell','Abandono de Carrinho','Heatmap','Funil de Compra','Page Speed'] }
+  }},
+  suporte:{ label:'Suporte ao Cliente', subareas:{
+    'cs':{ label:'Customer Success', skills:['Onboarding de Clientes','Churn Reduction','NPS','CSAT','Health Score','QBR','Upsell/Expansion','Jornada do Cliente','Playbook','Sucesso do Cliente'] },
+    'atendimento':{ label:'Atendimento ao Cliente', skills:['Zendesk','Intercom','HubSpot Service','Freshdesk','Base de Conhecimento','SLA','Chatbot de Atendimento','Central de Ajuda','CSAT','CES'] }
+  }},
+  seo:{ label:'SEO & Performance', subareas:{
+    'tecnico':{ label:'SEO Técnico', skills:['Auditoria de SEO','Core Web Vitals','Schema Markup','Sitemap','Robots.txt','Crawl Budget','Indexação','Semrush','Ahrefs','Screaming Frog','Page Speed'] },
+    'conteudo':{ label:'SEO de Conteúdo', skills:['Pesquisa de Palavras-chave','Clusters de Conteúdo','On-Page SEO','Link Building','Guest Post','Digital PR','SEO para Blog','Rich Snippets'] },
+    'local':{ label:'SEO Local', skills:['Google Meu Negócio','Citações Locais','Review Management','NAP Consistency','Local Landing Pages','Geotargeting'] }
+  }},
+  educacao:{ label:'Educação & Treinamento', subareas:{
+    'ead':{ label:'EAD & E-learning', skills:['Design Instrucional','ADDIE','Moodle','Hotmart','Articulate Storyline','Articulate Rise','Captivate','iSpring','LMS','SCORM','xAPI','Gamificação'] },
+    'treinamento':{ label:'Treinamento Corporativo', skills:['Treinamento Presencial','Workshop','Facilitação','Trilha de Aprendizado','Onboarding Corporativo','PDI','Assessment','Avaliação de Desempenho'] },
+    'producao':{ label:'Produção de Conteúdo Educacional', skills:['Videoaula','Podcast Educacional','Ebook Técnico','Apostila','Quiz & Avaliação','Roteiro Pedagógico','Microlearning'] }
+  }},
+  engenharia:{ label:'Engenharia & Manufatura', subareas:{
+    'civil':{ label:'Engenharia Civil', skills:['AutoCAD','Revit','SketchUp','Projetos Estruturais','Projetos Hidráulicos','Projetos Elétricos','AVCB','ART','BIM','Laudos Técnicos','Topografia'] },
+    'industrial':{ label:'Engenharia Industrial & Automação', skills:['CLP','SCADA','Rockwell','Siemens','Pneumática','Hidráulica','Lean Manufacturing','TPM','SMED','OEE','PLC Programação'] },
+    'producao':{ label:'Engenharia de Produção', skills:['Gestão de Projetos','Planejamento de Produção','FMEA','CEP','ISO 9001','Gestão de Qualidade','Logística','Supply Chain','Kanban Industrial','MRP/ERP'] }
+  }},
+  idiomas:{ label:'Idiomas & Localização', subareas:{
+    'traducao':{ label:'Tradução', skills:['Inglês','Espanhol','Francês','Alemão','Italiano','Japonês','Mandarim','Português para Inglês','Inglês para Português','Tradução Juramentada','SDL Trados','memoQ'] },
+    'localizacao':{ label:'Localização', skills:['Localização de Software','Localização de Games','Localização de Site','Adaptação Cultural','Post-Editing MT','Subtitling','Dubbing','LSP Management'] },
+    'ensino':{ label:'Ensino de Idiomas', skills:['Business English','IELTS Prep','TOEFL Prep','Inglês Conversacional','Espanhol para Negócios','Inglês para Executivos','Aula Online','Material Didático'] }
+  }},
+  juridico:{ label:'Jurídico & Financeiro', subareas:{
+    'contratos':{ label:'Contratos & Empresarial', skills:['Elaboração de Contratos','Revisão de Contratos','NDA','Termos de Uso','Política de Privacidade','LGPD','Direito Societário','M&A Jurídico','Compliance'] },
+    'trabalhista':{ label:'Trabalhista & RH Jurídico', skills:['CLT','Pejotização','Rescisão','Compliance Trabalhista','eSocial','Defesa Trabalhista','Acordos Coletivos','Normas Regulamentadoras'] },
+    'tributario':{ label:'Tributário & Fiscal', skills:['Planejamento Tributário','Simples Nacional','Lucro Presumido','IRPJ/CSLL','PIS/COFINS','ICMS','ISS','Recuperação de Créditos','Defesa Fiscal','MEI/ME'] },
+    'digital':{ label:'Direito Digital', skills:['LGPD','Marco Civil da Internet','Propriedade Intelectual','Direito Autoral','Crypto e Blockchain Legal','Contratos de Software','SaaS Agreements'] }
+  }},
+  fotografia:{ label:'Fotografia', subareas:{
+    'produto':{ label:'Fotografia de Produto', skills:['E-commerce','Fundo Infinito','Packshot','Gastronomia','Lifestyle com Produto','Joia & Relógio','Moda Flat','Amazon Standard','Edição Lightroom','Retoque Photoshop'] },
+    'corporativo':{ label:'Fotografia Corporativa', skills:['Retrato Corporativo','Ensaio de Equipe','LinkedIn','Eventos Corporativos','Feiras e Conferências','Cobertura de Inauguração','Fotos para Press Release'] },
+    'arquitetural':{ label:'Fotografia Arquitetural & Imóvel', skills:['Fotografia de Imóveis','Interiores','Arquitetura','Drone para Imóveis','Tour Virtual 360°','Real Estate','HDR Fotográfico'] }
+  }},
+  rh:{ label:'RH & Recrutamento', subareas:{
+    'recrutamento':{ label:'Recrutamento & Seleção', skills:['Hunting','Recrutamento Tech','LinkedIn Recruiter','Gupy','DISC','Entrevista por Competência','Onboarding','Assessment','Headhunting','Seleção em Massa'] },
+    'gestao-pessoas':{ label:'Gestão de Pessoas', skills:['Avaliação de Desempenho','PDI','Plano de Carreira','Política Salarial','Cargos e Salários','People Analytics','Employee Experience','Employer Branding','Cultura Organizacional'] },
+    'td':{ label:'T&D — Treinamento & Desenvolvimento', skills:['LNT','Trilha de Desenvolvimento','Liderança','Programas de Gestão','Mentoring','Coaching Executivo','NPS Interno','eNPS','Engajamento'] }
+  }},
+  arquitetura:{ label:'Arquitetura & Interiores', subareas:{
+    'arquitetura':{ label:'Arquitetura', skills:['Projeto Arquitetônico','AutoCAD','Revit','BIM','Renderização 3D','Luminion','V-Ray','Projeto Executivo','Compatibilização de Projetos','ARQ Responsável','Aprovação Prefeitura'] },
+    'interiores':{ label:'Design de Interiores', skills:['Projeto de Interiores','3D Residencial','3D Comercial','Decoração','Moodboard','Memorial Descritivo','Planta Mobiliada','Ambientação','Gerenciamento de Obra'] },
+    'paisagismo':{ label:'Paisagismo', skills:['Projeto Paisagístico','Plantas Nativas','Garden Design','Telhado Verde','Jardim Vertical','Piscina & Spa','Iluminação de Jardim','Irrigação'] }
+  }},
+  jogos:{ label:'Jogos & Entretenimento', subareas:{
+    'desenvolvimento':{ label:'Desenvolvimento de Games', skills:['Unity','Unreal Engine','C#','C++','Blueprint','Game Design','Mecânicas de Gameplay','Balanceamento','Monetização','F2P','App Store & Play'] },
+    'arte':{ label:'Arte para Games', skills:['Arte 2D','Pixel Art','Arte Conceitual','Character Design','Environment Art','UI para Games','Blender 3D','Maya','Substance Painter','Animação 3D para Games'] },
+    'gamificacao':{ label:'Gamificação', skills:['Gamificação Corporativa','Serious Games','Badges e Rankings','Mecânicas de Engajamento','LMS Gamificado','Recompensas Digitais','Game Thinking'] }
+  }},
+  musica:{ label:'Música & Áudio', subareas:{
+    'producao':{ label:'Produção Musical', skills:['Produção Musical','Ableton Live','Logic Pro','Pro Tools','FL Studio','Mixagem','Masterização','Arranjo','Composição','Beats/Instrumentais','Sample Packs'] },
+    'trilha':{ label:'Trilha Sonora & Jingle', skills:['Trilha para Vídeo','Jingle Publicitário','Audio Branding','Som para Games','Música para Podcast','Licenciamento Musical','Composição Orquestral','Música Eletrônica'] },
+    'audio':{ label:'Engenharia de Áudio', skills:['Edição de Podcast','Voice-over','Locução','Design de Som','Foley','ADR','Sincronização AV','Tratamento Acústico','Áudio para EAD','Loudness para Streaming'] }
+  }},
+  blockchain:{ label:'Blockchain & Web3', subareas:{
+    'smart-contracts':{ label:'Smart Contracts', skills:['Solidity','Hardhat','Foundry','ERC-20','ERC-721','ERC-1155','Auditorias de Segurança','DeFi Protocols','Staking','Yield Farming','DAO'] },
+    'web3':{ label:'Frontend Web3', skills:['ethers.js','wagmi','RainbowKit','Web3Modal','React + Web3','IPFS','NFT Marketplace','Mint Page','Wallet Integration','The Graph'] },
+    'tokenizacao':{ label:'Tokenização & Consultoria', skills:['Tokenização de Ativos','Real World Assets (RWA)','Whitepaper','Tokenomics','ICO/IDO','Legal Blockchain','DAO Governance','DeFi Strategy'] }
+  }},
+  saude:{ label:'Saúde & Bem-estar', subareas:{
+    'nutricao':{ label:'Nutrição', skills:['Nutrição Clínica','Nutrição Esportiva','Emagrecimento','Ganho de Massa','Nutrição Funcional','Nutrição para Gestantes','Plano Alimentar','Teleconsulta'] },
+    'fitness':{ label:'Educação Física & Fitness', skills:['Personal Trainer','Musculação','Funcional','HIIT','Pilates','Yoga','Crossfit','Treinamento Online','Treino em Casa','Avaliação Física'] },
+    'saude-mental':{ label:'Saúde Mental & Bem-estar', skills:['Psicologia Online','Coaching','Mindfulness','Meditação','Saúde Corporativa','Qualidade de Vida no Trabalho','Ginástica Laboral','Gestão de Estresse'] }
+  }}
+};
+
+/* Selected skills array */
+var _selectedSkills = [];
+
+function loadProfileSubareas(area) {
+  var subSel = document.getElementById('profile-subarea');
+  var skillsSection = document.getElementById('profile-skills-section');
+  if(!subSel) return;
+
+  if(!area || !_SKILLS_DB[area]) {
+    subSel.innerHTML = '<option value="">Selecione a área primeiro...</option>';
+    subSel.disabled = true;
+    if(skillsSection) skillsSection.style.display = 'none';
+    return;
+  }
+
+  var db = _SKILLS_DB[area];
+  subSel.innerHTML = '<option value="">Selecione a subárea...</option>';
+  Object.keys(db.subareas).forEach(function(key) {
+    var opt = document.createElement('option');
+    opt.value = key;
+    opt.textContent = db.subareas[key].label;
+    subSel.appendChild(opt);
+  });
+  subSel.disabled = false;
+  if(skillsSection) skillsSection.style.display = 'none';
+}
+
+function loadProfileSkillsList(area, subarea) {
+  var section = document.getElementById('profile-skills-section');
+  var grid    = document.getElementById('profile-skills-grid');
+  var selWrap = document.getElementById('profile-selected-skills-wrap');
+  if(!section || !grid) return;
+
+  if(!area || !subarea || !_SKILLS_DB[area] || !_SKILLS_DB[area].subareas[subarea]) {
+    section.style.display = 'none'; return;
+  }
+
+  var skills = _SKILLS_DB[area].subareas[subarea].skills;
+  grid.innerHTML = skills.map(function(s) {
+    var isActive = _selectedSkills.indexOf(s) !== -1;
+    return '<button class="skill-check-btn' + (isActive ? ' active' : '') + '" onclick="toggleProfileSkill(this, \'' + s.replace(/'/g, "\\'") + '\')">' + s + '</button>';
+  }).join('');
+
+  section.style.display = 'block';
+  if(selWrap) selWrap.style.display = 'block';
+  _renderSelectedSkills();
+}
+
+function toggleProfileSkill(btn, skill) {
+  var idx = _selectedSkills.indexOf(skill);
+  if(idx !== -1) {
+    _selectedSkills.splice(idx, 1);
+    btn.classList.remove('active');
+  } else {
+    if(_selectedSkills.length >= 15) {
+      showToast('Máximo de 15 habilidades selecionadas.', 'info');
+      return;
+    }
+    _selectedSkills.push(skill);
+    btn.classList.add('active');
+  }
+  _renderSelectedSkills();
+}
+
+function _renderSelectedSkills() {
+  var container = document.getElementById('profile-selected-skills');
+  var hint      = document.getElementById('profile-skills-hint');
+  if(!container) return;
+
+  container.innerHTML = _selectedSkills.map(function(s) {
+    return '<span class="selected-skill-tag">' + s +
+      '<span class="rm-skill" onclick="removeProfileSkill(this, \'' + s.replace(/'/g, "\\'") + '\')">×</span>' +
+    '</span>';
+  }).join('');
+
+  if(hint) hint.textContent = _selectedSkills.length + ' de 15 selecionadas';
+}
+
+function removeProfileSkill(el, skill) {
+  el.stopPropagation && el.stopPropagation();
+  var idx = _selectedSkills.indexOf(skill);
+  if(idx !== -1) _selectedSkills.splice(idx, 1);
+
+  /* Deactivate button in grid */
+  var grid = document.getElementById('profile-skills-grid');
+  if(grid) {
+    Array.from(grid.querySelectorAll('.skill-check-btn')).forEach(function(btn) {
+      if(btn.textContent === skill) btn.classList.remove('active');
+    });
+  }
+  _renderSelectedSkills();
+}
+
+/* ── Add user to freelancer grid ── */
+function addUserToFreelancerGrid() {
+  if(!_session) return;
+
+  var flGrid = document.getElementById('fl-list-grid');
+  if(!flGrid) return;
+
+  /* Remove existing user card if any */
+  var existing = flGrid.querySelector('.fl-list-card[data-user-card="true"]');
+  if(existing) existing.remove();
+
+  /* Only add if has skills or area set */
+  var area = _session.area || '';
+  var skills = _session.skills || [];
+  var name = _session.name || 'Usuário';
+  var rate = _session.hourlyRate || 80;
+
+  if(!area && skills.length === 0) return;
+
+  var areaLabel = area && _SKILLS_DB[area] ? _SKILLS_DB[area].label : 'Freelancer';
+  var colors = ['linear-gradient(135deg,#2E7D32,#66BB6A)','linear-gradient(135deg,#1565C0,#42A5F5)',
+                'linear-gradient(135deg,#7B1FA2,#BA68C8)','linear-gradient(135deg,#E65100,#FF8F00)'];
+  var color = colors[name.length % colors.length];
+  var init  = name.split(' ').map(function(w){return w.charAt(0).toUpperCase();}).slice(0,2).join('');
+  var city  = _session.state ? _session.state : 'Brasil';
+
+  var displaySkills = skills.slice(0, 5);
+
+  var card = document.createElement('div');
+  card.className = 'fl-list-card';
+  card.setAttribute('data-user-card', 'true');
+  card.setAttribute('data-cat', area || 'web');
+  card.setAttribute('data-rate', rate);
+  card.setAttribute('data-rating', '5.0');
+  card.setAttribute('data-verified', 'true');
+  card.setAttribute('data-top', 'false');
+  card.setAttribute('data-recs', '0');
+  card.innerHTML =
+    '<div class="fl-list-avatar" style="background:' + color + ';">' + init + '</div>' +
+    '<div class="fl-list-body">' +
+      '<div class="fl-list-top">' +
+        '<span class="fl-list-name">' + name + '</span>' +
+        '<span style="font-size:11px;background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-weight:600;">Novo</span>' +
+      '</div>' +
+      '<div class="fl-list-role">' + areaLabel + ' — ' + city + '</div>' +
+      (displaySkills.length > 0 ? '<div class="fl-skills" style="margin-bottom:8px;">' +
+        displaySkills.map(function(s){ return '<span class="fl-skill">' + s + '</span>'; }).join('') +
+      '</div>' : '') +
+      '<div class="fl-list-meta">' +
+        '<span>⭐ Novo na plataforma</span>' +
+        '<span>📅 Cadastrado hoje</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="fl-list-right">' +
+      '<div class="fl-list-rate">R$ ' + rate + '<small>/hora</small></div>' +
+      '<div class="fl-list-rating" style="font-size:12px;color:var(--text-4);">Novo freelancer</div>' +
+      '<button class="btn btn-green btn-sm" onclick="openContractModal({name:\''+name+'\',role:\''+areaLabel+'\',value:'+rate*40+',project:\'Meu Projeto\',deadline:\'30 dias\'})">Contratar</button>' +
+      '<button class="btn btn-outline btn-sm" onclick="showToast(\'Perfil em construção — complete seu perfil!\',\'info\')">Ver Perfil</button>' +
+    '</div>';
+
+  /* Insert as first card */
+  flGrid.insertBefore(card, flGrid.firstChild);
+}
+
+/* Override dashSaveProfile to save skills and update freelancer grid */
+var _origDashSaveProfile = window.dashSaveProfile;
+window.dashSaveProfile = function() {
+  /* Save area and skills to session */
+  var areaEl    = document.getElementById('profile-area');
+  var subareaEl = document.getElementById('profile-subarea');
+  if(_session) {
+    if(areaEl)    _session.area    = areaEl.value;
+    if(subareaEl) _session.subarea = subareaEl.value;
+    _session.skills = _selectedSkills.slice();
+
+    /* Save to localStorage */
+    try {
+      var s = JSON.parse(localStorage.getItem('hw_session') || '{}');
+      s.area    = _session.area;
+      s.subarea = _session.subarea;
+      s.skills  = _session.skills;
+      localStorage.setItem('hw_session', JSON.stringify(s));
+    } catch(e) {}
+  }
+
+  /* Call original save */
+  _origDashSaveProfile && _origDashSaveProfile.call(this);
+
+  /* Add to freelancer grid after 1s */
+  setTimeout(addUserToFreelancerGrid, 1000);
+};
+
+/* Restore skills on session restore */
+var _origRestoreSkills = _restoreSession;
+_restoreSession = function() {
+  _origRestoreSkills();
+  try {
+    var s = JSON.parse(localStorage.getItem('hw_session') || '{}');
+    if(s.skills)  _selectedSkills = s.skills.slice();
+    if(s.area) {
+      setTimeout(function() {
+        var areaEl = document.getElementById('profile-area');
+        var subEl  = document.getElementById('profile-subarea');
+        if(areaEl && s.area)    { areaEl.value = s.area; loadProfileSubareas(s.area); }
+        if(subEl  && s.subarea) {
+          setTimeout(function(){
+            subEl.value = s.subarea;
+            loadProfileSkillsList(s.area, s.subarea);
+          }, 100);
+        }
+      }, 300);
+    }
+    /* Add to grid if has skills */
+    if(s.skills && s.skills.length > 0) setTimeout(addUserToFreelancerGrid, 500);
+  } catch(e) {}
+};
+
+/* Also call when opening dashboard */
+var _origOpenDashSkills = window.openDashboard;
+window.openDashboard = function() {
+  _origOpenDashSkills.call(this);
+  setTimeout(function() {
+    try {
+      var s = JSON.parse(localStorage.getItem('hw_session') || '{}');
+      var areaEl = document.getElementById('profile-area');
+      var subEl  = document.getElementById('profile-subarea');
+      if(areaEl && s.area)    { areaEl.value = s.area; loadProfileSubareas(s.area); }
+      if(subEl  && s.subarea) {
+        setTimeout(function(){
+          subEl.value = s.subarea;
+          loadProfileSkillsList(s.area, s.subarea);
+          _selectedSkills = (s.skills || []).slice();
+          _renderSelectedSkills();
+        }, 150);
+      }
+    } catch(e) {}
+  }, 400);
+};
 
 </script>
 </body>
