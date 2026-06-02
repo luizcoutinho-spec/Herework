@@ -13821,7 +13821,7 @@ function hcShowCategory(cat) {
     catNames[cat] + ' — ' + articles.length + ' artigos</div>';
 
   html += articles.map(function(a) {
-    return '<div class="hc-article-item" onclick="hcShowArticle('' + a.id + '')">' +
+    return '<div class="hc-article-item" onclick="hcShowArticle(\x27' + a.id + '\x27)">' +
       '<div class="hc-article-icon">' + a.icon + '</div>' +
       '<div class="hc-article-info">' +
         '<div class="hc-article-title">' + a.title + '</div>' +
@@ -13857,7 +13857,7 @@ function hcShowArticle(id) {
   document.getElementById('hc-main').innerHTML =
     '<div class="hc-article-detail">' +
       '<div class="hc-breadcrumb">' +
-        '<a onclick="hcShowCategory('' + _hcCurrentCategory + '')">&#8592; ' + catNames[_hcCurrentCategory] + '</a>' +
+        '<a onclick="hcShowCategory(\x27' + _hcCurrentCategory + '\x27)">&#8592; ' + catNames[_hcCurrentCategory] + '</a>' +
         '<span>›</span>' +
         '<span>' + article.title + '</span>' +
       '</div>' +
@@ -13928,7 +13928,7 @@ function hcSearch(query) {
     '<div style="font-size:11px;color:var(--text-4);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:12px;">' +
     results.length + ' resultado' + (results.length !== 1 ? 's' : '') + ' para "' + _sanitize(query) + '"</div>' +
     results.map(function(r) {
-      return '<div class="hc-article-item" onclick="hcShowArticleFromSearch('' + r.article.id + '','' + r.cat + '')">' +
+      return '<div class="hc-article-item" onclick="hcShowArticleFromSearch(\x27' + r.article.id + '\x27,\x27' + r.cat + '\x27)">' +
         '<div class="hc-article-icon">' + r.article.icon + '</div>' +
         '<div class="hc-article-info">' +
           '<div class="hc-article-title">' + r.article.title + '</div>' +
@@ -14127,7 +14127,7 @@ function _renderBlogList(articles) {
   /* Featured article */
   var featured = articles.filter(function(a){ return a.featured; })[0];
   if(featured && _blogCurrentCat === 'all') {
-    html += '<div class="blog-featured" onclick="blogShowArticle('' + featured.id + '')">' +
+    html += '<div class="blog-featured" onclick="blogShowArticle(\x27' + featured.id + '\x27)">' +
       '<div class="blog-feat-img" style="background:linear-gradient(135deg,#1e3a5f,#1565c0);">' + featured.icon + '</div>' +
       '<div class="blog-feat-body">' +
         '<div class="blog-feat-tag">&#11088; Destaque &nbsp;·&nbsp; ' + featured.tag + '</div>' +
@@ -14151,7 +14151,7 @@ function _renderBlogList(articles) {
   if(gridArticles.length) {
     html += '<div class="blog-grid">';
     html += gridArticles.map(function(a) {
-      return '<div class="blog-card" onclick="blogShowArticle('' + a.id + '')">' +
+      return '<div class="blog-card" onclick="blogShowArticle(\x27' + a.id + '\x27)">' +
         '<div class="blog-card-img" style="background:' + a.color + ';">' + a.icon + '</div>' +
         '<div class="blog-card-body">' +
           '<div class="blog-card-tag">' + a.tag + '</div>' +
@@ -14223,7 +14223,7 @@ function blogShowArticle(id) {
       (related.length ? '<div><div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">Leia tamb&eacute;m</div>' +
         '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;">' +
         related.map(function(r) {
-          return '<div onclick="blogShowArticle('' + r.id + '')" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">' +
+          return '<div onclick="blogShowArticle(\x27' + r.id + '\x27)" style="background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:14px;cursor:pointer;transition:all .2s;" onmouseover="this.style.borderColor=\x27var(--green)\x27" onmouseout="this.style.borderColor=\x27var(--border)\x27">' +
             '<div style="font-size:24px;margin-bottom:8px;">' + r.icon + '</div>' +
             '<div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.4;">' + r.title + '</div>' +
             '<div style="font-size:11px;color:var(--text-4);margin-top:5px;">&#9201; ' + r.readTime + '</div>' +
