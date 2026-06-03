@@ -11924,8 +11924,8 @@ function openDashboard() {
   var stEl = document.getElementById('profile-state');
   if(stEl && _session && _session.state) stEl.value = _session.state;
 
-  el = document.getElementById('dct-client-count'); if(el) el.textContent = _dashData.client.active.length + _dashData.client.done.length;
-  el = document.getElementById('dct-fl-count');     if(el) el.textContent = _dashData.freelancer.active.length + _dashData.freelancer.done.length;
+  el = document.getElementById('dct-client-count'); if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
+  el = document.getElementById('dct-fl-count');     if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
 
   _renderDashClientActive(_vd);
   _renderDashClientWaiting(_vd);
@@ -13746,16 +13746,17 @@ function _updatePaymentSummary() {
   var fmt = function(n){ return 'R\$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2}); };
 
   /* ── CLIENTE ── */
-  var clientActive    = _dashData.client.active;
-  var clientDone      = _dashData.client.done;
+  var _vd = _getViewData();
+  var clientActive    = _vd.client.active;
+  var clientDone      = _vd.client.done;
   var clientLiberado  = clientDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
   var clientGarantia  = clientActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
   var clientTotal     = clientLiberado + clientGarantia;
   var clientCount     = clientActive.length + clientDone.length;
 
   /* ── FREELANCER ── */
-  var flActive   = _dashData.freelancer.active;
-  var flDone     = _dashData.freelancer.done;
+  var flActive   = _vd.freelancer.active;
+  var flDone     = _vd.freelancer.done;
   var flRecebido = flDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
   var flPendente = flActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
   var flTotal    = flRecebido + flPendente;
@@ -13878,7 +13879,7 @@ function _renderMyPayments() {
   var items = [];
 
   /* Active contracts — em garantia */
-  _dashData.client.active.forEach(function(p) {
+  _vd.client.active.forEach(function(p) {
     items.push({
       icon: p.status === 'review' ? '&#9989;' : '&#128274;',
       iconBg: p.status === 'review' ? '#f0fdf4' : '#fff7ed',
@@ -13893,7 +13894,7 @@ function _renderMyPayments() {
   });
 
   /* Completed contracts — liberados */
-  _dashData.client.done.forEach(function(p) {
+  _vd.client.done.forEach(function(p) {
     items.push({
       icon: '&#9989;',
       iconBg: '#f0fdf4',
@@ -13939,7 +13940,7 @@ function _renderMyReceived() {
   var items = [];
 
   /* Active FL contracts — aguardando aprovacao */
-  _dashData.freelancer.active.forEach(function(p) {
+  _vd.freelancer.active.forEach(function(p) {
     items.push({
       icon: p.status === 'review' ? '&#9200;' : '&#9889;',
       iconBg: p.status === 'review' ? '#eff6ff' : '#f0fdf4',
@@ -13953,7 +13954,7 @@ function _renderMyReceived() {
   });
 
   /* Completed FL work — recebidos */
-  _dashData.freelancer.done.forEach(function(p) {
+  _vd.freelancer.done.forEach(function(p) {
     items.push({
       icon: '&#128176;',
       iconBg: '#f0fdf4',
