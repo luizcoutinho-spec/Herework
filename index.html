@@ -9878,10 +9878,8 @@ function openModal(id) {
     showToast('Apenas clientes podem publicar projetos.', 'warn');
     return;
   }
-  if (id === 'proposal' && _session && _session.type === 'client') {
-    showToast('Apenas freelancers podem enviar propostas.', 'warn');
-    return;
-  }
+  /* Proposta: qualquer usuário logado pode enviar */
+  /* if (id === 'proposal' && _session && _session.type === 'client') { removed } */
   var overlay = document.getElementById('overlay-' + id);
   if (!overlay) return;
   overlay.classList.add('open');
@@ -10315,47 +10313,76 @@ function submitProposal() {
   var d   = document.getElementById('prop-days');
   var cv  = document.getElementById('prop-cover');
   var btn = document.querySelector('#overlay-proposal .btn-green');
-  var ok  = _vField(v,'err-prop-value', lang()==='pt'?'Informe seu valor':'Ingresa tu valor')
-          & _vField(d,'err-prop-days',  lang()==='pt'?'Informe o prazo':'Ingresa el plazo')
-          & _vField(cv,'err-prop-cover',lang()==='pt'?'Escreva uma apresentação':'Escribe una presentación');
-  if (!ok) return;
-  _setBtnLoading(btn, true);
 
-  var value       = parseInt((v ? v.value : '0').replace(/[^0-9]/g,''), 10) || 0;
-  var days        = parseInt(d ? d.value : '0', 10) || 0;
-  var coverLetter = cv ? cv.value.trim() : '';
+  /* Limpar erros anteriores */
+  ['err-prop-value','err-prop-days','err-prop-cover'].forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){ el.textContent=''; el.classList.remove('show'); }
+  });
+
+  /* Validação */
+  var ok = true;
+  if (!v || !v.value.trim()) {
+    var errV = document.getElementById('err-prop-value');
+    if(errV){ errV.textContent='Informe seu valor'; errV.classList.add('show'); }
+    if(v) v.classList.add('error');
+    ok = false;
+  }
+  if (!d || !d.value.trim()) {
+    var errD = document.getElementById('err-prop-days');
+    if(errD){ errD.textContent='Informe o prazo em dias'; errD.classList.add('show'); }
+    if(d) d.classList.add('error');
+    ok = false;
+  }
+  if (!cv || cv.value.trim().length < 20) {
+    var errC = document.getElementById('err-prop-cover');
+    if(errC){ errC.textContent='Mínimo 20 caracteres'; errC.classList.add('show'); }
+    if(cv) cv.classList.add('error');
+    ok = false;
+  }
+  if (!ok) return;
+
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
+
+  var value       = parseInt((v.value || '0').replace(/[^0-9]/g,''), 10) || 0;
+  var days        = parseInt(d.value || '0', 10) || 0;
+  var coverLetter = cv.value.trim();
   var projId      = window._activeProposalProjectId || '';
 
-  /* Salvar no Supabase se disponível */
-  if (_sbReady() && projId) {
-    _sbCreateProposal({ projectId: projId, value: value, deadline: days, coverLetter: coverLetter })
-      .then(function(res) {
-        _setBtnLoading(btn, false);
-        if (!res) {
-          showToast(lang()==='pt' ? 'Erro ao enviar proposta. Tente novamente.' : 'Error al enviar propuesta.', 'error');
-          return;
-        }
-        closeModal('proposal');
-        if (typeof _pdfReset === 'function') _pdfReset();
-        showToast(lang()==='pt' ? '🎉 Proposta enviada com sucesso!' : '🎉 Propuesta enviada exitosamente!', 'success');
-      })
-      .catch(function(err) {
-        _setBtnLoading(btn, false);
-        showToast('Erro: ' + err.message, 'error');
-      });
+  function onSuccess() {
+    if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+    /* Fechar modal */
+    var overlay = document.getElementById('overlay-proposal');
+    if (overlay) overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    if (typeof _pdfReset === 'function') _pdfReset();
+    /* Limpar campos */
+    if (v) v.value=''; if (d) d.value=''; if (cv) cv.value='';
+    showToast('🎉 Proposta enviada com sucesso!', 'success');
+    window._pendingProposal = null;
+  }
+
+  function onError(msg) {
+    if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+    showToast('Erro ao enviar: ' + (msg || 'tente novamente'), 'error');
+  }
+
+  /* Salvar no Supabase */
+  if (_sbReady() && projId && _session) {
+    _sbCreateProposal({
+      projectId:   projId,
+      value:       value,
+      deadline:    days,
+      coverLetter: coverLetter
+    }).then(function(res) {
+      if (res) { onSuccess(); }
+      else { onError('Proposta não salva. Verifique se está logado.'); }
+    }).catch(function(err) {
+      onError(err && err.message ? err.message : 'Erro desconhecido');
+    });
   } else {
-    /* Demo mode — sem Supabase ou sem ID do projeto */
-    setTimeout(function() {
-      _setBtnLoading(btn, false);
-      closeModal('proposal');
-      if (typeof _pdfReset === 'function') _pdfReset();
-      var hasPdf = document.getElementById('prop-pdf-input') &&
-                   document.getElementById('prop-pdf-input').files &&
-                   document.getElementById('prop-pdf-input').files.length > 0;
-      showToast(lang()==='pt'
-        ? '🎉 Proposta enviada com sucesso!' + (hasPdf ? ' (PDF anexado)' : '')
-        : '🎉 Propuesta enviada exitosamente!', 'success');
-    }, 800);
+    /* Demo mode ou sem projeto ID */
+    setTimeout(function() { onSuccess(); }, 800);
   }
 }
 
@@ -12037,60 +12064,89 @@ if (document.readyState === 'loading') {
 
 /* ─── Open proposal modal with project context ─── */
 function openProposalFor(btn) {
-  /* Requer login */
-  if (!_session) {
-    showToast('Voce precisa estar logado para enviar uma proposta!', 'warn');
+  var card = btn ? btn.closest('.proj-list-card') : null;
+
+  /* Salvar contexto do projeto para usar após login */
+  window._pendingProposal = {
+    card:    card,
+    projId:  card ? (card.getAttribute('data-proj-id') || '') : '',
+    title:   card ? ((card.querySelector('.proj-list-title') || {}).textContent || '').trim() : '',
+    budget:  card ? ((card.querySelector('.proj-list-budget') || {}).textContent || '').trim() : '',
+    deadline: card ? (card.getAttribute('data-deadline') || '0') : '0'
+  };
+
+  /* Se não logado — abrir login com callback para reabrir após login */
+  if (!_session || !_session.name) {
+    showToast('Faça login para enviar uma proposta.', 'warn');
+    window._afterLoginCallback = function() {
+      window._afterLoginCallback = null;
+      _openProposalModal(window._pendingProposal);
+    };
     setTimeout(function(){ openModal('login'); }, 350);
     return;
   }
-  if (_session.type === 'client') {
-    showToast('Apenas freelancers podem enviar propostas.', 'warn');
-    return;
-  }
-  var card   = btn ? btn.closest('.proj-list-card') : null;
+
+  _openProposalModal(window._pendingProposal);
+}
+
+/* Abrir o modal de proposta com os dados do projeto */
+function _openProposalModal(ctx) {
+  ctx = ctx || {};
   var info   = document.getElementById('proposal-project-info');
   var valInp = document.getElementById('prop-value');
   var daysInp= document.getElementById('prop-days');
 
-  // Reset fields
+  /* Reset */
   if (valInp)  valInp.value  = '';
   if (daysInp) daysInp.value = '';
   document.querySelectorAll('#overlay-proposal .form-error').forEach(function(e){ e.textContent=''; e.classList.remove('show'); });
   document.querySelectorAll('#overlay-proposal .form-input, #overlay-proposal .form-textarea').forEach(function(e){ e.classList.remove('error'); });
 
-  if (card && info) {
+  /* Preencher info do projeto */
+  if (ctx.card && info) {
+    var card = ctx.card;
     var titleEl  = card.querySelector('.proj-list-title');
     var descEl   = card.querySelector('.proj-list-desc');
     var budgetEl = card.querySelector('.proj-list-budget');
     var deadEl   = card.querySelector('.proj-list-type');
     var catEl    = card.querySelector('.proj-cat');
 
-    document.getElementById('prop-proj-title').textContent    = titleEl  ? titleEl.textContent.trim()  : '';
-    document.getElementById('prop-proj-desc').textContent     = descEl   ? descEl.textContent.trim()   : '';
-    document.getElementById('prop-proj-budget').textContent   = budgetEl ? budgetEl.textContent.trim() : '';
-    document.getElementById('prop-proj-deadline').textContent = deadEl   ? '⏱ ' + deadEl.textContent.trim() : '';
-    document.getElementById('prop-proj-cat').textContent      = catEl    ? catEl.textContent.trim()    : '';
+    var tEl = document.getElementById('prop-proj-title');
+    var dEl = document.getElementById('prop-proj-desc');
+    var bEl = document.getElementById('prop-proj-budget');
+    var dlEl= document.getElementById('prop-proj-deadline');
+    var cEl = document.getElementById('prop-proj-cat');
+    if (tEl)  tEl.textContent  = titleEl  ? titleEl.textContent.trim()  : '';
+    if (dEl)  dEl.textContent  = descEl   ? descEl.textContent.trim()   : '';
+    if (bEl)  bEl.textContent  = budgetEl ? budgetEl.textContent.trim() : '';
+    if (dlEl) dlEl.textContent = deadEl   ? ('⏱ ' + deadEl.textContent.trim()) : '';
+    if (cEl)  cEl.textContent  = catEl    ? catEl.textContent.trim()    : '';
 
-    // Pre-fill value suggestion (midpoint of budget range)
+    /* Sugerir valor médio do orçamento */
     if (valInp && budgetEl) {
-      var nums = budgetEl.textContent.replace(/[R$\s]/g,'').split('–').map(function(n){ return parseInt(n.replace(/\./g,'').replace(',','.')); }).filter(Number);
+      var nums = budgetEl.textContent.replace(/[R$\s]/g,'').split('–').map(function(n){
+        return parseInt(n.replace(/\./g,'').replace(',','.'));
+      }).filter(Number);
       if (nums.length === 2) valInp.placeholder = 'Ex: ' + Math.round((nums[0]+nums[1])/2).toLocaleString('pt-BR');
     }
-    // Pre-fill deadline suggestion
-    if (daysInp) {
-      var dl = parseInt(card.getAttribute('data-deadline') || '0');
+    if (daysInp && ctx.deadline) {
+      var dl = parseInt(ctx.deadline);
       if (dl > 0) daysInp.placeholder = 'Ex: ' + dl;
     }
-
-    info.style.display = 'block';
+    if (info) info.style.display = 'block';
   } else if (info) {
     info.style.display = 'none';
   }
 
-  /* Guardar ID do projeto para o submitProposal */
-  window._activeProposalProjectId = card ? (card.getAttribute('data-proj-id') || '') : '';
-  openModal('proposal');
+  window._activeProposalProjectId = ctx.projId || '';
+
+  /* Abrir modal diretamente (sem guard de tipo) */
+  var overlay = document.getElementById('overlay-proposal');
+  if (!overlay) return;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
 
 /* ─── PDF Upload Handler ─── */
 function pdfSelected(input) {
