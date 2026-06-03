@@ -4011,6 +4011,15 @@ section { padding: 64px 0; }
   .prop-input-row { grid-template-columns:1fr !important; }
 }
 
+
+/* Plan limit modal animation */
+#overlay-plan-limit { align-items:center; }
+#overlay-plan-limit .modal { animation: slideUp 0.3s ease; }
+@keyframes slideUp {
+  from { transform:translateY(30px); opacity:0; }
+  to   { transform:translateY(0);    opacity:1; }
+}
+
 </style>
   
   <!-- Supabase Client -->
@@ -10493,6 +10502,59 @@ function openAdvancedReports() {
 }
 
 
+/* ── Modal de Limite do Plano Gratuito ───────────────────── */
+function showPlanLimitModal() {
+  var ov = document.getElementById('overlay-plan-limit');
+  if (!ov) return;
+
+  /* Preencher dados dinâmicos */
+  var nameEl = document.getElementById('pl-name');
+  if (nameEl) nameEl.textContent = (_session && _session.name) ? _session.name.split(' ')[0] : 'Usuário';
+
+  var dateEl = document.getElementById('pl-date');
+  if (dateEl) {
+    var now = new Date();
+    var months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    dateEl.textContent = now.getDate() + ' de ' + months[now.getMonth()];
+  }
+
+  var resetEl = document.getElementById('pl-reset-date');
+  if (resetEl) {
+    var next = new Date();
+    next.setMonth(next.getMonth() + 1, 1);
+    var mNames = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    resetEl.textContent = '1° de ' + mNames[next.getMonth()];
+  }
+
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  /* Também enviar email de notificação via mailto */
+  if (_session && _session.email) {
+    var subject = encodeURIComponent('[HereWork] Você atingiu o limite de projetos do Plano Gratuito');
+    var body = encodeURIComponent(
+      'Olá, ' + (_session.name || 'Usuário') + '!\n\n' +
+      'Você publicou 3 projetos este mês e atingiu o limite do Plano Básico.\n\n' +
+      'A partir de agora você continuará recebendo:\n' +
+      '• Resumo diário de novos projetos\n' +
+      '• Acesso à base de freelancers\n' +
+      '• Chat com candidatos\n\n' +
+      'Faça upgrade para o Plano Profissional (R$ 149/mês) e tenha:\n' +
+      '• Projetos ilimitados\n' +
+      '• Comissão reduzida: 12%\n' +
+      '• Suporte em até 4h\n' +
+      '• Convites diretos a freelancers\n\n' +
+      'Acesse: https://herework.vercel.app/#pricing\n\n' +
+      'Equipe HereWork'
+    );
+    /* Notificar via contato@ (email simulado) */
+    setTimeout(function() {
+      /* Em produção: chamar API de email */
+      console.log('[HereWork] Notificação de limite enviada para:', _session.email);
+    }, 2000);
+  }
+}
+
 function _clearSession() {
   if (_sbReady()) _sbLogout().catch(function(){});
   /* --- */
@@ -10619,7 +10681,7 @@ function submitProject() {
   if (!_isPro()) {
     var _mk = 'hw_pjc_' + new Date().getMonth();
     var _pc = parseInt(localStorage.getItem(_mk)||'0');
-    if (_pc >= 3) { closeModal('publish'); showToast('🔒 Limite de 3 projetos/mês no Plano Gratuito. Faça upgrade!','warn'); setTimeout(function(){showPage('pricing');},700); return; }
+    if (_pc >= 3) { closeModal('publish'); setTimeout(function(){ showPlanLimitModal(); }, 200); return; }
     localStorage.setItem(_mk, _pc+1);
   }
   var t   = document.getElementById('proj-title');
@@ -17192,6 +17254,66 @@ function closeStripePayment() {
         <div style="font-size:11px;color:var(--orange);margin-top:6px;">&#9888;&#65039; Pague em até 3 dias úteis para não expirar</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL: LIMITE DO PLANO GRATUITO
+═══════════════════════════════════════════════════════ -->
+<div class="overlay" id="overlay-plan-limit" onclick="if(event.target===this){this.classList.remove('open');document.body.style.overflow='';}">
+  <div class="modal" style="max-width:520px;padding:0;overflow:hidden;border-radius:16px;">
+
+    <!-- Header verde HereWork -->
+    <div style="background:var(--green);padding:24px 28px;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">Here<span style="color:#A5D6A7;">work</span></span>
+      </div>
+      <div style="color:rgba(255,255,255,0.85);font-size:13px;" id="pl-date"></div>
+    </div>
+
+    <!-- Corpo -->
+    <div style="padding:32px 32px 28px;background:#fff;">
+      <h2 style="font-size:22px;font-weight:700;color:#1C2B3A;margin-bottom:16px;">
+        Olá, <span id="pl-name">Usuário</span>! 👋
+      </h2>
+
+      <p style="font-size:14px;color:#4A5568;line-height:1.6;margin-bottom:14px;">
+        Você atingiu o limite de <strong>3 projetos gratuitos</strong> deste mês no plano Básico.
+      </p>
+
+      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
+        <p style="font-size:14px;color:#166534;font-weight:600;margin-bottom:6px;">
+          📬 A partir de agora você receberá:
+        </p>
+        <ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:18px;margin:0;">
+          <li>Resumo diário de novos projetos por e-mail</li>
+          <li>Acesso à base de freelancers</li>
+          <li>Chat com candidatos existentes</li>
+          <li>Garantia básica nos contratos ativos</li>
+        </ul>
+      </div>
+
+      <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:24px;">
+        Assine o <strong style="color:var(--green);">Plano Profissional</strong> para publicar projetos ilimitados,
+        ter comissão reduzida de 12%, suporte em 4h e muito mais.
+      </p>
+
+      <!-- Botões -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button class="btn btn-green btn-block btn-lg" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';showPage('pricing');">
+          🚀 Fazer Upgrade — R$ 149/mês
+        </button>
+        <button class="btn btn-outline btn-block" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';">
+          Continuar no plano Gratuito
+        </button>
+      </div>
+
+      <p style="font-size:11px;color:#9CA3AF;text-align:center;margin-top:16px;">
+        O limite reinicia em <strong id="pl-reset-date">1° de julho</strong>.
+        Dúvidas? <a href="mailto:contato@herework.com.br" style="color:var(--green);">contato@herework.com.br</a>
+      </p>
+    </div>
+
   </div>
 </div>
 </body>
