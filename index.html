@@ -10470,6 +10470,10 @@ function sendDirectInvite() {
 }
 
 /* ── Relatórios Avançados (Pro) ──────────────────────────── */
+function closeAdvReports() {
+  var ov = document.getElementById('overlay-adv-reports');
+  if(ov) { ov.classList.remove('open'); document.body.style.overflow=''; }
+}
 function openAdvancedReports() {
   if (!_requirePro('Relatórios e métricas avançadas')) return;
   var ov = document.getElementById('overlay-adv-reports');
@@ -10495,7 +10499,7 @@ function openAdvancedReports() {
           '<div class="modal-title">📊 Relatórios & Métricas</div>' +
           '<div class="modal-subtitle">Últimos 6 meses · Plano Profissional</div>' +
         '</div>' +
-        '<button class="modal-close" onclick="document.getElementById('overlay-adv-reports').classList.remove('open');document.body.style.overflow=''">×</button></div>' +
+        '<button class="modal-close" onclick="closeAdvReports()">×</button></div>' +
         '<div class="modal-body" style="padding:20px;">' +
           '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
             '<div style="background:var(--surface);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">R$ 9.760</div><div style="font-size:12px;color:var(--text-3);">Total investido</div></div>' +
@@ -11181,6 +11185,16 @@ function init() {
   _initSupabase();   /* Inicializar Supabase + restaurar sessão JWT */
   _restoreSession(); /* Restaurar sessão do localStorage */
   setLang('pt');
+  /* Override openModal para montar Stripe quando necessário */
+  (function() {
+    var _orig = openModal;
+    window.openModal = function(id) {
+      _orig(id);
+      if (id === 'payment') {
+        setTimeout(function() { if(typeof _mountStripePaymentModal==='function') _mountStripePaymentModal(); }, 200);
+      }
+    };
+  })();
 
   /* LGPD */
   var consent = '';
@@ -14903,21 +14917,7 @@ window.contractPayCard = async function() {
   }
 };
 
-/* ── Mount elements when modals open ── */
-var _origOpenModal = window.openModal;
-window.openModal = function(id) {
-  _origOpenModal(id);
-  if (id === 'payment') {
-    setTimeout(function() {
-      if (document.getElementById('pay-panel-card').classList.contains('active') || true) {
-        _mountStripePaymentModal();
-      }
-    }, 200);
-  }
-  if (id === 'contract') {
-    setTimeout(_mountStripeContractModal, 200);
-  }
-};
+
 
 /* ── Override switchPayTab to mount on tab switch ── */
 var _origSwitchPayTab = window.switchPayTab;
