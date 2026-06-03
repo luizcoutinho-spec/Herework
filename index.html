@@ -6,7 +6,7 @@
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
-  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")">
+  <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>HereWork — Plataforma de Freelancers e Projetos do Brasil</title>
 <meta name="description" content="Encontre os melhores freelancers para o seu projeto. Rápido, seguro e sem complicações.">
@@ -16240,6 +16240,15 @@ async function openStripePayment(opts) {
   // Mostrar modal
   var ov = document.getElementById('overlay-stripe-payment');
   if (!ov) return;
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  // Reset state for fresh open
+  document.getElementById('sp-loading').style.display           = 'block';
+  document.getElementById('sp-element-container').style.display = 'none';
+  document.getElementById('sp-success').style.display           = 'none';
+  document.getElementById('sp-boleto-result').style.display     = 'none';
+  var _spErrEl = document.getElementById('sp-error');
+  if (_spErrEl) { _spErrEl.style.display = 'none'; _spErrEl.textContent = ''; }
   document.getElementById('sp-amount').textContent = 'R$ ' + _spAmount.toLocaleString('pt-BR',{minimumFractionDigits:2});
   document.getElementById('sp-title').textContent = opts.title || 'Pagamento Seguro';
   var subEl = document.getElementById('sp-subtitle');
