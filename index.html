@@ -11217,6 +11217,16 @@ if (document.readyState === 'loading') {
 
 /* ─── Open proposal modal with project context ─── */
 function openProposalFor(btn) {
+  /* Requer login */
+  if (!_session) {
+    showToast('Voce precisa estar logado para enviar uma proposta!', 'warn');
+    setTimeout(function(){ openOverlay('overlay-login'); }, 350);
+    return;
+  }
+  if (_session.role === 'client') {
+    showToast('Apenas freelancers podem enviar propostas.', 'warn');
+    return;
+  }
   var card   = btn ? btn.closest('.proj-list-card') : null;
   var info   = document.getElementById('proposal-project-info');
   var valInp = document.getElementById('prop-value');
