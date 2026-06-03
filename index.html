@@ -11401,9 +11401,14 @@ function submitCardPayment() {
   /* Abrir novo modal Stripe Payment Element */
   var amount = 0;
   /* Tentar pegar valor do contexto ativo */
-  var amtEl = document.getElementById('c-amount') || document.getElementById('pay-amount-display') || document.getElementById('card-pay-amount');
-  if (amtEl) amount = parseFloat(amtEl.textContent.replace(/[R$\s.]/g,'').replace(',','.')) || 0;
-  if (!amount && window._payCtx) amount = window._payCtx.amount || 0;
+  if (_contractCtx && _contractCtx.value) {
+    amount = _contractCtx.value;
+  } else if (window._payCtx && window._payCtx.amount) {
+    amount = window._payCtx.amount;
+  } else {
+    var vEl2 = document.getElementById('c-value') || document.getElementById('pay-amount-display');
+    if (vEl2) amount = parseFloat((vEl2.textContent||'0').replace(/[^0-9]/g,'')) || 0;
+  }
   var desc = window._payCtx ? window._payCtx.desc : 'HereWork — Pagamento';
   closeModal('payment');
   openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc, title: desc });
@@ -12095,9 +12100,13 @@ function contractStep2() {
   _goContractStep(2);
   /* Abrir Stripe Payment Element automaticamente */
   setTimeout(function() {
-    var amount = parseFloat((document.getElementById('c-amount')||{}).textContent||'0') || 0;
-    var desc   = 'HereWork — ' + ((document.getElementById('c-proj')||{}).textContent||'Contrato');
-    openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc, title: 'Pagamento em Garantia' });
+    var amount = (_contractCtx && _contractCtx.value) ? _contractCtx.value : 0;
+    var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
+    if (!amount) {
+      var vEl = document.getElementById('c-value');
+      if (vEl) amount = parseFloat((vEl.textContent||'0').replace(/[^0-9]/g,'')) || 0;
+    }
+    openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: 'HereWork — '+proj, title: 'Pagamento em Garantia' });
   }, 300);
 }
 
@@ -16212,6 +16221,11 @@ async function openStripePayment(opts) {
   document.getElementById('sp-success').style.display           = 'none';
   document.getElementById('sp-boleto-result').style.display     = 'none';
   document.getElementById('sp-error').style.display             = 'none';
+  /* Fechar modais antigos */
+  ['payment', 'contract'].forEach(function(id) {
+    var old = document.getElementById('overlay-' + id);
+    if (old && old.classList.contains('open')) { old.classList.remove('open'); }
+  });
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -16292,8 +16306,10 @@ async function confirmStripePayment() {
   if (errEl) { errEl.style.display = 'none'; }
 
   try {
-    var stripe = initStripe();
-    if (!stripe || !_stripeElements) throw new Error('Stripe não inicializado');
+    /* Usar mesma instância que criou os elements */
+    var stripe = _stripeInstance || initStripe();
+    if (!stripe) throw new Error('Stripe não carregado. Recarregue a página.');
+    if (!_stripeElements) throw new Error('Formulário de pagamento não iniciado. Feche e abra novamente.');
 
     // Submeter elementos (inclui validação)
     var submitRes = await _stripeElements.submit();
