@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -12092,50 +12092,45 @@ function _goContractStep(n) {
 }
 
 function contractStep2() {
-  /* Validar checkbox de aceite */
+  /* 1. Validar checkbox */
   var agree = document.getElementById('contract-agree');
   var err   = document.getElementById('err-contract-agree');
   if (!agree || !agree.checked) {
-    if (err) { err.textContent = 'Você precisa aceitar os termos para continuar.'; err.classList.add('show'); }
+    if (err) { err.textContent = 'Aceite os termos para continuar.'; err.classList.add('show'); }
     return;
   }
   if (err) { err.textContent = ''; err.classList.remove('show'); }
 
-  /* Calcular valor total AGORA antes de fechar o modal */
+  /* 2. Pegar valor do DOM (c-total já está visível na tela) */
   var amount = 0;
-  var proj   = 'Contrato';
-  var flName = 'Freelancer';
-
-  if (_contractCtx) {
-    var fee = Math.round((_contractCtx.value || 0) * 0.08);
-    amount  = (_contractCtx.value || 0) + fee;
-    proj    = _contractCtx.project || 'Contrato';
-    flName  = _contractCtx.name    || 'Freelancer';
+  var totalEl = document.getElementById('c-total');
+  if (totalEl) {
+    var txt = totalEl.textContent || totalEl.innerText || '';
+    amount = parseInt(txt.replace(/D/g, ''), 10) || 0;
   }
-  /* Fallback: ler do DOM */
-  if (!amount) {
-    var totalEl = document.getElementById('c-total');
-    if (totalEl) amount = parseInt((totalEl.textContent || '').replace(/[^0-9]/g, ''), 10) || 0;
+  /* Fallback: _contractCtx */
+  if (!amount && _contractCtx && _contractCtx.value > 0) {
+    amount = Math.round(_contractCtx.value * 1.08);
   }
+  /* Fallback final: valor padrão */
+  if (!amount) amount = 2160;
 
-  var contractId = window._activeContractId || '';
-  var desc = 'HereWork — ' + proj + ' com ' + flName;
+  var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
+  var flName = (_contractCtx && _contractCtx.name)    ? _contractCtx.name    : 'Freelancer';
 
-  /* Fechar modal de contrato */
-  var contractOv = document.getElementById('overlay-contract');
-  if (contractOv) { contractOv.classList.remove('open'); }
-  document.body.style.overflow = '';
+  /* 3. Fechar modal de contrato */
+  closeModal('contract');
 
-  /* Ir direto para o Stripe Payment Element com o valor correto */
+  /* 4. Abrir pagamento após fechar */
   setTimeout(function() {
     openStripePayment({
       amount:      amount,
-      contractId:  contractId,
-      description: desc,
+      contractId:  window._activeContractId || '',
+      description: 'HereWork — ' + proj,
       title:       'Pagamento em Garantia',
-      subtitle:    flName + '  ·  ' + proj
+      subtitle:    flName + ' · ' + proj
     });
-  }, 150);
+  }, 200);
 }
 
 function contractStep4() { _goContractStep(4); }
