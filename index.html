@@ -3867,7 +3867,7 @@ section { padding: 64px 0; }
     <div class="header-auth">
       <button id="nav-login-btn" class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <button id="nav-register-btn" class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-      <button class="btn btn-primary btn-sm" onclick="openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+      <button class="btn btn-primary btn-sm" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
       <!-- User chip (shown when logged in) -->
       <div id="nav-user-chip" style="display:none;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:40px;padding:5px 14px 5px 6px;cursor:pointer;" onclick="toggleUserMenu()">
         <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),#66BB6A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;" id="nav-user-avatar">U</div>
@@ -3907,7 +3907,7 @@ section { padding: 64px 0; }
   <div class="mobile-menu-auth">
     <button class="btn btn-outline btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('login');},150)" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
     <button class="btn btn-green btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('register');},150)" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-    <button class="btn btn-primary btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('publish');},150)" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+    <button class="btn btn-primary btn-block" onclick="closeMobileMenu();if(!_session||!_session.name){setTimeout(function(){showToast('Voce precisa estar logado para publicar!','warn');var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},150);return;}setTimeout(function(){openModal('publish');},150)" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
   </div>
 </div>
 
@@ -4234,7 +4234,7 @@ section { padding: 64px 0; }
       </div>
 
       <div style="text-align:center;margin-top:44px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-lg" onclick="openModal('publish')" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
+        <button class="btn btn-primary btn-lg" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
         <button class="btn btn-outline btn-lg" onclick="showPage('how')" data-pt="Saiba mais →" data-es="Saber más →">Saiba mais →</button>
       </div>
     </div>
@@ -4556,7 +4556,7 @@ section { padding: 64px 0; }
         Publique seu projeto gratuitamente e receba propostas de profissionais qualificados em minutos.
       </p>
       <div class="cta-actions">
-        <button class="btn btn-white btn-xl" onclick="openModal('publish')"
+        <button class="btn btn-white btn-xl" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')"
           data-pt="📋 Publicar Projeto Grátis" data-es="📋 Publicar Proyecto Gratis">
           📋 Publicar Projeto Grátis
         </button>
@@ -4868,7 +4868,7 @@ section { padding: 64px 0; }
         <div class="dash-section">
           <div class="dash-section-title" style="display:flex;align-items:center;justify-content:space-between;">
             <div><span>&#128203;</span> Projetos Publicados &mdash; Aguardando Propostas</div>
-            <button class="btn btn-primary btn-sm" onclick="openModal('publish')">+ Publicar</button>
+            <button class="btn btn-primary btn-sm" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')">+ Publicar</button>
           </div>
           <div id="dash-client-waiting"></div>
         </div>
@@ -9164,17 +9164,23 @@ document.addEventListener('click', function(e) {
    MODAL SYSTEM
 ═══════════════════════════════════════════ */
 function openModal(id) {
-  /* Acoes que exigem login */
-  if (id === 'publish') {
-    if (!_session) {
-      showToast('Voce precisa estar logado para publicar um projeto!', 'warn');
-      setTimeout(function(){ openOverlay('overlay-login'); }, 350);
-      return;
-    }
-    if (_session.role === 'freelancer') {
-      showToast('Apenas clientes podem publicar projetos.', 'warn');
-      return;
-    }
+  /* ── Acoes que exigem login ───────────────────── */
+  var _needLogin = (id === 'publish' || id === 'proposal');
+  if (_needLogin && (!_session || !_session.name)) {
+    var _msg = id === 'publish'
+      ? 'Voce precisa estar logado para publicar um projeto!'
+      : 'Voce precisa estar logado para enviar uma proposta!';
+    showToast(_msg, 'warn');
+    setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
+    return;
+  }
+  if (id === 'publish' && _session && _session.type === 'freelancer') {
+    showToast('Apenas clientes podem publicar projetos.', 'warn');
+    return;
+  }
+  if (id === 'proposal' && _session && _session.type === 'client') {
+    showToast('Apenas freelancers podem enviar propostas.', 'warn');
+    return;
   }
   var overlay = document.getElementById('overlay-' + id);
   if (!overlay) return;
