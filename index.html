@@ -2,9 +2,9 @@
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; form-action 'self'; base-uri 'self'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <meta http-equiv="X-Frame-Options" content="DENY">
+  
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
   <meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), geolocation=()">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -4986,12 +4986,12 @@ section { padding: 64px 0; }
           </div>
 
           <div id="profile-skills-section" style="display:none;">
-            <label class="form-label" style="margin-bottom:6px;">Especialidades &amp; Habilidades <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
+            <label for="profile-skills-grid" class="form-label" style="margin-bottom:6px;">Especialidades &amp; Habilidades <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
             <div class="skills-grid" id="profile-skills-grid"></div>
           </div>
 
           <div id="profile-selected-skills-wrap" style="margin-top:12px;display:none;">
-            <label class="form-label" style="margin-bottom:4px;">Habilidades selecionadas:</label>
+            <label class="form-label" style="margin-bottom:4px;" aria-label="Habilidades selecionadas:">Habilidades selecionadas:</label>
             <div class="selected-skills-wrap" id="profile-selected-skills"></div>
             <div class="skills-count-hint" id="profile-skills-hint">0 de 15 selecionadas</div>
           </div>
@@ -5284,28 +5284,28 @@ section { padding: 64px 0; }
               <div class="label">E-mail de propostas</div>
               <div class="desc">Receba e-mails quando alguém enviar proposta ao seu projeto</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="notif-proposals"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-proposals" class="admin-toggle"><input type="checkbox" checked id="notif-proposals"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">E-mail de mensagens</div>
               <div class="desc">Notificação de novas mensagens no chat</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="notif-messages"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-messages" class="admin-toggle"><input type="checkbox" checked id="notif-messages"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">E-mail de contratos</div>
               <div class="desc">Atualizações sobre contratos e pagamentos</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="notif-contracts"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-contracts" class="admin-toggle"><input type="checkbox" checked id="notif-contracts"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">Newsletter HereWork</div>
               <div class="desc">Novidades, dicas e atualizações da plataforma</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" id="notif-newsletter"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-newsletter" class="admin-toggle"><input type="checkbox" id="notif-newsletter"><span class="admin-toggle-slider"></span></label>
           </div>
         </div>
       </div>
@@ -5328,7 +5328,7 @@ section { padding: 64px 0; }
               <div class="label">Perfil p&uacute;blico</div>
               <div class="desc">Permitir que outros usuários vejam seu perfil</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="pref-public"><span class="admin-toggle-slider"></span></label>
+            <label for="pref-public" class="admin-toggle"><input type="checkbox" checked id="pref-public"><span class="admin-toggle-slider"></span></label>
           </div>
         </div>
       </div>
@@ -5343,42 +5343,42 @@ section { padding: 64px 0; }
               <div class="label">&#128231; Newsletter do Blog</div>
               <div class="desc">Receber artigos semanais sobre freelancing, tecnologia e neg&oacute;cios</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" id="perm-blog-newsletter" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-blog-newsletter" class="admin-toggle"><input type="checkbox" id="perm-blog-newsletter" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">&#9997;&#65039; Participar como autor do blog</div>
               <div class="desc">Quero publicar artigos e compartilhar minha experi&ecirc;ncia na plataforma</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" id="perm-blog-author" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-blog-author" class="admin-toggle"><input type="checkbox" id="perm-blog-author" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">&#128203; Novos projetos por e-mail</div>
               <div class="desc">Receber alertas de projetos que combinam com meu perfil (at&eacute; 3x por semana)</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="perm-new-projects" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-new-projects" class="admin-toggle"><input type="checkbox" checked id="perm-new-projects" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">&#128233; Novas propostas por e-mail</div>
               <div class="desc">Receber notifica&ccedil;&atilde;o quando chegarem propostas para meus projetos</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="perm-proposals" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-proposals" class="admin-toggle"><input type="checkbox" checked id="perm-proposals" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">&#127881; Oportunidades e promo&ccedil;&otilde;es</div>
               <div class="desc">Receber ofertas especiais, descontos em planos e novidades da plataforma</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" id="perm-promotions" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-promotions" class="admin-toggle"><input type="checkbox" id="perm-promotions" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">&#128202; Relat&oacute;rio mensal de atividade</div>
               <div class="desc">Resumo mensal com seus projetos, ganhos e desempenho na plataforma</div>
             </div>
-            <label class="admin-toggle"><input type="checkbox" checked id="perm-report" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
+            <label for="perm-report" class="admin-toggle"><input type="checkbox" checked id="perm-report" onchange="saveCommunicationPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
         </div>
         <div style="margin-top:12px;padding:10px 14px;background:var(--bg);border-radius:var(--radius);font-size:11px;color:var(--text-4);">
@@ -7084,42 +7084,42 @@ section { padding: 64px 0; }
           <div class="admin-control-label">Novos Cadastros</div>
           <div class="admin-control-desc">Permitir registro de novos usuários</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" checked onchange="adminToggle('signup',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" checked onchange="adminToggle('signup',this)"><span class="admin-toggle-slider"></span></label>
       </div>
       <div class="admin-control-card">
         <div class="admin-control-info">
           <div class="admin-control-label">Publicação de Projetos</div>
           <div class="admin-control-desc">Habilitar postagem de novos projetos</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" checked onchange="adminToggle('projects',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" checked onchange="adminToggle('projects',this)"><span class="admin-toggle-slider"></span></label>
       </div>
       <div class="admin-control-card">
         <div class="admin-control-info">
           <div class="admin-control-label">Pagamentos</div>
           <div class="admin-control-desc">Gateway de pagamentos ativo</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" checked onchange="adminToggle('payments',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" checked onchange="adminToggle('payments',this)"><span class="admin-toggle-slider"></span></label>
       </div>
       <div class="admin-control-card">
         <div class="admin-control-info">
           <div class="admin-control-label">Notificações Push</div>
           <div class="admin-control-desc">Enviar notificações automáticas</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" checked onchange="adminToggle('push',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" checked onchange="adminToggle('push',this)"><span class="admin-toggle-slider"></span></label>
       </div>
       <div class="admin-control-card">
         <div class="admin-control-info">
           <div class="admin-control-label">Reviews e Avaliações</div>
           <div class="admin-control-desc">Permitir avaliações de projetos</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" checked onchange="adminToggle('reviews',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" checked onchange="adminToggle('reviews',this)"><span class="admin-toggle-slider"></span></label>
       </div>
       <div class="admin-control-card">
         <div class="admin-control-info">
           <div class="admin-control-label">Modo Manutenção</div>
           <div class="admin-control-desc">Exibir página de manutenção</div>
         </div>
-        <label class="admin-toggle"><input type="checkbox" onchange="adminToggle('maintenance',this)"><span class="admin-toggle-slider"></span></label>
+        <label class="admin-toggle" aria-label="toggle"><input type="checkbox" onchange="adminToggle('maintenance',this)"><span class="admin-toggle-slider"></span></label>
       </div>
     </div>
 
@@ -7476,12 +7476,12 @@ section { padding: 64px 0; }
       </div>
       <div class="form-divider" data-pt="ou use seu e-mail" data-es="o usa tu correo">ou use seu e-mail</div>
       <div class="form-group">
-        <label class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
+        <label for="login-email" class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
         <input class="form-input" id="login-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
         <div class="form-error" id="err-login-email"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
+        <label for="login-pass" class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
         <div style="position:relative;">
           <input class="form-input" id="login-pass" type="password" data-placeholder-pt="Sua senha" data-placeholder-es="Tu contraseña" placeholder="Sua senha" style="padding-right:44px;">
           <button type="button" onclick="togglePwd(this,'login-pass')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;padding:4px;" title="Mostrar">👁</button>
@@ -7516,17 +7516,17 @@ section { padding: 64px 0; }
         <button id="reg-type-fl" class="btn btn-outline btn-sm" style="flex:1;" onclick="setRegType('freelancer',this)" data-pt="Sou Freelancer" data-es="Soy Freelancer">Sou Freelancer</button>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Nome completo" data-es="Nombre completo">Nome completo</label>
+        <label for="reg-name" class="form-label" data-pt="Nome completo" data-es="Nombre completo">Nome completo</label>
         <input class="form-input" id="reg-name" type="text" data-placeholder-pt="Seu nome completo" data-placeholder-es="Tu nombre completo" placeholder="Seu nome completo">
         <div class="form-error" id="err-reg-name"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
+        <label for="reg-email" class="form-label" data-pt="E-mail" data-es="Correo electrónico">E-mail</label>
         <input class="form-input" id="reg-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
         <div class="form-error" id="err-reg-email"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
+        <label for="reg-pass" class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
         <div style="position:relative;">
           <input class="form-input" id="reg-pass" type="password" data-placeholder-pt="Crie uma senha segura" data-placeholder-es="Crea una contraseña segura" placeholder="Crie uma senha segura" style="padding-right:44px;">
           <button type="button" onclick="togglePwd(this,'reg-pass')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;padding:4px;" title="Mostrar">👁</button>
@@ -7555,13 +7555,13 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label" data-pt="Título do projeto" data-es="Título del proyecto">Título do projeto</label>
+        <label for="proj-title" class="form-label" data-pt="Título do projeto" data-es="Título del proyecto">Título do projeto</label>
         <input class="form-input" id="proj-title" type="text" data-placeholder-pt="Ex: Desenvolvimento de site institucional em React" data-placeholder-es="Ej: Desarrollo de sitio web institucional en React" placeholder="Ex: Desenvolvimento de site institucional em React">
         <div class="form-error" id="err-proj-title"></div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-pt="Categoria" data-es="Categoría">Categoria</label>
+          <label for="proj-cat" class="form-label" data-pt="Categoria" data-es="Categoría">Categoria</label>
           <select class="form-select" id="proj-cat">
             <option value="" data-pt="Selecione..." data-es="Selecciona...">Selecione...</option>
             <option data-pt="Design & Criação" data-es="Diseño & Creación">Design & Criação</option>
@@ -7575,14 +7575,14 @@ section { padding: 64px 0; }
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" data-pt="Orçamento (R$)" data-es="Presupuesto (R$)">Orçamento (R$)</label>
+          <label for="proj-budget" class="form-label" data-pt="Orçamento (R$)" data-es="Presupuesto (R$)">Orçamento (R$)</label>
           <input class="form-input" id="proj-budget" type="text" data-placeholder-pt="Ex: 1.500 – 3.000" data-placeholder-es="Ej: 1.500 – 3.000" placeholder="Ex: 1.500 – 3.000">
           <div class="form-error" id="err-proj-budget"></div>
         </div>
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-pt="Tipo de contrato" data-es="Tipo de contrato">Tipo de contrato</label>
+          <label class="form-label" data-pt="Tipo de contrato" data-es="Tipo de contrato" aria-label="Tipo de contrato">Tipo de contrato</label>
           <select class="form-select">
             <option data-pt="Preço fixo" data-es="Precio fijo">Preço fixo</option>
             <option data-pt="Por hora" data-es="Por hora">Por hora</option>
@@ -7590,7 +7590,7 @@ section { padding: 64px 0; }
           </select>
         </div>
         <div class="form-group">
-          <label class="form-label" data-pt="Prazo de entrega" data-es="Plazo de entrega">Prazo de entrega</label>
+          <label class="form-label" data-pt="Prazo de entrega" data-es="Plazo de entrega" aria-label="Prazo de entrega">Prazo de entrega</label>
           <select class="form-select">
             <option data-pt="Até 7 dias" data-es="Hasta 7 días">Até 7 dias</option>
             <option data-pt="Até 15 dias" data-es="Hasta 15 días">Até 15 dias</option>
@@ -7600,12 +7600,12 @@ section { padding: 64px 0; }
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Descrição detalhada" data-es="Descripción detallada">Descrição detalhada</label>
+        <label for="proj-desc" class="form-label" data-pt="Descrição detalhada" data-es="Descripción detallada">Descrição detalhada</label>
         <textarea class="form-textarea" id="proj-desc" data-placeholder-pt="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." data-placeholder-es="Describe en detalle lo que necesitas, objetivos, referencias, entregables esperados..." placeholder="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." style="min-height:130px;"></textarea>
         <div class="form-error" id="err-proj-desc"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Anexar Briefing / Documento em PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(opcional &middot; m&aacute;x. 10 MB)</span></label>
+        <label for="proj-pdf-drop-zone" class="form-label">Anexar Briefing / Documento em PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(opcional &middot; m&aacute;x. 10 MB)</span></label>
         <div class="pdf-upload-area" id="proj-pdf-drop-zone" onclick="document.getElementById('proj-pdf-input').click()"
           ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
           <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected2(this)">
@@ -7655,27 +7655,27 @@ section { padding: 64px 0; }
       </div>
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-pt="Valor da proposta (R$)" data-es="Valor de la propuesta (R$)">Valor da proposta (R$)</label>
+          <label for="prop-value" class="form-label" data-pt="Valor da proposta (R$)" data-es="Valor de la propuesta (R$)">Valor da proposta (R$)</label>
           <input class="form-input" id="prop-value" type="number" min="1" data-placeholder-pt="Ex: 2500" data-placeholder-es="Ej: 2500" placeholder="Ex: 2500">
           <div class="form-error" id="err-prop-value"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" data-pt="Prazo de entrega (dias)" data-es="Plazo de entrega (días)">Prazo de entrega (dias)</label>
+          <label for="prop-days" class="form-label" data-pt="Prazo de entrega (dias)" data-es="Plazo de entrega (días)">Prazo de entrega (dias)</label>
           <input class="form-input" id="prop-days" type="number" min="1" data-placeholder-pt="Ex: 20" data-placeholder-es="Ej: 20" placeholder="Ex: 20">
           <div class="form-error" id="err-prop-days"></div>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Carta de apresentação" data-es="Carta de presentación">Carta de apresentação</label>
+        <label for="prop-cover" class="form-label" data-pt="Carta de apresentação" data-es="Carta de presentación">Carta de apresentação</label>
         <textarea class="form-textarea" id="prop-cover" data-placeholder-pt="Apresente-se, descreva sua experiência com projetos similares e por que você é a melhor escolha..." data-placeholder-es="Preséntate, describe tu experiencia con proyectos similares y por qué eres la mejor elección..." placeholder="Apresente-se, descreva sua experiência com projetos similares e por que você é a melhor escolha..." style="min-height:140px;"></textarea>
         <div class="form-error" id="err-prop-cover"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Portfólio relevante (opcional)" data-es="Portafolio relevante (opcional)">Portfólio relevante (opcional)</label>
+        <label for="prop-portfolio" class="form-label" data-pt="Portfólio relevante (opcional)" data-es="Portafolio relevante (opcional)">Portfólio relevante (opcional)</label>
         <input class="form-input" type="url" id="prop-portfolio" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
       </div>
       <div class="form-group">
-        <label class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
+        <label for="pdf-drop-zone" class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
         <div class="pdf-upload-area" id="pdf-drop-zone" onclick="document.getElementById('prop-pdf-input').click()"
           ondragover="pdfDragOver(event)" ondragleave="pdfDragLeave(event)" ondrop="pdfDrop(event)">
           <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected(this)">
@@ -7712,7 +7712,7 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label" data-pt="Selecione o projeto" data-es="Selecciona el proyecto">Selecione o projeto</label>
+        <label for="invite-proj" class="form-label" data-pt="Selecione o projeto" data-es="Selecciona el proyecto">Selecione o projeto</label>
         <select class="form-select" id="invite-proj">
           <option data-pt="Nenhum projeto no momento" data-es="Ningún proyecto por ahora">Nenhum projeto no momento</option>
           <option data-pt="E-commerce WooCommerce" data-es="E-commerce WooCommerce">E-commerce WooCommerce</option>
@@ -7720,7 +7720,7 @@ section { padding: 64px 0; }
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Mensagem de convite" data-es="Mensaje de invitación">Mensagem de convite</label>
+        <label for="invite-msg" class="form-label" data-pt="Mensagem de convite" data-es="Mensaje de invitación">Mensagem de convite</label>
         <textarea class="form-textarea" id="invite-msg" data-placeholder-pt="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..." data-placeholder-es="¡Hola! Vi tu perfil y creo que serías perfecto para nuestro proyecto de..." placeholder="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..."></textarea>
         <div class="form-error" id="err-invite-msg"></div>
       </div>
@@ -7814,18 +7814,18 @@ section { padding: 64px 0; }
     <div class="modal-body">
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label" data-pt="Seu nome" data-es="Tu nombre">Seu nome</label>
+          <label for="contact-name" class="form-label" data-pt="Seu nome" data-es="Tu nombre">Seu nome</label>
           <input class="form-input" id="contact-name" type="text" data-placeholder-pt="Nome completo" data-placeholder-es="Nombre completo" placeholder="Nome completo">
           <div class="form-error" id="err-contact-name"></div>
         </div>
         <div class="form-group">
-          <label class="form-label" data-pt="E-mail" data-es="Correo">E-mail</label>
+          <label for="contact-email" class="form-label" data-pt="E-mail" data-es="Correo">E-mail</label>
           <input class="form-input" id="contact-email" type="email" data-placeholder-pt="seu@email.com" data-placeholder-es="tu@correo.com" placeholder="seu@email.com">
           <div class="form-error" id="err-contact-email"></div>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Assunto" data-es="Asunto">Assunto</label>
+        <label for="contact-subject" class="form-label" data-pt="Assunto" data-es="Asunto">Assunto</label>
         <select class="form-select" id="contact-subject">
           <option value="" data-pt="Selecione o assunto" data-es="Selecciona el asunto">Selecione o assunto</option>
           <option data-pt="Suporte t&#233;cnico" data-es="Soporte t&#233;cnico">Suporte t&#233;cnico</option>
@@ -7837,7 +7837,7 @@ section { padding: 64px 0; }
         </select>
       </div>
       <div class="form-group">
-        <label class="form-label" data-pt="Mensagem" data-es="Mensaje">Mensagem</label>
+        <label for="contact-msg" class="form-label" data-pt="Mensagem" data-es="Mensaje">Mensagem</label>
         <textarea class="form-textarea" id="contact-msg" data-placeholder-pt="Descreva sua d&#250;vida, sugest&#227;o ou problema..." data-placeholder-es="Describe tu duda, sugerencia o problema..." placeholder="Descreva sua d&#250;vida, sugest&#227;o ou problema..." style="min-height:120px;"></textarea>
         <div class="form-error" id="err-contact-msg"></div>
       </div>
@@ -7897,7 +7897,7 @@ section { padding: 64px 0; }
           </div>
 
           <div class="form-group">
-            <label class="form-label">N&uacute;mero do cart&atilde;o</label>
+            <label for="stripe-num-wrap" class="form-label">N&uacute;mero do cart&atilde;o</label>
             <div class="stripe-element-wrap" id="stripe-num-wrap">
               <div id="stripe-card-number"></div>
             </div>
@@ -7906,13 +7906,13 @@ section { padding: 64px 0; }
 
           <div class="card-row">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Validade</label>
+              <label for="stripe-exp-wrap" class="form-label">Validade</label>
               <div class="stripe-element-wrap" id="stripe-exp-wrap">
                 <div id="stripe-card-expiry"></div>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">CVV</label>
+              <label for="stripe-cvc-wrap" class="form-label">CVV</label>
               <div class="stripe-element-wrap" id="stripe-cvc-wrap">
                 <div id="stripe-card-cvc"></div>
               </div>
@@ -8113,7 +8113,7 @@ section { padding: 64px 0; }
               <div class="form-error" id="err-c-stripe-name"></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Dados do cart&atilde;o</label>
+              <label for="c-stripe-card-wrap" class="form-label">Dados do cart&atilde;o</label>
               <div class="stripe-element-wrap" id="c-stripe-card-wrap">
                 <div id="c-stripe-card-element"></div>
               </div>
@@ -8251,7 +8251,7 @@ section { padding: 64px 0; }
 
       <!-- Checklist de entregáveis -->
       <div class="form-group">
-        <label class="form-label">&#9989; Confirme os itens entregues</label>
+        <label class="form-label" aria-label="&#9989; Confirme os itens entregues">&#9989; Confirme os itens entregues</label>
         <div class="delivery-checklist" id="delivery-checklist">
           <!-- populated by JS -->
         </div>
@@ -8260,7 +8260,7 @@ section { padding: 64px 0; }
 
       <!-- Link do trabalho -->
       <div class="form-group">
-        <label class="form-label">&#127758; Link do trabalho / Repositório <span style="font-size:11px;color:var(--text-4);">(opcional)</span></label>
+        <label for="delivery-url" class="form-label">&#127758; Link do trabalho / Repositório <span style="font-size:11px;color:var(--text-4);">(opcional)</span></label>
         <div class="delivery-url-wrap">
           <span class="delivery-url-icon">🔗</span>
           <input class="form-input" id="delivery-url" type="url"
@@ -8271,7 +8271,7 @@ section { padding: 64px 0; }
 
       <!-- Anexar arquivos (múltiplos PDFs) -->
       <div class="form-group">
-        <label class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
+        <label for="delivery-drop-zone" class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
         <div class="pdf-upload-area" id="delivery-drop-zone"
           onclick="document.getElementById('delivery-file-input').click()"
           ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryDrop(event)"
@@ -8289,7 +8289,7 @@ section { padding: 64px 0; }
 
       <!-- Mensagem para o cliente -->
       <div class="form-group">
-        <label class="form-label">&#128172; Mensagem para o cliente <span style="font-size:11px;color:var(--text-4);">(obrigatório)</span></label>
+        <label for="delivery-message" class="form-label">&#128172; Mensagem para o cliente <span style="font-size:11px;color:var(--text-4);">(obrigatório)</span></label>
         <textarea class="form-textarea" id="delivery-message"
           placeholder="Descreva o que foi entregue, como usar o trabalho, senhas de acesso (se houver), próximos passos sugeridos..."
           style="min-height:120px;"></textarea>
@@ -8403,7 +8403,7 @@ section { padding: 64px 0; }
 
       <!-- Tipo de revisão -->
       <div class="form-group">
-        <label class="form-label">Tipo de revisão</label>
+        <label class="form-label" aria-label="Tipo de revisão">Tipo de revisão</label>
         <div class="revision-type-grid">
           <button class="revision-type-btn" id="rtype-scope" onclick="selectRevType('scope',this)">
             <span class="icon">&#128203;</span>Escopo / Conteúdo
@@ -8423,7 +8423,7 @@ section { padding: 64px 0; }
 
       <!-- Urgência -->
       <div class="form-group">
-        <label class="form-label">Urgência</label>
+        <label class="form-label" aria-label="Urgência">Urgência</label>
         <div class="revision-urgency-row">
           <button class="revision-urgency-btn low" id="rurg-low" onclick="selectRevUrgency('low')">
             &#128994; Baixa
@@ -8440,7 +8440,7 @@ section { padding: 64px 0; }
 
       <!-- Descrição -->
       <div class="form-group">
-        <label class="form-label">Descreva o que precisa ser corrigido <span style="color:#ef4444;">*</span></label>
+        <label for="rev-description" class="form-label">Descreva o que precisa ser corrigido <span style="color:#ef4444;">*</span></label>
         <textarea class="form-textarea" id="rev-description"
           placeholder="Ex: O logotipo ficou em baixa resolução (precisa de no mínimo 300dpi para impressão). O arquivo editável do Illustrator também não foi enviado conforme combinado..."
           style="min-height:120px;" oninput="revDescCount(this)"></textarea>
@@ -8665,13 +8665,13 @@ section { padding: 64px 0; }
 
       <!-- Formulário -->
       <div class="form-group">
-        <label class="form-label">Nome completo <span style="color:#ef4444;">*</span></label>
+        <label for="apply-name" class="form-label">Nome completo <span style="color:#ef4444;">*</span></label>
         <input class="form-input" id="apply-name" type="text" maxlength="80" placeholder="Seu nome completo">
         <div class="form-error" id="err-apply-name"></div>
       </div>
 
       <div class="form-group">
-        <label class="form-label">E-mail <span style="color:#ef4444;">*</span></label>
+        <label for="apply-email" class="form-label">E-mail <span style="color:#ef4444;">*</span></label>
         <input class="form-input" id="apply-email" type="email" maxlength="120" placeholder="seu@email.com">
         <div class="form-error" id="err-apply-email"></div>
       </div>
@@ -8687,7 +8687,7 @@ section { padding: 64px 0; }
       </div>
 
       <div class="form-group">
-        <label class="form-label">Por que voc&ecirc; quer trabalhar na HereWork? <span style="color:#ef4444;">*</span></label>
+        <label for="apply-motivation" class="form-label">Por que voc&ecirc; quer trabalhar na HereWork? <span style="color:#ef4444;">*</span></label>
         <textarea class="form-textarea" id="apply-motivation" maxlength="1000" placeholder="Conte um pouco sobre voc&ecirc;, sua experi&ecirc;ncia e por que se identifica com nossa miss&atilde;o..." style="min-height:100px;"></textarea>
         <div style="display:flex;justify-content:flex-end;margin-top:3px;">
           <span style="font-size:11px;color:var(--text-4);" id="apply-motivation-count">0 / 100 m&iacute;n.</span>
@@ -8697,7 +8697,7 @@ section { padding: 64px 0; }
 
       <!-- Upload CV -->
       <div class="form-group">
-        <label class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
+        <label for="apply-cv-zone" class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
         <div class="pdf-upload-area" id="apply-cv-zone" onclick="document.getElementById('apply-cv-input').click()"
           ondragover="applyDragOver(event)" ondragleave="applyDragLeave(event)" ondrop="applyDrop(event)">
           <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" onchange="applyCVSelected(this)">
@@ -8840,7 +8840,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-ticket-category"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Prioridade</label>
+        <label class="form-label" aria-label="Prioridade">Prioridade</label>
         <div style="display:flex;gap:8px;">
           <label style="flex:1;cursor:pointer;">
             <input type="radio" name="ticket-priority" value="low" checked style="accent-color:var(--green);">
@@ -8850,21 +8850,21 @@ section { padding: 64px 0; }
             <input type="radio" name="ticket-priority" value="medium" style="accent-color:#f59e0b;">
             <span style="font-size:13px;margin-left:5px;">&#128993; M&eacute;dia</span>
           </label>
-          <label style="flex:1;cursor:pointer;">
+          <label for="ticket-desc" style="flex:1;cursor:pointer;">
             <input type="radio" name="ticket-priority" value="high" style="accent-color:#ef4444;">
             <span style="font-size:13px;margin-left:5px;">&#128308; Alta</span>
           </label>
         </div>
       </div>
       <div class="form-group">
-        <label class="form-label">Descreva o problema <span style="color:#ef4444;">*</span></label>
+        <label for="ticket-desc" class="form-label">Descreva o problema <span style="color:#ef4444;">*</span></label>
         <textarea class="form-textarea" id="ticket-desc" maxlength="2000"
           placeholder="Descreva o problema com o m&aacute;ximo de detalhes. Inclua etapas para reproduzir, mensagens de erro, etc."
           style="min-height:120px;"></textarea>
         <div class="form-error" id="err-ticket-desc"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
+        <label for="ticket-file-zone" class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
         <div class="pdf-upload-area" id="ticket-file-zone" style="padding:12px;"
           onclick="document.getElementById('ticket-file-input').click()">
           <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" onchange="ticketFileSelected(this)">
@@ -8977,7 +8977,7 @@ section { padding: 64px 0; }
       ⚠️ Este acesso é monitorado. Tentativas inválidas são registradas.
     </div>
     <div class="form-group">
-      <label class="form-label" data-pt="Usuário" data-es="Usuario">Usuário</label>
+      <label for="admin-login-user" class="form-label" data-pt="Usuário" data-es="Usuario">Usuário</label>
       <input class="form-input" id="admin-login-user" type="text" autocomplete="off"
         placeholder="admin" onkeydown="if(event.key==='Enter')adminDoLogin()">
       <div class="field-error" id="err-admin-user"></div>
@@ -10446,7 +10446,7 @@ function openDirectInvite(name) {
         '</div>' +
         '<button class="modal-close" onclick="closeDirectInvite()">×</button></div>' +
         '<div class="modal-body" style="padding:20px;">' +
-          '<div class="form-group"><label class="form-label">Mensagem de convite</label>' +
+          '<div class="form-group"><label for="di-msg" class="form-label">Mensagem de convite</label>' +
           '<textarea id="di-msg" class="form-textarea" rows="4" placeholder="Olá! Gostaria de convidá-lo para o meu projeto..."></textarea></div>' +
           '<button class="btn btn-green btn-block" onclick="sendDirectInvite()">📨 Enviar Convite</button>' +
         '</div></div>';
@@ -13625,7 +13625,7 @@ function openDeliveryModal(proj) {
   var cl = document.getElementById('delivery-checklist');
   if(cl) {
     cl.innerHTML = items.map(function(item, i) {
-      return '<label class="delivery-check-item" id="dci-'+i+'" onclick="toggleDeliveryCheck('+i+',this)">' +
+      return '<label for="dcheck-'+i+'" class="delivery-check-item" id="dci-'+i+'" onclick="toggleDeliveryCheck('+i+',this)">' +
         '<input type="checkbox" id="dcheck-'+i+'" onclick="event.stopPropagation();" onchange="toggleDeliveryCheck('+i+',this.closest(\'label\'))">' +
         '<span class="delivery-check-label">'+item+'</span>' +
         '<span style="font-size:14px;color:var(--green);display:none;" id="dcheck-icon-'+i+'">&#10003;</span>' +
