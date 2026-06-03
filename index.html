@@ -3807,6 +3807,8 @@ section { padding: 64px 0; }
 .skills-count-hint { font-size:11px; color:var(--text-4); margin-top:6px; }
 </style>
   <script src="https://js.stripe.com/v3/" defer></script>
+  <!-- Supabase Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
@@ -8681,6 +8683,257 @@ section { padding: 64px 0; }
      JAVASCRIPT BASE
 ════════════════════════════════════════ -->
 <script>
+/* ═══════════════════════════════════════════════════════════════
+   SUPABASE — Configuração e camada de dados
+   IMPORTANTE: substitua os valores abaixo pelas suas chaves
+   do painel Supabase > Settings > API
+═══════════════════════════════════════════════════════════════ */
+var _SUPA_URL = 'COLE_SUA_SUPABASE_URL_AQUI';
+var _SUPA_KEY = 'COLE_SUA_SUPABASE_ANON_KEY_AQUI';
+var _sb = null;
+
+/* Inicializar cliente Supabase */
+function _initSupabase() {
+  if (typeof supabase === 'undefined') return;
+  if (_SUPA_URL === 'COLE_SUA_SUPABASE_URL_AQUI') return; /* Chaves não configuradas */
+  try {
+    _sb = supabase.createClient(_SUPA_URL, _SUPA_KEY);
+    _sbRestoreSession();
+  } catch(e) { console.warn('Supabase init error:', e); }
+}
+
+/* Verificar se Supabase está configurado */
+function _sbReady() {
+  return _sb !== null && _SUPA_URL !== 'COLE_SUA_SUPABASE_URL_AQUI';
+}
+
+/* ── AUTH: Restaurar sessão ───────────────────────────────────── */
+async function _sbRestoreSession() {
+  if (!_sbReady()) return;
+  try {
+    var r = await _sb.auth.getSession();
+    if (r.data && r.data.session && r.data.session.user) {
+      var user = r.data.session.user;
+      var prof = await _sbGetProfile(user.id);
+      if (prof) {
+        _setSession(prof.name, prof.email, prof.type);
+        /* Guardar id do Supabase na sessão */
+        _session.uid = user.id;
+      }
+    }
+    /* Listener para mudanças de autenticação */
+    _sb.auth.onAuthStateChange(function(event, session) {
+      if (event === 'SIGNED_OUT') { _clearSession(); }
+    });
+  } catch(e) { console.warn('sbRestoreSession:', e); }
+}
+
+/* ── AUTH: Buscar perfil do banco ─────────────────────────────── */
+async function _sbGetProfile(uid) {
+  if (!_sbReady()) return null;
+  try {
+    var r = await _sb.from('profiles').select('*').eq('id', uid).single();
+    return r.data || null;
+  } catch(e) { return null; }
+}
+
+/* ── AUTH: Login ──────────────────────────────────────────────── */
+async function _sbLogin(email, pass) {
+  if (!_sbReady()) return { error: 'Supabase não configurado' };
+  var r = await _sb.auth.signInWithPassword({ email: email, password: pass });
+  if (r.error) return { error: r.error.message };
+  var prof = await _sbGetProfile(r.data.user.id);
+  return { user: r.data.user, profile: prof };
+}
+
+/* ── AUTH: Registro ───────────────────────────────────────────── */
+async function _sbRegister(name, email, pass, type) {
+  if (!_sbReady()) return { error: 'Supabase não configurado' };
+  var r = await _sb.auth.signUp({
+    email: email,
+    password: pass,
+    options: { data: { name: name, type: type } }
+  });
+  if (r.error) return { error: r.error.message };
+  return { user: r.data.user };
+}
+
+/* ── AUTH: Logout ─────────────────────────────────────────────── */
+async function _sbLogout() {
+  if (!_sbReady()) return;
+  await _sb.auth.signOut();
+}
+
+/* ── AUTH: Esqueci a senha ────────────────────────────────────── */
+async function _sbForgotPassword(email) {
+  if (!_sbReady()) return { error: 'Supabase não configurado' };
+  var r = await _sb.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin
+  });
+  return r.error ? { error: r.error.message } : { ok: true };
+}
+
+/* ── PROJETOS: Criar ──────────────────────────────────────────── */
+async function _sbCreateProject(data) {
+  if (!_sbReady() || !_session) return null;
+  var r = await _sb.from('projects').insert({
+    client_id:     _session.uid,
+    title:         data.title,
+    description:   data.description,
+    category:      data.category,
+    budget_min:    data.budgetMin,
+    budget_max:    data.budgetMax,
+    deadline_days: data.deadline,
+    type:          data.type,
+    skills_needed: data.skills || []
+  }).select().single();
+  return r.data || null;
+}
+
+/* ── PROJETOS: Listar públicos ────────────────────────────────── */
+async function _sbListProjects(filters) {
+  if (!_sbReady()) return [];
+  var q = _sb.from('projects').select('*, profiles(name, rating, avatar_url)').eq('status','open').order('created_at', { ascending: false });
+  if (filters && filters.category) q = q.eq('category', filters.category);
+  if (filters && filters.budgetMax) q = q.lte('budget_max', filters.budgetMax);
+  var r = await q.limit(50);
+  return r.data || [];
+}
+
+/* ── PROPOSTAS: Criar ─────────────────────────────────────────── */
+async function _sbCreateProposal(data) {
+  if (!_sbReady() || !_session) return null;
+  var r = await _sb.from('proposals').insert({
+    project_id:    data.projectId,
+    freelancer_id: _session.uid,
+    value:         data.value,
+    deadline_days: data.deadline,
+    cover_letter:  data.coverLetter
+  }).select().single();
+  return r.data || null;
+}
+
+/* ── CONTRATOS: Listar do usuário ─────────────────────────────── */
+async function _sbGetMyContracts() {
+  if (!_sbReady() || !_session) return { client: [], freelancer: [] };
+  var uid = _session.uid;
+  var [asClient, asFL] = await Promise.all([
+    _sb.from('contracts').select('*, freelancer:profiles!freelancer_id(name,avatar_url,rating)').eq('client_id', uid).order('created_at', { ascending: false }),
+    _sb.from('contracts').select('*, client:profiles!client_id(name,avatar_url)').eq('freelancer_id', uid).order('created_at', { ascending: false })
+  ]);
+  return {
+    client:     asClient.data  || [],
+    freelancer: asFL.data      || []
+  };
+}
+
+/* ── DASHBOARD: Estatísticas ──────────────────────────────────── */
+async function _sbGetDashStats() {
+  if (!_sbReady() || !_session) return null;
+  var uid = _session.uid;
+  var [prof, contracts] = await Promise.all([
+    _sbGetProfile(uid),
+    _sbGetMyContracts()
+  ]);
+  /* Calcular totais */
+  var totalEscrow  = contracts.client.filter(function(c){ return c.status === 'active'; }).reduce(function(s,c){ return s+(c.value||0); }, 0);
+  var totalPaid    = contracts.client.filter(function(c){ return c.status === 'completed'; }).reduce(function(s,c){ return s+(c.value||0); }, 0);
+  var totalReceived= contracts.freelancer.filter(function(c){ return c.status === 'completed'; }).reduce(function(s,c){ return s+(c.value||0); }, 0);
+  var totalPending = contracts.freelancer.filter(function(c){ return c.status === 'active'; }).reduce(function(s,c){ return s+(c.value||0); }, 0);
+  return {
+    profile:   prof,
+    contracts: contracts,
+    stats: {
+      escrow:        totalEscrow,
+      paid:          totalPaid,
+      received:      totalReceived,
+      pending:       totalPending,
+      activeCount:   contracts.client.filter(function(c){ return c.status==='active'; }).length +
+                     contracts.freelancer.filter(function(c){ return c.status==='active'; }).length,
+      completedCount: contracts.client.filter(function(c){ return c.status==='completed'; }).length +
+                      contracts.freelancer.filter(function(c){ return c.status==='completed'; }).length
+    }
+  };
+}
+
+/* ── PERFIL: Salvar ───────────────────────────────────────────── */
+async function _sbSaveProfile(data) {
+  if (!_sbReady() || !_session) return false;
+  var r = await _sb.from('profiles').update({
+    name:        data.name,
+    bio:         data.bio,
+    city:        data.city,
+    state:       data.state,
+    phone:       data.phone,
+    hourly_rate: data.hourlyRate,
+    skills:      data.skills || [],
+    updated_at:  new Date().toISOString()
+  }).eq('id', _session.uid);
+  return !r.error;
+}
+
+/* ── MENSAGENS: Buscar ────────────────────────────────────────── */
+async function _sbGetMessages(contractId) {
+  if (!_sbReady()) return [];
+  var r = await _sb.from('messages').select('*, sender:profiles!sender_id(name,avatar_url)').eq('contract_id', contractId).order('created_at', { ascending: true });
+  return r.data || [];
+}
+
+/* ── MENSAGENS: Enviar ────────────────────────────────────────── */
+async function _sbSendMessage(contractId, content, type) {
+  if (!_sbReady() || !_session) return null;
+  var r = await _sb.from('messages').insert({
+    contract_id: contractId,
+    sender_id:   _session.uid,
+    content:     content,
+    type:        type || 'text'
+  }).select().single();
+  return r.data || null;
+}
+
+/* ── NEWSLETTER: Inscrever ────────────────────────────────────── */
+async function _sbSubscribeNewsletter(email) {
+  if (!_sbReady()) return false;
+  var r = await _sb.from('newsletter_subscriptions').upsert({ email: email, active: true }, { onConflict: 'email' });
+  return !r.error;
+}
+
+/* ── SUPORTE: Criar ticket ────────────────────────────────────── */
+async function _sbCreateTicket(data) {
+  if (!_sbReady()) return null;
+  var protocol = 'HW-' + Date.now().toString(36).toUpperCase().slice(-6);
+  var r = await _sb.from('support_tickets').insert({
+    user_id:     _session ? _session.uid : null,
+    name:        data.name,
+    email:       data.email,
+    category:    data.category,
+    description: data.description,
+    protocol:    protocol
+  }).select().single();
+  return r.data ? protocol : null;
+}
+
+/* ── PROJETOS: Meus projetos ──────────────────────────────────── */
+async function _sbGetMyProjects() {
+  if (!_sbReady() || !_session) return [];
+  var r = await _sb.from('projects').select('*, proposals(count)').eq('client_id', _session.uid).order('created_at', { ascending: false });
+  return r.data || [];
+}
+
+/* ── REALTIME: Escutar mensagens novas ────────────────────────── */
+function _sbListenMessages(contractId, callback) {
+  if (!_sbReady()) return null;
+  return _sb.channel('messages:' + contractId)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: 'contract_id=eq.' + contractId
+    }, function(payload) { callback(payload.new); })
+    .subscribe();
+}
+
+
 /* ═══════════════════════════════════════════
    SPA ROUTING
 ═══════════════════════════════════════════ */
@@ -9341,53 +9594,66 @@ function _setBtnLoading(btn, loading) {
 function forgotPassword() {
   var e = document.getElementById('forgot-email') || document.getElementById('login-email');
   var email = e ? e.value.trim() : '';
-  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showToast('Informe seu e-mail cadastrado primeiro.','warn'); return;
   }
-  var subj = encodeURIComponent('[HereWork] Redefinição de senha — ' + email);
-  var body = encodeURIComponent('Olá, equipe HereWork!\n\nPreciso redefinir a senha da minha conta.\nE-mail cadastrado: ' + email + '\n\nAguardo instruções.\nObrigado!');
-  window.open('mailto:contato@herework.com.br?subject=' + subj + '&body=' + body, '_blank');
-  showToast('Seu e-mail foi aberto! Envie para contato@herework.com.br e responderemos em até 24h.','success');
-  closeModal('login');
+  if (_sbReady()) {
+    _sbForgotPassword(email).then(function(res) {
+      if (res.error) { showToast(res.error, 'error'); return; }
+      showToast('✅ Link de redefinição enviado para ' + email + '. Verifique sua caixa de entrada.', 'success');
+      closeModal('login');
+    });
+  } else {
+    var subj = encodeURIComponent('[HereWork] Redefinição de senha — ' + email);
+    var body = encodeURIComponent('Olá!\n\nPreciso redefinir a senha.\nE-mail: ' + email);
+    window.open('mailto:contato@herework.com.br?subject=' + subj + '&body=' + body, '_blank');
+    showToast('E-mail aberto. Envie para contato@herework.com.br.', 'success');
+    closeModal('login');
+  }
 }
 
 function submitLogin() {
   var e   = document.getElementById('login-email');
   var p   = document.getElementById('login-pass');
   var btn = document.getElementById('login-submit-btn');
-
-  /* Clear previous errors */
   ['err-login-email','err-login-pass'].forEach(function(id){
     var el=document.getElementById(id); if(el){el.textContent='';el.classList.remove('show');}
   });
-
   var ok = (_vEmail(e,'err-login-email') &
             _vField(p,'err-login-pass', lang()==='pt'?'Senha obrigatória':'Contraseña obligatoria'));
   if (!ok) return;
-
   _setBtnLoading(btn, true);
 
-  setTimeout(function(){
-    _setBtnLoading(btn, false);
-
-    var email = e ? e.value.trim() : '';
-    var name  = email.split('@')[0]
-                     .replace(/[._-]/g,' ')
-                     .replace(/\b\w/g, function(c){ return c.toUpperCase(); });
-
-    _setSession(name, email, 'client');
-    if (e) e.value = ''; if (p) p.value = '';
-    closeModal('login');
-
-    showToast(
-      lang()==='pt'
-        ? '&#x1F44B; Bem-vindo(a) de volta, ' + name.split(' ')[0] + '!'
-        : '&#x1F44B; &#xa1;Bienvenido/a de regreso, ' + name.split(' ')[0] + '!',
-      'success'
-    );
-
-    setTimeout(function(){ openDashboard(); }, 400);
-  }, 800);
+  /* Tentar Supabase primeiro, fallback para modo demo */
+  if (_sbReady()) {
+    _sbLogin(e.value.trim(), p.value).then(function(res) {
+      _setBtnLoading(btn, false);
+      if (res.error) {
+        var errEl = document.getElementById('err-login-pass');
+        if (errEl) { errEl.textContent = lang()==='pt' ? 'E-mail ou senha inválidos.' : 'E-mail o contraseña inválidos.'; errEl.classList.add('show'); }
+        return;
+      }
+      var prof = res.profile;
+      _setSession(prof.name, prof.email, prof.type);
+      _session.uid = res.user.id;
+      if (e) e.value = ''; if (p) p.value = '';
+      closeModal('login');
+      showToast((lang()==='pt' ? '👋 Bem-vindo(a) de volta, ' : '👋 ¡Bienvenido/a de regreso, ') + prof.name.split(' ')[0] + '!', 'success');
+      setTimeout(function(){ openDashboard(); }, 400);
+    });
+  } else {
+    /* Modo demo — sem Supabase configurado */
+    setTimeout(function(){
+      _setBtnLoading(btn, false);
+      var email = e ? e.value.trim() : '';
+      var name  = email.split('@')[0].replace(/[._-]/g,' ').replace(/w/g, function(c){ return c.toUpperCase(); });
+      _setSession(name, email, 'client');
+      if (e) e.value = ''; if (p) p.value = '';
+      closeModal('login');
+      showToast((lang()==='pt' ? '👋 Bem-vindo(a), ' : '👋 ¡Bienvenido/a, ') + name.split(' ')[0] + '! (modo demo)', 'success');
+      setTimeout(function(){ openDashboard(); }, 400);
+    }, 800);
+  }
 }
 
 function setRegType(type) {
@@ -9428,6 +9694,8 @@ function _setSession(name, email, type) {
 }
 
 function _clearSession() {
+  if (_sbReady()) _sbLogout().catch(function(){});
+  /* --- */
   _session = null;
 
   /* Remove do localStorage */
@@ -9486,55 +9754,65 @@ function submitRegister() {
   var p    = document.getElementById('reg-pass');
   var btn  = document.getElementById('reg-submit-btn');
   var errP = document.getElementById('err-reg-pass');
-
-  /* Clear previous errors */
   ['err-reg-name','err-reg-email','err-reg-pass'].forEach(function(id){
     var el=document.getElementById(id); if(el){el.textContent='';el.classList.remove('show');}
   });
-
   var ok = (_vField(n,'err-reg-name', lang()==='pt'?'Nome obrigatório':'Nombre obligatorio')
           & _vEmail(e,'err-reg-email')
           & _vField(p,'err-reg-pass',  lang()==='pt'?'Crie uma senha':'Crea una contraseña'));
-
-  /* Minimum 6 chars */
   if (ok && p && p.value.length < 6) {
     if (errP) { errP.textContent = lang()==='pt'?'Mínimo de 6 caracteres.':'Mínimo 6 caracteres.'; errP.classList.add('show'); }
     if (p) p.classList.add('error');
     ok = false;
   }
-
   if (!ok) return;
-
   _setBtnLoading(btn, true);
+  var name  = n ? n.value.trim() : '';
+  var email = e ? e.value.trim() : '';
+  var pass  = p ? p.value : '';
+  var type  = regType || 'client';
 
-  setTimeout(function(){
-    _setBtnLoading(btn, false);
-
-    var name  = n ? n.value.trim() : '';
-    var email = e ? e.value.trim() : '';
-    var first = name.split(' ')[0];
-    var type  = regType || 'client';
-
-    _setSession(name, email, type);
-    if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
-    closeModal('register');
-
-    showToast(
-      lang()==='pt'
-        ? '&#x1F44B; Bem-vindo(a), ' + first + '! Sua conta foi criada.'
-        : '&#x1F44B; &#xa1;Bienvenido/a, ' + first + '! Tu cuenta fue creada.',
-      'success'
-    );
-
-    setTimeout(function(){ openDashboard(); }, 400);
-  }, 900);
+  if (_sbReady()) {
+    _sbRegister(name, email, pass, type).then(function(res) {
+      _setBtnLoading(btn, false);
+      if (res.error) {
+        var errEl = document.getElementById('err-reg-email');
+        if (errEl) { errEl.textContent = res.error; errEl.classList.add('show'); }
+        return;
+      }
+      /* Supabase pode exigir confirmação de email — tratar os dois casos */
+      if (res.user && res.user.confirmed_at) {
+        /* Email já confirmado (confirmação desabilitada no Supabase) */
+        _setSession(name, email, type);
+        _session.uid = res.user.id;
+      } else {
+        /* Criar sessão local temporária */
+        _setSession(name, email, type);
+        if (res.user) _session.uid = res.user.id;
+      }
+      if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
+      closeModal('register');
+      showToast('🎉 ' + (lang()==='pt' ? 'Bem-vindo(a), ' : '¡Bienvenido/a, ') + name.split(' ')[0] + '! ' + (lang()==='pt' ? 'Conta criada com sucesso.' : 'Cuenta creada con éxito.'), 'success');
+      setTimeout(function(){ openDashboard(); }, 400);
+    });
+  } else {
+    /* Modo demo */
+    setTimeout(function(){
+      _setBtnLoading(btn, false);
+      _setSession(name, email, type);
+      if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
+      closeModal('register');
+      showToast('🎉 ' + (lang()==='pt' ? 'Bem-vindo(a), ' : '¡Bienvenido/a, ') + name.split(' ')[0] + '! (modo demo)', 'success');
+      setTimeout(function(){ openDashboard(); }, 400);
+    }, 900);
+  }
 }
 
 function submitProject() {
-  if (!_session) {
-    showToast('Voce precisa estar logado para publicar um projeto!', 'warn');
+  if (!_session || !_session.name) {
+    showToast('Você precisa estar logado para publicar um projeto!','warn');
     closeModal('publish');
-    setTimeout(function(){ openModal('login'); }, 350);
+    setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
   }
   var t   = document.getElementById('proj-title');
@@ -9548,13 +9826,37 @@ function submitProject() {
   if (c && !c.value) { c.classList.add('error'); ok = false; } else if (c) c.classList.remove('error');
   if (!ok) return;
   _setBtnLoading(btn, true);
-  setTimeout(function(){
-    _setBtnLoading(btn, false);
-    closeModal('publish');
-    var hasPdf2 = document.getElementById('proj-pdf-input') && document.getElementById('proj-pdf-input').files && document.getElementById('proj-pdf-input').files.length > 0;
-    _pdfReset2();
-    showToast(lang()==='pt' ? 'Projeto publicado com sucesso!' + (hasPdf2?' (PDF anexado)':'') : 'Proyecto publicado exitosamente!', 'success');
-  }, 800);
+
+  var budgetStr = b ? b.value.replace(/[R$\s.]/g,'').replace(',','.') : '0';
+  var budgetNum = parseFloat(budgetStr) || 0;
+  var projData = {
+    title:       t ? t.value.trim() : '',
+    description: d ? d.value.trim() : '',
+    category:    c ? c.value : '',
+    budgetMin:   budgetNum * 0.8,
+    budgetMax:   budgetNum,
+    deadline:    30,
+    type:        'fixo',
+    skills:      []
+  };
+
+  if (_sbReady()) {
+    _sbCreateProject(projData).then(function(proj) {
+      _setBtnLoading(btn, false);
+      if (!proj) { showToast('Erro ao publicar projeto. Tente novamente.','error'); return; }
+      closeModal('publish');
+      if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
+      showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+    });
+  } else {
+    /* Modo demo */
+    setTimeout(function(){
+      _setBtnLoading(btn, false);
+      closeModal('publish');
+      if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
+      showToast('🚀 Projeto publicado com sucesso! (modo demo)','success');
+    }, 900);
+  }
 }
 
 function submitProposal() {
@@ -14556,29 +14858,22 @@ function blogSearch(q) {
 function subscribeBlog() {
   var inp = document.getElementById('blog-subscribe-email') || document.querySelector('.blog-subscribe-input');
   var email = inp ? inp.value.trim() : '';
-  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     showToast('Informe um e-mail válido para se inscrever.','warn'); return;
   }
-  /* Salvar inscrição local */
-  try {
-    var subs = JSON.parse(localStorage.getItem('hw_blog_subs') || '[]');
-    if(subs.indexOf(email) === -1) subs.push(email);
-    localStorage.setItem('hw_blog_subs', JSON.stringify(subs));
-  } catch(e) {}
-  /* Notificar via mailto */
-  var subj = encodeURIComponent('[HereWork Blog] Nova inscrição: ' + email);
-  var body = encodeURIComponent('Nova inscrição no blog HereWork!\n\nE-mail: ' + email + '\nData: ' + new Date().toLocaleDateString('pt-BR'));
-  /* Abrir em background (não bloqueia o usuário) */
-  var a = document.createElement('a');
-  a.href = 'mailto:blog@herework.com.br?subject=' + subj + '&body=' + body;
-  a.style.display = 'none';
-  document.body.appendChild(a);
-  /* Apenas notifica admin, não bloqueia usuário */
-  if(inp) inp.value = '';
-  showToast('🎉 Inscrito com sucesso! Você receberá as novidades do blog HereWork.','success');
-  /* Desabilitar botão de inscrição */
-  var btn = inp ? inp.nextElementSibling : null;
-  if(btn) { btn.textContent = '✅ Inscrito!'; btn.disabled = true; }
+  if (_sbReady()) {
+    _sbSubscribeNewsletter(email).then(function(ok) {
+      if (!ok) { showToast('Erro ao inscrever. Tente novamente.','error'); return; }
+      if (inp) inp.value = '';
+      var btn = inp ? inp.nextElementSibling : null;
+      if (btn) { btn.textContent = '✅ Inscrito!'; btn.disabled = true; }
+      showToast('🎉 Inscrito com sucesso! Você receberá as novidades do HereWork.','success');
+    });
+  } else {
+    try { var subs=JSON.parse(localStorage.getItem('hw_blog_subs')||'[]'); if(subs.indexOf(email)===-1) subs.push(email); localStorage.setItem('hw_blog_subs',JSON.stringify(subs)); } catch(e) {}
+    if (inp) inp.value = '';
+    showToast('🎉 Inscrito! (modo demo)','success');
+  }
 }
 
 function subscribeBlogInline() {
@@ -15725,6 +16020,17 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   wireAutoFilter(document.querySelector('#page-freelancers .sidebar'), 'fl');
   wireAutoFilter(document.querySelector('#page-projects .sidebar'), 'proj');
+});
+</script>
+<script>
+window.addEventListener('load', function() {
+  if (!_sbReady() && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    var banner = document.createElement('div');
+    banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1e293b;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:99999;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+    banner.textContent = 'Supabase nao configurado — modo demo ativo';
+    document.body.appendChild(banner);
+    setTimeout(function(){ if(banner.parentNode) banner.parentNode.removeChild(banner); }, 5000);
+  }
 });
 </script>
 </body>
