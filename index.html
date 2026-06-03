@@ -13819,10 +13819,7 @@ if(window.self !== window.top) {
 
 /* ── Console warning ── */
 (function() {
-  var style = 'font-size:20px;font-weight:bold;color:#dc2626;';
-  var style2 = 'font-size:14px;color:#374151;';
-  console.log('%c&#9888; AVISO DE SEGURANÇA', style);
-  console.log('%cEsta é uma área restrita. Qualquer tentativa de manipulação desta aplicação pode constituir crime de acesso não autorizado (Lei 12.737/2012).', style2);
+  /* security console removed */
 })();
 
 /* ── Init on page load ── */
@@ -16293,7 +16290,7 @@ async function openStripePayment(opts) {
     });
     _stripePaymentEl = _stripeElements.create('payment', {
       layout: { type: 'accordion', defaultCollapsed: false },
-      wallets: { applePay: 'never', googlePay: 'never', link: 'never' }
+      wallets: 'never'
     });
 
     document.getElementById('stripe-payment-element').innerHTML = '';
