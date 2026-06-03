@@ -12037,6 +12037,8 @@ function openContractModal(opts) {
 
   var fee   = Math.round(_contractCtx.value * 0.08);
   var total = _contractCtx.value + fee;
+  _contractCtx.fee   = fee;
+  _contractCtx.total = total; /* guardar total para pagamento */
   var fmt   = function(n){ return n.toLocaleString('pt-BR'); };
 
   // Populate step 1
@@ -12098,15 +12100,34 @@ function contractStep2() {
   }
   if(err) { err.textContent=''; err.classList.remove('show'); }
   _goContractStep(2);
-  /* Abrir Stripe Payment Element automaticamente */
-  setTimeout(function() {
-    var amount = (_contractCtx && _contractCtx.value) ? _contractCtx.value : 0;
-    var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
-    if (!amount) {
-      var vEl = document.getElementById('c-value');
-      if (vEl) amount = parseFloat((vEl.textContent||'0').replace(/[^0-9]/g,'')) || 0;
+  /* Calcular valor AGORA antes do setTimeout (evita perda de contexto) */
+  var _payAmount = 0;
+  var _payDesc   = 'HereWork — Contrato';
+  /* 1. Tentar _contractCtx (mais confiável) */
+  if (_contractCtx && _contractCtx.value && _contractCtx.value > 0) {
+    var _fee    = Math.round(_contractCtx.value * 0.08);
+    _payAmount  = _contractCtx.value + _fee; /* total com taxa */
+    _payDesc    = 'HereWork — ' + (_contractCtx.project || 'Contrato');
+  }
+  /* 2. Fallback: ler do DOM (c-total já inclui a taxa) */
+  if (!_payAmount) {
+    var totalEl = document.getElementById('c-total');
+    if (totalEl) {
+      var raw = (totalEl.textContent || '').replace(/[^0-9]/g, '');
+      _payAmount = parseInt(raw, 10) || 0;
     }
-    openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: 'HereWork — '+proj, title: 'Pagamento em Garantia' });
+  }
+  /* 3. Fallback: c-value (sem taxa) */
+  if (!_payAmount) {
+    var valEl = document.getElementById('c-value');
+    if (valEl) {
+      var raw2 = (valEl.textContent || '').replace(/[^0-9]/g, '');
+      _payAmount = parseInt(raw2, 10) || 0;
+    }
+  }
+  var _payContractId = window._activeContractId || '';
+  setTimeout(function() {
+    openStripePayment({ amount: _payAmount, contractId: _payContractId, description: _payDesc, title: 'Pagamento em Garantia — R$ ' + (_payAmount).toLocaleString('pt-BR') });
   }, 300);
 }
 
