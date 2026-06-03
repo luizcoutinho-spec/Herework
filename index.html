@@ -9909,6 +9909,23 @@ function applyAllFilters(prefix) {
   });
 
   if (countEl)    countEl.textContent = visible;
+  /* Atualizar contagem ao lado de cada categoria com base nos cards visíveis */
+  if (isFL && sidebar) {
+    var catCounts = {};
+    cards.forEach(function(card) {
+      var cat = card.getAttribute('data-cat') || '';
+      var isVis = card.style.display !== 'none';
+      if (isVis) catCounts[cat] = (catCounts[cat] || 0) + 1;
+    });
+    sidebar.querySelectorAll('.filter-count').forEach(function(el) {
+      var label = el.closest('.filter-option');
+      if (!label) return;
+      var span = label.querySelector('[data-cat-key]');
+      if (!span) return;
+      var key = span.getAttribute('data-cat-key');
+      el.textContent = catCounts[key] !== undefined ? catCounts[key] : el.textContent;
+    });
+  }
   if (emptyState) emptyState.style.display = visible === 0 ? '' : 'none';
   if (pagination) pagination.style.display = visible === 0 ? 'none' : '';
 }
