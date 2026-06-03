@@ -8693,6 +8693,180 @@ var _SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 var _sb = null;
 
 /* ── Stripe + Edge Functions ─────────────────────────── */
+
+/* ── PIX via Stripe Edge Function ────────────────────────── */
+var _pixTimer = null;
+var _pixCheckTimer = null;
+
+async function _stripeCreatePix(amount, contractId, description, email, name) {
+  if (!_sbReady()) return { error: 'Backend não configurado' };
+  var session = await _sb.auth.getSession();
+  var token   = session.data.session ? session.data.session.access_token : '';
+  var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-pix-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ amount: amount, contractId: contractId, description: description, customerEmail: email, customerName: name })
+  });
+  return await res.json();
+}
+
+async function _stripeCheckPix(paymentIntentId, contractId) {
+  if (!_sbReady()) return { paid: false };
+  var session = await _sb.auth.getSession();
+  var token   = session.data.session ? session.data.session.access_token : '';
+  var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/check-pix-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+    body: JSON.stringify({ paymentIntentId: paymentIntentId, contractId: contractId })
+  });
+  return await res.json();
+}
+
+function openPixModal(opts) {
+  opts = opts || {};
+  var amount      = opts.amount      || 0;
+  var contractId  = opts.contractId  || '';
+  var description = opts.description || 'HereWork — Pagamento em Garantia';
+  var email       = (window._session && window._session.email)  || (_session && _session.email)  || '';
+  var name        = (window._session && window._session.name)   || (_session && _session.name)   || '';
+
+  /* Criar ou reutilizar modal PIX */
+  var ov = document.getElementById('overlay-pix');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.id = 'overlay-pix';
+    ov.innerHTML =
+      '<div class="modal" style="max-width:480px;">' +
+        '<div class="modal-header">' +
+          '<div>' +
+            '<div class="modal-title">&#128248; Pagar com PIX</div>' +
+            '<div class="modal-subtitle" id="pix-subtitle">Gerando QR Code...</div>' +
+          '</div>' +
+          '<button class="modal-close" onclick="closePixModal()">&#10005;</button>' +
+        '</div>' +
+        '<div class="modal-body" id="pix-body" style="text-align:center;padding:24px 20px;">' +
+          '<div id="pix-loading" style="padding:40px 0;">' +
+            '<div style="font-size:40px;margin-bottom:12px;">&#9203;</div>' +
+            '<div style="color:var(--text-3);">Gerando código PIX seguro...</div>' +
+          '</div>' +
+          '<div id="pix-content" style="display:none;">' +
+            '<div style="background:#f0fdf4;border:2px solid #22c55e;border-radius:12px;padding:16px;margin-bottom:16px;">' +
+              '<div style="font-size:13px;color:var(--text-3);margin-bottom:4px;">Valor a pagar</div>' +
+              '<div id="pix-amount" style="font-size:28px;font-weight:800;color:var(--green);">R$ 0,00</div>' +
+            '</div>' +
+            '<img id="pix-qr-img" src="" alt="QR Code PIX" style="width:200px;height:200px;border-radius:12px;border:1px solid var(--border);margin-bottom:16px;" />' +
+            '<div style="margin-bottom:12px;">' +
+              '<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;">Ou copie o código PIX:</div>' +
+              '<div style="display:flex;gap:8px;align-items:stretch;">' +
+                '<input id="pix-code-input" type="text" readonly style="flex:1;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-family:monospace;" />' +
+                '<button class="btn btn-green btn-sm" onclick="copyPixCode()" style="flex-shrink:0;padding:8px 14px;">&#128203; Copiar</button>' +
+              '</div>' +
+            '</div>' +
+            '<div id="pix-timer" style="font-size:13px;color:var(--text-3);margin-bottom:16px;">&#9203; Expira em <span id="pix-countdown" style="font-weight:700;color:var(--orange);">30:00</span></div>' +
+            '<div id="pix-status" style="display:none;background:#f0fdf4;border-radius:8px;padding:12px;color:#166534;font-weight:600;">&#9989; Pagamento confirmado!</div>' +
+            '<div style="background:#eff6ff;border-radius:8px;padding:10px 14px;font-size:12px;color:#1e40af;text-align:left;">' +
+              '&#128274; Pagamento seguro via Stripe. O valor fica em Garantia até você aprovar a entrega.' +
+            '</div>' +
+          '</div>' +
+          '<div id="pix-error" style="display:none;color:#dc2626;padding:16px;"></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e){ if(e.target===ov) closePixModal(); });
+  }
+
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('pix-loading').style.display = 'block';
+  document.getElementById('pix-content').style.display = 'none';
+  document.getElementById('pix-error').style.display   = 'none';
+  document.getElementById('pix-status').style.display  = 'none';
+  document.getElementById('pix-subtitle').textContent  = 'Gerando QR Code...';
+
+  /* Gerar PIX */
+  _stripeCreatePix(amount, contractId, description, email, name).then(function(data) {
+    if (data.error) {
+      document.getElementById('pix-loading').style.display = 'none';
+      document.getElementById('pix-error').style.display   = 'block';
+      document.getElementById('pix-error').textContent     = '❌ ' + data.error;
+      return;
+    }
+
+    /* Exibir QR Code */
+    document.getElementById('pix-loading').style.display   = 'none';
+    document.getElementById('pix-content').style.display   = 'block';
+    document.getElementById('pix-amount').textContent       = 'R$ ' + (data.amount||0).toLocaleString('pt-BR', {minimumFractionDigits:2});
+    document.getElementById('pix-code-input').value         = data.pixCode || '';
+    document.getElementById('pix-subtitle').textContent     = 'Escaneie o QR Code no seu banco';
+
+    var qrImg = document.getElementById('pix-qr-img');
+    if (data.pixQrImageUrl) {
+      qrImg.src   = data.pixQrImageUrl;
+      qrImg.style.display = 'block';
+    } else {
+      qrImg.style.display = 'none';
+    }
+
+    /* Temporizador de expiração */
+    var expiresAt = data.expiresAt ? data.expiresAt * 1000 : Date.now() + 30*60*1000;
+    if (_pixTimer) clearInterval(_pixTimer);
+    _pixTimer = setInterval(function() {
+      var remaining = Math.max(0, expiresAt - Date.now());
+      var mins = Math.floor(remaining / 60000);
+      var secs = Math.floor((remaining % 60000) / 1000);
+      document.getElementById('pix-countdown').textContent =
+        String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+      if (remaining <= 0) {
+        clearInterval(_pixTimer);
+        document.getElementById('pix-countdown').textContent = 'EXPIRADO';
+        document.getElementById('pix-countdown').style.color = '#dc2626';
+      }
+    }, 1000);
+
+    /* Verificar pagamento a cada 5 segundos */
+    var piId = data.paymentIntentId;
+    if (_pixCheckTimer) clearInterval(_pixCheckTimer);
+    _pixCheckTimer = setInterval(function() {
+      _stripeCheckPix(piId, contractId).then(function(check) {
+        if (check.paid) {
+          clearInterval(_pixCheckTimer);
+          clearInterval(_pixTimer);
+          document.getElementById('pix-status').style.display = 'block';
+          document.getElementById('pix-timer').style.display  = 'none';
+          showToast('✅ PIX confirmado! Pagamento em Garantia.', 'success');
+          setTimeout(function() { closePixModal(); if(typeof _goContractStep==='function') _goContractStep(3); }, 2500);
+        }
+      }).catch(function(){});
+    }, 5000);
+  });
+}
+
+function closePixModal() {
+  if (_pixTimer)      clearInterval(_pixTimer);
+  if (_pixCheckTimer) clearInterval(_pixCheckTimer);
+  var ov = document.getElementById('overlay-pix');
+  if (ov) { ov.classList.remove('open'); }
+  document.body.style.overflow = '';
+}
+
+function copyPixCode() {
+  var inp = document.getElementById('pix-code-input');
+  if (!inp) return;
+  inp.select();
+  try {
+    navigator.clipboard.writeText(inp.value).then(function(){
+      showToast('✅ Código PIX copiado!', 'success');
+    }).catch(function(){
+      document.execCommand('copy');
+      showToast('✅ Código PIX copiado!', 'success');
+    });
+  } catch(e) {
+    document.execCommand('copy');
+    showToast('✅ Código PIX copiado!', 'success');
+  }
+}
+
 var _STRIPE_PK   = 'pk_live_51RGy77HXgU6QiY3Xe6fsOvl67arEu34VSxG6FKHXVxoPnKzN3Y1tu1H2MFulddCoP2JOHz8ypsxRC8GNd7SW83rf00oDZTxhzB';
 var _EDGE_BASE   = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1';
 
