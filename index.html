@@ -11162,7 +11162,9 @@ function openPaymentModal(amount, desc, plan) {
   // Start PIX timer
   _startPixTimer();
 
-  openModal('payment');
+  /* Usar Stripe Payment Element em vez do modal antigo */
+  openStripePayment({ amount: amount || 149, description: desc || 'HereWork — Pagamento', title: desc || 'Pagamento Seguro' });
+  /* openModal('payment'); — substituído */
 }
 
 function _buildInstallments(amt) {
@@ -11396,61 +11398,16 @@ function _luhn(num) {
 }
 
 function submitCardPayment() {
-  var numEl  = document.getElementById('card-number-input');
-  var nameEl = document.getElementById('card-name-input');
-  var expEl  = document.getElementById('card-expiry-input');
-  var cvvEl  = document.getElementById('card-cvv-input');
-  var btn    = document.getElementById('card-pay-btn');
-  var errG   = document.getElementById('err-card-general');
-
-  // Clear errors
-  ['err-card-number','err-card-name','err-card-expiry','err-card-cvv','err-card-general']
-    .forEach(function(id){ var e=document.getElementById(id); if(e) e.textContent=''; });
-
-  var ok = true;
-  var num = (numEl ? numEl.value.replace(/\s/g,'') : '');
-  var brand = _detectBrand(num);
-
-  if(!num || num.length < 15) {
-    var e = document.getElementById('err-card-number');
-    if(e) e.textContent = 'Número de cartão inválido.'; ok=false;
-  } else if(!_luhn(num)) {
-    var e = document.getElementById('err-card-number');
-    if(e) e.textContent = 'Número de cartão inválido (dígito verificador).'; ok=false;
-  }
-  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
-    var e = document.getElementById('err-card-name');
-    if(e) e.textContent = 'Informe o nome completo como no cartão.'; ok=false;
-  }
-  var exp = expEl ? expEl.value : '';
-  if(!/^\d{2}\/\d{2}$/.test(exp)) {
-    var e = document.getElementById('err-card-expiry');
-    if(e) e.textContent = 'Validade inválida (MM/AA).'; ok=false;
-  } else {
-    var parts = exp.split('/');
-    var mm = parseInt(parts[0]), yy = parseInt(parts[1]);
-    var now = new Date(); var nowY = now.getFullYear()%100; var nowM = now.getMonth()+1;
-    if(mm<1||mm>12||(yy<nowY||(yy===nowY&&mm<nowM))) {
-      var e = document.getElementById('err-card-expiry');
-      if(e) e.textContent = 'Cartão expirado ou data inválida.'; ok=false;
-    }
-  }
-  var cvv = cvvEl ? cvvEl.value : '';
-  var cvvLen = brand==='amex' ? 4 : 3;
-  if(!cvv || cvv.length < cvvLen) {
-    var e = document.getElementById('err-card-cvv');
-    if(e) e.textContent = 'CVV inválido.'; ok=false;
-  }
-  if(!ok) return;
-
-  _setBtnLoading(btn, true);
-  // Simulate Stripe processing
-  setTimeout(function() {
-    _setBtnLoading(btn, false);
-    _showPaySuccess('card');
-  }, 2200);
+  /* Abrir novo modal Stripe Payment Element */
+  var amount = 0;
+  /* Tentar pegar valor do contexto ativo */
+  var amtEl = document.getElementById('c-amount') || document.getElementById('pay-amount-display') || document.getElementById('card-pay-amount');
+  if (amtEl) amount = parseFloat(amtEl.textContent.replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+  if (!amount && window._payCtx) amount = window._payCtx.amount || 0;
+  var desc = window._payCtx ? window._payCtx.desc : 'HereWork — Pagamento';
+  closeModal('payment');
+  openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc, title: desc });
 }
-
 function _showPaySuccess(method) {
   var cnt = document.getElementById('pay-content'); if(cnt) cnt.style.display='none';
   var suc = document.getElementById('pay-success');
@@ -12136,6 +12093,12 @@ function contractStep2() {
   }
   if(err) { err.textContent=''; err.classList.remove('show'); }
   _goContractStep(2);
+  /* Abrir Stripe Payment Element automaticamente */
+  setTimeout(function() {
+    var amount = parseFloat((document.getElementById('c-amount')||{}).textContent||'0') || 0;
+    var desc   = 'HereWork — ' + ((document.getElementById('c-proj')||{}).textContent||'Contrato');
+    openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc, title: 'Pagamento em Garantia' });
+  }, 300);
 }
 
 function contractStep4() { _goContractStep(4); }
@@ -14108,11 +14071,7 @@ function _showStripeBrand(brand) {
 /* ── submitCardPayment — integração completa com backend ── */
 var _origSubmitCard = window.submitCardPayment;
 window.submitCardPayment = async function() {
-  /* Redirecionar para o novo modal com todos os métodos */
-  var amount = parseFloat((document.getElementById('c-amount')||{}).textContent||'0') || 0;
-  var desc   = 'HereWork — ' + ((document.getElementById('c-proj')||{}).textContent||'Contrato');
-  closeModal('payment');
-  openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc });
+  submitCardPayment();
 };
 
 
