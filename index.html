@@ -16215,18 +16215,15 @@ async function openStripePayment(opts) {
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  // Criar PaymentIntent via Edge Function
-  if (!_sbReady()) {
-    // Modo demo
-    document.getElementById('sp-loading').style.display = 'none';
-    document.getElementById('sp-success').style.display = 'block';
-    document.getElementById('sp-success-msg').textContent = 'Modo demo — pagamento simulado com sucesso!';
-    return;
-  }
-
+  // Criar PaymentIntent via Edge Function (não requer login)
   try {
-    var session = await _sb.auth.getSession();
-    var token   = session.data.session ? session.data.session.access_token : '';
+    var token = '';
+    try {
+      if (_sbReady()) {
+        var session = await _sb.auth.getSession();
+        token = session.data.session ? session.data.session.access_token : '';
+      }
+    } catch(e) {}
     var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
