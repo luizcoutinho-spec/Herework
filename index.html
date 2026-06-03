@@ -12091,8 +12091,8 @@ function _goContractStep(n) {
   });
 }
 
-function contractStep2() {
-  console.log("[HW] contractStep2 chamado!");
+window.contractStep2 = function contractStep2() {
+  console.error("[HW DEBUG] contractStep2 CHAMADO! amount=", (document.getElementById("c-total")||{}).textContent);
   try {
     /* 1. Validar checkbox */
     var agree = document.getElementById('contract-agree');
