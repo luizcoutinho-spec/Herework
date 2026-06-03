@@ -9567,7 +9567,8 @@ async function _sbSubscribeNewsletter(email) {
 /* ── SUPORTE: Criar ticket ────────────────────────────────────── */
 async function _sbCreateTicket(data) {
   if (!_sbReady()) return null;
-  var protocol = 'HW-' + Date.now().toString(36).toUpperCase().slice(-6);
+  var _isPrioTicket = (typeof _isPro === 'function') && _isPro();
+    var protocol = (_isPrioTicket ? 'PRO-' : 'HW-') + Date.now().toString(36).toUpperCase().slice(-6);
   var r = await _sb.from('support_tickets').insert({
     user_id:     _session ? _session.uid : null,
     name:        data.name,
@@ -10374,6 +10375,124 @@ function _setSession(name, email, type) {
   }
 }
 
+/* ════════════════════════════════════════════════════════════
+   SISTEMA DE PLANOS — HereWork
+   free / pro / enterprise
+════════════════════════════════════════════════════════════ */
+function _getUserPlan() {
+  if (!_session) return 'free';
+  return _session.plan || 'free';
+}
+function _isPro()        { var p = _getUserPlan(); return p === 'pro' || p === 'enterprise'; }
+function _isEnterprise() { return _getUserPlan() === 'enterprise'; }
+function _getPlanLabel() {
+  switch(_getUserPlan()) {
+    case 'pro':        return 'Profissional';
+    case 'enterprise': return 'Enterprise';
+    default:           return 'Gratuito';
+  }
+}
+function _getPlanCommission() {
+  return _isPro() ? 0.12 : 0.20;
+}
+function _requirePro(featureName) {
+  if (_isPro()) return true;
+  showToast('🔒 ' + (featureName || 'Este recurso') + ' requer o Plano Profissional.', 'warn');
+  setTimeout(function() { showPage('pricing'); }, 700);
+  return false;
+}
+
+/* ── Convite Direto a Freelancer (Pro) ───────────────────── */
+function openDirectInvite(name) {
+  if (!_session) { openModal('login'); return; }
+  if (!_requirePro('Convite direto a freelancers')) return;
+  var ov = document.getElementById('overlay-direct-invite');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.id = 'overlay-direct-invite';
+    ov.onclick = function(e){ if(e.target===ov){ ov.classList.remove('open'); document.body.style.overflow=''; } };
+    ov.innerHTML =
+      '<div class="modal" style="max-width:460px;">' +
+        '<div class="modal-header"><div>' +
+          '<div class="modal-title">✉️ Convidar Freelancer</div>' +
+          '<div id="di-fl-name" class="modal-subtitle" style="color:var(--green);"></div>' +
+        '</div>' +
+        '<button class="modal-close" onclick="document.getElementById(String.fromCharCode(39)+'overlay-direct-invite'+String.fromCharCode(39)).classList.remove('open');document.body.style.overflow=''">×</button></div>' +
+        '<div class="modal-body" style="padding:20px;">' +
+          '<div class="form-group"><label class="form-label">Mensagem de convite</label>' +
+          '<textarea id="di-msg" class="form-textarea" rows="4" placeholder="Olá! Gostaria de convidá-lo para o meu projeto..."></textarea></div>' +
+          '<button class="btn btn-green btn-block" onclick="sendDirectInvite()">📨 Enviar Convite</button>' +
+        '</div></div>';
+    document.body.appendChild(ov);
+  }
+  var n = document.getElementById('di-fl-name');
+  if(n) n.textContent = 'Para: ' + (name || 'Freelancer');
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function sendDirectInvite() {
+  var msg = document.getElementById('di-msg');
+  if (!msg || msg.value.trim().length < 10) { showToast('Escreva uma mensagem.', 'warn'); return; }
+  var ov = document.getElementById('overlay-direct-invite');
+  if(ov) { ov.classList.remove('open'); document.body.style.overflow=''; }
+  showToast('✅ Convite enviado com sucesso!', 'success');
+}
+
+/* ── Relatórios Avançados (Pro) ──────────────────────────── */
+function openAdvancedReports() {
+  if (!_requirePro('Relatórios e métricas avançadas')) return;
+  var ov = document.getElementById('overlay-adv-reports');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.className = 'overlay';
+    ov.id = 'overlay-adv-reports';
+    ov.onclick = function(e){ if(e.target===ov){ ov.classList.remove('open'); document.body.style.overflow=''; } };
+    var months = ['Jan','Fev','Mar','Abr','Mai','Jun'];
+    var vals   = [0, 0, 1200, 2800, 3600, 2160];
+    var maxVal = Math.max.apply(null, vals) || 1;
+    var bars   = months.map(function(m,i){
+      var h = vals[i] ? Math.round((vals[i]/maxVal)*70) + 10 : 4;
+      var c = vals[i] ? 'var(--green)' : 'var(--border)';
+      return '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">' +
+        '<div style="font-size:10px;color:var(--text-3);">' + (vals[i] ? 'R$'+Math.round(vals[i]/1000)+'k' : '') + '</div>' +
+        '<div style="width:100%;background:'+c+';border-radius:4px 4px 0 0;height:'+h+'px;"></div>' +
+        '<div style="font-size:10px;color:var(--text-3);">'+m+'</div></div>';
+    }).join('');
+    ov.innerHTML =
+      '<div class="modal" style="max-width:600px;">' +
+        '<div class="modal-header"><div>' +
+          '<div class="modal-title">📊 Relatórios & Métricas</div>' +
+          '<div class="modal-subtitle">Últimos 6 meses · Plano Profissional</div>' +
+        '</div>' +
+        '<button class="modal-close" onclick="document.getElementById(String.fromCharCode(39)+'overlay-adv-reports'+String.fromCharCode(39)).classList.remove('open');document.body.style.overflow=''">×</button></div>' +
+        '<div class="modal-body" style="padding:20px;">' +
+          '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
+            '<div style="background:var(--surface);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">R$ 9.760</div><div style="font-size:12px;color:var(--text-3);">Total investido</div></div>' +
+            '<div style="background:var(--surface);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">7</div><div style="font-size:12px;color:var(--text-3);">Projetos concluídos</div></div>' +
+            '<div style="background:var(--surface);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">4,8★</div><div style="font-size:12px;color:var(--text-3);">Avaliação média</div></div>' +
+          '</div>' +
+          '<div style="background:var(--surface);border-radius:10px;padding:16px;margin-bottom:16px;">' +
+            '<div style="font-size:13px;font-weight:600;margin-bottom:12px;">Investimento Mensal (R$)</div>' +
+            '<div style="display:flex;align-items:flex-end;gap:8px;height:90px;">' + bars + '</div></div>' +
+          '<div style="background:var(--surface);border-radius:10px;padding:16px;">' +
+            '<div style="font-size:13px;font-weight:600;margin-bottom:12px;">Top Freelancers Contratados</div>' +
+            '<div style="display:flex;flex-direction:column;gap:10px;">' +
+              [['CA','Carlos A.','Dev Full Stack','R$ 4.800'],['ML','Marina L.','UI/UX','R$ 2.160'],['RP','Rafael P.','Marketing','R$ 2.800']].map(function(f){
+                return '<div style="display:flex;align-items:center;gap:10px;">' +
+                  '<div style="width:34px;height:34px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">'+f[0]+'</div>' +
+                  '<div style="flex:1;"><div style="font-size:13px;font-weight:600;">'+f[1]+'</div><div style="font-size:11px;color:var(--text-3);">'+f[2]+'</div></div>' +
+                  '<div style="font-size:13px;font-weight:700;color:var(--green);">'+f[3]+'</div></div>';
+              }).join('') +
+            '</div></div>' +
+        '</div></div>';
+    document.body.appendChild(ov);
+  }
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+
 function _clearSession() {
   if (_sbReady()) _sbLogout().catch(function(){});
   /* --- */
@@ -10495,6 +10614,13 @@ function submitProject() {
     closeModal('publish');
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
+  }
+  /* Limite plano gratuito */
+  if (!_isPro()) {
+    var _mk = 'hw_pjc_' + new Date().getMonth();
+    var _pc = parseInt(localStorage.getItem(_mk)||'0');
+    if (_pc >= 3) { closeModal('publish'); showToast('🔒 Limite de 3 projetos/mês no Plano Gratuito. Faça upgrade!','warn'); setTimeout(function(){showPage('pricing');},700); return; }
+    localStorage.setItem(_mk, _pc+1);
   }
   var t   = document.getElementById('proj-title');
   var d   = document.getElementById('proj-desc');
@@ -12568,7 +12694,8 @@ function openContractModal(opts) {
     rating:   0
   };
 
-  var fee   = Math.round(_contractCtx.value * 0.08);
+  var _comm = (typeof _getPlanCommission === 'function') ? _getPlanCommission() : 0.20;
+  var fee   = Math.round(_contractCtx.value * _comm);
   var total = _contractCtx.value + fee;
   _contractCtx.fee   = fee;
   _contractCtx.total = total; /* guardar total para pagamento */
@@ -12980,7 +13107,7 @@ function openDashboard() {
 
   var el;
   el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
-  el = document.getElementById('ds-plan');        if(el) el.textContent = 'Gratuito';
+  el = document.getElementById('ds-plan'); if(el){ el.textContent = (typeof _getPlanLabel==='function')?_getPlanLabel():'Gratuito'; if(typeof _isPro==='function'&&_isPro()) el.style.color='var(--green)'; }
 
   var _vd = _getViewData();
   var garantia = _vd.client.active.reduce(function(s,p){return s+p.value;},0);
@@ -14729,6 +14856,7 @@ if (document.readyState === 'loading') {
 
 
 /* ─── Payment History Tab Switch ─── */
+function openReports() { openAdvancedReports(); }
 function switchPayHistory(tab) {
   ['out','in'].forEach(function(t) {
     var btn = document.getElementById('ptab-' + t);
@@ -15371,7 +15499,7 @@ function submitSupportTicket() {
     var body  = encodeURIComponent('Protocolo: ' + protocol + '\nNome: ' + name + '\nE-mail: ' + email + '\nCategoria: ' + cat + '\n\nDescrição do problema:\n' + desc);
     window.open('mailto:suporte@herework.com.br?subject=' + subj + '&body=' + body, '_blank');
     closeModal('support-ticket');
-    showToast('✅ Protocolo ' + protocol + ' — E-mail aberto! Envie para suporte@herework.com.br. Resposta em até 24h.', 'success');
+    showToast('✅ Protocolo ' + protocol + ' — E-mail aberto! Envie para suporte@herework.com.br. ' + (_isPrioTicket ? 'Prioridade Pro — resposta em 4h!' : 'Resposta em até 24h.') + '', 'success');
     nameEl.value=''; emailEl.value=''; if(catEl) catEl.value=''; descEl.value='';
   }, 700);
 }
