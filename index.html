@@ -9164,6 +9164,18 @@ document.addEventListener('click', function(e) {
    MODAL SYSTEM
 ═══════════════════════════════════════════ */
 function openModal(id) {
+  /* Acoes que exigem login */
+  if (id === 'publish') {
+    if (!_session) {
+      showToast('Voce precisa estar logado para publicar um projeto!', 'warn');
+      setTimeout(function(){ openOverlay('overlay-login'); }, 350);
+      return;
+    }
+    if (_session.role === 'freelancer') {
+      showToast('Apenas clientes podem publicar projetos.', 'warn');
+      return;
+    }
+  }
   var overlay = document.getElementById('overlay-' + id);
   if (!overlay) return;
   overlay.classList.add('open');
@@ -9516,6 +9528,12 @@ function submitRegister() {
 }
 
 function submitProject() {
+  if (!_session) {
+    showToast('Voce precisa estar logado para publicar um projeto!', 'warn');
+    closeModal('publish');
+    setTimeout(function(){ openOverlay('overlay-login'); }, 350);
+    return;
+  }
   var t   = document.getElementById('proj-title');
   var d   = document.getElementById('proj-desc');
   var c   = document.getElementById('proj-cat');
