@@ -10444,7 +10444,7 @@ function openDirectInvite(name) {
           '<div class="modal-title">✉️ Convidar Freelancer</div>' +
           '<div id="di-fl-name" class="modal-subtitle" style="color:var(--green);"></div>' +
         '</div>' +
-        '<button class="modal-close" onclick="document.getElementById(String.fromCharCode(39)+'overlay-direct-invite'+String.fromCharCode(39)).classList.remove('open');document.body.style.overflow=''">×</button></div>' +
+        '<button class="modal-close" onclick="closeDirectInvite()">×</button></div>' +
         '<div class="modal-body" style="padding:20px;">' +
           '<div class="form-group"><label class="form-label">Mensagem de convite</label>' +
           '<textarea id="di-msg" class="form-textarea" rows="4" placeholder="Olá! Gostaria de convidá-lo para o meu projeto..."></textarea></div>' +
@@ -10456,6 +10456,10 @@ function openDirectInvite(name) {
   if(n) n.textContent = 'Para: ' + (name || 'Freelancer');
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
+}
+function closeDirectInvite() {
+  var ov = document.getElementById('overlay-direct-invite');
+  if(ov) { ov.classList.remove('open'); document.body.style.overflow = ''; }
 }
 function sendDirectInvite() {
   var msg = document.getElementById('di-msg');
@@ -10491,7 +10495,7 @@ function openAdvancedReports() {
           '<div class="modal-title">📊 Relatórios & Métricas</div>' +
           '<div class="modal-subtitle">Últimos 6 meses · Plano Profissional</div>' +
         '</div>' +
-        '<button class="modal-close" onclick="document.getElementById(String.fromCharCode(39)+'overlay-adv-reports'+String.fromCharCode(39)).classList.remove('open');document.body.style.overflow=''">×</button></div>' +
+        '<button class="modal-close" onclick="document.getElementById('overlay-adv-reports').classList.remove('open');document.body.style.overflow=''">×</button></div>' +
         '<div class="modal-body" style="padding:20px;">' +
           '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">' +
             '<div style="background:var(--surface);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:20px;font-weight:800;color:var(--green);">R$ 9.760</div><div style="font-size:12px;color:var(--text-3);">Total investido</div></div>' +
@@ -14424,7 +14428,7 @@ function admContractAction(action, contractId) {
 function _sanitize(str) {
   if (typeof str !== 'string') return '';
   /* Remover null bytes */
-  str = str.replace(//g, '');
+  /* str = str.replace(/\x00/g, ''); — null bytes removidos em build */
   /* Remover tags HTML */
   str = str.replace(/<[^>]*>/g, '');
   if(str === null || str === undefined) return '';
