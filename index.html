@@ -12092,43 +12092,50 @@ function _goContractStep(n) {
 }
 
 function contractStep2() {
+  /* Validar checkbox de aceite */
   var agree = document.getElementById('contract-agree');
   var err   = document.getElementById('err-contract-agree');
-  if(!agree || !agree.checked) {
-    if(err) { err.textContent = 'Você precisa aceitar os termos para continuar.'; err.classList.add('show'); }
+  if (!agree || !agree.checked) {
+    if (err) { err.textContent = 'Você precisa aceitar os termos para continuar.'; err.classList.add('show'); }
     return;
   }
-  if(err) { err.textContent=''; err.classList.remove('show'); }
-  _goContractStep(2);
-  /* Calcular valor AGORA antes do setTimeout (evita perda de contexto) */
-  var _payAmount = 0;
-  var _payDesc   = 'HereWork — Contrato';
-  /* 1. Tentar _contractCtx (mais confiável) */
-  if (_contractCtx && _contractCtx.value && _contractCtx.value > 0) {
-    var _fee    = Math.round(_contractCtx.value * 0.08);
-    _payAmount  = _contractCtx.value + _fee; /* total com taxa */
-    _payDesc    = 'HereWork — ' + (_contractCtx.project || 'Contrato');
+  if (err) { err.textContent = ''; err.classList.remove('show'); }
+
+  /* Calcular valor total AGORA antes de fechar o modal */
+  var amount = 0;
+  var proj   = 'Contrato';
+  var flName = 'Freelancer';
+
+  if (_contractCtx) {
+    var fee = Math.round((_contractCtx.value || 0) * 0.08);
+    amount  = (_contractCtx.value || 0) + fee;
+    proj    = _contractCtx.project || 'Contrato';
+    flName  = _contractCtx.name    || 'Freelancer';
   }
-  /* 2. Fallback: ler do DOM (c-total já inclui a taxa) */
-  if (!_payAmount) {
+  /* Fallback: ler do DOM */
+  if (!amount) {
     var totalEl = document.getElementById('c-total');
-    if (totalEl) {
-      var raw = (totalEl.textContent || '').replace(/[^0-9]/g, '');
-      _payAmount = parseInt(raw, 10) || 0;
-    }
+    if (totalEl) amount = parseInt((totalEl.textContent || '').replace(/[^0-9]/g, ''), 10) || 0;
   }
-  /* 3. Fallback: c-value (sem taxa) */
-  if (!_payAmount) {
-    var valEl = document.getElementById('c-value');
-    if (valEl) {
-      var raw2 = (valEl.textContent || '').replace(/[^0-9]/g, '');
-      _payAmount = parseInt(raw2, 10) || 0;
-    }
-  }
-  var _payContractId = window._activeContractId || '';
+
+  var contractId = window._activeContractId || '';
+  var desc = 'HereWork — ' + proj + ' com ' + flName;
+
+  /* Fechar modal de contrato */
+  var contractOv = document.getElementById('overlay-contract');
+  if (contractOv) { contractOv.classList.remove('open'); }
+  document.body.style.overflow = '';
+
+  /* Ir direto para o Stripe Payment Element com o valor correto */
   setTimeout(function() {
-    openStripePayment({ amount: _payAmount, contractId: _payContractId, description: _payDesc, title: 'Pagamento em Garantia — R$ ' + (_payAmount).toLocaleString('pt-BR') });
-  }, 300);
+    openStripePayment({
+      amount:      amount,
+      contractId:  contractId,
+      description: desc,
+      title:       'Pagamento em Garantia',
+      subtitle:    flName + '  ·  ' + proj
+    });
+  }, 150);
 }
 
 function contractStep4() { _goContractStep(4); }
@@ -16235,21 +16242,22 @@ async function openStripePayment(opts) {
   // Mostrar modal
   var ov = document.getElementById('overlay-stripe-payment');
   if (!ov) return;
-  document.getElementById('sp-amount').textContent = 'R\$ ' + _spAmount.toLocaleString('pt-BR',{minimumFractionDigits:2});
-  document.getElementById('sp-title').textContent  = opts.title || 'Pagamento Seguro';
-  document.getElementById('sp-loading').style.display          = 'block';
-  document.getElementById('sp-element-container').style.display = 'none';
-  document.getElementById('sp-success').style.display           = 'none';
-  document.getElementById('sp-boleto-result').style.display     = 'none';
-  document.getElementById('sp-error').style.display             = 'none';
-  /* Fechar modais antigos */
-  ['payment', 'contract'].forEach(function(id) {
-    var old = document.getElementById('overlay-' + id);
-    if (old && old.classList.contains('open')) { old.classList.remove('open'); }
-  });
-  ov.classList.add('open');
-  document.body.style.overflow = 'hidden';
-
+  document.getElementById('sp-amount').textContent = 'R$ ' + _spAmount.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('sp-title').textContent = opts.title || 'Pagamento Seguro';
+  var subEl = document.getElementById('sp-subtitle');
+  if (subEl) subEl.textContent = 'Escolha a forma de pagamento';
+  /* Preencher resumo do contrato */
+  var flNameEl = document.getElementById('sp-fl-name');
+  var svcEl    = document.getElementById('sp-service-val');
+  var feeEl    = document.getElementById('sp-fee-val');
+  if (_contractCtx && _contractCtx.value > 0) {
+    var _f = Math.round(_contractCtx.value * 0.08);
+    if (flNameEl) flNameEl.textContent = (_contractCtx.name||'') + ' — ' + (_contractCtx.project||'');
+    if (svcEl)    svcEl.textContent    = 'Serviço: R$ ' + _contractCtx.value.toLocaleString('pt-BR');
+    if (feeEl)    feeEl.textContent    = 'Taxa (8%): R$ ' + _f.toLocaleString('pt-BR');
+  } else {
+    if (flNameEl) flNameEl.textContent = opts.subtitle || '';
+  }
   // Criar PaymentIntent via Edge Function (não requer login)
   try {
     var token = '';
@@ -16420,10 +16428,22 @@ function closeStripePayment() {
     </div>
     <div class="modal-body" style="padding:20px;">
 
-      <!-- Resumo do valor -->
-      <div style="background:var(--surface);border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
-        <div style="font-size:13px;color:var(--text-3);">Pagamento em Garantia</div>
-        <div id="sp-amount" style="font-size:22px;font-weight:800;color:var(--green);">R$ 0,00</div>
+      <!-- Resumo do contrato -->
+      <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:12px;padding:16px;margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+          <div>
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:2px;">&#128274; Total a depositar em garantia</div>
+            <div id="sp-fl-name" style="font-size:13px;font-weight:600;color:var(--text-2);"></div>
+          </div>
+          <div id="sp-amount" style="font-size:26px;font-weight:800;color:var(--green);">R$ 0,00</div>
+        </div>
+        <div id="sp-breakdown" style="border-top:1px solid #86efac;padding-top:8px;margin-top:6px;font-size:12px;color:var(--text-3);display:flex;justify-content:space-between;">
+          <span id="sp-service-val">Serviço: —</span>
+          <span id="sp-fee-val">Taxa plataforma (8%): —</span>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#166534;background:#bbf7d0;border-radius:6px;padding:6px 10px;">
+          &#9989; Valor retido com segurança — liberado ao freelancer só após sua aprovação
+        </div>
       </div>
 
       <!-- Loading -->
