@@ -4187,7 +4187,11 @@ section { padding: 64px 0; }
           <option data-pt="Blockchain &amp; Web3" data-es="Blockchain &amp; Web3">Blockchain &amp; Web3</option>
           <option data-pt="Sa&uacute;de &amp; Bem-estar" data-es="Salud &amp; Bienestar">Sa&uacute;de &amp; Bem-estar</option>
           <option data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</option>
-        </select>
+        <option value="imobiliario">Imóveis & Construção</option>
+<option value="gastronomia">Gastronomia & Culinária</option>
+<option value="moda">Moda & Beleza</option>
+<option value="eventos">Eventos & Entretenimento</option>
+</select>
         <button class="hero-search-btn">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
             <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -16418,11 +16422,18 @@ var _SKILLS_DB = {
     'localizacao':{ label:'Localização', skills:['Localização de Software','Localização de Games','Localização de Site','Adaptação Cultural','Post-Editing MT','Subtitling','Dubbing','LSP Management'] },
     'ensino':{ label:'Ensino de Idiomas', skills:['Business English','IELTS Prep','TOEFL Prep','Inglês Conversacional','Espanhol para Negócios','Inglês para Executivos','Aula Online','Material Didático'] }
   }},
-  juridico:{ label:'Jurídico & Financeiro', subareas:{
+  juridico:{ label:'Jurídico', subareas:{
     'contratos':{ label:'Contratos & Empresarial', skills:['Elaboração de Contratos','Revisão de Contratos','NDA','Termos de Uso','Política de Privacidade','LGPD','Direito Societário','M&A Jurídico','Compliance'] },
     'trabalhista':{ label:'Trabalhista & RH Jurídico', skills:['CLT','Pejotização','Rescisão','Compliance Trabalhista','eSocial','Defesa Trabalhista','Acordos Coletivos','Normas Regulamentadoras'] },
     'tributario':{ label:'Tributário & Fiscal', skills:['Planejamento Tributário','Simples Nacional','Lucro Presumido','IRPJ/CSLL','PIS/COFINS','ICMS','ISS','Recuperação de Créditos','Defesa Fiscal','MEI/ME'] },
     'digital':{ label:'Direito Digital', skills:['LGPD','Marco Civil da Internet','Propriedade Intelectual','Direito Autoral','Crypto e Blockchain Legal','Contratos de Software','SaaS Agreements'] }
+  }},
+  financeiro:{ label:'Financeiro', subareas:{
+    'contabilidade':{ label:'Contabilidade & Fiscal', skills:['Simples Nacional','Lucro Presumido','Lucro Real','IRPJ/CSLL','PIS/COFINS','ICMS','ISS','Abertura de Empresa','Encerramento de Empresa','eSocial','SPED Contábil','SPED Fiscal','ECD/ECF','Balancete','Balanço Patrimonial','DRE Contábil','MEI/ME','Nota Fiscal Eletrônica','BPO Contábil','Conciliação Bancária'] },
+    'analise':{ label:'Análise & Planejamento Financeiro', skills:['DRE','Fluxo de Caixa','Capital de Giro','Análise de Viabilidade','Budget/Orçamento','Forecast','Valuation','DCF','EBITDA','KPIs Financeiros','Dashboard Financeiro','Power BI Financeiro','Excel Avançado','Modelo Financeiro','Business Plan','Indicadores de Performance'] },
+    'investimentos':{ label:'Investimentos & Mercado Financeiro', skills:['Renda Fixa','Renda Variável','Fundos de Investimento','FII','CRI/CRA','Debêntures','Tesouro Direto','Ações','BDR','Cripto Ativos','Planejamento de Aposentadoria','Previdência Privada','PGBL/VGBL','Carteira de Investimentos','Análise Fundamentalista'] },
+    'gestao':{ label:'Gestão Financeira Empresarial', skills:['Controladoria','CFO as a Service','Gestão de Custos','Precificação','Margem de Contribuição','Ponto de Equilíbrio','Gestão de Caixa','Contas a Pagar/Receber','Folha de Pagamento','Rotinas Financeiras','ERP Financeiro','SAP','TOTVS','Omie','Bling'] },
+    'pessoal':{ label:'Finanças Pessoais & Educação Financeira', skills:['Planejamento Financeiro Pessoal','Orçamento Familiar','Quitação de Dívidas','Reserva de Emergência','Independência Financeira','FIRE','Educação Financeira','Gestão de Cartão de Crédito','Compra de Imóvel','Planejamento de Casamento'] }
   }},
   fotografia:{ label:'Fotografia', subareas:{
     'produto':{ label:'Fotografia de Produto', skills:['E-commerce','Fundo Infinito','Packshot','Gastronomia','Lifestyle com Produto','Joia & Relógio','Moda Flat','Amazon Standard','Edição Lightroom','Retoque Photoshop'] },
@@ -16458,6 +16469,28 @@ var _SKILLS_DB = {
     'nutricao':{ label:'Nutrição', skills:['Nutrição Clínica','Nutrição Esportiva','Emagrecimento','Ganho de Massa','Nutrição Funcional','Nutrição para Gestantes','Plano Alimentar','Teleconsulta'] },
     'fitness':{ label:'Educação Física & Fitness', skills:['Personal Trainer','Musculação','Funcional','HIIT','Pilates','Yoga','Crossfit','Treinamento Online','Treino em Casa','Avaliação Física'] },
     'saude-mental':{ label:'Saúde Mental & Bem-estar', skills:['Psicologia Online','Coaching','Mindfulness','Meditação','Saúde Corporativa','Qualidade de Vida no Trabalho','Ginástica Laboral','Gestão de Estresse'] }
+  }},
+
+  imobiliario:{ label:'Imóveis & Construção', subareas:{
+    'avaliacao':{ label:'Avaliação & Consultoria Imobiliária', skills:['Avaliação de Imóveis','PTAM','Laudo Técnico','Due Diligence Imobiliária','Consultoria de Compra','Consultoria de Venda','Análise de Mercado','Investimento em FII','Airbnb Management','Home Staging'] },
+    'projetos':{ label:'Projetos & Engenharia', skills:['Projeto Arquitetônico','Design de Interiores','Engenharia Civil','Laudos Estruturais','Regularização de Imóveis','AVCB','Habite-se','Memorial Descritivo','Orçamento de Obra','Gerenciamento de Obra'] }
+  }},
+  gastronomia:{ label:'Gastronomia & Culinária', subareas:{
+    'consultoria':{ label:'Consultoria Gastronômica', skills:['Cardápio','Fichas Técnicas','Custo de Alimentos','CMV','Gestão de Restaurante','Treinamento de Equipe','Food Service','Delivery','Dark Kitchen','Franchise Food'] },
+    'conteudo':{ label:'Conteúdo Gastronômico', skills:['Fotografia de Alimentos','Receitas','Blog Gastronômico','YouTube Culinário','TikTok Food','Cookbook','Nutrição Culinária','Chef Particular','Personal Chef','Aulas de Culinária Online'] }
+  }},
+  moda:{ label:'Moda & Beleza', subareas:{
+    'estilo':{ label:'Estilo & Consultoria de Imagem', skills:['Personal Stylist','Consultoria de Imagem','Coloração Pessoal','Armário Cápsula','Compras Assistidas','Styling para Eventos','Styling Corporativo','Moda Sustentável','Slow Fashion'] },
+    'producao':{ label:'Produção & Conteúdo', skills:['Fashion Design','Modelagem','Costura','Estamparia','Produção de Moda','Direção Criativa','Edição de Moda','Look Book','Catálogo de Moda','Social Media Fashion'] }
+  }},
+  rh:{ label:'RH & Gestão de Pessoas', subareas:{
+    'recrutamento':{ label:'Recrutamento & Seleção', skills:['Hunting Executivo','R&S Operacional','Assessment','Entrevista por Competências','Testes Psicológicos','Onboarding','Employer Branding','LinkedIn Recruiter','ATS','Banco de Talentos'] },
+    'desenvolvimento':{ label:'Treinamento & Desenvolvimento', skills:['T&D','Trilhas de Aprendizado','EAD Corporativo','Gamificação','LMS','Avaliação de Desempenho','Gestão por Competências','PDI','Coaching Executivo','Mentoria'] },
+    'gestao-rh':{ label:'Gestão de RH & Cultura', skills:['Cultura Organizacional','Clima Organizacional','Endomarketing','Remuneração & Benefícios','PCCS','Pesquisa de Engajamento','NPS de Funcionários','Diversidade & Inclusão','Política de RH','People Analytics'] }
+  }},
+  eventos:{ label:'Eventos & Entretenimento', subareas:{
+    'corporativo':{ label:'Eventos Corporativos', skills:['Organização de Eventos','Convenção','Summit','Workshop','Webinar','Evento Híbrido','Cerimonial','MC/Mestre de Cerimônias','AV & Técnica','Credenciamento'] },
+    'social':{ label:'Eventos Sociais & Casamentos', skills:['Wedding Planner','Casamento','Debutante','Formatura','Aniversário','Buffet','Decoração','Fotografia de Evento','Filmagem de Evento','DJ/Música'] }
   }}
 };
 
