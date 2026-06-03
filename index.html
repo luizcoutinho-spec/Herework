@@ -3809,6 +3809,7 @@ section { padding: 64px 0; }
   <script src="https://js.stripe.com/v3/" defer></script>
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -14107,42 +14108,11 @@ function _showStripeBrand(brand) {
 /* ── submitCardPayment — integração completa com backend ── */
 var _origSubmitCard = window.submitCardPayment;
 window.submitCardPayment = async function() {
-  var amount      = parseFloat((document.getElementById('c-amount') || {}).textContent || '0') || 0;
-  var contractId  = window._activeContractId || '';
-  var description = 'HereWork — ' + ((document.getElementById('c-proj') || {}).textContent || 'Contrato');
-  var btn         = document.querySelector('#overlay-payment .btn-primary');
-  if (btn) btn.disabled = true;
-
-  /* Criar PaymentIntent via Edge Function */
-  var intentRes = await _stripeCreatePayment(amount, contractId, description);
-  if (intentRes.error) {
-    showToast('Erro: ' + intentRes.error, 'error');
-    if (btn) btn.disabled = false;
-    return;
-  }
-
-  /* Confirmar pagamento com Stripe.js */
-  try {
-    var stripe = Stripe(_STRIPE_PK);
-    var cardEl  = document.getElementById('card-number-element') ||
-                  document.getElementById('stripe-card-element');
-    var result  = await stripe.confirmCardPayment(intentRes.clientSecret, {
-      payment_method: cardEl ? { card: cardEl } : undefined
-    });
-    if (result.error) {
-      showToast('Pagamento recusado: ' + result.error.message, 'error');
-      if (btn) btn.disabled = false;
-      return;
-    }
-    /* Sucesso */
-    _goContractStep(3);
-    showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
-  } catch(e) {
-    /* Fallback demo se Stripe.js não carregar */
-    _goContractStep(3);
-    showToast('✅ Pagamento processado com sucesso!', 'success');
-  }
-  if (btn) btn.disabled = false;
+  /* Redirecionar para o novo modal com todos os métodos */
+  var amount = parseFloat((document.getElementById('c-amount')||{}).textContent||'0') || 0;
+  var desc   = 'HereWork — ' + ((document.getElementById('c-proj')||{}).textContent||'Contrato');
+  closeModal('payment');
+  openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc });
 };
 
 
@@ -16247,6 +16217,271 @@ window.addEventListener('load', function() {
     setTimeout(function(){ if(banner.parentNode) banner.parentNode.removeChild(banner); }, 5000);
   }
 });
+
+/* ══════════════════════════════════════════════════════
+   STRIPE PAYMENT ELEMENT — Todos os métodos
+   Cartões, Apple Pay, Google Pay, Link, Boleto
+══════════════════════════════════════════════════════ */
+var _stripeInstance  = null;
+var _stripeElements  = null;
+var _stripePaymentEl = null;
+var _spContractId    = '';
+var _spAmount        = 0;
+
+function initStripe() {
+  if (!_stripeInstance && typeof Stripe !== 'undefined') {
+    _stripeInstance = Stripe('pk_live_51RGy77HXgU6QiY3Xe6fsOvl67arEu34VSxG6FKHXVxoPnKzN3Y1tu1H2MFulddCoP2JOHz8ypsxRC8GNd7SW83rf00oDZTxhzB');
+  }
+  return _stripeInstance;
+}
+
+async function openStripePayment(opts) {
+  opts = opts || {};
+  _spAmount     = opts.amount     || 0;
+  _spContractId = opts.contractId || '';
+  var description = opts.description || 'HereWork — Contrato';
+  var email = _session ? _session.email : '';
+  var name  = _session ? _session.name  : '';
+
+  // Mostrar modal
+  var ov = document.getElementById('overlay-stripe-payment');
+  if (!ov) return;
+  document.getElementById('sp-amount').textContent = 'R\$ ' + _spAmount.toLocaleString('pt-BR',{minimumFractionDigits:2});
+  document.getElementById('sp-title').textContent  = opts.title || 'Pagamento Seguro';
+  document.getElementById('sp-loading').style.display          = 'block';
+  document.getElementById('sp-element-container').style.display = 'none';
+  document.getElementById('sp-success').style.display           = 'none';
+  document.getElementById('sp-boleto-result').style.display     = 'none';
+  document.getElementById('sp-error').style.display             = 'none';
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  // Criar PaymentIntent via Edge Function
+  if (!_sbReady()) {
+    // Modo demo
+    document.getElementById('sp-loading').style.display = 'none';
+    document.getElementById('sp-success').style.display = 'block';
+    document.getElementById('sp-success-msg').textContent = 'Modo demo — pagamento simulado com sucesso!';
+    return;
+  }
+
+  try {
+    var session = await _sb.auth.getSession();
+    var token   = session.data.session ? session.data.session.access_token : '';
+    var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Montar Stripe Payment Element
+    var stripe = initStripe();
+    if (!stripe) throw new Error('Stripe não carregado');
+
+    _stripeElements = stripe.elements({
+      clientSecret: data.clientSecret,
+      appearance: {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#2E7D32',
+          borderRadius: '8px',
+          fontFamily: 'Inter, system-ui, sans-serif',
+        }
+      }
+    });
+    _stripePaymentEl = _stripeElements.create('payment', {
+      layout: { type: 'accordion', defaultCollapsed: false },
+      wallets: { applePay: 'auto', googlePay: 'auto' }
+    });
+
+    document.getElementById('stripe-payment-element').innerHTML = '';
+    _stripePaymentEl.mount('#stripe-payment-element');
+
+    // Detectar se Boleto foi selecionado
+    _stripePaymentEl.on('change', function(e) {
+      var isBoleto = e.value && e.value.type === 'boleto';
+      document.getElementById('sp-boleto-fields').style.display = isBoleto ? 'block' : 'none';
+      if (isBoleto && _session) {
+        var ni = document.getElementById('sp-boleto-name');
+        var ei = document.getElementById('sp-boleto-email');
+        if (ni && !ni.value) ni.value = _session.name  || '';
+        if (ei && !ei.value) ei.value = _session.email || '';
+      }
+    });
+
+    _stripePaymentEl.on('ready', function() {
+      document.getElementById('sp-loading').style.display           = 'none';
+      document.getElementById('sp-element-container').style.display = 'block';
+    });
+
+    // Guardar client secret para confirmar
+    window._spClientSecret = data.clientSecret;
+    window._spPaymentId    = data.paymentIntentId;
+
+  } catch(err) {
+    document.getElementById('sp-loading').style.display = 'none';
+    document.getElementById('sp-error').style.display   = 'block';
+    document.getElementById('sp-error').textContent     = '❌ ' + err.message;
+    document.getElementById('sp-element-container').style.display = 'block';
+  }
+}
+
+async function confirmStripePayment() {
+  var btn = document.getElementById('sp-pay-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
+
+  var errEl = document.getElementById('sp-error');
+  if (errEl) { errEl.style.display = 'none'; }
+
+  try {
+    var stripe = initStripe();
+    if (!stripe || !_stripeElements) throw new Error('Stripe não inicializado');
+
+    // Submeter elementos (inclui validação)
+    var submitRes = await _stripeElements.submit();
+    if (submitRes.error) throw new Error(submitRes.error.message);
+
+    // Verificar se é boleto
+    var isBoleto = false;
+    try {
+      var val = await _stripePaymentEl.getValue();
+      isBoleto = val && val.value && val.value.type === 'boleto';
+    } catch(e) {}
+
+    if (isBoleto) {
+      // Boleto: confirmar via Edge Function com dados do CPF
+      var bName  = document.getElementById('sp-boleto-name').value.trim();
+      var bEmail = document.getElementById('sp-boleto-email').value.trim();
+      var bTaxId = document.getElementById('sp-boleto-taxid').value.trim();
+      if (!bName || !bEmail || !bTaxId) throw new Error('Preencha nome, email e CPF/CNPJ para emitir o boleto');
+
+      var session = await _sb.auth.getSession();
+      var token   = session.data.session ? session.data.session.access_token : '';
+      var bRes = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/confirm-boleto', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ paymentIntentId: window._spPaymentId, name: bName, email: bEmail, taxId: bTaxId })
+      });
+      var bData = await bRes.json();
+      if (bData.error) throw new Error(bData.error);
+
+      // Mostrar boleto
+      document.getElementById('sp-element-container').style.display = 'none';
+      document.getElementById('sp-boleto-result').style.display     = 'block';
+      if (bData.boletoUrl) document.getElementById('sp-boleto-link').href = bData.boletoUrl;
+      if (bData.boletoNumber) document.getElementById('sp-boleto-number').textContent = 'Código: ' + bData.boletoNumber;
+      showToast('✅ Boleto gerado! Pague em até 3 dias úteis.', 'success');
+
+    } else {
+      // Cartão, Apple Pay, Google Pay, Link
+      var confirmRes = await stripe.confirmPayment({
+        elements:      _stripeElements,
+        clientSecret:  window._spClientSecret,
+        confirmParams: { return_url: window.location.href },
+        redirect:      'if_required'
+      });
+
+      if (confirmRes.error) throw new Error(confirmRes.error.message);
+
+      // Sucesso!
+      document.getElementById('sp-element-container').style.display = 'none';
+      document.getElementById('sp-success').style.display           = 'block';
+      showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
+
+      setTimeout(function() {
+        closeStripePayment();
+        if (typeof _goContractStep === 'function') _goContractStep(3);
+      }, 2500);
+    }
+
+  } catch(err) {
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = '❌ ' + err.message; }
+    if (btn) { btn.disabled = false; btn.textContent = '🔒 Pagar com segurança'; }
+  }
+}
+
+function closeStripePayment() {
+  var ov = document.getElementById('overlay-stripe-payment');
+  if (ov) ov.classList.remove('open');
+  document.body.style.overflow = '';
+  _stripeElements  = null;
+  _stripePaymentEl = null;
+  window._spClientSecret = null;
+}
+
 </script>
+
+<!-- ═══════════════════════════════════════
+     MODAL: PAGAMENTO STRIPE (todos os métodos)
+═══════════════════════════════════════ -->
+<div class="overlay" id="overlay-stripe-payment" onclick="if(event.target===this)closeStripePayment()">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="sp-title">Pagamento Seguro</div>
+        <div class="modal-subtitle" id="sp-subtitle">Escolha como pagar</div>
+      </div>
+      <button class="modal-close" onclick="closeStripePayment()">&#10005;</button>
+    </div>
+    <div class="modal-body" style="padding:20px;">
+
+      <!-- Resumo do valor -->
+      <div style="background:var(--surface);border-radius:10px;padding:14px 16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;">
+        <div style="font-size:13px;color:var(--text-3);">Pagamento em Garantia</div>
+        <div id="sp-amount" style="font-size:22px;font-weight:800;color:var(--green);">R$ 0,00</div>
+      </div>
+
+      <!-- Loading -->
+      <div id="sp-loading" style="text-align:center;padding:32px 0;">
+        <div style="font-size:32px;margin-bottom:8px;">&#9203;</div>
+        <div style="color:var(--text-3);font-size:13px;">Preparando pagamento seguro...</div>
+      </div>
+
+      <!-- Stripe Payment Element (cartão, Apple Pay, Google Pay, Link, Boleto) -->
+      <div id="sp-element-container" style="display:none;">
+        <div id="stripe-payment-element"></div>
+
+        <!-- Campos extras para Boleto (aparecem dinamicamente) -->
+        <div id="sp-boleto-fields" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
+          <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;">&#128203; Dados para emissão do Boleto:</div>
+          <input id="sp-boleto-name"  class="form-input" placeholder="Nome completo" style="margin-bottom:8px;" />
+          <input id="sp-boleto-email" class="form-input" placeholder="E-mail" style="margin-bottom:8px;" />
+          <input id="sp-boleto-taxid" class="form-input" placeholder="CPF ou CNPJ" />
+          <div style="font-size:11px;color:var(--text-3);margin-top:6px;">&#9888;&#65039; Boleto expira em 3 dias úteis</div>
+        </div>
+
+        <div id="sp-error" style="color:#dc2626;font-size:13px;margin:10px 0;display:none;"></div>
+
+        <button id="sp-pay-btn" class="btn btn-green btn-block btn-lg" style="margin-top:16px;" onclick="confirmStripePayment()">
+          &#128274; Pagar com segurança
+        </button>
+
+        <div style="text-align:center;margin-top:12px;font-size:11px;color:var(--text-3);">
+          &#128274; Pagamento processado pelo Stripe &nbsp;|&nbsp; Dinheiro em Garantia até sua aprovação
+        </div>
+      </div>
+
+      <!-- Sucesso -->
+      <div id="sp-success" style="display:none;text-align:center;padding:24px 0;">
+        <div style="font-size:48px;margin-bottom:12px;">&#9989;</div>
+        <div style="font-size:18px;font-weight:700;color:var(--green);margin-bottom:8px;">Pagamento Confirmado!</div>
+        <div id="sp-success-msg" style="font-size:13px;color:var(--text-3);">Valor em Garantia. Será liberado após sua aprovação.</div>
+      </div>
+
+      <!-- Boleto gerado -->
+      <div id="sp-boleto-result" style="display:none;text-align:center;padding:16px 0;">
+        <div style="font-size:40px;margin-bottom:8px;">&#128203;</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:12px;">Boleto Gerado!</div>
+        <a id="sp-boleto-link" href="#" target="_blank" class="btn btn-primary btn-block" style="margin-bottom:10px;">
+          &#128203; Visualizar e Pagar Boleto
+        </a>
+        <div id="sp-boleto-number" style="font-size:11px;color:var(--text-3);word-break:break-all;margin-top:8px;"></div>
+        <div style="font-size:11px;color:var(--orange);margin-top:6px;">&#9888;&#65039; Pague em até 3 dias úteis para não expirar</div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
