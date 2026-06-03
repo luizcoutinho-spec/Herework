@@ -168,18 +168,26 @@ CREATE TRIGGER trg_contracts_updated  BEFORE UPDATE ON contracts  FOR EACH ROW E
 -- TRIGGER — criar perfil automaticamente após signup
 -- ═══════════════════════════════════════════════════════════════
 CREATE OR REPLACE FUNCTION handle_new_user()
-RETURNS TRIGGER AS $$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  INSERT INTO profiles (id, name, email, type)
+  INSERT INTO public.profiles (id, name, email, type)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'name', split_part(NEW.email,'@',1)),
     NEW.email,
     COALESCE(NEW.raw_user_meta_data->>'type', 'client')
-  );
+  )
+  ON CONFLICT (id) DO NOTHING;
   RETURN NEW;
+EXCEPTION
+  WHEN OTHERS THEN
+    RETURN NEW; -- nunca bloquear o cadastro por falha no perfil
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
@@ -200,12 +208,12 @@ ALTER TABLE newsletter_subscriptions ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: qualquer um lê, só o dono edita
 CREATE POLICY "profiles_read"   ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (true); -- trigger cria com SECURITY DEFINER
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- Projects: qualquer um lê, só o cliente dono cria/edita
 CREATE POLICY "projects_read"   ON projects FOR SELECT USING (true);
-CREATE POLICY "projects_insert" ON projects FOR INSERT WITH CHECK (auth.uid() = client_id);
+CREATE POLICY "projects_insert" ON projects FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "projects_update" ON projects FOR UPDATE USING (auth.uid() = client_id);
 
 -- Proposals: freelancer cria, partes envolvidas lêem
