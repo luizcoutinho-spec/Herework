@@ -12092,7 +12092,7 @@ function _goContractStep(n) {
 }
 
 window.contractStep2 = function contractStep2() {
-  console.error("[HW DEBUG] contractStep2 CHAMADO! amount=", (document.getElementById("c-total")||{}).textContent);
+  
   try {
     /* 1. Validar checkbox */
     var agree = document.getElementById('contract-agree');
@@ -14341,8 +14341,9 @@ _restoreSession = function() {
 function _renderMyPayments() {
   var el = document.getElementById('dash-my-payments');
   if (!el) return;
+  var _vd = _getViewData();
 
-  /* Build list from _dashData — active + done contracts */
+  /* Build list from _vd — active + done contracts */
   var items = [];
 
   /* Active contracts — em garantia */
@@ -14403,6 +14404,7 @@ function _renderMyPayments() {
 function _renderMyReceived() {
   var el = document.getElementById('dash-my-received');
   if (!el) return;
+  var _vd = _getViewData();
 
   var items = [];
 
