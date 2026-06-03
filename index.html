@@ -9430,6 +9430,17 @@ async function _sbRegister(name, email, pass, type) {
     options: { data: { name: name, type: type } }
   });
   if (r.error) return { error: r.error.message };
+  /* Inserir perfil manualmente como fallback do trigger */
+  if (r.data && r.data.user) {
+    try {
+      await _sb.from('profiles').upsert({
+        id:    r.data.user.id,
+        name:  name,
+        email: email,
+        type:  type || 'client'
+      }, { onConflict: 'id', ignoreDuplicates: true });
+    } catch(profileErr) { /* trigger já criou ou erro ignorado */ }
+  }
   return { user: r.data.user };
 }
 
@@ -10325,6 +10336,11 @@ function submitLogin() {
         return;
       }
       var prof = res.profile;
+      /* Guard: perfil pode ser null se trigger falhou */
+      if (!prof) {
+        /* Criar perfil com dados do Auth */
+        prof = { name: res.user.user_metadata && res.user.user_metadata.name ? res.user.user_metadata.name : e.value.split('@')[0], email: e.value.trim(), type: 'client' };
+      }
       _setSession(prof.name, prof.email, prof.type);
       _session.uid = res.user.id;
       if (e) e.value = ''; if (p) p.value = '';
@@ -10347,6 +10363,7 @@ function submitLogin() {
   }
 }
 
+var regType = 'client'; /* tipo selecionado no registro */
 function setRegType(type) {
   regType = type;
   var cBtn = document.getElementById('reg-type-client');
@@ -11157,6 +11174,8 @@ function openEditProject(btn) {
 
 
 function init() {
+  _initSupabase();   /* Inicializar Supabase + restaurar sessão JWT */
+  _restoreSession(); /* Restaurar sessão do localStorage */
   setLang('pt');
 
   /* LGPD */
@@ -14405,7 +14424,7 @@ function admContractAction(action, contractId) {
 function _sanitize(str) {
   if (typeof str !== 'string') return '';
   /* Remover null bytes */
-  str = str.replace(/ /g, '');
+  str = str.replace(//g, '');
   /* Remover tags HTML */
   str = str.replace(/<[^>]*>/g, '');
   if(str === null || str === undefined) return '';
