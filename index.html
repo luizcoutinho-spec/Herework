@@ -4480,7 +4480,7 @@ section { padding: 64px 0; }
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <span class="proj-proposals">14 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              <button class="btn btn-green btn-sm" onclick="openProposalFor(this)" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
             </div>
           </div>
         </div>
@@ -4508,7 +4508,7 @@ section { padding: 64px 0; }
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <span class="proj-proposals">8 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              <button class="btn btn-green btn-sm" onclick="openProposalFor(this)" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
             </div>
           </div>
         </div>
@@ -4536,7 +4536,7 @@ section { padding: 64px 0; }
             </div>
             <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
               <span class="proj-proposals">21 <span data-pt="propostas" data-es="propuestas">propostas</span></span>
-              <button class="btn btn-green btn-sm" onclick="openModal('proposal')" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
+              <button class="btn btn-green btn-sm" onclick="openProposalFor(this)" data-pt="Enviar Proposta" data-es="Enviar Propuesta">Enviar Proposta</button>
             </div>
           </div>
         </div>
@@ -10107,13 +10107,43 @@ function submitProposal() {
           & _vField(cv,'err-prop-cover',lang()==='pt'?'Escreva uma apresentação':'Escribe una presentación');
   if (!ok) return;
   _setBtnLoading(btn, true);
-  setTimeout(function(){
-    _setBtnLoading(btn, false);
-    closeModal('proposal');
-    _pdfReset();
-    var hasPdf = document.getElementById('prop-pdf-input') && document.getElementById('prop-pdf-input').files && document.getElementById('prop-pdf-input').files.length > 0;
-    showToast(lang()==='pt' ? 'Proposta enviada com sucesso!' + (hasPdf?' (PDF anexado)':'') : 'Propuesta enviada exitosamente!', 'success');
-  }, 800);
+
+  var value       = parseInt((v ? v.value : '0').replace(/[^0-9]/g,''), 10) || 0;
+  var days        = parseInt(d ? d.value : '0', 10) || 0;
+  var coverLetter = cv ? cv.value.trim() : '';
+  var projId      = window._activeProposalProjectId || '';
+
+  /* Salvar no Supabase se disponível */
+  if (_sbReady() && projId) {
+    _sbCreateProposal({ projectId: projId, value: value, deadline: days, coverLetter: coverLetter })
+      .then(function(res) {
+        _setBtnLoading(btn, false);
+        if (!res) {
+          showToast(lang()==='pt' ? 'Erro ao enviar proposta. Tente novamente.' : 'Error al enviar propuesta.', 'error');
+          return;
+        }
+        closeModal('proposal');
+        if (typeof _pdfReset === 'function') _pdfReset();
+        showToast(lang()==='pt' ? '🎉 Proposta enviada com sucesso!' : '🎉 Propuesta enviada exitosamente!', 'success');
+      })
+      .catch(function(err) {
+        _setBtnLoading(btn, false);
+        showToast('Erro: ' + err.message, 'error');
+      });
+  } else {
+    /* Demo mode — sem Supabase ou sem ID do projeto */
+    setTimeout(function() {
+      _setBtnLoading(btn, false);
+      closeModal('proposal');
+      if (typeof _pdfReset === 'function') _pdfReset();
+      var hasPdf = document.getElementById('prop-pdf-input') &&
+                   document.getElementById('prop-pdf-input').files &&
+                   document.getElementById('prop-pdf-input').files.length > 0;
+      showToast(lang()==='pt'
+        ? '🎉 Proposta enviada com sucesso!' + (hasPdf ? ' (PDF anexado)' : '')
+        : '🎉 Propuesta enviada exitosamente!', 'success');
+    }, 800);
+  }
 }
 
 function submitInvite() {
@@ -11800,7 +11830,7 @@ function openProposalFor(btn) {
     setTimeout(function(){ openModal('login'); }, 350);
     return;
   }
-  if (_session.role === 'client') {
+  if (_session.type === 'client') {
     showToast('Apenas freelancers podem enviar propostas.', 'warn');
     return;
   }
@@ -11844,6 +11874,8 @@ function openProposalFor(btn) {
     info.style.display = 'none';
   }
 
+  /* Guardar ID do projeto para o submitProposal */
+  window._activeProposalProjectId = card ? (card.getAttribute('data-proj-id') || '') : '';
   openModal('proposal');
 }
 
