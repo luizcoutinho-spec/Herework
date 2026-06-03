@@ -2,7 +2,7 @@
 <html lang="pt-BR" data-lang="pt">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="X-Frame-Options" content="DENY">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -3806,7 +3806,7 @@ section { padding: 64px 0; }
 .selected-skill-tag .rm-skill:hover { opacity:1; }
 .skills-count-hint { font-size:11px; color:var(--text-4); margin-top:6px; }
 </style>
-  <script src="https://js.stripe.com/v3/" defer></script>
+  
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
@@ -12092,45 +12092,48 @@ function _goContractStep(n) {
 }
 
 function contractStep2() {
-  /* 1. Validar checkbox */
-  var agree = document.getElementById('contract-agree');
-  var err   = document.getElementById('err-contract-agree');
-  if (!agree || !agree.checked) {
-    if (err) { err.textContent = 'Aceite os termos para continuar.'; err.classList.add('show'); }
-    return;
+  try {
+    /* 1. Validar checkbox */
+    var agree = document.getElementById('contract-agree');
+    var err   = document.getElementById('err-contract-agree');
+    if (!agree || !agree.checked) {
+      if (err) { err.textContent = 'Aceite os termos para continuar.'; err.classList.add('show'); }
+      return;
+    }
+    if (err) { err.textContent = ''; err.classList.remove('show'); }
+
+    /* 2. Pegar valor do DOM — c-total já mostra o total */
+    var amount = 0;
+    var totalEl = document.getElementById('c-total');
+    if (totalEl) {
+      amount = parseInt((totalEl.textContent || '').replace(/\D/g, ''), 10) || 0;
+    }
+    if (!amount && _contractCtx && _contractCtx.value > 0) {
+      amount = Math.round(_contractCtx.value * 1.08);
+    }
+    if (!amount) amount = 2160;
+
+    var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
+    var flName = (_contractCtx && _contractCtx.name)    ? _contractCtx.name    : 'Freelancer';
+
+    /* 3. Fechar modal */
+    closeModal('contract');
+
+    /* 4. Abrir pagamento */
+    setTimeout(function() {
+      openStripePayment({
+        amount:      amount,
+        contractId:  window._activeContractId || '',
+        description: 'HereWork — ' + proj,
+        title:       'Pagamento em Garantia',
+        subtitle:    flName + ' · ' + proj
+      });
+    }, 200);
+
+  } catch(e) {
+    console.error('contractStep2 error:', e);
+    showToast('Erro ao abrir pagamento: ' + e.message, 'error');
   }
-  if (err) { err.textContent = ''; err.classList.remove('show'); }
-
-  /* 2. Pegar valor do DOM (c-total já está visível na tela) */
-  var amount = 0;
-  var totalEl = document.getElementById('c-total');
-  if (totalEl) {
-    var txt = totalEl.textContent || totalEl.innerText || '';
-    amount = parseInt(txt.replace(/D/g, ''), 10) || 0;
-  }
-  /* Fallback: _contractCtx */
-  if (!amount && _contractCtx && _contractCtx.value > 0) {
-    amount = Math.round(_contractCtx.value * 1.08);
-  }
-  /* Fallback final: valor padrão */
-  if (!amount) amount = 2160;
-
-  var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
-  var flName = (_contractCtx && _contractCtx.name)    ? _contractCtx.name    : 'Freelancer';
-
-  /* 3. Fechar modal de contrato */
-  closeModal('contract');
-
-  /* 4. Abrir pagamento após fechar */
-  setTimeout(function() {
-    openStripePayment({
-      amount:      amount,
-      contractId:  window._activeContractId || '',
-      description: 'HereWork — ' + proj,
-      title:       'Pagamento em Garantia',
-      subtitle:    flName + ' · ' + proj
-    });
-  }, 200);
 }
 
 function contractStep4() { _goContractStep(4); }
