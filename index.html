@@ -16249,7 +16249,7 @@ async function openStripePayment(opts) {
     });
     _stripePaymentEl = _stripeElements.create('payment', {
       layout: { type: 'accordion', defaultCollapsed: false },
-      wallets: { applePay: 'auto', googlePay: 'auto', link: 'never' }
+      wallets: { applePay: 'never', googlePay: 'never', link: 'never' }
     });
 
     document.getElementById('stripe-payment-element').innerHTML = '';
