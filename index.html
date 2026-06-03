@@ -3805,6 +3805,212 @@ section { padding: 64px 0; }
 }
 .selected-skill-tag .rm-skill:hover { opacity:1; }
 .skills-count-hint { font-size:11px; color:var(--text-4); margin-top:6px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVO — Breakpoints 768px e 480px
+═══════════════════════════════════════════════════════════ */
+
+/* ── Hambúrguer maior para toque ─────────────────────────── */
+.hamburger { width:36px; height:36px; padding:6px; }
+.hamburger span { height:3px; border-radius:2px; }
+
+/* ── Tablet (768px) ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  /* Modais */
+  .modal-header { padding:16px 18px 12px !important; }
+  .modal-body   { padding:16px 18px 20px !important; }
+  .modal-footer { padding:12px 18px !important; }
+  .modal-title  { font-size:18px !important; }
+  .modal        { max-width:100% !important; border-radius:16px 16px 0 0 !important; }
+  .modal-lg     { max-width:100% !important; border-radius:16px 16px 0 0 !important; }
+  .overlay      { padding:0 !important; align-items:flex-end !important; }
+
+  /* Formulários: 1 coluna */
+  .form-row { grid-template-columns:1fr !important; }
+  .social-login { flex-direction:column; gap:8px; }
+  .social-login-btn { width:100%; }
+
+  /* Header */
+  .header-auth .btn-sm { padding:6px 12px; font-size:13px; }
+
+  /* Hero */
+  .hero { padding:40px 16px 36px !important; }
+  .hero-search { flex-direction:column; gap:8px; }
+  .hero-search input { border-radius:10px !important; }
+  .hero-search .btn  { border-radius:10px !important; width:100%; }
+  .hero-tags { gap:6px; flex-wrap:wrap; }
+  .hero-quick-tag { padding:6px 12px; font-size:12px; min-height:36px; }
+
+  /* Grids */
+  .categories-grid { grid-template-columns:repeat(3,1fr) !important; gap:10px !important; }
+  .fl-list-grid    { grid-template-columns:1fr !important; }
+  .fl-card         { padding:16px !important; }
+
+  /* Cards de projeto em lista */
+  .proj-list-card  { padding:16px !important; }
+  .proj-list-footer { flex-wrap:wrap; gap:8px; }
+
+  /* Stats */
+  .stat-item { min-width:auto; flex:1; padding:12px 8px; }
+  .stat-value { font-size:22px !important; }
+
+  /* Trust cards */
+  .trust-grid { grid-template-columns:1fr 1fr !important; gap:12px; }
+
+  /* Planos */
+  .plans-grid { grid-template-columns:1fr !important; gap:16px; }
+
+  /* Dashboard */
+  .dash-nav { flex-wrap:wrap; gap:4px; }
+  .dash-nav-tab { padding:8px 12px; font-size:12px; flex:1; min-width:calc(50% - 4px); }
+  .contracts-tabs { flex-wrap:wrap; }
+
+  /* Footer */
+  .footer-top { grid-template-columns:1fr 1fr !important; gap:24px !important; }
+  .footer-bottom { flex-direction:column; gap:8px; text-align:center; }
+
+  /* Pagamentos */
+  .pay-summary { flex-direction:column; gap:12px; }
+  .pay-tabs { flex-direction:column; gap:6px; }
+
+  /* Toast */
+  .toast-container { left:12px; right:12px; bottom:16px; max-width:none; }
+  .toast { width:100%; }
+
+  /* Admin */
+  .admin-nav { flex-wrap:wrap; gap:6px; }
+  .admin-stats { grid-template-columns:1fr 1fr !important; }
+
+  /* Blog */
+  .blog-grid { grid-template-columns:1fr !important; }
+
+  /* Contrato */
+  .contract-steps { gap:4px; }
+  .contract-steps .step-label { font-size:10px; }
+}
+
+/* ── Mobile pequeno (480px) ──────────────────────────────── */
+@media (max-width: 480px) {
+  /* Base */
+  body { font-size:14px; }
+
+  /* Header */
+  .header-inner { padding:0 12px; }
+  .logo-text { font-size:18px !important; }
+  .header-auth .btn { padding:5px 10px; font-size:12px; }
+  .header-auth .btn-sm { display:inline-flex; }
+
+  /* Hero */
+  .hero { padding:28px 12px 28px !important; }
+  .hero-title { font-size:clamp(22px,7vw,34px) !important; }
+  .hero-subtitle { font-size:13px !important; }
+  .hero-stats { gap:16px; flex-wrap:wrap; justify-content:center; }
+  .hero-stat-value { font-size:20px; }
+  .hero-tags { justify-content:center; }
+
+  /* Modais ainda menores */
+  .modal-header { padding:14px 14px 10px !important; }
+  .modal-body   { padding:14px 14px 18px !important; }
+  .modal-title  { font-size:16px !important; }
+  .modal-subtitle { font-size:12px !important; }
+  .modal-close  { width:28px; height:28px; font-size:14px; }
+
+  /* Botões */
+  .btn-lg  { padding:11px 18px; font-size:14px; }
+  .btn-xl  { padding:12px 20px; font-size:15px; }
+  .btn-block { width:100%; }
+
+  /* Cards */
+  .fl-card    { padding:14px !important; }
+  .fl-avatar  { width:44px; height:44px; font-size:16px; }
+  .fl-name    { font-size:14px; }
+  .fl-tags    { gap:4px; }
+  .tag        { padding:2px 8px; font-size:10px; }
+
+  /* Projeto cards */
+  .proj-list-card { padding:14px !important; }
+  .proj-list-title { font-size:14px; }
+  .proj-list-budget { font-size:15px; }
+
+  /* Categorias */
+  .categories-grid { grid-template-columns:repeat(2,1fr) !important; gap:8px !important; }
+  .cat-card { padding:12px 8px !important; }
+  .cat-name { font-size:11px !important; }
+
+  /* Stats */
+  .stats-bar { flex-direction:column; gap:8px; padding:16px 12px; }
+  .stat-item { border-right:none !important; border-bottom:1px solid var(--border); padding:8px 12px; }
+  .stat-item:last-child { border-bottom:none; }
+  .stat-value { font-size:20px !important; }
+
+  /* Trust section */
+  .trust-grid { grid-template-columns:1fr !important; }
+
+  /* Planos */
+  .plan-card { padding:20px 16px !important; }
+  .plan-price { font-size:32px !important; }
+
+  /* Seção CTA */
+  .cta-section { padding:32px 16px !important; }
+  .cta-actions { flex-direction:column; gap:10px; }
+  .cta-actions .btn { width:100%; }
+
+  /* FAQ */
+  .faq-section { padding:32px 12px !important; }
+  .faq-carousel-q { font-size:13px; padding:14px 12px; }
+
+  /* Dashboard */
+  .dash-nav-tab { padding:7px 10px; font-size:11px; }
+  .contract-card { padding:14px !important; }
+  .contract-card-header { flex-direction:column; gap:6px; }
+
+  /* Pagamento modal */
+  #overlay-stripe-payment .modal { border-radius:16px 16px 0 0 !important; }
+  #overlay-stripe-payment .modal-body { padding:14px !important; }
+
+  /* Footer */
+  .footer-top { grid-template-columns:1fr !important; gap:20px !important; }
+  .footer-brand-desc { font-size:12px; }
+  .footer-badges { flex-wrap:wrap; gap:6px; }
+
+  /* Scroll to top */
+  #scroll-top-btn { bottom:16px; right:12px; width:36px; height:36px; font-size:14px; }
+}
+
+/* ── Ajustes gerais mobile (max-width 600px existente + extras) ── */
+@media (max-width: 600px) {
+  /* Garantir que overlays usem toda a tela */
+  .overlay { padding:0 !important; }
+  .modal, .modal-lg {
+    max-height:95vh;
+    overflow-y:auto;
+    border-radius:16px 16px 0 0;
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    width:100%;
+    max-width:100% !important;
+    margin:0;
+  }
+  .overlay.open {
+    display:flex;
+    align-items:flex-end;
+  }
+
+  /* Nav mobile pill buttons menores */
+  .header-auth { gap:6px; }
+  .header-auth #nav-publish-btn { display:none; } /* esconder publicar no mobile — usar hamburguer */
+
+  /* Freelancer profile header */
+  .fl-profile-header { flex-direction:column; text-align:center; }
+  .fl-profile-info { align-items:center; }
+
+  /* Proposta modal */
+  .proposal-project-info { padding:12px !important; }
+  .prop-input-row { grid-template-columns:1fr !important; }
+}
+
 </style>
   
   <!-- Supabase Client -->
