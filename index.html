@@ -1490,7 +1490,7 @@ section { padding: 64px 0; }
   gap: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 .proj-list-meta {
   display: flex;
@@ -1500,7 +1500,7 @@ section { padding: 64px 0; }
   color: var(--text-3);
 }
 .proj-list-meta span { display: flex; align-items: center; gap: 4px; }
-.proj-list-actions { display: flex; align-items: center; gap: 8px; }
+.proj-list-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-shrink: 0; }
 
 /* Paginação */
 .pagination {
