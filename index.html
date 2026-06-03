@@ -5549,10 +5549,10 @@ section { padding: 64px 0; }
             <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
           </div>
           <div class="filter-options">
-            <label class="filter-option"><input type="radio" name="rating" onchange="applyAllFilters('fl')"> <span>★★★★★ 5,0</span></label>
-            <label class="filter-option"><input type="radio" name="rating" onchange="applyAllFilters('fl')"> <span>★★★★☆ <span data-pt="4,0 ou mais" data-es="4,0 o más">4,0 ou mais</span></span></label>
-            <label class="filter-option"><input type="radio" name="rating" onchange="applyAllFilters('fl')"> <span>★★★☆☆ <span data-pt="3,0 ou mais" data-es="3,0 o más">3,0 ou mais</span></span></label>
-            <label class="filter-option"><input type="radio" name="rating" onchange="applyAllFilters('fl')"> <span data-pt="Qualquer avaliação" data-es="Cualquier calificación">Qualquer avaliação</span></label>
+            <label class="filter-option"><input type="radio" name="rating" value="4.8" onchange="applyAllFilters('fl')"> <span>★★★★★ <span data-pt="4,8 ou mais" data-es="4,8 o más">4,8 ou mais</span></span></label>
+            <label class="filter-option"><input type="radio" name="rating" value="4.0" onchange="applyAllFilters('fl')"> <span>★★★★☆ <span data-pt="4,0 ou mais" data-es="4,0 o más">4,0 ou mais</span></span></label>
+            <label class="filter-option"><input type="radio" name="rating" value="3.0" onchange="applyAllFilters('fl')"> <span>★★★☆☆ <span data-pt="3,0 ou mais" data-es="3,0 o más">3,0 ou mais</span></span></label>
+            <label class="filter-option"><input type="radio" name="rating" value="0" onchange="applyAllFilters('fl')"> <span data-pt="Qualquer avaliação" data-es="Cualquier calificación">Qualquer avaliação</span></label>
           </div>
         </div>
 
@@ -9498,9 +9498,9 @@ function applyAllFilters(prefix) {
   if (sidebar) {
     var ratingRadio = sidebar.querySelector('input[name=rating]:checked');
     if (ratingRadio) {
-      var rt = (ratingRadio.closest('.filter-option').querySelector('span') || {}).textContent || '';
-      var rm = rt.match(/(\d)/);
-      if (rm) minRating = parseFloat(rm[1]);
+      /* Usar value do radio (ex: "4.8", "4.0", "3.0", "0") */
+      var rval = parseFloat(ratingRadio.value || '0');
+      if (rval > 0) minRating = rval;
     }
   }
 
