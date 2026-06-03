@@ -4162,7 +4162,7 @@ section { padding: 64px 0; }
     <div class="hero-search">
       <div class="hero-search-box">
         <input
-          class="hero-search-input"
+          class="hero-search-input" id="hero-search" name="q" aria-label="Buscar freelancers ou serviços"
           type="text"
           data-placeholder-pt="O que você precisa? Ex: Logotipo, Site, Redação..."
           data-placeholder-es="¿Qué necesitas? Ej: Logo, Sitio web, Redacción..."
@@ -4875,29 +4875,29 @@ section { padding: 64px 0; }
 
         <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group">
-            <label class="form-label">Nome completo</label>
+            <label class="form-label" for="profile-name">Nome completo</label>
             <input class="form-input" id="profile-name" type="text" placeholder="Seu nome completo">
           </div>
           <div class="form-group">
-            <label class="form-label">E-mail</label>
+            <label class="form-label" for="profile-email">E-mail</label>
             <input class="form-input" id="profile-email" type="email" placeholder="seu@email.com">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label">Profiss&atilde;o / T&iacute;tulo profissional</label>
+          <label class="form-label" for="profile-title">Profiss&atilde;o / T&iacute;tulo profissional</label>
           <input class="form-input" id="profile-title" type="text" placeholder="Ex: Desenvolvedor Full Stack, Designer UI/UX, Gestor de Marketing...">
         </div>
         <div class="form-group">
-          <label class="form-label">Sobre mim</label>
+          <label class="form-label" for="profile-bio">Sobre mim</label>
           <textarea class="form-textarea" id="profile-bio" placeholder="Descreva sua experi&ecirc;ncia, especialidades e o que voc&ecirc; busca na plataforma..." style="min-height:100px;"></textarea>
         </div>
         <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group">
-            <label class="form-label">Telefone (opcional)</label>
+            <label class="form-label" for="profile-phone">Telefone (opcional)</label>
             <input class="form-input" id="profile-phone" type="tel" placeholder="(11) 99999-9999">
           </div>
           <div class="form-group">
-            <label class="form-label">Estado</label>
+            <label class="form-label" for="profile-state">Estado</label>
             <select class="form-select" id="profile-state" onchange="loadCitiesForState(this.value)">
               <option value="">Selecione seu estado...</option>
               <option value="AC">AC &mdash; Acre</option>
@@ -4930,14 +4930,14 @@ section { padding: 64px 0; }
             </select>
           </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Cidade</label>
+              <label class="form-label" for="profile-city">Cidade</label>
               <select class="form-select" id="profile-city">
                 <option value="">Selecione o estado primeiro...</option>
               </select>
             </div>
         </div>
         <div class="form-group">
-          <label class="form-label">LinkedIn / Portf&oacute;lio (opcional)</label>
+          <label class="form-label" for="profile-url">LinkedIn / Portf&oacute;lio (opcional)</label>
           <input class="form-input" id="profile-url" type="url" placeholder="https://linkedin.com/in/seuperfil">
         </div>
 
@@ -4947,7 +4947,7 @@ section { padding: 64px 0; }
           
           <div class="skills-area-row">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">&Aacute;rea principal</label>
+              <label class="form-label" for="profile-area">&Aacute;rea principal</label>
               <select class="form-select" id="profile-area" onchange="loadProfileSubareas(this.value)">
                 <option value="">Selecione a &aacute;rea...</option>
                 <option value="design">Design &amp; Cria&ccedil;&atilde;o</option>
@@ -4978,7 +4978,7 @@ section { padding: 64px 0; }
               </select>
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Sub&aacute;rea</label>
+              <label class="form-label" for="profile-subarea">Sub&aacute;rea</label>
               <select class="form-select" id="profile-subarea" onchange="loadProfileSkillsList(document.getElementById('profile-area').value, this.value)" disabled>
                 <option value="">Selecione a &aacute;rea primeiro...</option>
               </select>
@@ -5011,15 +5011,15 @@ section { padding: 64px 0; }
         <div class="dash-section-title" style="margin-bottom:16px;"><span>&#128274;</span> Alterar Senha</div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Senha atual</label>
+            <label class="form-label" for="pwd-current">Senha atual</label>
             <input class="form-input" id="pwd-current" type="password" placeholder="Senha atual">
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Nova senha</label>
+            <label class="form-label" for="pwd-new">Nova senha</label>
             <input class="form-input" id="pwd-new" type="password" placeholder="M&iacute;nimo 6 caracteres">
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Confirmar senha</label>
+            <label class="form-label" for="pwd-confirm">Confirmar senha</label>
             <input class="form-input" id="pwd-confirm" type="password" placeholder="Repita a nova senha">
           </div>
         </div>
@@ -5471,7 +5471,7 @@ section { padding: 64px 0; }
       <div class="page-banner-search">
         <div class="page-search-wrap" style="max-width:460px;">
           <span class="search-ico">🔍</span>
-          <input class="page-search-input" style="padding-left:36px;" type="text"
+          <input class="page-search-input" id="fl-search-input" name="fl-q" aria-label="Buscar freelancers" style="padding-left:36px;" type="text"
             data-placeholder-pt="Buscar por nome, habilidade ou serviço..."
             data-placeholder-es="Buscar por nombre, habilidad o servicio..."
             placeholder="Buscar por nome, habilidade ou serviço...">
@@ -5576,9 +5576,9 @@ section { padding: 64px 0; }
             <svg fill="none" stroke-width="2.5" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
           </div>
           <div class="filter-range">
-            <input type="number" placeholder="Min" min="0" value="" oninput="applyAllFilters('fl')">
+            <input type="number" id="fl-rate-min" name="fl-rate-min" placeholder="Min" aria-label="Taxa mínima" min="0" value="" oninput="applyAllFilters('fl')">
             <span class="filter-range-sep">—</span>
-            <input type="number" placeholder="Max" min="0" value="" oninput="applyAllFilters('fl')">
+            <input type="number" id="fl-rate-max" name="fl-rate-max" placeholder="Max" aria-label="Taxa máxima" min="0" value="" oninput="applyAllFilters('fl')">
           </div>
         </div>
 
@@ -5935,7 +5935,7 @@ section { padding: 64px 0; }
       <div class="page-banner-search">
         <div class="page-search-wrap" style="max-width:460px;">
           <span class="search-ico">🔍</span>
-          <input class="page-search-input" style="padding-left:36px;" type="text"
+          <input class="page-search-input" id="proj-search-input" name="proj-q" aria-label="Buscar projetos" style="padding-left:36px;" type="text"
             data-placeholder-pt="Buscar projetos por palavra-chave..."
             data-placeholder-es="Buscar proyectos por palabra clave..."
             placeholder="Buscar projetos por palavra-chave...">
@@ -7890,7 +7890,7 @@ section { padding: 64px 0; }
         <div class="pay-panel active" id="pay-panel-card">
 
           <div class="form-group">
-            <label class="form-label">Nome no cart&atilde;o</label>
+            <label class="form-label" for="stripe-holder-name">Nome no cart&atilde;o</label>
             <input class="form-input" id="stripe-holder-name" type="text" maxlength="60"
               placeholder="Como aparece no cart&atilde;o" autocomplete="cc-name" spellcheck="false">
             <div class="field-error" id="err-stripe-holder"></div>
@@ -7920,7 +7920,7 @@ section { padding: 64px 0; }
           </div>
 
           <div class="form-group" style="margin-top:14px;">
-            <label class="form-label">Parcelas</label>
+            <label class="form-label" for="card-installments">Parcelas</label>
             <select class="pay-installments" id="card-installments">
               <option value="1" id="inst-1">1x de R$ 149,00 sem juros</option>
               <option value="2" id="inst-2">2x de R$ 74,50 sem juros</option>
@@ -8107,7 +8107,7 @@ section { padding: 64px 0; }
           <!-- Cartão -->
           <div id="cpay-card" style="display:block;">
             <div class="form-group">
-              <label class="form-label">Nome no cart&atilde;o</label>
+              <label class="form-label" for="c-stripe-name">Nome no cart&atilde;o</label>
               <input class="form-input" id="c-stripe-name" type="text" maxlength="60"
                 placeholder="Como aparece no cart&atilde;o" autocomplete="cc-name" spellcheck="false">
               <div class="form-error" id="err-c-stripe-name"></div>
@@ -8213,7 +8213,7 @@ section { padding: 64px 0; }
         </div>
 
         <div class="form-group">
-          <label class="form-label">Deixe um depoimento (opcional)</label>
+          <label class="form-label" for="contract-review-text">Deixe um depoimento (opcional)</label>
           <textarea class="form-textarea" id="contract-review-text" placeholder="Conte como foi trabalhar com este profissional..." style="min-height:80px;"></textarea>
         </div>
         <div class="form-error" id="err-contract-stars" style="margin-bottom:10px;text-align:center;"></div>
@@ -8452,7 +8452,7 @@ section { padding: 64px 0; }
 
       <!-- Prazo sugerido -->
       <div class="form-group">
-        <label class="form-label">Prazo para correção</label>
+        <label class="form-label" for="rev-deadline">Prazo para correção</label>
         <select class="form-select" id="rev-deadline">
           <option value="24h">24 horas</option>
           <option value="48h" selected>48 horas (padrão)</option>
@@ -8677,12 +8677,12 @@ section { padding: 64px 0; }
       </div>
 
       <div class="form-group">
-        <label class="form-label">Telefone / WhatsApp</label>
+        <label class="form-label" for="apply-phone">Telefone / WhatsApp</label>
         <input class="form-input" id="apply-phone" type="tel" maxlength="20" placeholder="(11) 99999-9999">
       </div>
 
       <div class="form-group">
-        <label class="form-label">LinkedIn (opcional)</label>
+        <label class="form-label" for="apply-linkedin">LinkedIn (opcional)</label>
         <input class="form-input" id="apply-linkedin" type="url" maxlength="200" placeholder="https://linkedin.com/in/seuperfil">
       </div>
 
@@ -8816,17 +8816,17 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label">Nome completo</label>
+        <label class="form-label" for="profile-name">Nome completo</label>
         <input class="form-input" id="ticket-name" type="text" maxlength="80" placeholder="Seu nome">
         <div class="form-error" id="err-ticket-name"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">E-mail</label>
+        <label class="form-label" for="profile-email">E-mail</label>
         <input class="form-input" id="ticket-email" type="email" maxlength="120" placeholder="seu@email.com">
         <div class="form-error" id="err-ticket-email"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Categoria do problema</label>
+        <label class="form-label" for="ticket-category">Categoria do problema</label>
         <select class="form-select" id="ticket-category">
           <option value="">Selecione...</option>
           <option>Conta e acesso</option>
@@ -8983,7 +8983,7 @@ section { padding: 64px 0; }
       <div class="field-error" id="err-admin-user"></div>
     </div>
     <div class="form-group">
-      <label class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
+      <label class="form-label" for="login-pass" data-pt="Senha" data-es="Contraseña">Senha</label>
       <input class="form-input" id="admin-login-pass" type="password" autocomplete="off"
         placeholder="••••••••••" onkeydown="if(event.key==='Enter')adminDoLogin()">
       <div class="field-error" id="err-admin-pass"></div>
