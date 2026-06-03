@@ -17171,6 +17171,13 @@ function closeStripePayment() {
   window._spClientSecret = null;
 }
 
+
+/* ── Inicializar aplicação ── */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function() { init(); });
+} else {
+  init(); /* DOM já carregado */
+}
 </script>
 
 <!-- ═══════════════════════════════════════
