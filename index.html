@@ -12342,7 +12342,7 @@ function _flCard(cat, idx) {
   var g    = GR[_rnd(GR.length)];
   var fn   = FN[_rnd(FN.length)];
   var ln   = LN[_rnd(LN.length)];
-  var name = fn + ' ' + ln;
+  var name = fn + ' ' + ln[0] + '.';  /* Abreviado: 'Bruno O.' */
   var ini  = fn[0] + ln[0];
   var role = _pick(d.r);
   var city = _pick(CT);
