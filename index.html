@@ -1573,16 +1573,7 @@ section { padding: 64px 0; }
   position: relative;
 }
 .hiw-step-full:hover { border-color: var(--green); transform: translateY(-4px); box-shadow: var(--shadow-md); }
-.hiw-step-full::after {
-  content: '→';
-  position: absolute;
-  right: -20px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 22px;
-  color: var(--border-2);
-  font-weight: 300;
-}
+.hiw-step-full::after { display: none; }
 .hiw-step-full:last-child::after { display: none; }
 .hiw-step-num-big {
   width: 44px; height: 44px;
