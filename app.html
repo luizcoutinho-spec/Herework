@@ -10581,14 +10581,181 @@ function openAdvancedReports() {
 }
 
 
-/* ── Modal de Limite do Plano Gratuito ───────────────────── */
-function showPlanLimitModal() {
+/* ════════════════════════════════════════════════════════════
+   USAGE-BASED PLAN ENFORCEMENT — HereWork
+   Controle de consumo por plano: limites parametrizados por
+   tipo de usuário (cliente/freelancer) e por plano contratado,
+   validação em tempo real, alertas preventivos (80/90/95%),
+   bloqueio em 100% com jornada de upgrade, e log de auditoria
+   para análise de conversão.
+════════════════════════════════════════════════════════════ */
+
+/* Limites por tipo de usuário e plano — Infinity = sem limite.
+   Ajuste aqui para alterar cotas sem tocar na lógica de aplicação. */
+var _PLAN_LIMITS = {
+  client: {
+    free:       { projects_month: 3,        direct_invites: 0,        candidates_per_project: 10 },
+    pro:        { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity },
+    enterprise: { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity }
+  },
+  freelancer: {
+    free:       { proposals_month: 10,       portfolio_items: 5,        verified_badges: 0 },
+    pro:        { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: 1 },
+    enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity }
+  }
+};
+
+/* Metadados de exibição de cada recurso controlado (rótulo, ícone e
+   período de reinício do contador: month | project | lifetime) */
+var _RESOURCE_META = {
+  projects_month:         { label: 'projetos publicados este mês',   singular: 'projeto',             icon: '📁', period: 'month'   },
+  direct_invites:         { label: 'convites diretos a freelancers', singular: 'convite direto',      icon: '✉️', period: 'month'   },
+  candidates_per_project: { label: 'candidatos neste projeto',       singular: 'candidato',           icon: '👥', period: 'project' },
+  proposals_month:        { label: 'propostas enviadas este mês',    singular: 'proposta',            icon: '📨', period: 'month'   },
+  portfolio_items:        { label: 'itens no portfólio',             singular: 'item de portfólio',   icon: '🖼️', period: 'lifetime'},
+  verified_badges:        { label: 'selos de verificação ativos',    singular: 'selo de verificação', icon: '🏅', period: 'lifetime'}
+};
+
+/* ── Contadores de uso (persistidos; reiniciam conforme o período) ── */
+function _usagePeriodSuffix(period) {
+  var now = new Date();
+  if (period === 'month') return '_' + now.getFullYear() + '_' + now.getMonth();
+  return '';
+}
+function _usageKey(resourceKey) {
+  return 'hw_usage_' + resourceKey + _usagePeriodSuffix((_RESOURCE_META[resourceKey] || {}).period);
+}
+function _getUsage(resourceKey) {
+  return parseInt(localStorage.getItem(_usageKey(resourceKey)) || '0', 10) || 0;
+}
+function _incUsage(resourceKey, by) {
+  var v = _getUsage(resourceKey) + (by || 1);
+  try { localStorage.setItem(_usageKey(resourceKey), String(v)); } catch(e) {}
+  return v;
+}
+/* Chamar após a ação ser concluída com sucesso, para contabilizar o consumo */
+function _registerPlanUsage(resourceKey, amount) {
+  return _incUsage(resourceKey, amount || 1);
+}
+
+/* ── Limite vigente para o usuário atual, conforme tipo + plano ── */
+function _getResourceLimit(resourceKey) {
+  var type  = (_session && _session.type === 'freelancer') ? 'freelancer' : 'client';
+  var tier  = _getUserPlan();                                 /* 'free' | 'pro' | 'enterprise' */
+  var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
+  var plan  = table[tier] || table.free;
+  return (plan && plan.hasOwnProperty(resourceKey)) ? plan[resourceKey] : Infinity;
+}
+
+/* ── Próximo plano disponível e seus benefícios (jornada de upgrade) ── */
+function _getNextPlanInfo() {
+  var type = (_session && _session.type === 'freelancer') ? 'freelancer' : 'client';
+  var tier = _getUserPlan();
+  if (type === 'freelancer') {
+    if (tier === 'free') return { key:'pro', name:'Premium', price:'R$ 49/mês', benefits:[
+      'Propostas ilimitadas por mês', 'Portfólio ilimitado', 'Comissão reduzida para 10%',
+      'Selo de verificação Premium no perfil', 'Saque via Pix'
+    ]};
+    if (tier === 'pro') return { key:'enterprise', name:'Elite', price:'R$ 99/mês', benefits:[
+      'Tudo do plano Premium', 'Comissão ainda menor: 7%', 'Prioridade nos resultados de busca',
+      "Badge 'Elite' exclusivo no perfil"
+    ]};
+    return null;
+  }
+  if (tier === 'free') return { key:'pro', name:'Profissional', price:'R$ 149/mês', benefits:[
+    'Projetos publicados ilimitados', 'Comissão reduzida para 12%', 'Suporte prioritário em até 4h',
+    'Convites diretos a freelancers', 'Relatórios e métricas avançadas'
+  ]};
+  if (tier === 'pro') return { key:'enterprise', name:'Enterprise', price:'sob consulta', benefits:[
+    'Tudo do plano Profissional', 'Conta dedicada e onboarding', 'Integrações personalizadas', 'SLA garantido de atendimento'
+  ]};
+  return null;
+}
+
+/* ── Log de eventos de limite — auditoria e análise de conversão ──
+   Persistido em localStorage (até 200 eventos) e replicado no log
+   de segurança (_secLog) para visibilidade unificada no painel admin. */
+var _planEvents = (function() {
+  try { return JSON.parse(localStorage.getItem('hw_plan_events') || '[]'); } catch(e) { return []; }
+})();
+function _logPlanEvent(type, resourceKey, used, limit) {
+  var ev = {
+    ts:       new Date().toISOString(),
+    type:     type,            /* LIMIT_WARNING_80 | LIMIT_WARNING_90 | LIMIT_WARNING_95 | LIMIT_BLOCKED | UPGRADE_CTA_CLICK */
+    resource: resourceKey,
+    used:     used,
+    limit:    limit,
+    plan:     _getUserPlan(),
+    userType: (_session && _session.type) || 'guest',
+    email:    (_session && _session.email) || null
+  };
+  _planEvents.unshift(ev);
+  if (_planEvents.length > 200) _planEvents.pop();
+  try { localStorage.setItem('hw_plan_events', JSON.stringify(_planEvents)); } catch(e) {}
+  if (typeof _secLog === 'function') {
+    _secLog('PLAN_LIMIT', type + ' · ' + resourceKey + ' (' + used + '/' + limit + ') · plano ' + _getPlanLabel());
+  }
+}
+
+/* ── Alertas preventivos (80/90/95%) — exibidos uma única vez por limiar/período ── */
+function _maybeShowPlanWarning(resourceKey, used, limit) {
+  if (!limit || limit === Infinity) return;
+  var percent = Math.round((used / limit) * 100);
+  var thresholds = [95, 90, 80];
+  for (var i = 0; i < thresholds.length; i++) {
+    var th = thresholds[i];
+    if (percent >= th) {
+      var flagKey = 'hw_planwarn_' + resourceKey + '_' + th + _usagePeriodSuffix((_RESOURCE_META[resourceKey] || {}).period);
+      if (localStorage.getItem(flagKey)) return;          /* já avisado neste limiar/período */
+      try { localStorage.setItem(flagKey, '1'); } catch(e) {}
+      var meta = _RESOURCE_META[resourceKey] || { label: resourceKey, icon: '📊' };
+      var msg  = meta.icon + ' Você já utilizou ' + used + '/' + limit + ' ' + meta.label +
+                 ' (' + percent + '% do limite do plano ' + _getPlanLabel() + '). ' +
+                 (th >= 95 ? 'Faça upgrade agora para não ser bloqueado!' : 'Considere fazer upgrade para continuar sem interrupções.');
+      showToast(msg, th >= 95 ? 'warn' : 'info');
+      _logPlanEvent('LIMIT_WARNING_' + th, resourceKey, used, limit);
+      return;
+    }
+  }
+}
+
+/* ── Verificação central, EM TEMPO REAL, antes de executar a ação ──
+   Retorna true se a ação pode prosseguir. Caso o limite tenha sido
+   atingido/ultrapassado, exibe o modal de upgrade, registra o evento
+   de auditoria e retorna false (bloqueando a ação). ── */
+function _checkPlanLimit(resourceKey, amount) {
+  amount = amount || 1;
+  var limit = _getResourceLimit(resourceKey);
+  if (limit === Infinity) return true;
+
+  var used   = _getUsage(resourceKey);
+  var willBe = used + amount;
+
+  if (willBe > limit) {
+    _logPlanEvent('LIMIT_BLOCKED', resourceKey, used, limit);
+    _showPlanLimitModal(resourceKey, used, limit);
+    return false;
+  }
+
+  _maybeShowPlanWarning(resourceKey, willBe, limit);
+  return true;
+}
+
+/* ── Modal de Limite Atingido — genérico e parametrizado por recurso ──
+   Mostra: qual limite foi atingido, percentual de uso (ex.: 50/50 — 100%),
+   bloqueio das novas ações, benefícios do próximo plano e CTA de upgrade. */
+function _showPlanLimitModal(resourceKey, used, limit) {
   var ov = document.getElementById('overlay-plan-limit');
   if (!ov) return;
+  var meta    = _RESOURCE_META[resourceKey] || { label: resourceKey, singular: 'item', icon: '📊' };
+  var next    = _getNextPlanInfo();
+  var percent = limit > 0 ? Math.min(100, Math.round((used / limit) * 100)) : 100;
 
-  /* Preencher dados dinâmicos */
   var nameEl = document.getElementById('pl-name');
   if (nameEl) nameEl.textContent = (_session && _session.name) ? _session.name.split(' ')[0] : 'Usuário';
+
+  var iconEl = document.getElementById('pl-icon');
+  if (iconEl) iconEl.textContent = meta.icon || '🚧';
 
   var dateEl = document.getElementById('pl-date');
   if (dateEl) {
@@ -10596,42 +10763,71 @@ function showPlanLimitModal() {
     var months = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
     dateEl.textContent = now.getDate() + ' de ' + months[now.getMonth()];
   }
-
   var resetEl = document.getElementById('pl-reset-date');
   if (resetEl) {
-    var next = new Date();
-    next.setMonth(next.getMonth() + 1, 1);
+    var resetD = new Date();
+    resetD.setMonth(resetD.getMonth() + 1, 1);
     var mNames = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
-    resetEl.textContent = '1° de ' + mNames[next.getMonth()];
+    resetEl.textContent = '1° de ' + mNames[resetD.getMonth()];
+  }
+
+  /* Mensagem principal: qual limite foi atingido + bloqueio + caminho de upgrade */
+  var msgEl = document.getElementById('pl-message');
+  if (msgEl) {
+    msgEl.innerHTML = 'Você atingiu o limite de <strong>' + limit + ' ' + meta.label + '</strong> do seu plano atual ' +
+      '(<strong>' + _getPlanLabel() + '</strong>). Novas ações relacionadas a este recurso ficam <strong>temporariamente bloqueadas/restritas</strong> ' +
+      'até a renovação do ciclo' + (next ? (', ou faça upgrade agora para o Plano <strong style="color:var(--green);">' + next.name + '</strong> e continue sem interrupções.') : '.');
+  }
+
+  /* Percentual de utilização do plano (ex.: 50/50 — 100%) */
+  var pctEl = document.getElementById('pl-usage-pct');
+  if (pctEl) pctEl.textContent = used + '/' + limit + ' ' + meta.label + ' utilizados — ' + percent + '% do limite';
+  var barEl = document.getElementById('pl-usage-bar');
+  if (barEl) { barEl.style.width = percent + '%'; barEl.style.background = percent >= 100 ? '#E53935' : '#F4511E'; }
+
+  /* Benefícios do próximo plano disponível */
+  var benEl = document.getElementById('pl-benefits');
+  if (benEl) {
+    if (next) {
+      benEl.style.display = '';
+      benEl.innerHTML =
+        '<p style="font-size:14px;color:#166534;font-weight:600;margin-bottom:6px;">📬 Faça upgrade para o Plano ' + next.name + ' e tenha:</p>' +
+        '<ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:18px;margin:0;">' +
+          next.benefits.map(function(b){ return '<li>' + b + '</li>'; }).join('') +
+        '</ul>';
+    } else {
+      benEl.style.display = 'none';
+      benEl.innerHTML = '';
+    }
+  }
+
+  /* CTA de upgrade — leva direto para a página de planos */
+  var ctaEl = document.getElementById('pl-cta');
+  if (ctaEl) {
+    ctaEl.textContent = next ? ('🚀 Fazer Upgrade — ' + next.name + (next.price ? ' · ' + next.price : '')) : '🚀 Ver planos disponíveis';
+    ctaEl.onclick = function() {
+      ov.classList.remove('open');
+      document.body.style.overflow = '';
+      _logPlanEvent('UPGRADE_CTA_CLICK', resourceKey, used, limit);
+      showPage('pricing');
+    };
   }
 
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 
-  /* Também enviar email de notificação via mailto */
+  /* Notificação por e-mail (simulada — em produção, chamaria API de e-mail) */
   if (_session && _session.email) {
-    var subject = encodeURIComponent('[HereWork] Você atingiu o limite de projetos do Plano Gratuito');
-    var body = encodeURIComponent(
-      'Olá, ' + (_session.name || 'Usuário') + '!\n\n' +
-      'Você publicou 3 projetos este mês e atingiu o limite do Plano Básico.\n\n' +
-      'A partir de agora você continuará recebendo:\n' +
-      '• Resumo diário de novos projetos\n' +
-      '• Acesso à base de freelancers\n' +
-      '• Chat com candidatos\n\n' +
-      'Faça upgrade para o Plano Profissional (R$ 149/mês) e tenha:\n' +
-      '• Projetos ilimitados\n' +
-      '• Comissão reduzida: 12%\n' +
-      '• Suporte em até 4h\n' +
-      '• Convites diretos a freelancers\n\n' +
-      'Acesse: https://herework.vercel.app/#pricing\n\n' +
-      'Equipe HereWork'
-    );
-    /* Notificar via contato@ (email simulado) */
     setTimeout(function() {
-      /* Em produção: chamar API de email */
-      console.log('[HereWork] Notificação de limite enviada para:', _session.email);
+      console.log('[HereWork] Notificação de limite de plano enviada para:', _session.email,
+                  '— recurso:', resourceKey, '(' + used + '/' + limit + ')');
     }, 2000);
   }
+}
+
+/* Compatibilidade com chamadas antigas (cenário "limite de projetos do plano gratuito") */
+function showPlanLimitModal() {
+  _showPlanLimitModal('projects_month', _getUsage('projects_month'), _getResourceLimit('projects_month'));
 }
 
 function _clearSession() {
@@ -10756,13 +10952,8 @@ function submitProject() {
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
   }
-  /* Limite plano gratuito */
-  if (!_isPro()) {
-    var _mk = 'hw_pjc_' + new Date().getMonth();
-    var _pc = parseInt(localStorage.getItem(_mk)||'0');
-    if (_pc >= 3) { closeModal('publish'); setTimeout(function(){ showPlanLimitModal(); }, 200); return; }
-    localStorage.setItem(_mk, _pc+1);
-  }
+  /* Validação de limite do plano em tempo real — antes de executar a ação */
+  if (!_checkPlanLimit('projects_month')) { closeModal('publish'); return; }
   var t   = document.getElementById('proj-title');
   var d   = document.getElementById('proj-desc');
   var c   = document.getElementById('proj-cat');
@@ -10806,6 +10997,8 @@ function submitProject() {
         closeModal('publish');
         if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
         showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+        /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
+        _registerPlanUsage('projects_month');
         /* Exibir imediatamente em "Projetos Ativos" e em "Meu Perfil → Meus Projetos Publicados" */
         if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
       }).catch(function(err) {
@@ -10821,6 +11014,8 @@ function submitProject() {
       closeModal('publish');
       if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
       showToast('🚀 Projeto publicado com sucesso! (modo demo)','success');
+      /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
+      _registerPlanUsage('projects_month');
     }, 900);
   }
 }
@@ -10859,6 +11054,9 @@ function submitProposal() {
   }
   if (!ok) return;
 
+  /* Validação de limite do plano em tempo real — antes de enviar a proposta */
+  if (!_checkPlanLimit('proposals_month')) return;
+
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando...'; }
 
   var value       = parseInt((v.value || '0').replace(/[^0-9]/g,''), 10) || 0;
@@ -10877,6 +11075,8 @@ function submitProposal() {
     if (v) v.value=''; if (d) d.value=''; if (cv) cv.value='';
     showToast('🎉 Proposta enviada com sucesso!', 'success');
     window._pendingProposal = null;
+    /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
+    _registerPlanUsage('proposals_month');
   }
 
   function onError(msg) {
@@ -14739,8 +14939,8 @@ function _renderSecLog() {
     el.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-4);padding:14px;">Nenhum evento registrado ainda.</td></tr>';
     return;
   }
-  var icons = { LOGIN_OK:'&#9989;', LOGIN_FAIL:'&#10060;', BRUTE_FORCE:'&#128680;', LOCKOUT_BLOCK:'&#128274;', LOGOUT:'&#128682;', SESSION_TIMEOUT:'&#9200;' };
-  var colors = { LOGIN_OK:'#166534', LOGIN_FAIL:'#991b1b', BRUTE_FORCE:'#dc2626', LOCKOUT_BLOCK:'#92400e', LOGOUT:'#475569', SESSION_TIMEOUT:'#1e40af' };
+  var icons = { LOGIN_OK:'&#9989;', LOGIN_FAIL:'&#10060;', BRUTE_FORCE:'&#128680;', LOCKOUT_BLOCK:'&#128274;', LOGOUT:'&#128682;', SESSION_TIMEOUT:'&#9200;', PLAN_LIMIT:'&#128202;' };
+  var colors = { LOGIN_OK:'#166534', LOGIN_FAIL:'#991b1b', BRUTE_FORCE:'#dc2626', LOCKOUT_BLOCK:'#92400e', LOGOUT:'#475569', SESSION_TIMEOUT:'#1e40af', PLAN_LIMIT:'#9333ea' };
   el.innerHTML = _secEvents.slice(0,20).map(function(e) {
     return '<tr>' +
       '<td style="font-size:11px;color:var(--text-4);white-space:nowrap;">' + e.ts + '</td>' +
@@ -17571,37 +17771,38 @@ if (document.readyState === 'loading') {
     <!-- Corpo -->
     <div style="padding:32px 32px 28px;background:#fff;">
       <h2 style="font-size:22px;font-weight:700;color:#1C2B3A;margin-bottom:16px;">
-        Olá, <span id="pl-name">Usuário</span>! 👋
+        <span id="pl-icon">🚧</span> Olá, <span id="pl-name">Usuário</span>!
       </h2>
 
-      <p style="font-size:14px;color:#4A5568;line-height:1.6;margin-bottom:14px;">
-        Você atingiu o limite de <strong>3 projetos gratuitos</strong> deste mês no plano Básico.
+      <!-- Mensagem dinâmica: qual limite foi atingido + bloqueio + caminho de upgrade -->
+      <p id="pl-message" style="font-size:14px;color:#4A5568;line-height:1.6;margin-bottom:14px;">
+        Você atingiu o limite do seu plano atual.
       </p>
 
-      <div style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:18px;">
-        <p style="font-size:14px;color:#166534;font-weight:600;margin-bottom:6px;">
-          📬 A partir de agora você receberá:
-        </p>
-        <ul style="font-size:13px;color:#374151;line-height:1.8;padding-left:18px;margin:0;">
-          <li>Resumo diário de novos projetos por e-mail</li>
-          <li>Acesso à base de freelancers</li>
-          <li>Chat com candidatos existentes</li>
-          <li>Garantia básica nos contratos ativos</li>
-        </ul>
+      <!-- Percentual de utilização do plano (ex.: 50/50 — 100%) -->
+      <div style="margin-bottom:18px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:#6B7280;margin-bottom:6px;">
+          <span id="pl-usage-pct">0/0 utilizados — 0% do limite</span>
+        </div>
+        <div style="background:#E5E7EB;border-radius:999px;height:8px;overflow:hidden;">
+          <div id="pl-usage-bar" style="background:#F4511E;height:100%;border-radius:999px;width:0%;transition:width .4s ease;"></div>
+        </div>
       </div>
 
+      <!-- Benefícios do próximo plano disponível (preenchido dinamicamente) -->
+      <div id="pl-benefits" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:10px;padding:16px 18px;margin-bottom:18px;"></div>
+
       <p style="font-size:13px;color:#6B7280;line-height:1.6;margin-bottom:24px;">
-        Assine o <strong style="color:var(--green);">Plano Profissional</strong> para publicar projetos ilimitados,
-        ter comissão reduzida de 12%, suporte em 4h e muito mais.
+        Ações relacionadas a este recurso ficam temporariamente bloqueadas/restritas até a renovação do ciclo ou o upgrade do plano.
       </p>
 
       <!-- Botões -->
       <div style="display:flex;flex-direction:column;gap:10px;">
-        <button class="btn btn-green btn-block btn-lg" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';showPage('pricing');">
-          🚀 Fazer Upgrade — R$ 149/mês
+        <button id="pl-cta" class="btn btn-green btn-block btn-lg" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';showPage('pricing');">
+          🚀 Fazer Upgrade
         </button>
         <button class="btn btn-outline btn-block" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';">
-          Continuar no plano Gratuito
+          Continuar no plano atual
         </button>
       </div>
 
