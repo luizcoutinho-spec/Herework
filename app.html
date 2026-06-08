@@ -13973,11 +13973,6 @@ async function _deletePublishedProject(projectId, btnEl) {
   var titleEl  = card  ? card.querySelector('.proj-list-title, .dash-proj-title') : null;
   var projTitle = titleEl ? titleEl.textContent.trim() : 'esta publicação';
 
-  /* Confirmação — evita remoções acidentais */
-  if (!confirm('Tem certeza que deseja excluir a publicação\n"' + projTitle + '"?\n\nEsta ação não pode ser desfeita — a publicação será removida permanentemente da plataforma.')) {
-    return;
-  }
-
   /* Feedback visual imediato enquanto aguarda o banco */
   if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = 'Excluindo…'; }
 
