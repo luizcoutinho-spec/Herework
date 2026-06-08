@@ -10336,30 +10336,65 @@ async function _sbSaveProfile(data, extMeta) {
         _session.uid = uid;
       }
     }
-  } catch(e) { console.warn('_sbSaveProfile: session sync error', e); }
+  } catch(e) { console.warn('[sbSave] session sync error:', e); }
 
-  if (!uid) { console.warn('_sbSaveProfile: uid desconhecido — não é possível salvar'); return false; }
+  if (!uid) { console.warn('[sbSave] uid desconhecido — abortando'); return false; }
 
-  var updatePayload = {
-    name:        data.name,
-    bio:         data.bio,
-    city:        data.city,
-    state:       data.state,
-    phone:       data.phone,
-    hourly_rate: data.hourlyRate,
+  /* Payload completo — inclui id+email para upsert funcionar mesmo
+     se o perfil não existir ainda na tabela (falha de trigger no signup) */
+  var payload = {
+    id:          uid,
+    email:       (_session && _session.email) || '',
+    name:        data.name  || '',
+    bio:         data.bio   || '',
+    city:        data.city  || '',
+    state:       data.state || '',
+    phone:       data.phone || '',
+    hourly_rate: data.hourlyRate || null,
     skills:      data.skills || [],
     updated_at:  new Date().toISOString()
   };
-  /* Inclui type apenas quando fornecido e válido */
   if (data.type && ['client','freelancer','both'].indexOf(data.type) !== -1) {
-    updatePayload.type = data.type;
+    payload.type = data.type;
   }
-  /* Salva metadados extendidos em coluna JSONB */
   if (extMeta) {
-    updatePayload.profile_metadata = extMeta;
+    payload.profile_metadata = extMeta;
   }
-  var r = await _sb.from('profiles').update(updatePayload).eq('id', uid);
-  return !r.error;
+
+  /* ── Tentativa 1: payload completo ── */
+  var r = await _sb.from('profiles').upsert(payload, { onConflict: 'id' });
+  if (!r.error) return true;
+
+  console.error('[sbSave] upsert falhou:', r.error.code, '|', r.error.message);
+  var errMsg = (r.error.message || '').toLowerCase();
+
+  /* ── Tentativa 2: sem profile_metadata (coluna pode não ter sido criada) ── */
+  if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
+    delete payload.profile_metadata;
+    var r2 = await _sb.from('profiles').upsert(payload, { onConflict: 'id' });
+    if (!r2.error) return true;
+    console.error('[sbSave] retry sem metadata falhou:', r2.error.message);
+    errMsg = (r2.error.message || '').toLowerCase();
+  }
+
+  /* ── Tentativa 3: só campos básicos (sem type nem metadata) ── */
+  var safePayload = {
+    id:          uid,
+    email:       payload.email,
+    name:        payload.name,
+    bio:         payload.bio,
+    city:        payload.city,
+    state:       payload.state,
+    phone:       payload.phone,
+    hourly_rate: payload.hourly_rate,
+    skills:      payload.skills,
+    updated_at:  payload.updated_at
+  };
+  var r3 = await _sb.from('profiles').upsert(safePayload, { onConflict: 'id' });
+  if (!r3.error) return true;
+
+  console.error('[sbSave] tentativa final falhou:', r3.error.code, '|', r3.error.message);
+  return false;
 }
 
 /* ── MENSAGENS: Buscar ────────────────────────────────────────── */
@@ -11412,6 +11447,8 @@ function submitLogin() {
               var isFL = (_ps.type === 'freelancer' || _ps.type === 'both');
               if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
               showToast('Perfil salvo com sucesso! ✓', 'success');
+            } else {
+              showToast('Erro ao salvar — execute as migrações do banco e tente novamente.', 'error');
             }
           });
         }, 600);
