@@ -403,3 +403,52 @@ ALTER TABLE profiles ADD CONSTRAINT profiles_type_check
 
 -- Verificação opcional: retorna todos os tipos distintos existentes
 -- SELECT DISTINCT type FROM profiles;
+
+-- ═══════════════════════════════════════════════════════════════
+-- MIGRAÇÃO — Perfil Freelancer Extendido
+--
+-- Adiciona coluna JSONB `profile_metadata` para armazenar todos os
+-- campos adicionais do formulário freelancer (experiência, idiomas,
+-- disponibilidade, ferramentas, formação, portfólio, IA, etc.)
+--
+-- Execute no SQL Editor do Supabase. Seguro para rodar múltiplas vezes.
+-- Dados existentes não são afetados.
+-- ═══════════════════════════════════════════════════════════════
+
+-- Adiciona coluna profile_metadata se ainda não existir
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS profile_metadata JSONB DEFAULT '{}'::jsonb;
+
+-- Índice GIN para buscas eficientes dentro do JSONB
+CREATE INDEX IF NOT EXISTS idx_profiles_metadata
+  ON profiles USING GIN (profile_metadata);
+
+-- Comentário documentando o schema do JSONB
+COMMENT ON COLUMN profiles.profile_metadata IS
+'Dados extendidos do freelancer. Campos esperados:
+  title TEXT                 — Título profissional
+  linkedin_url TEXT          — URL do LinkedIn
+  portfolio_url TEXT         — URL do site/portfólio principal
+  portfolio_1..3 TEXT        — Links adicionais de portfólio
+  timezone TEXT              — Ex: "-3"
+  hourly_rate NUMERIC        — Valor hora em R$
+  project_min NUMERIC        — Valor mínimo por projeto em R$
+  exp_years TEXT             — Ex: "3-5"
+  exp_level TEXT             — iniciante|intermediario|senior|especialista
+  billing_prefs TEXT         — CSV: hora,projeto,mensal,combinar
+  availability TEXT          — disponivel|breve|ocupado
+  hours_week TEXT            — Ex: "20"
+  work_regime TEXT           — CSV: remoto,hibrido,presencial
+  proj_prefs TEXT            — CSV: curto,medio,longo,recorrente
+  languages TEXT             — CSV: pt,en,es,fr,de,it,zh,ja,outro
+  tools TEXT[]               — Ferramentas do dia a dia
+  ai_use TEXT                — sim|as-vezes|nao
+  ai_tools TEXT              — CSV: chatgpt,claude,gemini,midjourney,copilot,n8n,outras
+  education_level TEXT       — medio|tecnico|graduacao|pos|mestrado|doutorado
+  education_area TEXT        — Ex: "Ciência da Computação"
+  certifications TEXT        — Certificações em texto livre
+';
+
+-- Verificação opcional: retorna freelancers com metadata preenchido
+-- SELECT id, name, profile_metadata FROM profiles
+-- WHERE type IN (''freelancer'', ''both'') AND profile_metadata != ''{}'';

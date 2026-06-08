@@ -2424,6 +2424,44 @@ section { padding: 64px 0; }
 }
 
 /* ═══════════════════════════════════════
+   PERFIL FREELANCER — chips de seleção
+═══════════════════════════════════════ */
+.profile-chip {
+  display:inline-flex; align-items:center; padding:5px 12px;
+  border:1.5px solid var(--border); border-radius:20px; cursor:pointer;
+  font-size:12px; font-weight:600; color:var(--text-3); background:var(--surface);
+  transition:all .15s; user-select:none; white-space:nowrap; line-height:1.3;
+}
+.profile-chip:hover  { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+.profile-chip.active { border-color:var(--green); color:var(--green); background:#f0fdf4;
+                       box-shadow:0 0 0 3px rgba(34,197,94,.12); }
+
+/* Divisores de seção dentro do form */
+.prof-section-divider {
+  display:flex; align-items:center; gap:10px;
+  margin:22px 0 14px; padding-top:16px; border-top:1px solid var(--border-2);
+}
+.prof-section-title {
+  font-size:12px; font-weight:700; color:var(--text-2); white-space:nowrap;
+}
+
+/* Barra de completude do perfil */
+.profile-completion-wrap {
+  margin:14px 0; padding:12px 14px;
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:var(--radius); font-size:12px;
+  display:flex; align-items:center; gap:12px;
+}
+.profile-completion-bg {
+  flex:1; height:6px; background:var(--border-2);
+  border-radius:3px; overflow:hidden;
+}
+.profile-completion-bar {
+  height:100%; border-radius:3px; background:var(--green);
+  transition:width .5s; width:0%;
+}
+
+/* ═══════════════════════════════════════
    CONTRATO + GARANTIA — MODAL
 ═══════════════════════════════════════ */
 #overlay-contract .modal { max-width:560px; padding:0; overflow:hidden; }
@@ -4951,23 +4989,44 @@ section { padding: 64px 0; }
           </div>
         </div>
 
+        <!-- Completude do perfil -->
+        <div class="profile-completion-wrap" id="profile-completion-wrap">
+          <div style="flex-shrink:0;">
+            <div style="font-size:11px;font-weight:700;color:var(--text-2);">Completude do perfil</div>
+            <div style="font-size:10px;color:var(--text-4);margin-top:1px;">Perfis completos recebem até 3× mais propostas</div>
+          </div>
+          <div class="profile-completion-bg">
+            <div class="profile-completion-bar" id="profile-completion-bar"></div>
+          </div>
+          <div style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--green);" id="profile-completion-pct">0%</div>
+        </div>
+
         <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group">
-            <label class="form-label" for="profile-name">Nome completo</label>
-            <input class="form-input" id="profile-name" type="text" placeholder="Seu nome completo">
+            <label class="form-label" for="profile-name">Nome completo <span style="color:#ef4444;">*</span></label>
+            <input class="form-input" id="profile-name" type="text" placeholder="Seu nome completo" oninput="profileUpdateCompletion()">
           </div>
           <div class="form-group">
             <label class="form-label" for="profile-email">E-mail</label>
-            <input class="form-input" id="profile-email" type="email" placeholder="seu@email.com">
+            <input class="form-input" id="profile-email" type="email" placeholder="seu@email.com" style="opacity:.65;" readonly>
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="profile-title">Profiss&atilde;o / T&iacute;tulo profissional</label>
-          <input class="form-input" id="profile-title" type="text" placeholder="Ex: Desenvolvedor Full Stack, Designer UI/UX, Gestor de Marketing...">
+          <label class="form-label" for="profile-title">T&iacute;tulo profissional <span style="color:#ef4444;">*</span></label>
+          <input class="form-input" id="profile-title" type="text"
+            placeholder="Ex: Desenvolvedor Full Stack · Designer UI/UX · Especialista em Marketing"
+            oninput="profileUpdateCompletion()">
+          <div style="font-size:11px;color:var(--text-4);margin-top:3px;">Exibido abaixo do seu nome na listagem de freelancers</div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="profile-bio">Sobre mim</label>
-          <textarea class="form-textarea" id="profile-bio" placeholder="Descreva sua experi&ecirc;ncia, especialidades e o que voc&ecirc; busca na plataforma..." style="min-height:100px;"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+            <label for="profile-bio" class="form-label" style="margin:0;">Sobre mim <span style="color:#ef4444;">*</span></label>
+            <span id="profile-bio-count" style="font-size:11px;color:var(--text-4);">0/1000</span>
+          </div>
+          <textarea class="form-textarea" id="profile-bio" maxlength="1000"
+            placeholder="Descreva sua experi&ecirc;ncia, especialidades, diferenciais e o que voc&ecirc; entrega de valor. Um bom perfil aumenta em at&eacute; 3&times; suas chances de ser contratado."
+            style="min-height:110px;" oninput="profileUpdateBioCount(this);profileUpdateCompletion()"></textarea>
+          <div class="pub-quality-bar"><div class="pub-quality-fill" id="profile-bio-bar"></div></div>
         </div>
         <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group">
@@ -5014,9 +5073,28 @@ section { padding: 64px 0; }
               </select>
             </div>
         </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-url">LinkedIn</label>
+            <input class="form-input" id="profile-url" type="url" placeholder="https://linkedin.com/in/seuperfil">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-portfolio-url">Portf&oacute;lio / Site pessoal</label>
+            <input class="form-input" id="profile-portfolio-url" type="url" placeholder="https://seusite.com ou Behance...">
+          </div>
+        </div>
         <div class="form-group">
-          <label class="form-label" for="profile-url">LinkedIn / Portf&oacute;lio (opcional)</label>
-          <input class="form-input" id="profile-url" type="url" placeholder="https://linkedin.com/in/seuperfil">
+          <label class="form-label" for="profile-timezone">Fuso hor&aacute;rio</label>
+          <select class="form-select" id="profile-timezone">
+            <option value="-3" selected>UTC-3 &mdash; Bras&iacute;lia, S&atilde;o Paulo, Rio &#9733;</option>
+            <option value="-4">UTC-4 &mdash; Cuiab&aacute;, Manaus</option>
+            <option value="-5">UTC-5 &mdash; Acre, Rio Branco</option>
+            <option value="-2">UTC-2 &mdash; Fernando de Noronha</option>
+            <option value="0">UTC+0 &mdash; Portugal, Lisboa</option>
+            <option value="-6">UTC-6 &mdash; M&eacute;xico</option>
+            <option value="-5b">UTC-5 &mdash; Nova York, Miami</option>
+            <option value="-8">UTC-8 &mdash; Los Angeles, S&atilde;o Francisco</option>
+          </select>
         </div>
 
         <!-- ── Área de Atuação & Habilidades ── -->
@@ -5063,7 +5141,200 @@ section { padding: 64px 0; }
           </div>
         </div>
 
-        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+        <!-- ══════ VALOR & EXPERIÊNCIA ══════ -->
+        <div class="prof-section-divider">
+          <span class="prof-section-title">&#128176; Valor &amp; Experi&ecirc;ncia</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Valor por hora (R$)</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--text-3);">R$</span>
+              <input class="form-input" id="profile-hourly-rate" type="number" min="0" placeholder="Ex: 120"
+                style="padding-left:34px;" oninput="profileUpdateCompletion()">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Valor m&iacute;nimo por projeto (R$)</label>
+            <div style="position:relative;">
+              <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--text-3);">R$</span>
+              <input class="form-input" id="profile-project-min" type="number" min="0" placeholder="Ex: 500"
+                style="padding-left:34px;">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-exp-years">Anos de experi&ecirc;ncia</label>
+            <select class="form-select" id="profile-exp-years" onchange="profileUpdateCompletion()">
+              <option value="">Selecione...</option>
+              <option value="menos1">Menos de 1 ano</option>
+              <option value="1-2">1 a 2 anos</option>
+              <option value="3-5">3 a 5 anos</option>
+              <option value="6-10">6 a 10 anos</option>
+              <option value="mais10">Mais de 10 anos</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" style="margin-bottom:6px;">N&iacute;vel profissional</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="iniciante">Iniciante</button>
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="intermediario">Intermedi&aacute;rio</button>
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="senior">S&ecirc;nior</button>
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="especialista">Especialista</button>
+            </div>
+            <input type="hidden" id="profile-exp-level">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="margin-bottom:6px;">Modalidade de cobran&ccedil;a preferida</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'billing')" data-val="hora">Por hora</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'billing')" data-val="projeto">Por projeto</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'billing')" data-val="mensal">Mensalidade</button>
+            <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'billing')" data-val="combinar">A combinar</button>
+          </div>
+          <input type="hidden" id="profile-billing-prefs" value="combinar">
+        </div>
+
+        <!-- ══════ DISPONIBILIDADE ══════ -->
+        <div class="prof-section-divider">
+          <span class="prof-section-title">&#128197; Disponibilidade</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div>
+            <label class="form-label" style="margin-bottom:6px;">Status atual <span style="color:#ef4444;">*</span></label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="profile-chip active" type="button" onclick="profileSelectChip(this,'avail')" data-val="disponivel" style="border-color:#16a34a;color:#16a34a;background:#f0fdf4;">&#128994; Dispon&iacute;vel</button>
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'avail')" data-val="breve">&#128993; Em breve</button>
+              <button class="profile-chip" type="button" onclick="profileSelectChip(this,'avail')" data-val="ocupado">&#128308; Ocupado</button>
+            </div>
+            <input type="hidden" id="profile-availability" value="disponivel">
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-hours-week">Horas dispon&iacute;veis / semana</label>
+            <select class="form-select" id="profile-hours-week">
+              <option value="">Selecione...</option>
+              <option value="10">At&eacute; 10 horas</option>
+              <option value="20">10 a 20 horas</option>
+              <option value="30">20 a 30 horas</option>
+              <option value="40">30 a 40 horas</option>
+              <option value="40+">Tempo integral (+40h)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div>
+            <label class="form-label" style="margin-bottom:6px;">Regime preferido</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'regime')" data-val="remoto">&#127968; Remoto</button>
+              <button class="profile-chip" type="button" onclick="profileMultiChip(this,'regime')" data-val="hibrido">&#128260; H&iacute;brido</button>
+              <button class="profile-chip" type="button" onclick="profileMultiChip(this,'regime')" data-val="presencial">&#127970; Presencial</button>
+            </div>
+            <input type="hidden" id="profile-work-regime" value="remoto">
+          </div>
+          <div>
+            <label class="form-label" style="margin-bottom:6px;">Tipo de projeto preferido</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button class="profile-chip" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="curto">Curto (&lt;1m)</button>
+              <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="medio">M&eacute;dio (1-3m)</button>
+              <button class="profile-chip" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="longo">Longo (3m+)</button>
+              <button class="profile-chip" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="recorrente">Recorrente</button>
+            </div>
+            <input type="hidden" id="profile-proj-prefs" value="medio">
+          </div>
+        </div>
+
+        <!-- ══════ IDIOMAS ══════ -->
+        <div class="prof-section-divider">
+          <span class="prof-section-title">&#127758; Idiomas</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'lang')" data-val="pt">&#127463;&#127479; Portugu&ecirc;s</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="en">&#127482;&#127480; Ingl&ecirc;s</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="es">&#127466;&#127480; Espanhol</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="fr">&#127467;&#127479; Franc&ecirc;s</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="de">&#127465;&#127466; Alem&atilde;o</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="it">&#127470;&#127481; Italiano</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="zh">&#127464;&#127475; Chin&ecirc;s</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="ja">&#127471;&#127477; Japon&ecirc;s</button>
+          <button class="profile-chip" type="button" onclick="profileMultiChip(this,'lang')" data-val="outro">Outro</button>
+        </div>
+        <input type="hidden" id="profile-languages" value="pt">
+
+        <!-- ══════ FERRAMENTAS & IA ══════ -->
+        <div class="prof-section-divider">
+          <span class="prof-section-title">&#129302; Ferramentas &amp; IA</span>
+        </div>
+        <div class="form-group" style="margin-bottom:12px;">
+          <label class="form-label" style="margin-bottom:5px;">
+            Ferramentas do dia a dia
+            <span style="font-size:11px;font-weight:400;color:var(--text-4);">(pressione Enter para adicionar &middot; m&aacute;x. 10)</span>
+          </label>
+          <input class="form-input" id="profile-tools-input" type="text"
+            placeholder="Ex: Figma, VS Code, Notion, Jira, Photoshop, Slack..."
+            onkeydown="profileAddTool(event)">
+          <div id="profile-tools-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:0;"></div>
+          <input type="hidden" id="profile-tools" value="[]">
+        </div>
+        <div class="form-group" style="margin-bottom:8px;">
+          <label class="form-label" style="margin-bottom:6px;">Usa intelig&ecirc;ncia artificial no trabalho?</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="profile-chip" type="button" onclick="profileSelectChip(this,'ai-use');profileToggleAITools()" data-val="sim">&#9989; Sim, regularmente</button>
+            <button class="profile-chip" type="button" onclick="profileSelectChip(this,'ai-use');profileToggleAITools()" data-val="as-vezes">&#9889; &Agrave;s vezes</button>
+            <button class="profile-chip" type="button" onclick="profileSelectChip(this,'ai-use');profileToggleAITools()" data-val="nao">&#10060; N&atilde;o utilizo</button>
+          </div>
+          <input type="hidden" id="profile-ai-use">
+        </div>
+        <div id="profile-ai-tools-section" style="display:none;margin-top:10px;">
+          <label class="form-label" style="margin-bottom:6px;font-size:12px;">Quais ferramentas de IA voc&ecirc; utiliza?</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="chatgpt">ChatGPT</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="claude">Claude</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="gemini">Gemini</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="midjourney">Midjourney</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="copilot">GitHub Copilot</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="n8n">n8n / Make</button>
+            <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="outras">Outras</button>
+          </div>
+          <input type="hidden" id="profile-ai-tools">
+        </div>
+
+        <!-- ══════ FORMAÇÃO & PORTFÓLIO ══════ -->
+        <div class="prof-section-divider">
+          <span class="prof-section-title">&#127891; Forma&ccedil;&atilde;o &amp; Portf&oacute;lio</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-education-level">N&iacute;vel de forma&ccedil;&atilde;o</label>
+            <select class="form-select" id="profile-education-level">
+              <option value="">Selecione...</option>
+              <option value="medio">Ensino M&eacute;dio</option>
+              <option value="tecnico">T&eacute;cnico / Tecn&oacute;logo</option>
+              <option value="graduacao">Gradua&ccedil;&atilde;o</option>
+              <option value="pos">P&oacute;s-gradua&ccedil;&atilde;o / MBA</option>
+              <option value="mestrado">Mestrado</option>
+              <option value="doutorado">Doutorado</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="profile-education-area">&Aacute;rea de forma&ccedil;&atilde;o</label>
+            <input class="form-input" id="profile-education-area" type="text" placeholder="Ex: Ci&ecirc;ncia da Computa&ccedil;&atilde;o, Design...">
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label" for="profile-certifications">Certifica&ccedil;&otilde;es relevantes</label>
+          <textarea class="form-textarea" id="profile-certifications"
+            placeholder="Liste suas principais certifica&ccedil;&otilde;es. Ex: AWS Solutions Architect (2024), Scrum Master, Google Analytics, HubSpot..."
+            style="min-height:65px;"></textarea>
+        </div>
+        <label class="form-label" style="margin-bottom:8px;">&#128279; Links de Portf&oacute;lio</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <input class="form-input" id="profile-portfolio-1" type="url" placeholder="&#128279; GitHub, Behance, Dribbble &mdash; link principal">
+          <input class="form-input" id="profile-portfolio-2" type="url" placeholder="&#128279; YouTube, case study, artigo t&eacute;cnico">
+          <input class="form-input" id="profile-portfolio-3" type="url" placeholder="&#128279; Outro link relevante (opcional)">
+        </div>
+
+        <!-- ══════ SALVAR ══════ -->
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:24px;">
           <button class="btn btn-outline" onclick="dashCancelEdit()">Cancelar</button>
           <button class="btn btn-primary" id="profile-save-btn" onclick="dashSaveProfile()">
             &#10003; Salvar Altera&ccedil;&otilde;es
@@ -9714,7 +9985,7 @@ async function _sbGetDashStats() {
 }
 
 /* ── PERFIL: Salvar ───────────────────────────────────────────── */
-async function _sbSaveProfile(data) {
+async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
   var updatePayload = {
     name:        data.name,
@@ -9729,6 +10000,10 @@ async function _sbSaveProfile(data) {
   /* Inclui type apenas quando fornecido e válido */
   if (data.type && ['client','freelancer','both'].indexOf(data.type) !== -1) {
     updatePayload.type = data.type;
+  }
+  /* Salva metadados extendidos em coluna JSONB (opcional — só se a coluna existir) */
+  if (extMeta) {
+    updatePayload.profile_metadata = extMeta;
   }
   var r = await _sb.from('profiles').update(updatePayload).eq('id', _session.uid);
   return !r.error;
@@ -14928,6 +15203,9 @@ function openDashboard() {
   /* Inicializa o seletor de tipo de conta no painel de perfil */
   if (typeof _initAcTypeUI === 'function') _initAcTypeUI();
 
+  /* Preenche campos extendidos do formulário freelancer */
+  if (typeof _initProfileExtended === 'function') _initProfileExtended();
+
   switchDashPanel('profile');
   showPage('dashboard');
 }
@@ -14980,6 +15258,258 @@ function _initAcTypeUI() {
   dashSetAccountType(cur);
 }
 
+/* ── CHIP: seleção única (radio) ────────────────────────────────── */
+function profileSelectChip(btn, group) {
+  var parent = btn.closest('[style]') || btn.parentElement;
+  if (parent) {
+    var chips = parent.querySelectorAll('.profile-chip[data-val]');
+    chips.forEach(function(c) {
+      c.classList.remove('active');
+      c.style.borderColor = '';
+      c.style.color = '';
+      c.style.background = '';
+    });
+  }
+  btn.classList.add('active');
+  /* guarda valor no hidden correspondente */
+  var hiddenMap = {
+    'exp-level': 'profile-exp-level',
+    'avail':     'profile-availability',
+    'ai-use':    'profile-ai-use'
+  };
+  var hidId = hiddenMap[group];
+  if (hidId) {
+    var hid = document.getElementById(hidId);
+    if (hid) hid.value = btn.dataset.val || '';
+  }
+  profileUpdateCompletion();
+}
+window.profileSelectChip = profileSelectChip;
+
+/* ── CHIP: seleção múltipla (checkbox) ──────────────────────────── */
+function profileMultiChip(btn, group) {
+  btn.classList.toggle('active');
+  /* coleta todos os ativos do mesmo grupo */
+  var parent = btn.closest('[style]') || btn.parentElement;
+  var vals = [];
+  if (parent) {
+    parent.querySelectorAll('.profile-chip.active[data-val]').forEach(function(c) {
+      vals.push(c.dataset.val);
+    });
+  }
+  /* Garante pelo menos 1 selecionado — reverte se ficou vazio */
+  if (vals.length === 0) {
+    btn.classList.add('active');
+    vals = [btn.dataset.val];
+  }
+  var hiddenMap = {
+    'billing':   'profile-billing-prefs',
+    'regime':    'profile-work-regime',
+    'proj-pref': 'profile-proj-prefs',
+    'lang':      'profile-languages',
+    'ai-tools':  'profile-ai-tools'
+  };
+  var hidId = hiddenMap[group];
+  if (hidId) {
+    var hid = document.getElementById(hidId);
+    if (hid) hid.value = vals.join(',');
+  }
+  profileUpdateCompletion();
+}
+window.profileMultiChip = profileMultiChip;
+
+/* ── IA: mostra/oculta ferramentas de IA ───────────────────────── */
+function profileToggleAITools() {
+  var aiUse = document.getElementById('profile-ai-use');
+  var sec   = document.getElementById('profile-ai-tools-section');
+  if (!sec) return;
+  var show = aiUse && (aiUse.value === 'sim' || aiUse.value === 'as-vezes');
+  sec.style.display = show ? 'block' : 'none';
+}
+window.profileToggleAITools = profileToggleAITools;
+
+/* ── BIO: contador de caracteres + barra de qualidade ──────────── */
+function profileUpdateBioCount(inp) {
+  var len  = (inp && inp.value) ? inp.value.length : 0;
+  var cnt  = document.getElementById('profile-bio-count');
+  var bar  = document.getElementById('profile-bio-bar');
+  if (cnt) cnt.textContent = len + '/1000';
+  if (bar) {
+    var pct = Math.min(len / 400 * 100, 100); /* cheio aos 400 chars */
+    bar.style.width = pct + '%';
+    bar.style.background = pct < 30 ? '#ef4444' : pct < 70 ? '#f59e0b' : '#22c55e';
+  }
+}
+window.profileUpdateBioCount = profileUpdateBioCount;
+
+/* ── FERRAMENTAS: adicionar via Enter ───────────────────────────── */
+function profileAddTool(e) {
+  if (e.key !== 'Enter') return;
+  e.preventDefault();
+  var inp   = document.getElementById('profile-tools-input');
+  var hid   = document.getElementById('profile-tools');
+  var cont  = document.getElementById('profile-tools-chips');
+  if (!inp || !hid || !cont) return;
+  var val = (inp.value || '').trim();
+  if (!val) return;
+  var tools = [];
+  try { tools = JSON.parse(hid.value || '[]'); } catch(x) {}
+  if (tools.length >= 10) { showToast('Máximo de 10 ferramentas atingido.', 'warning'); return; }
+  if (tools.indexOf(val) !== -1) { inp.value=''; return; }
+  tools.push(val);
+  hid.value = JSON.stringify(tools);
+  inp.value = '';
+  /* renderiza chip */
+  var chip = document.createElement('span');
+  chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--text-2);background:var(--surface);';
+  chip.innerHTML = val + '<button type="button" onclick="profileRemoveTool(this,\'' + val.replace(/'/g,"\\'") + '\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-4);padding:0 0 0 3px;line-height:1;">&times;</button>';
+  cont.appendChild(chip);
+}
+window.profileAddTool = profileAddTool;
+
+/* ── FERRAMENTAS: remover chip ──────────────────────────────────── */
+function profileRemoveTool(btn, val) {
+  var hid  = document.getElementById('profile-tools');
+  if (!hid) return;
+  var tools = [];
+  try { tools = JSON.parse(hid.value || '[]'); } catch(x) {}
+  tools = tools.filter(function(t){ return t !== val; });
+  hid.value = JSON.stringify(tools);
+  if (btn.parentElement) btn.parentElement.remove();
+}
+window.profileRemoveTool = profileRemoveTool;
+
+/* ── COMPLETION: calcula % de preenchimento ─────────────────────── */
+function profileUpdateCompletion() {
+  var fields = [
+    document.getElementById('profile-name'),
+    document.getElementById('profile-title'),
+    document.getElementById('profile-bio'),
+    document.getElementById('profile-exp-years'),
+    document.getElementById('profile-exp-level'),
+    document.getElementById('profile-hourly-rate'),
+    document.getElementById('profile-languages'),
+    document.getElementById('profile-availability')
+  ];
+  var filled = 0;
+  fields.forEach(function(f) {
+    if (f && f.value && f.value.trim() !== '') filled++;
+  });
+  var pct = Math.round(filled / fields.length * 100);
+  var bar = document.getElementById('profile-completion-bar');
+  var lbl = document.getElementById('profile-completion-pct');
+  if (bar) bar.style.width = pct + '%';
+  if (lbl) lbl.textContent = pct + '%';
+}
+window.profileUpdateCompletion = profileUpdateCompletion;
+
+/* ── INIT EXTENDED: preenche campos ao abrir ────────────────────── */
+function _initProfileExtended() {
+  var meta = {};
+  try { meta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x) {}
+
+  /* Título */
+  var titleEl = document.getElementById('profile-title');
+  if (titleEl && meta.title) titleEl.value = meta.title;
+
+  /* Fuso horário */
+  var tzEl = document.getElementById('profile-timezone');
+  if (tzEl && meta.timezone) tzEl.value = meta.timezone;
+
+  /* LinkedIn / Portfolio URL */
+  var urlEl = document.getElementById('profile-url');
+  if (urlEl && meta.linkedin_url) urlEl.value = meta.linkedin_url;
+  var portEl = document.getElementById('profile-portfolio-url');
+  if (portEl && meta.portfolio_url) portEl.value = meta.portfolio_url;
+
+  /* Valor hora / mínimo */
+  var hrEl = document.getElementById('profile-hourly-rate');
+  if (hrEl && meta.hourly_rate) hrEl.value = meta.hourly_rate;
+  var pmEl = document.getElementById('profile-project-min');
+  if (pmEl && meta.project_min) pmEl.value = meta.project_min;
+
+  /* Anos de experiência */
+  var eyEl = document.getElementById('profile-exp-years');
+  if (eyEl && meta.exp_years) eyEl.value = meta.exp_years;
+
+  /* Chips de seleção única — restaura ativo */
+  function _restoreChip(group, hidId, val) {
+    if (!val) return;
+    var hid = document.getElementById(hidId);
+    if (hid) hid.value = val;
+    var parent = hid ? hid.previousElementSibling : null;
+    if (parent) {
+      parent.querySelectorAll('.profile-chip[data-val]').forEach(function(c) {
+        c.classList.toggle('active', c.dataset.val === val);
+      });
+    }
+  }
+  _restoreChip('exp-level', 'profile-exp-level', meta.exp_level);
+  _restoreChip('avail',     'profile-availability', meta.availability);
+  _restoreChip('ai-use',    'profile-ai-use', meta.ai_use);
+
+  /* Chips multi — restaura ativos */
+  function _restoreMulti(hidId, val) {
+    if (!val) return;
+    var vals = val.split(',');
+    var hid = document.getElementById(hidId);
+    if (hid) hid.value = val;
+    var parent = hid ? hid.previousElementSibling : null;
+    if (parent) {
+      parent.querySelectorAll('.profile-chip[data-val]').forEach(function(c) {
+        c.classList.toggle('active', vals.indexOf(c.dataset.val) !== -1);
+      });
+    }
+  }
+  _restoreMulti('profile-billing-prefs', meta.billing_prefs);
+  _restoreMulti('profile-work-regime',   meta.work_regime);
+  _restoreMulti('profile-proj-prefs',    meta.proj_prefs);
+  _restoreMulti('profile-languages',     meta.languages);
+  _restoreMulti('profile-ai-tools',      meta.ai_tools);
+
+  /* Horas/semana */
+  var hwEl = document.getElementById('profile-hours-week');
+  if (hwEl && meta.hours_week) hwEl.value = meta.hours_week;
+
+  /* Ferramentas */
+  var toolsHid = document.getElementById('profile-tools');
+  var toolsCont = document.getElementById('profile-tools-chips');
+  if (toolsHid && meta.tools) {
+    toolsHid.value = JSON.stringify(meta.tools);
+    if (toolsCont) {
+      toolsCont.innerHTML = '';
+      meta.tools.forEach(function(val) {
+        var chip = document.createElement('span');
+        chip.style.cssText = 'display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border:1.5px solid var(--border);border-radius:20px;font-size:12px;font-weight:600;color:var(--text-2);background:var(--surface);';
+        chip.innerHTML = val + '<button type="button" onclick="profileRemoveTool(this,\'' + val.replace(/'/g,"\\'") + '\')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--text-4);padding:0 0 0 3px;line-height:1;">&times;</button>';
+        toolsCont.appendChild(chip);
+      });
+    }
+  }
+
+  /* Formação */
+  var edLvEl = document.getElementById('profile-education-level');
+  if (edLvEl && meta.education_level) edLvEl.value = meta.education_level;
+  var edArEl = document.getElementById('profile-education-area');
+  if (edArEl && meta.education_area) edArEl.value = meta.education_area;
+  var certEl = document.getElementById('profile-certifications');
+  if (certEl && meta.certifications) certEl.value = meta.certifications;
+
+  /* Portfolio links */
+  ['1','2','3'].forEach(function(n) {
+    var pEl = document.getElementById('profile-portfolio-' + n);
+    if (pEl && meta['portfolio_' + n]) pEl.value = meta['portfolio_' + n];
+  });
+
+  /* Bio count */
+  var bioEl = document.getElementById('profile-bio');
+  if (bioEl && meta.bio) { bioEl.value = meta.bio; profileUpdateBioCount(bioEl); }
+
+  profileToggleAITools();
+  profileUpdateCompletion();
+}
+window._initProfileExtended = _initProfileExtended;
+
 function dashSaveProfile() {
   var nameEl  = document.getElementById('profile-name');
   var emailEl = document.getElementById('profile-email');
@@ -15004,6 +15534,40 @@ function dashSaveProfile() {
   var titleEl  = document.getElementById('profile-title');
   var urlEl    = document.getElementById('profile-url');
 
+  /* ── Coleta campos extendidos ── */
+  function _gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+  var extMeta = {
+    title:            _gv('profile-title'),
+    bio:              _gv('profile-bio'),
+    linkedin_url:     _gv('profile-url'),
+    portfolio_url:    _gv('profile-portfolio-url'),
+    timezone:         _gv('profile-timezone'),
+    hourly_rate:      _gv('profile-hourly-rate'),
+    project_min:      _gv('profile-project-min'),
+    exp_years:        _gv('profile-exp-years'),
+    exp_level:        _gv('profile-exp-level'),
+    billing_prefs:    _gv('profile-billing-prefs'),
+    availability:     _gv('profile-availability'),
+    hours_week:       _gv('profile-hours-week'),
+    work_regime:      _gv('profile-work-regime'),
+    proj_prefs:       _gv('profile-proj-prefs'),
+    languages:        _gv('profile-languages'),
+    ai_use:           _gv('profile-ai-use'),
+    ai_tools:         _gv('profile-ai-tools'),
+    education_level:  _gv('profile-education-level'),
+    education_area:   _gv('profile-education-area'),
+    certifications:   _gv('profile-certifications'),
+    portfolio_1:      _gv('profile-portfolio-1'),
+    portfolio_2:      _gv('profile-portfolio-2'),
+    portfolio_3:      _gv('profile-portfolio-3')
+  };
+  /* ferramentas: JSON array */
+  try { extMeta.tools = JSON.parse(_gv('profile-tools') || '[]'); } catch(x) { extMeta.tools = []; }
+  /* persiste em localStorage */
+  try { localStorage.setItem('hw_profile_meta', JSON.stringify(extMeta)); } catch(x) {}
+
+  var hrRate = parseFloat(extMeta.hourly_rate) || null;
+
   var profileData = {
     name:      newName,
     bio:       bioEl   ? bioEl.value.trim()   : '',
@@ -15011,13 +15575,13 @@ function dashSaveProfile() {
     city:      newCity,
     state:     newState,
     type:      newType,
-    hourlyRate: null,
+    hourlyRate: hrRate,
     skills:    []
   };
 
   /* Salva no Supabase em background — não bloqueia o UX */
   if (_sbReady() && _session && _session.uid) {
-    _sbSaveProfile(profileData).then(function(ok) {
+    _sbSaveProfile(profileData, extMeta).then(function(ok) {
       if (!ok) console.warn('dashSaveProfile: Supabase update falhou silenciosamente');
     });
   }
