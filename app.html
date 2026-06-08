@@ -9653,6 +9653,18 @@ async function _sbDeleteProject(id) {
   return true;
 }
 
+/* ── PROPOSTAS: Listar para um projeto (visão do cliente) ────── */
+async function _sbGetProjectProposals(projectId) {
+  if (!_sbReady() || !_session || !projectId) return [];
+  await _sbEnsureSession();
+  var r = await _sb.from('proposals')
+    .select('*, freelancer:profiles!freelancer_id(name, avatar_url, rating, completed_jobs)')
+    .eq('project_id', projectId)
+    .order('created_at', { ascending: false });
+  if (r.error) { console.warn('_sbGetProjectProposals:', r.error.message || r.error); return []; }
+  return r.data || [];
+}
+
 /* ── REALTIME: Escutar mensagens novas ────────────────────────── */
 function _sbListenMessages(contractId, callback) {
   if (!_sbReady()) return null;
@@ -11378,64 +11390,495 @@ window.addEventListener('scroll', function() {
 /* ═══════════════════════════════════════════
    INIT
 ═══════════════════════════════════════════ */
-/* ── Ver Propostas recebidas ─────────────────────────────── */
-function openProposalList(btn) {
-  var card     = btn ? btn.closest('[data-proj-id]') : null;
-  var projName = 'Projeto';
-  if (card) {
-    var b = card.querySelector('b') || card.querySelector('strong') || {};
-    projName = (b.textContent || 'Projeto').trim();
-  }
-  var ov = document.getElementById('overlay-proposal-list');
+/* ═══════════════════════════════════════════════════════════════
+   MÓDULO DE PROPOSTAS — Visualização real + Análise com IA
+   Substitui o stub demo anterior por dados reais do Supabase,
+   cards detalhados, suporte a anexos PDF e motor de scoring local.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Mapa de contexto de projetos para acesso seguro nos onclick */
+window._projectCtxMap = window._projectCtxMap || {};
+
+/* Propostas carregadas no modal atual (indexed para acesso via onclick) */
+window._pmodProposals = [];
+/* Contexto do modal atual (projeto + pesos de IA) */
+window._pmodCtx = null;
+
+/* Ponto de entrada a partir dos botões do painel (recebe apenas o id) */
+function _openProjectProposalsById(id) {
+  var ctx = window._projectCtxMap[id];
+  if (!ctx) { showToast('Projeto não encontrado.', 'info'); return; }
+  _openProjectProposals(id, ctx.title, ctx.budgetMin, ctx.budgetMax, ctx.deadlineDays);
+}
+window._openProjectProposalsById = _openProjectProposalsById;
+
+/* Função principal — abre o modal e carrega as propostas do Supabase */
+async function _openProjectProposals(projectId, projTitle, budgetMin, budgetMax, deadlineDays) {
+  if (!_requireAuth('Você precisa estar logado para ver as propostas.')) return;
+
+  /* Criar overlay uma única vez */
+  var ov = document.getElementById('overlay-pmod');
   if (!ov) {
     ov = document.createElement('div');
     ov.className = 'overlay';
-    ov.id        = 'overlay-proposal-list';
-    ov.innerHTML =
-      '<div class="modal" style="max-width:560px;">' +
-        '<div class="modal-header">' +
-          '<div class="modal-title" id="plist-title">Propostas Recebidas</div>' +
-          '<button class="modal-close" id="plist-close">&#10005;</button>' +
-        '</div>' +
-        '<div class="modal-body" id="plist-body" style="max-height:420px;overflow-y:auto;padding:0;"></div>' +
-        '<div style="padding:12px 18px;border-top:1px solid var(--border);">' +
-          '<button class="btn btn-outline btn-sm" id="plist-close2">Fechar</button>' +
-        '</div>' +
-      '</div>';
+    ov.id = 'overlay-pmod';
+    ov.innerHTML = [
+      '<div class="modal" style="max-width:880px;width:96%;display:flex;flex-direction:column;max-height:92vh;padding:0;">',
+        '<div class="modal-header" style="flex-shrink:0;gap:10px;padding:16px 20px;flex-wrap:wrap;">',
+          '<div style="flex:1;min-width:0;">',
+            '<div class="modal-title" id="pmod-title">Propostas Recebidas</div>',
+            '<div id="pmod-subtitle" style="font-size:13px;color:var(--text-3);margin-top:2px;"></div>',
+          '</div>',
+          '<div style="display:flex;gap:8px;align-items:center;flex-shrink:0;">',
+            '<button id="pmod-back-btn" class="btn btn-outline btn-sm" style="display:none;">← Propostas</button>',
+            '<button id="pmod-ai-btn" class="btn btn-outline btn-sm" style="color:#7c3aed;border-color:#ddd6fe;font-weight:600;">🤖 Analisar com IA</button>',
+            '<button class="modal-close" id="pmod-close">✕</button>',
+          '</div>',
+        '</div>',
+        '<div style="flex:1;overflow-y:auto;min-height:0;border-top:1px solid var(--border);">',
+          '<div id="pmod-loading" style="text-align:center;padding:60px;color:var(--text-3);">',
+            '<div style="font-size:36px;margin-bottom:12px;animation:spin 1s linear infinite;">⏳</div>',
+            '<div style="font-size:14px;">Buscando propostas…</div>',
+          '</div>',
+          '<div id="pmod-list" style="display:none;"></div>',
+          '<div id="pmod-ai-panel" style="display:none;padding:20px;"></div>',
+        '</div>',
+        '<div style="padding:12px 20px;border-top:1px solid var(--border);flex-shrink:0;display:flex;justify-content:flex-end;">',
+          '<button class="btn btn-outline btn-sm" id="pmod-close2">Fechar</button>',
+        '</div>',
+      '</div>'
+    ].join('');
     document.body.appendChild(ov);
-    function closePL(){ ov.classList.remove('open'); document.body.style.overflow = ''; }
-    ov.addEventListener('click', function(e){ if(e.target === ov) closePL(); });
-    document.getElementById('plist-close').addEventListener('click',  closePL);
-    document.getElementById('plist-close2').addEventListener('click', closePL);
-  }
-  var titleEl = document.getElementById('plist-title');
-  if (titleEl) titleEl.textContent = 'Propostas — ' + projName;
-  var names  = ['Lucas Ferreira','Ana Carolina','Marcos Oliveira','Juliana Rocha','Pedro Henrique','Camila Santos'];
-  var values = [850,1200,980,1100,750,1350];
-  var days   = [15,20,12,18,10,25];
-  var count  = 2 + Math.floor(Math.random() * 3);
-  var bodyEl = document.getElementById('plist-body');
-  bodyEl.innerHTML = '';
-  for (var i = 0; i < count; i++) {
-    var row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);';
-    row.innerHTML =
-      '<div style="width:40px;height:40px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;">' + names[i].charAt(0) + '</div>' +
-      '<div style="flex:1;min-width:0;">' +
-        '<div style="font-weight:600;font-size:14px;">' + names[i] + '</div>' +
-        '<div style="font-size:12px;color:var(--text-3);">Prazo: ' + days[i] + ' dias &nbsp;|&nbsp; &#9733; 4.' + (7 + i % 3) + '/5</div>' +
-      '</div>' +
-      '<div style="font-weight:700;color:var(--green);font-size:15px;white-space:nowrap;">R$ ' + values[i].toLocaleString('pt-BR') + '</div>' +
-      '<button class="btn btn-green btn-sm" data-fl="' + names[i] + '">Ver</button>';
-    row.querySelector('button').addEventListener('click', function() {
-      showToast('Perfil do freelancer — em breve!', 'info');
+
+    function closePmod() { ov.classList.remove('open'); document.body.style.overflow = ''; }
+    ov.addEventListener('click', function(e){ if (e.target === ov) closePmod(); });
+    document.getElementById('pmod-close').addEventListener('click', closePmod);
+    document.getElementById('pmod-close2').addEventListener('click', closePmod);
+
+    document.getElementById('pmod-ai-btn').addEventListener('click', function() {
+      if (!window._pmodProposals.length) { showToast('Nenhuma proposta disponível para análise.', 'info'); return; }
+      document.getElementById('pmod-list').style.display = 'none';
+      document.getElementById('pmod-ai-panel').style.display = 'block';
+      document.getElementById('pmod-back-btn').style.display = '';
+      this.style.display = 'none';
+      _renderAiPanel();
     });
-    bodyEl.appendChild(row);
+    document.getElementById('pmod-back-btn').addEventListener('click', function() {
+      document.getElementById('pmod-list').style.display = 'block';
+      document.getElementById('pmod-ai-panel').style.display = 'none';
+      this.style.display = 'none';
+      document.getElementById('pmod-ai-btn').style.display = '';
+    });
   }
-  if (!count) bodyEl.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-3);">Nenhuma proposta recebida ainda.</div>';
+
+  /* Reset visual */
+  var title = projTitle ? 'Propostas — ' + projTitle : 'Propostas Recebidas';
+  document.getElementById('pmod-title').textContent = title;
+  document.getElementById('pmod-subtitle').textContent = '';
+  document.getElementById('pmod-loading').style.display = 'block';
+  document.getElementById('pmod-list').style.display = 'none';
+  document.getElementById('pmod-ai-panel').style.display = 'none';
+  document.getElementById('pmod-back-btn').style.display = 'none';
+  document.getElementById('pmod-ai-btn').style.display = '';
+  ov.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  /* Buscar propostas reais do Supabase */
+  var proposals = await _sbGetProjectProposals(projectId);
+  document.getElementById('pmod-loading').style.display = 'none';
+
+  var n = proposals.length;
+  document.getElementById('pmod-subtitle').textContent = n
+    ? n + ' proposta' + (n !== 1 ? 's' : '') + ' recebida' + (n !== 1 ? 's' : '')
+    : 'Nenhuma proposta recebida ainda';
+
+  /* Salvar no escopo global para acesso pelos handlers de onclick */
+  window._pmodProposals = proposals;
+  window._pmodCtx = {
+    projectId:    projectId,
+    projTitle:    projTitle || 'Projeto',
+    budgetMin:    parseFloat(budgetMin  || 0),
+    budgetMax:    parseFloat(budgetMax  || 0),
+    deadlineDays: parseInt(deadlineDays || 30, 10),
+    proposals:    proposals,
+    weights:      { price: 40, deadline: 20, quality: 25, commercial: 15 }
+  };
+
+  var listEl = document.getElementById('pmod-list');
+  listEl.style.display = 'block';
+
+  if (!n) {
+    listEl.innerHTML = [
+      '<div style="text-align:center;padding:64px 24px;color:var(--text-3);">',
+        '<div style="font-size:44px;margin-bottom:14px;">📭</div>',
+        '<div style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text);">Nenhuma proposta recebida ainda</div>',
+        '<div style="font-size:13px;">Compartilhe seu projeto para atrair freelancers qualificados.</div>',
+      '</div>'
+    ].join('');
+    document.getElementById('pmod-ai-btn').style.display = 'none';
+    return;
+  }
+
+  listEl.innerHTML = proposals.map(function(p, i) { return _renderProposalCard(p, i); }).join('');
+}
+window._openProjectProposals = _openProjectProposals;
+
+/* ── Renderiza um card de proposta ────────────────────────────── */
+function _renderProposalCard(p, idx) {
+  var fl       = p.freelancer || {};
+  var flName   = _displayName(fl.name || 'Freelancer');
+  var flFull   = _sanitize(fl.name   || 'Freelancer');
+  var rating   = parseFloat(fl.rating || 0);
+  var jobs     = parseInt(fl.completed_jobs || 0, 10);
+  var initial  = (fl.name || 'F').charAt(0).toUpperCase();
+  var colors   = ['#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#14b8a6','#f97316','#ec4899'];
+  var color    = colors[idx % colors.length];
+  var value    = parseFloat(p.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  var days     = parseInt(p.deadline_days || 0, 10);
+  var when     = (typeof _timeAgo     === 'function') ? _timeAgo(p.created_at)     : '';
+  var whenFull = (typeof _fullDateTime === 'function') ? _fullDateTime(p.created_at) : '';
+  var letter   = _sanitize(p.cover_letter || '');
+  var letterShort = letter.length > 320 ? letter.substring(0, 320) + '…' : letter;
+
+  var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada' };
+  var stBg  = { pending:'background:#fef3c7;color:#92400e', accepted:'background:#dcfce7;color:#166534',
+                rejected:'background:#fee2e2;color:#991b1b', withdrawn:'background:#f3f4f6;color:#6b7280' };
+  var st = p.status || 'pending';
+
+  return [
+    '<div style="border-bottom:1px solid var(--border);padding:20px;" data-pidx="'+idx+'">',
+      /* ── Cabeçalho: avatar + nome + valor + status ── */
+      '<div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">',
+        '<div style="width:46px;height:46px;border-radius:50%;background:'+color+';color:#fff;',
+             'display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;',
+             'flex-shrink:0;" title="'+flFull+'">'+initial+'</div>',
+        '<div style="flex:1;min-width:0;">',
+          '<div style="font-weight:700;font-size:15px;color:var(--text);">'+_sanitize(flName)+'</div>',
+          '<div style="font-size:12px;color:var(--text-3);margin-top:3px;">',
+            (rating > 0 ? '⭐ '+rating.toFixed(1)+' &nbsp;&middot;&nbsp; ' : '')+
+            (jobs  > 0 ? jobs+' projetos concluídos &nbsp;&middot;&nbsp; ' : '')+
+            '<span title="'+_sanitize(whenFull)+'">Enviado '+_sanitize(when)+'</span>',
+          '</div>',
+        '</div>',
+        '<div style="text-align:right;flex-shrink:0;">',
+          '<div style="font-size:22px;font-weight:800;color:var(--green);">R$&nbsp;'+value+'</div>',
+          '<div style="margin-top:5px;">',
+            '<span style="font-size:11px;padding:3px 10px;border-radius:20px;font-weight:700;'+( stBg[st]||'')+'">'+( stMap[st]||st)+'</span>',
+          '</div>',
+        '</div>',
+      '</div>',
+      /* ── Meta: prazo + data ── */
+      '<div style="display:flex;gap:20px;font-size:13px;color:var(--text-2);margin-bottom:14px;flex-wrap:wrap;">',
+        '<span>⏱️ Prazo: <strong>'+days+' dias</strong></span>',
+        '<span title="'+_sanitize(whenFull)+'">📅 '+_sanitize(when)+'</span>',
+      '</div>',
+      /* ── Carta de Apresentação ── */
+      '<div style="font-size:13.5px;line-height:1.65;color:var(--text);background:var(--surface,#f9fafb);',
+           'padding:14px 16px;border-radius:10px;border:1px solid var(--border);margin-bottom:14px;">',
+        '<div style="font-weight:700;font-size:11px;letter-spacing:.05em;color:var(--text-3);margin-bottom:8px;">📝 CARTA DE APRESENTAÇÃO</div>',
+        '<div id="pmod-letter-'+idx+'" style="white-space:pre-line;">'+letterShort+'</div>',
+        letter.length > 320
+          ? '<button style="border:none;background:none;color:var(--green);font-size:12px;cursor:pointer;padding:4px 0 0;font-weight:600;" '+
+              'onclick="_toggleProposalLetter('+idx+',this)">ver mais ↓</button>'
+          : '',
+      '</div>',
+      /* ── Anexos ── */
+      _renderAttachments(p),
+      /* ── Ações ── */
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">',
+        (st === 'pending'
+          ? '<button class="btn btn-green btn-sm" onclick="_contractFromProposal('+idx+')">✅ Contratar</button>'
+          : ''),
+        '<button class="btn btn-outline btn-sm" onclick="showToast(\'Chat com freelancer disponível em breve!\',\'info\')">💬 Mensagem</button>',
+      '</div>',
+    '</div>'
+  ].join('');
+}
+window._renderProposalCard = _renderProposalCard;
+
+/* ── Expand / colapsar carta de apresentação ── */
+function _toggleProposalLetter(idx, btn) {
+  var props = window._pmodProposals;
+  if (!props || !props[idx]) return;
+  var full  = _sanitize(props[idx].cover_letter || '');
+  var short = full.length > 320 ? full.substring(0, 320) + '…' : full;
+  var el    = document.getElementById('pmod-letter-' + idx);
+  if (!el) return;
+  var expanded = el.getAttribute('data-expanded') === '1';
+  el.textContent = expanded ? short : full;
+  el.style.whiteSpace = 'pre-line';
+  el.setAttribute('data-expanded', expanded ? '0' : '1');
+  if (btn) btn.textContent = expanded ? 'ver mais ↓' : 'ver menos ↑';
+}
+window._toggleProposalLetter = _toggleProposalLetter;
+
+/* ── Renderiza anexos de uma proposta ── */
+function _renderAttachments(p) {
+  var files = (p.attachments || []);
+  if (!files.length) {
+    return '<div style="font-size:12.5px;color:var(--text-3);margin-bottom:14px;">📎 Nenhum arquivo anexado</div>';
+  }
+  var items = files.map(function(f) {
+    var isPDF = /\.pdf$/i.test(f.url || f);
+    var name  = f.name || (f.url || f).split('/').pop() || 'arquivo';
+    return [
+      '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface,#f9fafb);',
+           'border-radius:8px;border:1px solid var(--border);margin-bottom:6px;">',
+        '<span style="font-size:18px;">'+(isPDF ? '📄' : '📎')+'</span>',
+        '<span style="font-size:13px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+_sanitize(name)+'</span>',
+        isPDF
+          ? '<button class="btn btn-outline btn-sm" style="font-size:11px;" onclick="_viewPDF(\''+_sanitize(f.url||f)+'\')">👁 Ver PDF</button>'
+          : '',
+        '<a href="'+_sanitize(f.url||f)+'" download target="_blank" class="btn btn-outline btn-sm" style="font-size:11px;">⬇ Baixar</a>',
+      '</div>'
+    ].join('');
+  }).join('');
+  return '<div style="margin-bottom:14px;"><div style="font-size:12px;font-weight:700;color:var(--text-3);margin-bottom:6px;">📎 ARQUIVOS ANEXADOS</div>' + items + '</div>';
+}
+
+/* ── Visualizador de PDF embutido (Google Docs Viewer fallback) ── */
+function _viewPDF(url) {
+  if (!url) return;
+  var ov = document.getElementById('overlay-pdf-viewer');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = 'overlay-pdf-viewer';
+    ov.className = 'overlay';
+    ov.innerHTML = [
+      '<div class="modal" style="max-width:900px;width:96%;max-height:95vh;display:flex;flex-direction:column;padding:0;">',
+        '<div class="modal-header" style="flex-shrink:0;padding:14px 18px;">',
+          '<div class="modal-title">📄 Visualizador de PDF</div>',
+          '<button class="modal-close" onclick="document.getElementById(\'overlay-pdf-viewer\').classList.remove(\'open\');document.body.style.overflow=\'\'">✕</button>',
+        '</div>',
+        '<div style="flex:1;overflow:hidden;min-height:0;">',
+          '<iframe id="pdf-frame" src="" style="width:100%;height:75vh;border:none;"></iframe>',
+        '</div>',
+      '</div>'
+    ].join('');
+    document.body.appendChild(ov);
+    ov.addEventListener('click', function(e) {
+      if (e.target === ov) { ov.classList.remove('open'); document.body.style.overflow = ''; }
+    });
+  }
+  /* Tentar carregamento direto; fallback para Google Docs Viewer */
+  var src = url.match(/^https?:/) ? 'https://docs.google.com/viewer?url=' + encodeURIComponent(url) + '&embedded=true' : url;
+  document.getElementById('pdf-frame').src = src;
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
+window._viewPDF = _viewPDF;
+
+/* ── Contratar a partir de uma proposta (acesso por índice) ── */
+function _contractFromProposal(idx) {
+  var p = window._pmodProposals[idx];
+  if (!p) return;
+  var fl  = p.freelancer || {};
+  var ctx = window._pmodCtx || {};
+  openContractModal({
+    name:     fl.name     || 'Freelancer',
+    role:     'Freelancer',
+    value:    parseFloat(p.value || 0),
+    project:  ctx.projTitle || 'Projeto',
+    deadline: (p.deadline_days || 30) + ' dias'
+  });
+}
+window._contractFromProposal = _contractFromProposal;
+
+/* ═══════════════════════════════════════════════════════════════
+   ANÁLISE COM IA — Motor de scoring e ranking de propostas
+   Algoritmo local ponderado: Preço · Prazo · Qualidade · Comercial.
+   Sem dependência de APIs externas — roda inteiramente no browser.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Calcula o score (0-100) de uma proposta em 4 dimensões */
+function _calcProposalScore(p, ctx) {
+  var fl        = p.freelancer || {};
+  var bMin      = ctx.budgetMin   || 0;
+  var bMax      = ctx.budgetMax   || parseFloat(p.value || 0) * 1.3;
+  var refDays   = ctx.deadlineDays || 30;
+  var value     = parseFloat(p.value || 0);
+  var days      = parseInt(p.deadline_days || refDays, 10);
+  var rating    = parseFloat(fl.rating || 4.5);
+  var jobs      = parseInt(fl.completed_jobs || 0, 10);
+  var letterLen = (p.cover_letter || '').length;
+  var w         = ctx.weights;
+
+  /* Preço — mais próximo do mínimo = melhor */
+  var priceScore;
+  if (bMax > 0) {
+    var range = (bMax - bMin) || bMax;
+    priceScore = value <= bMin ? 100
+               : value <= bMax ? Math.round(100 - ((value - bMin) / range) * 55)
+               : Math.max(5, Math.round(45 - ((value - bMax) / bMax) * 80));
+  } else { priceScore = 60; }
+  priceScore = Math.max(0, Math.min(100, priceScore));
+
+  /* Prazo — mais rápido = melhor, relativo ao prazo do projeto */
+  var dRatio = days / refDays;
+  var deadlineScore =
+    dRatio <= 0.5 ? 100 :
+    dRatio <= 0.7 ? 90  :
+    dRatio <= 0.9 ? 78  :
+    dRatio <= 1.0 ? 65  :
+    dRatio <= 1.2 ? 48  :
+    dRatio <= 1.5 ? 32  : 15;
+
+  /* Qualidade Técnica — rating + extensão da carta */
+  var rScore = (rating / 5) * 100;
+  var lScore = Math.min(100, letterLen / 4.5);  /* 450 chars = 100% */
+  var qualityScore = Math.round(rScore * 0.65 + lScore * 0.35);
+  qualityScore = Math.max(0, Math.min(100, qualityScore));
+
+  /* Condições Comerciais — histórico de projetos + rating */
+  var jScore = Math.min(100, (jobs / 60) * 100);
+  var commercialScore = Math.round(rScore * 0.55 + jScore * 0.45);
+  commercialScore = Math.max(0, Math.min(100, commercialScore));
+
+  var total = Math.round(
+    (priceScore      * w.price +
+     deadlineScore   * w.deadline +
+     qualityScore    * w.quality +
+     commercialScore * w.commercial) / 100
+  );
+  total = Math.max(0, Math.min(100, total));
+
+  /* Pontos fortes e riscos narrativos */
+  var strengths = [], risks = [];
+  if (priceScore      >= 80) strengths.push('preço competitivo');
+  if (deadlineScore   >= 80) strengths.push('prazo ágil');
+  if (qualityScore    >= 75) strengths.push('perfil bem avaliado');
+  if (commercialScore >= 70) strengths.push('bom histórico de entregas');
+  if (letterLen       >= 400) strengths.push('proposta técnica detalhada');
+  if (value > bMax && bMax > 0)       risks.push('valor acima do orçamento previsto');
+  if (days  > refDays * 1.3)          risks.push('prazo acima do esperado');
+  if (rating < 4.0 && rating > 0)     risks.push('avaliação abaixo da média');
+  if (letterLen < 80)                  risks.push('carta de apresentação muito curta');
+
+  return {
+    total, priceScore, deadlineScore, qualityScore, commercialScore,
+    flName: fl.name || 'Freelancer',
+    value:  p.value, days,
+    justification: strengths.length ? strengths.join(', ') : 'proposta dentro dos parâmetros',
+    risk:          risks.length     ? risks.join(', ')     : ''
+  };
+}
+
+/* Renderiza o painel de Análise com IA no modal */
+function _renderAiPanel() {
+  var ctx = window._pmodCtx;
+  var el  = document.getElementById('pmod-ai-panel');
+  if (!el || !ctx || !ctx.proposals.length) return;
+
+  var w = ctx.weights;
+  /* Normalizar pesos se necessário */
+  var total = w.price + w.deadline + w.quality + w.commercial;
+  if (total > 0 && total !== 100) {
+    var f = 100 / total;
+    w = { price: Math.round(w.price*f), deadline: Math.round(w.deadline*f), quality: Math.round(w.quality*f), commercial: Math.round(w.commercial*f) };
+    ctx.weights = w;
+  }
+
+  /* Calcular e ordenar scores */
+  var scored = ctx.proposals.map(function(p) { return _calcProposalScore(p, ctx); });
+  scored.sort(function(a, b) { return b.total - a.total; });
+
+  var medals  = ['🥇','🥈','🥉'];
+  var rankHTML = scored.map(function(s, rank) {
+    var medal    = medals[rank] || (rank + 1) + 'º';
+    var barColor = s.total >= 70 ? '#10b981' : s.total >= 45 ? '#f59e0b' : '#ef4444';
+    var borderExtra = rank === 0 ? ';border-color:#10b981;box-shadow:0 0 0 2px #d1fae5' : '';
+    return [
+      '<div style="background:var(--surface,#f9fafb);border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border)'+borderExtra+';">',
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">',
+          '<span style="font-size:22px;flex-shrink:0;">'+medal+'</span>',
+          '<div style="flex:1;min-width:0;">',
+            '<div style="font-weight:700;font-size:14.5px;color:var(--text);">'+_sanitize(_displayName(s.flName))+'</div>',
+            '<div style="font-size:12px;color:var(--text-3);">R$ '+parseFloat(s.value||0).toLocaleString('pt-BR')+'&nbsp;&middot;&nbsp;'+s.days+' dias</div>',
+          '</div>',
+          '<div style="font-size:26px;font-weight:900;color:'+barColor+';min-width:48px;text-align:right;">'+s.total+'</div>',
+        '</div>',
+        /* Barra de progresso */
+        '<div style="background:var(--border,#e5e7eb);border-radius:6px;height:10px;overflow:hidden;margin-bottom:10px;">',
+          '<div style="height:100%;width:'+s.total+'%;background:'+barColor+';border-radius:6px;transition:width .5s;"></div>',
+        '</div>',
+        /* Breakdown 4 critérios */
+        '<div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px;font-size:12px;text-align:center;margin-bottom:8px;">',
+          _scoreChip('💰 Preço',    s.priceScore),
+          _scoreChip('⏱️ Prazo',    s.deadlineScore),
+          _scoreChip('⭐ Qualidade',s.qualityScore),
+          _scoreChip('🤝 Comercial',s.commercialScore),
+        '</div>',
+        /* Pontos fortes */
+        s.justification ? '<div style="font-size:12px;color:#166534;background:#dcfce7;border-radius:6px;padding:7px 10px;margin-bottom:6px;">✨ '+_sanitize(s.justification)+'</div>' : '',
+        /* Riscos */
+        s.risk ? '<div style="font-size:12px;color:#92400e;background:#fef3c7;border-radius:6px;padding:7px 10px;">⚠️ '+_sanitize(s.risk)+'</div>' : '',
+      '</div>'
+    ].join('');
+  }).join('');
+
+  /* Sliders de peso */
+  function wRow(key, label, val) {
+    return [
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">',
+        '<div style="min-width:155px;font-size:13px;color:var(--text-2);">'+label+'</div>',
+        '<input type="range" min="0" max="100" value="'+val+'" id="pmod-w-'+key+'" ',
+          'oninput="document.getElementById(\'pmod-wv-'+key+'\').textContent=this.value+\'%\';',
+          'var t=0;[\'price\',\'deadline\',\'quality\',\'commercial\'].forEach(function(k){',
+          't+=parseInt(document.getElementById(\'pmod-w-\'+k).value)||0;});',
+          'var te=document.getElementById(\'pmod-w-total\');te.textContent=t;',
+          'te.style.color=t===100?\'#10b981\':\'#ef4444\';" ',
+          'style="flex:1;height:6px;accent-color:#10b981;">',
+        '<span id="pmod-wv-'+key+'" style="min-width:38px;text-align:right;font-weight:700;font-size:13px;color:var(--text);">'+val+'%</span>',
+      '</div>'
+    ].join('');
+  }
+
+  el.innerHTML = [
+    /* Painel de Pesos */
+    '<div style="background:var(--surface,#f9fafb);border-radius:12px;padding:18px;margin-bottom:22px;border:1px solid var(--border);">',
+      '<div style="font-weight:700;font-size:14px;margin-bottom:14px;">⚖️ Ajustar Critérios de Avaliação',
+        '&nbsp;<span style="font-size:12px;font-weight:400;color:var(--text-3);">(soma deve ser 100% — atual: <span id="pmod-w-total" style="font-weight:700;color:#10b981;">100</span>%)</span>',
+      '</div>',
+      wRow('price',      '💰 Preço',              w.price),
+      wRow('deadline',   '⏱️ Prazo',              w.deadline),
+      wRow('quality',    '⭐ Qualidade Técnica',  w.quality),
+      wRow('commercial', '🤝 Condições Comerciais', w.commercial),
+      '<div style="text-align:right;margin-top:4px;">',
+        '<button class="btn btn-outline btn-sm" style="color:#7c3aed;border-color:#ddd6fe;" ',
+          'onclick="_recalcAiRanking()">↺ Recalcular Ranking</button>',
+      '</div>',
+    '</div>',
+    /* Ranking */
+    '<div style="font-weight:700;font-size:15px;margin-bottom:14px;">📊 Ranking das Propostas — '+ctx.proposals.length+' analisadas</div>',
+    rankHTML
+  ].join('');
+}
+window._renderAiPanel = _renderAiPanel;
+
+/* Chip de score individual para o breakdown */
+function _scoreChip(label, score) {
+  var color = score >= 70 ? '#166534' : score >= 45 ? '#92400e' : '#991b1b';
+  var bg    = score >= 70 ? '#dcfce7'  : score >= 45 ? '#fef3c7'  : '#fee2e2';
+  return '<div style="background:'+bg+';border-radius:6px;padding:5px 2px;color:'+color+';">'+label+'<br><b>'+score+'</b></div>';
+}
+
+/* Recalcula ranking com os pesos atuais dos sliders */
+function _recalcAiRanking() {
+  if (!window._pmodCtx) return;
+  var total = 0;
+  ['price','deadline','quality','commercial'].forEach(function(k) {
+    var v = parseInt((document.getElementById('pmod-w-' + k) || {}).value || '0', 10);
+    window._pmodCtx.weights[k] = v;
+    total += v;
+  });
+  if (total === 0) { showToast('Defina pelo menos um critério com peso maior que zero.', 'warn'); return; }
+  if (Math.abs(total - 100) > 1) {
+    showToast('Os pesos devem somar 100%. Soma atual: ' + total + '%.', 'warn'); return;
+  }
+  _renderAiPanel();
+  showToast('✅ Ranking recalculado com os novos pesos!', 'success');
+}
+window._recalcAiRanking = _recalcAiRanking;
 
 /* ── Editar Projeto ──────────────────────────────────────── */
 function openEditProject(btn) {
@@ -12974,11 +13417,23 @@ async function _refreshMyPublishedProjects() {
       name:       _session.name || 'Você',
       avatar_url: _session.avatar_url || null
     };
+    /* Registrar contexto de todos os projetos antes de renderizar os cards */
+    window._projectCtxMap = window._projectCtxMap || {};
     el.innerHTML = list.map(function(p) {
       var budget    = p.budget_max ? ('R$ ' + Math.round(p.budget_max).toLocaleString('pt-BR')) : 'A combinar';
       var proposals = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
+      /* Armazenar contexto do projeto para acesso seguro via _openProjectProposalsById */
+      window._projectCtxMap[p.id] = {
+        title:       p.title,
+        budgetMin:   p.budget_min  || 0,
+        budgetMax:   p.budget_max  || 0,
+        deadlineDays: p.deadline_days || 30
+      };
       /* data-real-id permite que _deletePublishedProject encontre e remova
          este card usando querySelectorAll('[data-real-id="..."]') */
+      var propLabel = proposals > 0
+        ? ('📩 ' + proposals + ' Proposta' + (proposals === 1 ? '' : 's'))
+        : '📩 Ver Propostas';
       return '<div class="dash-proj-card" data-real-id="' + _sanitize(p.id) + '">' +
         '<div class="dash-proj-card-top">' +
           '<div class="dash-proj-title">' + _sanitize(p.title) + '</div>' +
@@ -12994,9 +13449,7 @@ async function _refreshMyPublishedProjects() {
         '<div class="dash-proj-footer">' +
           '<div>' + _skillTags(p.skills_needed || []) + '</div>' +
           '<div class="dash-proj-actions">' +
-            '<button class="btn btn-primary btn-sm" onclick="showToast(\'' + (proposals
-                ? ('Você recebeu ' + proposals + ' proposta' + (proposals===1?'':'s') + ' para este projeto.')
-                : 'Ainda não há propostas para este projeto.') + '\',\'info\')">📩 Ver Propostas</button>' +
+            '<button class="btn btn-primary btn-sm" onclick="_openProjectProposalsById(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
             '<button class="btn btn-outline btn-sm" onclick="showToast(\'Edição de projeto disponível em breve!\',\'info\')">✏️ Editar</button>' +
             /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
             '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +

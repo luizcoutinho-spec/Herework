@@ -272,3 +272,10 @@ CREATE INDEX IF NOT EXISTS idx_messages_contract  ON messages(contract_id);
 --   UPDATE profiles SET is_admin = true WHERE email = 'email-do-admin@herework.com.br';
 -- ═══════════════════════════════════════════════════════════════
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
+
+-- ═══════════════════════════════════════════════════════════════
+-- MIGRAÇÃO — Módulo de Propostas: suporte a anexos (PDFs, arquivos)
+-- Execute no SQL Editor do Supabase. Seguro para rodar em bases
+-- já existentes — a coluna nasce como array vazio por padrão.
+-- ═══════════════════════════════════════════════════════════════
+ALTER TABLE proposals ADD COLUMN IF NOT EXISTS attachments TEXT[] DEFAULT '{}';
