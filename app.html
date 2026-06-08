@@ -12876,6 +12876,10 @@ async function _refreshMyPublishedProjects() {
   var el = document.getElementById('dash-client-waiting');
   if (!el) return;
   try {
+    /* Garante que _session.uid esteja sincronizado com o JWT ativo do Supabase —
+       sem isso, _sbGetMyProjects() filtra por client_id=undefined e retorna vazio
+       (mesmo com o projeto publicado e salvo corretamente no banco). */
+    await _sbEnsureSession();
     var list = await _sbGetMyProjects();
     if (!list.length) return; /* mantém o estado vazio padrão renderizado por _renderDashClientWaiting */
     var who = {
@@ -12980,6 +12984,15 @@ if (document.readyState === 'loading') {
 } else {
   _buildDemo();
 }
+
+/* Expor no escopo global — estas funções são chamadas (via checagem
+   "typeof X === 'function'") por código fora desta IIFE (init(), submitProject(),
+   openDashboard()). Sem isso, a checagem retorna 'undefined' e a chamada é
+   silenciosamente ignorada — por isso os projetos publicados pelo usuário nunca
+   eram inseridos em "Encontrar Projetos" nem em "Meu Perfil → Contratos". */
+window._loadRealProjects          = _loadRealProjects;
+window._addPublishedProjectToUI   = _addPublishedProjectToUI;
+window._refreshMyPublishedProjects = _refreshMyPublishedProjects;
 
 })();
 
