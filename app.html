@@ -5156,14 +5156,82 @@ section { padding: 64px 0; }
         <div class="form-group">
           <label class="form-label" for="profile-timezone">Fuso hor&aacute;rio</label>
           <select class="form-select" id="profile-timezone">
-            <option value="-3" selected>UTC-3 &mdash; Bras&iacute;lia, S&atilde;o Paulo, Rio &#9733;</option>
-            <option value="-4">UTC-4 &mdash; Cuiab&aacute;, Manaus</option>
-            <option value="-5">UTC-5 &mdash; Acre, Rio Branco</option>
-            <option value="-2">UTC-2 &mdash; Fernando de Noronha</option>
-            <option value="0">UTC+0 &mdash; Portugal, Lisboa</option>
-            <option value="-6">UTC-6 &mdash; M&eacute;xico</option>
-            <option value="-5b">UTC-5 &mdash; Nova York, Miami</option>
-            <option value="-8">UTC-8 &mdash; Los Angeles, S&atilde;o Francisco</option>
+            <optgroup label="&#127463;&#127479; Brasil">
+              <option value="America/Sao_Paulo" selected>UTC-3 &mdash; Bras&iacute;lia, S&atilde;o Paulo, Rio &#9733;</option>
+              <option value="America/Manaus">UTC-4 &mdash; Cuiab&aacute;, Manaus, Campo Grande</option>
+              <option value="America/Rio_Branco">UTC-5 &mdash; Acre, Rio Branco</option>
+              <option value="America/Noronha">UTC-2 &mdash; Fernando de Noronha</option>
+            </optgroup>
+            <optgroup label="&#127480;&#127462; Am&eacute;rica do Sul">
+              <option value="America/Argentina/Buenos_Aires">UTC-3 &mdash; Buenos Aires, Argentina</option>
+              <option value="America/Santiago">UTC-3/-4 &mdash; Santiago, Chile</option>
+              <option value="America/Lima">UTC-5 &mdash; Lima, Peru</option>
+              <option value="America/Bogota">UTC-5 &mdash; Bogot&aacute;, Col&ocirc;mbia</option>
+              <option value="America/Caracas">UTC-4 &mdash; Caracas, Venezuela</option>
+              <option value="America/La_Paz">UTC-4 &mdash; La Paz, Bol&iacute;via</option>
+              <option value="America/Asuncion">UTC-4/-3 &mdash; Assun&ccedil;&atilde;o, Paraguai</option>
+              <option value="America/Montevideo">UTC-3 &mdash; Montevid&eacute;u, Uruguai</option>
+              <option value="America/Guayaquil">UTC-5 &mdash; Guayaquil, Equador</option>
+            </optgroup>
+            <optgroup label="&#127482;&#127480; Am&eacute;rica do Norte">
+              <option value="America/New_York">UTC-5/-4 &mdash; Nova York, Miami, Boston</option>
+              <option value="America/Chicago">UTC-6/-5 &mdash; Chicago, Houston, Dallas</option>
+              <option value="America/Denver">UTC-7/-6 &mdash; Denver, Phoenix</option>
+              <option value="America/Los_Angeles">UTC-8/-7 &mdash; Los Angeles, San Francisco, Seattle</option>
+              <option value="America/Anchorage">UTC-9/-8 &mdash; Anchorage, Alaska</option>
+              <option value="Pacific/Honolulu">UTC-10 &mdash; Hawa&iacute;</option>
+              <option value="America/Toronto">UTC-5/-4 &mdash; Toronto, Montr&eacute;al</option>
+              <option value="America/Vancouver">UTC-8/-7 &mdash; Vancouver, Canad&aacute;</option>
+              <option value="America/Mexico_City">UTC-6/-5 &mdash; Cidade do M&eacute;xico</option>
+            </optgroup>
+            <optgroup label="&#127466;&#127482; Europa">
+              <option value="Europe/Lisbon">UTC+0/+1 &mdash; Lisboa, Portugal</option>
+              <option value="Europe/London">UTC+0/+1 &mdash; Londres, Reino Unido</option>
+              <option value="Europe/Paris">UTC+1/+2 &mdash; Paris, Fran&ccedil;a</option>
+              <option value="Europe/Berlin">UTC+1/+2 &mdash; Berlim, Alemanha</option>
+              <option value="Europe/Madrid">UTC+1/+2 &mdash; Madri, Espanha</option>
+              <option value="Europe/Rome">UTC+1/+2 &mdash; Roma, It&aacute;lia</option>
+              <option value="Europe/Amsterdam">UTC+1/+2 &mdash; Amsterdã, Pa&iacute;ses Baixos</option>
+              <option value="Europe/Warsaw">UTC+1/+2 &mdash; Vars&oacute;via, Pol&ocirc;nia</option>
+              <option value="Europe/Zurich">UTC+1/+2 &mdash; Zurique, Su&iacute;&ccedil;a</option>
+              <option value="Europe/Stockholm">UTC+1/+2 &mdash; Estocolmo, Su&eacute;cia</option>
+              <option value="Europe/Helsinki">UTC+2/+3 &mdash; Hels&iacute;nquia, Finl&acirc;ndia</option>
+              <option value="Europe/Kiev">UTC+2/+3 &mdash; Kyiv, Ucr&acirc;nia</option>
+              <option value="Europe/Athens">UTC+2/+3 &mdash; Atenas, Gr&eacute;cia</option>
+              <option value="Europe/Istanbul">UTC+3 &mdash; Istambul, Turquia</option>
+              <option value="Europe/Moscow">UTC+3 &mdash; Moscou, R&uacute;ssia</option>
+            </optgroup>
+            <optgroup label="&#127462;&#127467; &Aacute;frica">
+              <option value="Africa/Abidjan">UTC+0 &mdash; Abidj&atilde;, Cost do Marfim</option>
+              <option value="Africa/Lagos">UTC+1 &mdash; Lagos, Nig&eacute;ria</option>
+              <option value="Africa/Cairo">UTC+2 &mdash; Cairo, Egito</option>
+              <option value="Africa/Johannesburg">UTC+2 &mdash; Joanesburgo, &Aacute;frica do Sul</option>
+              <option value="Africa/Nairobi">UTC+3 &mdash; Nair&oacute;bi, Qu&ecirc;nia</option>
+              <option value="Africa/Casablanca">UTC+1 &mdash; Casablanca, Marrocos</option>
+            </optgroup>
+            <optgroup label="&#127462;&#127480; &Aacute;sia">
+              <option value="Asia/Dubai">UTC+4 &mdash; Dubai, Emirados &Aacute;rabes</option>
+              <option value="Asia/Karachi">UTC+5 &mdash; Carachi, Paquist&atilde;o</option>
+              <option value="Asia/Kolkata">UTC+5:30 &mdash; Mumbai, Nova Delhi, &Iacute;ndia</option>
+              <option value="Asia/Dhaka">UTC+6 &mdash; Dacca, Bangladesh</option>
+              <option value="Asia/Bangkok">UTC+7 &mdash; Bangkok, Tail&acirc;ndia</option>
+              <option value="Asia/Singapore">UTC+8 &mdash; Cingapura</option>
+              <option value="Asia/Shanghai">UTC+8 &mdash; Xangai, Pequim, China</option>
+              <option value="Asia/Tokyo">UTC+9 &mdash; Tóquio, Osaka, Jap&atilde;o</option>
+              <option value="Asia/Seoul">UTC+9 &mdash; Seul, Coreia do Sul</option>
+              <option value="Asia/Jakarta">UTC+7 &mdash; Jacarta, Indon&eacute;sia</option>
+              <option value="Asia/Riyadh">UTC+3 &mdash; Riad, Ar&aacute;bia Saudita</option>
+              <option value="Asia/Tehran">UTC+3:30 &mdash; Teer&atilde;, Ir&atilde;</option>
+              <option value="Asia/Taipei">UTC+8 &mdash; Taipei, Taiwan</option>
+              <option value="Asia/Ho_Chi_Minh">UTC+7 &mdash; Ho Chi Minh, Vietn&atilde;</option>
+              <option value="Asia/Kuala_Lumpur">UTC+8 &mdash; Kuala Lumpur, Mal&aacute;sia</option>
+            </optgroup>
+            <optgroup label="&#127462;&#127482; Oceania">
+              <option value="Australia/Sydney">UTC+10/+11 &mdash; Sydney, Melbourne</option>
+              <option value="Australia/Perth">UTC+8 &mdash; Perth, Austr&aacute;lia Ocidental</option>
+              <option value="Pacific/Auckland">UTC+12/+13 &mdash; Auckland, Nova Zel&acirc;ndia</option>
+              <option value="Pacific/Fiji">UTC+12 &mdash; Fiji</option>
+            </optgroup>
           </select>
         </div>
 
