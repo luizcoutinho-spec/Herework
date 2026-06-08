@@ -4260,7 +4260,7 @@ section { padding: 64px 0; }
     <div class="header-auth">
       <button id="nav-login-btn" class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <button id="nav-register-btn" class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-      <button class="btn btn-primary btn-sm" onclick="_guardedPublishModal()" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+      <button id="nav-publish-btn" class="btn btn-primary btn-sm" onclick="_guardedPublishModal()" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
       <!-- User chip (shown when logged in) -->
       <div id="nav-user-chip" style="display:none;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:40px;padding:5px 14px 5px 6px;cursor:pointer;" onclick="toggleUserMenu()">
         <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),#66BB6A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;" id="nav-user-avatar">U</div>
@@ -11353,6 +11353,9 @@ function _setSession(name, email, type, isAdmin) {
     if (nameEl) nameEl.textContent = name.split(' ')[0];
     if (avEl)   avEl.textContent   = name.charAt(0).toUpperCase();
   }
+
+  /* Aplica automaticamente todas as regras de UI baseadas no tipo */
+  if (typeof _applyAccountTypeUI === 'function') _applyAccountTypeUI(type);
 }
 
 /* ── Helpers de tipo de conta ─────────────────────────────── *
@@ -11364,6 +11367,57 @@ function _isFL()   { return !!(_session && (_session.type === 'freelancer' || _s
 function _isCL()   { return !_session || (_session.type !== 'freelancer'); }
 function _isBoth() { return !!(_session && _session.type === 'both'); }
 window._isFL = _isFL; window._isCL = _isCL; window._isBoth = _isBoth;
+
+/* ════════════════════════════════════════════════════════════
+   _applyAccountTypeUI(type)
+   Aplica automaticamente todas as regras de UI baseadas no
+   tipo de conta (client / freelancer / both).
+   Chamada em _setSession → cobre login, restore e troca de tipo.
+════════════════════════════════════════════════════════════ */
+function _applyAccountTypeUI(type) {
+  var isFL   = (type === 'freelancer' || type === 'both');
+  var isCL   = (type !== 'freelancer');
+  /* isCL também abrange sessão nula — tratar null como cliente por default */
+
+  /* ── Botão "Publicar Projeto" na navbar (apenas clientes/híbridos) ── */
+  var pubBtn = document.getElementById('nav-publish-btn');
+  if (pubBtn) pubBtn.style.display = isCL ? '' : 'none';
+
+  /* ── Abas de contrato no dashboard ── */
+  var dctCl = document.getElementById('dct-client');
+  var dctFl = document.getElementById('dct-freelancer');
+  if (dctCl) dctCl.style.display = isCL ? '' : 'none';
+  if (dctFl) dctFl.style.display = isFL ? '' : 'none';
+  /* Garante que a aba ativa não seja uma aba oculta */
+  if (typeof switchContractView === 'function') {
+    if (!isCL) switchContractView('freelancer');  /* freelancer puro → aba FL */
+    else if (!isFL) switchContractView('client'); /* cliente puro   → aba CL */
+    /* both: mantém aba já ativa */
+  }
+
+  /* ── Abas de pagamento no dashboard ── */
+  var ptOut = document.getElementById('ptab-out');
+  var ptIn  = document.getElementById('ptab-in');
+  if (ptOut) ptOut.style.display = isCL ? '' : 'none';
+  if (ptIn)  ptIn.style.display  = isFL ? '' : 'none';
+  /* Garante que a aba ativa não seja uma aba oculta */
+  if (typeof switchPayHistory === 'function') {
+    if (!isCL) switchPayHistory('in');  /* freelancer puro → recebimentos */
+    else if (!isFL) switchPayHistory('out'); /* cliente puro → pagamentos */
+  }
+
+  /* ── Badge de tipo no cabeçalho do dashboard ── */
+  var ptEl = document.getElementById('dash-profile-type');
+  if (ptEl) {
+    ptEl.textContent = type === 'both'       ? '🔄 Cliente + Freelancer'
+                     : type === 'freelancer' ? '🧑 Freelancer'
+                                             : '🏢 Cliente';
+  }
+
+  /* ── Campos do formulário de perfil ── */
+  if (typeof dashSetAccountType === 'function') dashSetAccountType(type);
+}
+window._applyAccountTypeUI = _applyAccountTypeUI;
 
 /* ════════════════════════════════════════════════════════════
    SISTEMA DE PLANOS — HereWork
@@ -17635,6 +17689,10 @@ window.pubRemoveSkill = pubRemoveSkill;
    espalhados pelos botões; centraliza a validação e a mensagem correta. */
 function _guardedPublishModal() {
   if (!_requireAuth('Você precisa estar logado para publicar um projeto.')) return;
+  if (_session && _session.type === 'freelancer') {
+    showToast('Apenas clientes podem publicar projetos. Altere o tipo de conta em Perfil para "Cliente" ou "Cliente + Freelancer".', 'info');
+    return;
+  }
   openModal('publish');
   setTimeout(function(){ if (typeof pubInitModal === 'function') pubInitModal(); }, 50);
 }
