@@ -10120,24 +10120,26 @@ async function _sbGetDashStats() {
 async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
 
-  /* Tenta sincronizar uid — mas não bloqueia o save se falhar */
-  var uid = _session.uid;
+  /* getUser() valida o JWT com o servidor (ao contrário de getSession() que
+     só lê o localStorage — pode retornar token expirado sem erro) */
+  var uid = null;
   try {
-    var s0 = await _sb.auth.getSession();
-    var su = s0 && s0.data && s0.data.session && s0.data.session.user;
-    if (su) {
-      uid = su.id;
+    var userRes = await _sb.auth.getUser();
+    if (userRes.data && userRes.data.user) {
+      uid = userRes.data.user.id;
       _session.uid = uid;
-    } else if (!uid) {
-      /* Tenta renovar token antes de desistir */
+    } else {
+      /* JWT inválido ou expirado — tenta renovar */
       var rr = await _sb.auth.refreshSession();
-      if (rr && rr.data && rr.data.user) {
+      if (rr.data && rr.data.user) {
         uid = rr.data.user.id;
         _session.uid = uid;
       }
     }
-  } catch(e) { console.warn('[sbSave] session sync error:', e); }
+  } catch(e) { console.warn('[sbSave] auth check error:', e); }
 
+  /* Último recurso: uid salvo na sessão local */
+  if (!uid) uid = _session.uid;
   if (!uid) { console.warn('[sbSave] uid desconhecido — abortando'); return false; }
 
   /* Payload completo — inclui id+email para upsert funcionar mesmo
@@ -10161,40 +10163,43 @@ async function _sbSaveProfile(data, extMeta) {
     payload.profile_metadata = extMeta;
   }
 
-  /* ── Tentativa 1: payload completo ── */
-  var r = await _sb.from('profiles').upsert(payload, { onConflict: 'id' });
-  if (!r.error) return true;
+  /* ── Tentativa 1: payload completo ──
+     .select('id') é essencial: quando o RLS bloqueia silenciosamente
+     (JWT expirado), o Supabase retorna {data:[], error:null}.
+     Verificar data.length > 0 distingue salvo real de bloqueio silencioso. */
+  var r = await _sb.from('profiles').upsert(payload, { onConflict: 'id' }).select('id');
+  if (r.error) {
+    console.error('[sbSave] upsert erro:', r.error.code, '|', r.error.message);
+    var errMsg = (r.error.message || '').toLowerCase();
 
-  console.error('[sbSave] upsert falhou:', r.error.code, '|', r.error.message);
-  var errMsg = (r.error.message || '').toLowerCase();
+    /* ── Tentativa 2: sem profile_metadata ── */
+    if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
+      delete payload.profile_metadata;
+      var r2 = await _sb.from('profiles').upsert(payload, { onConflict: 'id' }).select('id');
+      if (!r2.error && r2.data && r2.data.length > 0) return true;
+      if (r2.error) console.error('[sbSave] retry sem metadata erro:', r2.error.message);
+    }
 
-  /* ── Tentativa 2: sem profile_metadata (coluna pode não ter sido criada) ── */
-  if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
-    delete payload.profile_metadata;
-    var r2 = await _sb.from('profiles').upsert(payload, { onConflict: 'id' });
-    if (!r2.error) return true;
-    console.error('[sbSave] retry sem metadata falhou:', r2.error.message);
-    errMsg = (r2.error.message || '').toLowerCase();
+    /* ── Tentativa 3: campos básicos ── */
+    var safePayload = {
+      id: uid, email: payload.email, name: payload.name, bio: payload.bio,
+      city: payload.city, state: payload.state, phone: payload.phone,
+      hourly_rate: payload.hourly_rate, skills: payload.skills, updated_at: payload.updated_at
+    };
+    var r3 = await _sb.from('profiles').upsert(safePayload, { onConflict: 'id' }).select('id');
+    if (!r3.error && r3.data && r3.data.length > 0) return true;
+    console.error('[sbSave] tentativa final erro:', r3.error && r3.error.message);
+    return false;
   }
 
-  /* ── Tentativa 3: só campos básicos (sem type nem metadata) ── */
-  var safePayload = {
-    id:          uid,
-    email:       payload.email,
-    name:        payload.name,
-    bio:         payload.bio,
-    city:        payload.city,
-    state:       payload.state,
-    phone:       payload.phone,
-    hourly_rate: payload.hourly_rate,
-    skills:      payload.skills,
-    updated_at:  payload.updated_at
-  };
-  var r3 = await _sb.from('profiles').upsert(safePayload, { onConflict: 'id' });
-  if (!r3.error) return true;
+  /* Sem erro — verificar se alguma linha foi realmente afetada */
+  if (!r.data || r.data.length === 0) {
+    /* RLS bloqueou silenciosamente (JWT expirado no servidor) */
+    console.warn('[sbSave] 0 linhas retornadas — JWT expirado, RLS bloqueou');
+    return false;
+  }
 
-  console.error('[sbSave] tentativa final falhou:', r3.error.code, '|', r3.error.message);
-  return false;
+  return true;
 }
 
 /* ── MENSAGENS: Buscar ────────────────────────────────────────── */
