@@ -4194,11 +4194,6 @@ section { padding: 64px 0; }
           <option data-pt="M&uacute;sica &amp; &Aacute;udio" data-es="M&uacute;sica &amp; Audio">M&uacute;sica &amp; &Aacute;udio</option>
           <option data-pt="Blockchain &amp; Web3" data-es="Blockchain &amp; Web3">Blockchain &amp; Web3</option>
           <option data-pt="Sa&uacute;de &amp; Bem-estar" data-es="Salud &amp; Bienestar">Sa&uacute;de &amp; Bem-estar</option>
-          <option data-pt="Vídeo & Animação" data-es="Video & Animación">Vídeo & Animação</option>
-        <option value="imobiliario">Imóveis & Construção</option>
-<option value="gastronomia">Gastronomia & Culinária</option>
-<option value="moda">Moda & Beleza</option>
-<option value="eventos">Eventos & Entretenimento</option>
 </select>
         <button class="hero-search-btn">
           <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
@@ -4328,11 +4323,11 @@ section { padding: 64px 0; }
           <div class="cat-count" data-pt="287 profissionais" data-es="287 profesionales">287 profissionais</div>
         </a>
 
-        <a class="cat-card" onclick="filterByCategory('seguranca',this)" data-filter="seguranca">
+        <a class="cat-card" onclick="filterByCategory('ia',this)" data-filter="ia">
           <div class="cat-icon">
-            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" y1="1" x2="9" y2="4"/><line x1="15" y1="1" x2="15" y2="4"/><line x1="9" y1="20" x2="9" y2="23"/><line x1="15" y1="20" x2="15" y2="23"/><line x1="20" y1="9" x2="23" y2="9"/><line x1="20" y1="14" x2="23" y2="14"/><line x1="1" y1="9" x2="4" y2="9"/><line x1="1" y1="14" x2="4" y2="14"/></svg>
           </div>
-          <div class="cat-name" data-pt="Segurança & Infra" data-es="Seguridad & Infraest.">Segurança & Infra</div>
+          <div class="cat-name" data-pt="IA & Machine Learning" data-es="IA & Machine Learning">IA & Machine Learning</div>
           <div class="cat-count" data-pt="167 profissionais" data-es="167 profesionales">167 profissionais</div>
         </a>
 
@@ -4340,7 +4335,7 @@ section { padding: 64px 0; }
           <div class="cat-icon">
             <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           </div>
-          <div class="cat-name" data-pt="SEO & Conteúdo" data-es="SEO & Contenido">SEO & Conteúdo</div>
+          <div class="cat-name" data-pt="SEO & Performance" data-es="SEO & Performance">SEO & Performance</div>
           <div class="cat-count" data-pt="312 profissionais" data-es="312 profesionales">312 profissionais</div>
         </a>
 
@@ -4348,7 +4343,7 @@ section { padding: 64px 0; }
           <div class="cat-icon">
             <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
-          <div class="cat-name" data-pt="Consultoria & Gestão" data-es="Consultoría & Gestión">Consultoria & Gestão</div>
+          <div class="cat-name" data-pt="Consultoria & Negócios" data-es="Consultoría & Negocios">Consultoria & Negócios</div>
           <div class="cat-count" data-pt="145 profissionais" data-es="145 profesionales">145 profissionais</div>
         </a>
 
@@ -4356,7 +4351,7 @@ section { padding: 64px 0; }
           <div class="cat-icon">
             <svg fill="none" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
-          <div class="cat-name" data-pt="Arquitetura & Interior" data-es="Arquitectura & Interior">Arquitetura & Interior</div>
+          <div class="cat-name" data-pt="Arquitetura & Interiores" data-es="Arquitectura & Interiores">Arquitetura & Interiores</div>
           <div class="cat-count" data-pt="98 profissionais" data-es="98 profesionales">98 profissionais</div>
         </a>
 
@@ -10030,9 +10025,10 @@ function filterByCategory(cat, el) {
         'ti':        ['ti','sistemas'],
         'apps':      ['apps','mobile'],
         'dados':     ['dados','analytics'],
-        'seo':       ['marketing'],
-        'consultoria':['consultoria'],
-        'arquitetura':['arquitetura']
+        'ia':        ['ia','machine','learning'],
+        'seo':       ['seo','performance'],
+        'consultoria':['consultoria','negocios'],
+        'arquitetura':['arquitetura','interiores']
       };
       var list = aliasMap[cat] || [cat];
       sidebar.querySelectorAll('.filter-option input[type=checkbox]').forEach(function(cb) {
@@ -12564,6 +12560,10 @@ var CATS = {
                  sk:[['Contratos','LGPD','Societário','Trabalhista'],['Contabilidade','IRPJ','CSLL','Simples Nacional'],['Planejamento Tributário','ICMS','PIS','COFINS'],['Valuation','DCF','FP&A','Excel Avançado'],['Direito Digital','LGPD','Compliance','Termos de Uso']],
                  pt:['Elaboração de contrato de prestação de serviço','Consultoria tributária para abertura de empresa','Planejamento financeiro empresarial anual','Adequação à LGPD para plataforma digital','Due diligence para fusão de empresas','Revisão de contratos de fornecedores','Política de privacidade e termos de uso'],
                  bu:[[2000,6000],[1500,4000],[3000,8000],[1000,3000],[4000,12000]], ty:['fixo','hora','fixo','fixo','fixo'] },
+  financeiro:  { l:'Financeiro',              r:['Analista Financeiro','Controller','Consultor de Investimentos','Planejador Financeiro Pessoal','Analista de Crédito e Risco'],
+                 sk:[['Excel Avançado','Power BI','Fluxo de Caixa','DRE'],['Contabilidade Gerencial','ERP','Orçamento Empresarial','Forecast'],['Análise de Investimentos','Renda Fixa','Renda Variável','Valuation'],['Planejamento Financeiro','Educação Financeira','Aposentadoria','Seguros'],['Análise de Crédito','Gestão de Risco','Rating','Due Diligence']],
+                 pt:['Modelagem financeira para captação de investimento','Estruturação de fluxo de caixa e DRE gerencial','Consultoria em planejamento financeiro pessoal','Análise de viabilidade de novo investimento','Organização financeira para pequenas empresas','Dashboard financeiro interativo em Power BI','Auditoria e revisão de demonstrações contábeis'],
+                 bu:[[2000,6000],[3000,9000],[1500,4000],[1000,3000],[2500,7000]], ty:['fixo','fixo','recorrente','fixo','fixo'] },
   fotografia:  { l:'Fotografia',               r:['Fotógrafo Corporativo','Fotógrafo de Produto','Fotógrafo Editorial','Fotógrafo de Eventos','Fotógrafo de Arquitetura'],
                  sk:[['Lightroom','Photoshop','Canon 5D','Estúdio'],['Produto','E-commerce','Still Life','Lighting'],['Moda','Editorial','Retoque','Estúdio'],['Sony A7','Flash','Retratos','Eventos'],['Drone','DJI','Arquitetura','Real Estate']],
                  pt:['Fotos de produtos para e-commerce','Ensaio fotográfico para equipe corporativa','Cobertura fotográfica de evento empresarial','Fotos para catálogo de moda','Fotografia arquitetônica para construtora','Ensaio para perfil LinkedIn executivos','Fotos de gastronomia para restaurante'],
@@ -17162,28 +17162,6 @@ var _SKILLS_DB = {
     'nutricao':{ label:'Nutrição', skills:['Nutrição Clínica','Nutrição Esportiva','Emagrecimento','Ganho de Massa','Nutrição Funcional','Nutrição para Gestantes','Plano Alimentar','Teleconsulta'] },
     'fitness':{ label:'Educação Física & Fitness', skills:['Personal Trainer','Musculação','Funcional','HIIT','Pilates','Yoga','Crossfit','Treinamento Online','Treino em Casa','Avaliação Física'] },
     'saude-mental':{ label:'Saúde Mental & Bem-estar', skills:['Psicologia Online','Coaching','Mindfulness','Meditação','Saúde Corporativa','Qualidade de Vida no Trabalho','Ginástica Laboral','Gestão de Estresse'] }
-  }},
-
-  imobiliario:{ label:'Imóveis & Construção', subareas:{
-    'avaliacao':{ label:'Avaliação & Consultoria Imobiliária', skills:['Avaliação de Imóveis','PTAM','Laudo Técnico','Due Diligence Imobiliária','Consultoria de Compra','Consultoria de Venda','Análise de Mercado','Investimento em FII','Airbnb Management','Home Staging'] },
-    'projetos':{ label:'Projetos & Engenharia', skills:['Projeto Arquitetônico','Design de Interiores','Engenharia Civil','Laudos Estruturais','Regularização de Imóveis','AVCB','Habite-se','Memorial Descritivo','Orçamento de Obra','Gerenciamento de Obra'] }
-  }},
-  gastronomia:{ label:'Gastronomia & Culinária', subareas:{
-    'consultoria':{ label:'Consultoria Gastronômica', skills:['Cardápio','Fichas Técnicas','Custo de Alimentos','CMV','Gestão de Restaurante','Treinamento de Equipe','Food Service','Delivery','Dark Kitchen','Franchise Food'] },
-    'conteudo':{ label:'Conteúdo Gastronômico', skills:['Fotografia de Alimentos','Receitas','Blog Gastronômico','YouTube Culinário','TikTok Food','Cookbook','Nutrição Culinária','Chef Particular','Personal Chef','Aulas de Culinária Online'] }
-  }},
-  moda:{ label:'Moda & Beleza', subareas:{
-    'estilo':{ label:'Estilo & Consultoria de Imagem', skills:['Personal Stylist','Consultoria de Imagem','Coloração Pessoal','Armário Cápsula','Compras Assistidas','Styling para Eventos','Styling Corporativo','Moda Sustentável','Slow Fashion'] },
-    'producao':{ label:'Produção & Conteúdo', skills:['Fashion Design','Modelagem','Costura','Estamparia','Produção de Moda','Direção Criativa','Edição de Moda','Look Book','Catálogo de Moda','Social Media Fashion'] }
-  }},
-  rh:{ label:'RH & Gestão de Pessoas', subareas:{
-    'recrutamento':{ label:'Recrutamento & Seleção', skills:['Hunting Executivo','R&S Operacional','Assessment','Entrevista por Competências','Testes Psicológicos','Onboarding','Employer Branding','LinkedIn Recruiter','ATS','Banco de Talentos'] },
-    'desenvolvimento':{ label:'Treinamento & Desenvolvimento', skills:['T&D','Trilhas de Aprendizado','EAD Corporativo','Gamificação','LMS','Avaliação de Desempenho','Gestão por Competências','PDI','Coaching Executivo','Mentoria'] },
-    'gestao-rh':{ label:'Gestão de RH & Cultura', skills:['Cultura Organizacional','Clima Organizacional','Endomarketing','Remuneração & Benefícios','PCCS','Pesquisa de Engajamento','NPS de Funcionários','Diversidade & Inclusão','Política de RH','People Analytics'] }
-  }},
-  eventos:{ label:'Eventos & Entretenimento', subareas:{
-    'corporativo':{ label:'Eventos Corporativos', skills:['Organização de Eventos','Convenção','Summit','Workshop','Webinar','Evento Híbrido','Cerimonial','MC/Mestre de Cerimônias','AV & Técnica','Credenciamento'] },
-    'social':{ label:'Eventos Sociais & Casamentos', skills:['Wedding Planner','Casamento','Debutante','Formatura','Aniversário','Buffet','Decoração','Fotografia de Evento','Filmagem de Evento','DJ/Música'] }
   }}
 };
 
