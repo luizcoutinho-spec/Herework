@@ -16013,13 +16013,33 @@ function dashSaveProfile() {
     state:     newState,
     type:      newType,
     hourlyRate: hrRate,
-    skills:    []
+    skills:    (typeof _selectedSkills !== 'undefined' && _selectedSkills.length ? _selectedSkills.slice() : [])
   };
 
   /* Salva no Supabase em background — não bloqueia o UX */
   if (_sbReady() && _session && _session.uid) {
+    var _savedUid  = _session.uid;
+    var _savedType = newType;
     _sbSaveProfile(profileData, extMeta).then(function(ok) {
-      if (!ok) console.warn('dashSaveProfile: Supabase update falhou silenciosamente');
+      if (!ok) { console.warn('dashSaveProfile: Supabase update falhou silenciosamente'); return; }
+
+      /* Invalida cache do perfil para forçar releitura na próxima abertura */
+      if (window._realProfileCache && window._realProfileCache[_savedUid]) {
+        var c = window._realProfileCache[_savedUid];
+        c.name        = profileData.name;
+        c.bio         = profileData.bio;
+        c.city        = profileData.city;
+        c.state       = profileData.state;
+        c.hourly_rate = profileData.hourlyRate;
+        c.type        = _savedType;
+        if (extMeta) c.profile_metadata = extMeta;
+      }
+
+      /* Recarrega listagem de freelancers se o usuário é FL/both */
+      var isFL = (_savedType === 'freelancer' || _savedType === 'both');
+      if (isFL && typeof _renderRealFreelancers === 'function') {
+        _renderRealFreelancers();
+      }
     });
   }
 
