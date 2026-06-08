@@ -1,6 +1,14 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-BR" data-lang="pt">
 <head>
+<script>
+(function(){
+  var h = window.location.hostname;
+  if (h === 'herework.com.br' || h === 'www.herework.com.br') {
+    window.location.replace('/coming-soon.html');
+  }
+})();
+</script>
 <meta charset="UTF-8">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; form-action 'self'; base-uri 'self'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
