@@ -9554,19 +9554,66 @@ async function _sbGetMyProjects() {
   return r.data || [];
 }
 
-/* ── PROJETOS: Excluir publicação ─────────────────────────────── */
-/* Exclui o projeto do Supabase. Requer policy RLS "projects_delete":
-     USING (auth.uid() = client_id OR EXISTS (SELECT 1 FROM profiles
-       WHERE id = auth.uid() AND is_admin = true))
-   Rode a migração em supabase_schema.sql se ainda não aplicou. */
+/* ── PROJETOS: Excluir publicação ─────────────────────────────────────────────
+   Estratégia em dois níveis:
+   1. RPC `delete_project_cascade` (SECURITY DEFINER) — exclui mensagens →
+      contratos → propostas → projeto em uma única transação segura, ignorando
+      restrições FK individuais.  Requer a migração em supabase_schema.sql.
+   2. Fallback manual em cascata — caso a RPC ainda não exista no banco.
+
+   Em ambos os casos `_sbEnsureSession` garante que o JWT está ativo antes do
+   DELETE; sem isso, o RLS bloqueia silenciosamente (retorna {error:null, data:[]})
+   mesmo que o usuário apareça "logado" na UI. */
 async function _sbDeleteProject(id) {
   if (!_sbReady() || !_session || !id) return false;
-  /* Garante sessão Supabase ativa — sem isso a policy RLS bloqueia o DELETE. */
   var user = await _sbEnsureSession();
   if (!user) { console.warn('_sbDeleteProject: sem sessão Supabase ativa.'); return false; }
-  var r = await _sb.from('projects').delete().eq('id', id);
-  if (r.error) { console.warn('_sbDeleteProject error:', r.error.message || r.error); return false; }
-  return true;
+
+  /* ── Nível 1: RPC cascade (preferido) ───────────────────────────────────── */
+  try {
+    var rpc = await _sb.rpc('delete_project_cascade', { p_project_id: id });
+    /* 42883 = function does not exist → cair no fallback */
+    if (rpc.error && rpc.error.code === '42883') {
+      console.info('_sbDeleteProject: RPC não encontrada, usando fallback manual.');
+    } else if (rpc.error) {
+      console.warn('_sbDeleteProject RPC error:', rpc.error.message || rpc.error);
+      return false;
+    } else {
+      /* RPC executou — verificar retorno { ok: true/false } */
+      if (rpc.data && rpc.data.ok === false) {
+        console.warn('_sbDeleteProject RPC denied:', rpc.data.error);
+        return false;
+      }
+      return true;
+    }
+  } catch(e) {
+    console.warn('_sbDeleteProject RPC exception:', e);
+  }
+
+  /* ── Nível 2: fallback — cascata manual ─────────────────────────────────── */
+  /* Ordem obrigatória: messages → contracts → proposals → projects
+     (FK constraints: messages→contracts→projects, proposals→projects) */
+  try {
+    var cQ = await _sb.from('contracts').select('id').eq('project_id', id);
+    if (!cQ.error && cQ.data && cQ.data.length > 0) {
+      var cIds = cQ.data.map(function(c) { return c.id; });
+      var mDel = await _sb.from('messages').delete().in('contract_id', cIds);
+      if (mDel.error) console.warn('_sbDeleteProject: messages delete error:', mDel.error.message);
+      var cDel = await _sb.from('contracts').delete().eq('project_id', id);
+      if (cDel.error) console.warn('_sbDeleteProject: contracts delete error:', cDel.error.message);
+    }
+    var pDel = await _sb.from('proposals').delete().eq('project_id', id);
+    if (pDel.error) console.warn('_sbDeleteProject: proposals delete error:', pDel.error.message);
+    var r = await _sb.from('projects').delete().eq('id', id);
+    if (r.error) {
+      console.warn('_sbDeleteProject: projects delete error:', r.error.message || r.error);
+      return false;
+    }
+    return true;
+  } catch(e) {
+    console.warn('_sbDeleteProject cascade fallback exception:', e);
+    return false;
+  }
 }
 
 /* ── PROPOSTAS: Listar para um projeto (visão do cliente) ────── */

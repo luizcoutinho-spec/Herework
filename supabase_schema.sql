@@ -279,3 +279,101 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT 
 -- já existentes — a coluna nasce como array vazio por padrão.
 -- ═══════════════════════════════════════════════════════════════
 ALTER TABLE proposals ADD COLUMN IF NOT EXISTS attachments TEXT[] DEFAULT '{}';
+
+-- ═══════════════════════════════════════════════════════════════
+-- MIGRAÇÃO — Exclusão de projetos em cascata
+--
+-- PROBLEMA: o botão "Excluir" falha silenciosamente porque:
+--   (a) Nenhuma policy RLS DELETE existe para projects/contracts/
+--       proposals/messages → Supabase bloqueia sem retornar erro.
+--   (b) contracts.project_id não tem ON DELETE CASCADE → a FK
+--       impede a exclusão do projeto se houver contratos vinculados.
+--
+-- SOLUÇÃO: policies RLS + função RPC SECURITY DEFINER que executa
+-- toda a cascata numa única transação, contornando as FKs individuais.
+--
+-- Execute este bloco inteiro no SQL Editor do Supabase.
+-- Seguro para rodar múltiplas vezes (DROP ... IF EXISTS + IF NOT EXISTS).
+-- ═══════════════════════════════════════════════════════════════
+
+-- 1. RLS policies DELETE em falta
+-- (usa DROP IF EXISTS para ser idempotente)
+
+DROP POLICY IF EXISTS "projects_delete" ON projects;
+CREATE POLICY "projects_delete" ON projects FOR DELETE USING (
+  auth.uid() = client_id
+  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
+
+DROP POLICY IF EXISTS "contracts_delete" ON contracts;
+CREATE POLICY "contracts_delete" ON contracts FOR DELETE USING (
+  auth.uid() = client_id
+  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
+
+DROP POLICY IF EXISTS "proposals_delete" ON proposals;
+CREATE POLICY "proposals_delete" ON proposals FOR DELETE USING (
+  auth.uid() = freelancer_id
+  OR auth.uid() = (SELECT client_id FROM projects WHERE id = project_id)
+  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
+
+DROP POLICY IF EXISTS "messages_delete" ON messages;
+CREATE POLICY "messages_delete" ON messages FOR DELETE USING (
+  auth.uid() IN (
+    SELECT client_id    FROM contracts WHERE id = contract_id
+    UNION
+    SELECT freelancer_id FROM contracts WHERE id = contract_id
+  )
+);
+
+-- 2. Função RPC de exclusão segura em cascata
+--    SECURITY DEFINER: executa como owner (ignora RLS individualmente),
+--    mas verifica ownership explicitamente antes de qualquer DELETE.
+DROP FUNCTION IF EXISTS delete_project_cascade(UUID);
+CREATE OR REPLACE FUNCTION delete_project_cascade(p_project_id UUID)
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_client_id   UUID;
+  v_contract_ids UUID[];
+BEGIN
+  -- Buscar owner do projeto
+  SELECT client_id INTO v_client_id
+    FROM projects WHERE id = p_project_id;
+
+  -- Projeto inexistente
+  IF v_client_id IS NULL THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'project_not_found');
+  END IF;
+
+  -- Verificar permissão: author ou admin
+  IF v_client_id <> auth.uid() AND NOT EXISTS (
+    SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE
+  ) THEN
+    RETURN jsonb_build_object('ok', false, 'error', 'permission_denied');
+  END IF;
+
+  -- Coletar IDs de contratos vinculados
+  SELECT ARRAY(SELECT id FROM contracts WHERE project_id = p_project_id)
+    INTO v_contract_ids;
+
+  -- Excluir em cascata (ordem respeita FK constraints)
+  IF v_contract_ids IS NOT NULL AND array_length(v_contract_ids, 1) > 0 THEN
+    DELETE FROM messages  WHERE contract_id = ANY(v_contract_ids);
+    DELETE FROM contracts WHERE project_id  = p_project_id;
+  END IF;
+
+  DELETE FROM proposals WHERE project_id = p_project_id;
+  DELETE FROM projects  WHERE id         = p_project_id;
+
+  RETURN jsonb_build_object('ok', true);
+END;
+$$;
+
+-- Garantir que apenas usuários autenticados possam chamar a função
+REVOKE ALL ON FUNCTION delete_project_cascade(UUID) FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION delete_project_cascade(UUID) TO authenticated;
