@@ -10242,6 +10242,12 @@ document.addEventListener('keydown', function(e) {
    VER PERFIL - modal dinamico
 ═══════════════════════════════════════════ */
 function openProfile(card) {
+  /* Ação restrita — exige sessão autenticada válida.
+     Esta é a guarda canônica: cobre tanto as chamadas via delegação
+     quanto qualquer chamada direta residual. */
+  if (!_requireAuth('Você precisa estar logado para visualizar este perfil.',
+    function(){ openProfile(card); })) return;
+
   var nameEl   = card.querySelector('.fl-list-name');
   var roleEl   = card.querySelector('.fl-list-role');
   var bioEl    = card.querySelector('.fl-list-bio');
@@ -11314,7 +11320,13 @@ document.addEventListener('click', function(e) {
     var pt  = btn.getAttribute('data-pt') || '';
     if (txt === 'Ver Perfil' || pt === 'Ver Perfil') {
       var card = btn.closest('.fl-list-card');
-      if (card) { openProfile(card); return; }
+      if (card) {
+        /* Se o botão já declara onclick="" próprio (ex: openFreelancerProfile,
+           openDemoProfile), a guarda de auth é responsabilidade desse handler.
+           Não chamar openProfile aqui para evitar dupla execução / duplo toast. */
+        if (!btn.hasAttribute('onclick')) { openProfile(card); }
+        return;
+      }
     }
     if (btn.classList.contains('btn-login') || /^Entrar$|^Iniciar/.test(txt))
       { openModal('login'); return; }
