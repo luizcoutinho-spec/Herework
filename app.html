@@ -9392,6 +9392,25 @@ function _sbReady() {
   return _sb !== null && _SUPA_URL !== 'COLE_SUA_SUPABASE_URL_AQUI';
 }
 
+/* ── Garantir sessão Supabase ativa ───────────────────────────────
+   Sincroniza _session.uid com o JWT ativo no Supabase Auth. Isso evita
+   falhas silenciosas de RLS (ex.: "Erro ao publicar projeto") quando a
+   sessão exibida na UI vem do localStorage (hw_session) mas o token de
+   autenticação do Supabase expirou, não existe ou pertence a outro usuário.
+   Retorna o usuário autenticado (com .id) ou null se não houver sessão válida. */
+async function _sbEnsureSession() {
+  if (!_sbReady()) return null;
+  try {
+    var r = await _sb.auth.getSession();
+    var user = r && r.data && r.data.session && r.data.session.user;
+    if (user) {
+      if (_session) _session.uid = user.id;
+      return user;
+    }
+  } catch(e) { console.warn('_sbEnsureSession:', e); }
+  return null;
+}
+
 /* ── AUTH: Restaurar sessão ───────────────────────────────────── */
 async function _sbRestoreSession() {
   if (!_sbReady()) return;
@@ -9402,8 +9421,9 @@ async function _sbRestoreSession() {
       var prof = await _sbGetProfile(user.id);
       if (prof) {
         _setSession(prof.name, prof.email, prof.type);
-        /* Guardar id do Supabase na sessão */
+        /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
+        _session.avatar_url = prof.avatar_url || null;
       }
     }
     /* Listener para mudanças de autenticação */
@@ -9472,8 +9492,13 @@ async function _sbForgotPassword(email) {
 /* ── PROJETOS: Criar ──────────────────────────────────────────── */
 async function _sbCreateProject(data) {
   if (!_sbReady() || !_session) return null;
+  /* Garantir que existe uma sessão Supabase válida antes de inserir —
+     caso contrário a política RLS "projects_insert" (auth.uid() IS NOT NULL)
+     bloqueia silenciosamente o INSERT e a função retornaria null sem motivo aparente. */
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbCreateProject: sem sessão Supabase ativa — login necessário'); return null; }
   var r = await _sb.from('projects').insert({
-    client_id:     _session.uid,
+    client_id:     user.id,
     title:         data.title,
     description:   data.description,
     category:      data.category,
@@ -9482,7 +9507,8 @@ async function _sbCreateProject(data) {
     deadline_days: data.deadline,
     type:          data.type,
     skills_needed: data.skills || []
-  }).select().single();
+  }).select('*, profiles(name, avatar_url, rating)').single();
+  if (r.error) { console.warn('_sbCreateProject error:', r.error.message || r.error); return null; }
   return r.data || null;
 }
 
@@ -10370,6 +10396,7 @@ function submitLogin() {
       }
       _setSession(prof.name, prof.email, prof.type);
       _session.uid = res.user.id;
+      _session.avatar_url = prof.avatar_url || null;
       if (e) e.value = ''; if (p) p.value = '';
       closeModal('login');
       showToast((lang()==='pt' ? '👋 Bem-vindo(a) de volta, ' : '👋 ¡Bienvenido/a de regreso, ') + prof.name.split(' ')[0] + '!', 'success');
@@ -10762,12 +10789,30 @@ function submitProject() {
   };
 
   if (_sbReady()) {
-    _sbCreateProject(projData).then(function(proj) {
-      _setBtnLoading(btn, false);
-      if (!proj) { showToast('Erro ao publicar projeto. Tente novamente.','error'); return; }
-      closeModal('publish');
-      if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
-      showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+    /* Confirmar sessão Supabase ativa antes de tentar publicar — evita o
+       erro genérico quando o token expirou ou a sessão local está dessincronizada */
+    _sbEnsureSession().then(function(user) {
+      if (!user) {
+        _setBtnLoading(btn, false);
+        closeModal('publish');
+        showToast('Sua sessão expirou. Faça login novamente para publicar o projeto.','warn');
+        _clearSession();
+        setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
+        return;
+      }
+      _sbCreateProject(projData).then(function(proj) {
+        _setBtnLoading(btn, false);
+        if (!proj) { showToast('Erro ao publicar projeto. Tente novamente.','error'); return; }
+        closeModal('publish');
+        if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
+        showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+        /* Exibir imediatamente em "Projetos Ativos" e em "Meu Perfil → Meus Projetos Publicados" */
+        if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
+      }).catch(function(err) {
+        _setBtnLoading(btn, false);
+        console.warn('submitProject:', err);
+        showToast('Erro ao publicar projeto. Tente novamente.','error');
+      });
     });
   } else {
     /* Modo demo */
@@ -11211,6 +11256,9 @@ function openEditProject(btn) {
 function init() {
   _initSupabase();   /* Inicializar Supabase + restaurar sessão JWT */
   _restoreSession(); /* Restaurar sessão do localStorage */
+  /* Carregar projetos publicados por usuários reais (Supabase) na lista "Projetos Ativos" —
+     garante que continuem visíveis após recarregar a página ou novo login */
+  setTimeout(function(){ if (typeof _loadRealProjects === 'function') _loadRealProjects(); }, 500);
   setLang('pt');
   /* Override openModal para montar Stripe quando necessário */
   (function() {
@@ -12480,6 +12528,195 @@ function _projCard(cat, idx) {
     '</div>' +
   '</div>';
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PROJETOS REAIS (publicados por usuários via Supabase)
+   Renderização na lista pública "Projetos Ativos" e em
+   "Meu Perfil → Meus Projetos Publicados", incluindo dados do
+   autor/publicador (nome, foto e data/hora de publicação).
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Tempo relativo (ex.: "há 2h", "há 3 dias") */
+function _timeAgo(iso) {
+  if (!iso) return '';
+  var then = new Date(iso).getTime();
+  if (isNaN(then)) return '';
+  var diffMs = Date.now() - then;
+  if (diffMs < 0) diffMs = 0;
+  var mins = Math.floor(diffMs / 60000);
+  if (mins < 1)   return 'agora mesmo';
+  if (mins < 60)  return 'há ' + mins + ' min';
+  var hours = Math.floor(mins / 60);
+  if (hours < 24) return 'há ' + hours + 'h';
+  var days = Math.floor(hours / 24);
+  if (days < 30)  return 'há ' + days + (days > 1 ? ' dias' : ' dia');
+  var months = Math.floor(days / 30);
+  if (months < 12) return 'há ' + months + (months > 1 ? ' meses' : ' mês');
+  var years = Math.floor(months / 12);
+  return 'há ' + years + (years > 1 ? ' anos' : ' ano');
+}
+/* Data e hora completas, formatadas em pt-BR (ex.: "08/06/2026 às 14:32") */
+function _fullDateTime(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+}
+/* Converte o rótulo de categoria salvo no projeto (ex.: "Arquitetura & Interiores")
+   na chave usada pelos filtros da página (ex.: "arquitetura") */
+function _catKeyFromLabel(label) {
+  if (!label) return '';
+  var norm = _norm(label);
+  var keys = Object.keys(CATS);
+  for (var i = 0; i < keys.length; i++) {
+    if (_norm(CATS[keys[i]].l || '') === norm) return keys[i];
+  }
+  return '';
+}
+/* Bloco com as informações do autor/publicador: nome, foto (ou inicial) e data/hora */
+function _publisherChip(profile, createdAt) {
+  var name      = (profile && profile.name) ? profile.name : 'Cliente HereWork';
+  var avatarUrl = profile && profile.avatar_url;
+  var initial   = name.charAt(0).toUpperCase();
+  var avatarHTML = avatarUrl
+    ? '<img src="' + _sanitize(avatarUrl) + '" alt="' + _sanitize(name) + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover;flex-shrink:0;">'
+    : '<div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--orange));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;">' + _sanitize(initial) + '</div>';
+  var when = _fullDateTime(createdAt);
+  return '<div class="proj-publisher-chip" style="display:flex;align-items:center;gap:8px;margin-top:10px;">' +
+    avatarHTML +
+    '<div style="line-height:1.3;">' +
+      '<div style="font-size:12.5px;font-weight:600;color:var(--text);">' + _sanitize(name) + '</div>' +
+      '<div style="font-size:11px;color:var(--text-4);" title="' + _sanitize(when) + '">📅 Publicado ' + _sanitize(_timeAgo(createdAt)) + (when ? ' · ' + _sanitize(when) : '') + '</div>' +
+    '</div>' +
+  '</div>';
+}
+/* Cartão de projeto real (publicado por um usuário, vindo do Supabase) */
+function _realProjCard(p) {
+  var catLabel = p.category || '';
+  var catKey   = _catKeyFromLabel(catLabel);
+  var bMin     = Number(p.budget_min || 0), bMax = Number(p.budget_max || 0);
+  var budStr   = bMax ? ('R$ ' + Math.round(bMin).toLocaleString('pt-BR') + ' – ' + Math.round(bMax).toLocaleString('pt-BR')) : 'A combinar';
+  var typeLbl  = p.type === 'recorrente' ? 'Recorrente' : 'Preço Fixo';
+  var tagCls   = p.type === 'recorrente' ? 'tag-blue' : 'tag-green';
+  var dlStr    = p.type === 'recorrente' ? 'Por mês' : (p.deadline_days ? ('Prazo: ' + p.deadline_days + ' dias') : '');
+  var profile  = p.profiles || null;
+  var props    = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
+
+  return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-cat="' + _sanitize(catKey) +
+    '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) + '">' +
+    '<div class="proj-list-header">' +
+      '<div class="proj-list-left">' +
+        '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">' +
+          '<span class="proj-cat">' + _sanitize(catLabel) + '</span>' +
+          '<span class="tag ' + tagCls + '">' + typeLbl + '</span>' +
+          '<span class="tag" style="background:#e8f5e9;color:var(--green);">✅ Publicado por usuário</span>' +
+        '</div>' +
+        '<div class="proj-list-title">' + _sanitize(p.title) + '</div>' +
+      '</div>' +
+      '<div class="proj-list-right">' +
+        '<div class="proj-list-budget">' + budStr + '</div>' +
+        '<div class="proj-list-type">' + dlStr + '</div>' +
+      '</div>' +
+    '</div>' +
+    '<div class="proj-list-desc" style="font-size:13px;color:var(--text-2);line-height:1.6;margin:10px 0 12px;">' + _sanitize(p.description) + '</div>' +
+    _publisherChip(profile, p.created_at) +
+    '<div class="proj-list-footer" style="margin-top:12px;">' +
+      '<div class="proj-list-meta">' +
+        '<span>👁 ' + (p.views || 0) + ' visualizações</span>' +
+      '</div>' +
+      '<div class="proj-list-actions">' +
+        '<span class="proj-proposals">' + props + ' propostas</span>' +
+        '<button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+/* Controla quais projetos reais já foram inseridos na grade (evita duplicidade) */
+var _realProjectsLoaded = {};
+/* Busca os projetos publicados por usuários (Supabase) e os exibe no topo de "Projetos Ativos" */
+async function _loadRealProjects() {
+  if (!_sbReady()) return;
+  var grid = document.getElementById('proj-list-grid');
+  if (!grid) return;
+  try {
+    var list = await _sbListProjects();
+    list.forEach(function(p) {
+      if (_realProjectsLoaded[p.id]) return;
+      _realProjectsLoaded[p.id] = true;
+      grid.insertAdjacentHTML('afterbegin', _realProjCard(p));
+    });
+    if (typeof applyAllFilters === 'function') applyAllFilters('proj');
+    var projCount = document.getElementById('proj-count');
+    if (projCount) projCount.textContent = grid.querySelectorAll('.proj-list-card').length;
+  } catch(e) { console.warn('_loadRealProjects:', e); }
+}
+/* Insere imediatamente, na UI, um projeto recém-publicado — sem precisar recarregar a página */
+function _addPublishedProjectToUI(proj) {
+  if (!proj) return;
+  try {
+    var grid = document.getElementById('proj-list-grid');
+    if (grid && proj.id && !_realProjectsLoaded[proj.id]) {
+      _realProjectsLoaded[proj.id] = true;
+      grid.insertAdjacentHTML('afterbegin', _realProjCard(proj));
+      if (typeof applyAllFilters === 'function') applyAllFilters('proj');
+      var projCount = document.getElementById('proj-count');
+      if (projCount) projCount.textContent = grid.querySelectorAll('.proj-list-card').length;
+    }
+  } catch(e) { console.warn('_addPublishedProjectToUI (lista de projetos):', e); }
+  /* Atualizar "Meu Perfil → Meus Projetos Publicados" */
+  try {
+    if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+  } catch(e) {}
+}
+/* Carrega e renderiza, em "Meu Perfil → Meus Projetos Publicados", os projetos
+   reais do usuário logado (Supabase), com nome/foto/data do publicador implícitos
+   (o próprio usuário) e dados persistidos — substitui o estado vazio padrão. */
+async function _refreshMyPublishedProjects() {
+  if (!_sbReady() || !_session) return;
+  var el = document.getElementById('dash-client-waiting');
+  if (!el) return;
+  try {
+    var list = await _sbGetMyProjects();
+    if (!list.length) return; /* mantém o estado vazio padrão renderizado por _renderDashClientWaiting */
+    var who = {
+      name:       _session.name || 'Você',
+      avatar_url: _session.avatar_url || null
+    };
+    el.innerHTML = list.map(function(p) {
+      var budget    = p.budget_max ? ('R$ ' + Math.round(p.budget_max).toLocaleString('pt-BR')) : 'A combinar';
+      var proposals = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
+      return '<div class="dash-proj-card">' +
+        '<div class="dash-proj-card-top">' +
+          '<div class="dash-proj-title">' + _sanitize(p.title) + '</div>' +
+          _statusBadge('waiting', 'Aguardando propostas') +
+        '</div>' +
+        '<div class="dash-proj-meta">' +
+          '<span>💰 ' + budget + '</span>' +
+          '<span>📩 ' + proposals + ' proposta' + (proposals === 1 ? '' : 's') + ' recebida' + (proposals === 1 ? '' : 's') + '</span>' +
+          '<span>🕐 Publicado ' + _sanitize(_timeAgo(p.created_at)) + '</span>' +
+        '</div>' +
+        '<div class="dash-proj-desc">' + _sanitize(p.description) + '</div>' +
+        _publisherChip(who, p.created_at) +
+        '<div class="dash-proj-footer">' +
+          '<div>' + _skillTags(p.skills_needed || []) + '</div>' +
+          '<div class="dash-proj-actions">' +
+            '<button class="btn btn-primary btn-sm" onclick="showToast(\'' + (proposals
+                ? ('Você recebeu ' + proposals + ' proposta' + (proposals===1?'':'s') + ' para este projeto.')
+                : 'Ainda não há propostas para este projeto.') + '\',\'info\')">📩 Ver Propostas</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="showToast(\'Edição de projeto disponível em breve!\',\'info\')">✏️ Editar</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    /* Atualizar badge de contagem do painel "Como Cliente" */
+    var badge = document.getElementById('dct-client-count');
+    if (badge) {
+      var _vd = _getViewData();
+      badge.textContent = _vd.client.active.length + list.length + _vd.client.done.length;
+    }
+  } catch(e) { console.warn('_refreshMyPublishedProjects:', e); }
+}
+
 /* ── Inserir no DOM ── */
 function _buildDemo() {
   var flGrid   = document.getElementById('fl-list-grid');
@@ -13268,6 +13505,9 @@ function openDashboard() {
   _renderDashFLActive(_vd);
   _renderDashFLProposals(_vd);
   _renderDashFLDone(_vd);
+  /* Sobrescreve "Meus Projetos Publicados" com os projetos reais do usuário (Supabase),
+     garantindo que permaneçam visíveis após recarregar a página ou novo login */
+  if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
 
   switchDashPanel('profile');
   showPage('dashboard');
