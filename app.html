@@ -2383,6 +2383,17 @@ section { padding: 64px 0; }
 .pub-seg-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
 .pub-quality-bar  { height:3px; border-radius:2px; background:var(--border-2); margin-top:5px; overflow:hidden; }
 .pub-quality-fill { height:100%; border-radius:2px; transition:width .35s, background .35s; width:0%; }
+/* Subcategoria chip — modal Publicar Projeto */
+.pub-subcat-chip {
+  display:inline-flex; align-items:center; padding:5px 11px;
+  border:1.5px solid var(--border); border-radius:16px; cursor:pointer;
+  font-size:11.5px; font-weight:600; color:var(--text-3); background:var(--surface);
+  transition:all .13s; user-select:none;
+}
+.pub-subcat-chip:hover  { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+.pub-subcat-chip.active { border-color:var(--green); color:var(--green); background:#f0fdf4;
+                          box-shadow:0 0 0 3px rgba(34,197,94,.12); }
+
 .pub-advanced-toggle {
   display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600;
   color:var(--text-3); cursor:pointer; background:none; border:none; padding:8px 0;
@@ -8106,14 +8117,24 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body" style="padding-top:6px;">
 
-      <!-- 1. Categoria — chips visuais (1 clique, sem dropdown) -->
-      <div class="form-group" style="margin-bottom:16px;">
+      <!-- 1. Categoria — chips visuais -->
+      <div class="form-group" style="margin-bottom:12px;">
         <label class="form-label" style="margin-bottom:8px;">
           Categoria <span style="color:#ef4444;">*</span>
         </label>
         <div class="pub-cat-grid" id="pub-cat-chips"><!-- renderizado por pubInitModal() --></div>
         <input type="hidden" id="proj-cat">
         <div class="form-error" id="err-proj-cat"></div>
+      </div>
+
+      <!-- 1b. Especialidade (subcategoria — aparece após categoria selecionada) -->
+      <div id="pub-subcat-section" style="display:none;margin-bottom:16px;">
+        <label class="form-label" style="margin-bottom:6px;">
+          Especialidade
+          <span style="font-size:11px;font-weight:400;color:var(--text-4);">&mdash; opcional, mas aumenta a qualidade das propostas</span>
+        </label>
+        <div id="pub-subcat-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        <input type="hidden" id="proj-subcat">
       </div>
 
       <!-- 2. Título -->
@@ -8173,19 +8194,22 @@ section { padding: 64px 0; }
 
         <!-- Prazo + Tipo -->
         <div>
-          <label class="form-label" style="margin-bottom:6px;">Prazo de entrega</label>
-          <div class="pub-seg-group" style="width:100%;">
-            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,7)">7d</button>
-            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,15)">15d</button>
-            <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectDeadline(this,30)">30d</button>
-            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,60)">60d+</button>
+          <label class="form-label" style="margin-bottom:6px;">Prazo m&aacute;ximo de entrega</label>
+          <div class="pub-seg-group" id="pub-deadline-group" style="width:100%;flex-wrap:wrap;">
+            <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,5)" title="Urgente — menos de 6 dias">&lt;6d</button>
+            <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,7)">7d</button>
+            <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,15)">15d</button>
+            <button class="pub-seg-btn active" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,30)">30d</button>
+            <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,60)">60d+</button>
           </div>
+          <div id="pub-deadline-hint" style="font-size:11px;color:var(--text-4);margin-top:4px;min-height:14px;"></div>
           <input type="hidden" id="proj-deadline-days" value="30">
 
-          <label class="form-label" style="margin-bottom:6px;margin-top:12px;">Tipo de contrato</label>
-          <div class="pub-seg-group" style="width:100%;">
-            <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectType(this,'fixo')">Pre&ccedil;o Fixo</button>
-            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectType(this,'recorrente')">Recorrente</button>
+          <label class="form-label" style="margin-bottom:6px;margin-top:10px;">Modalidade de contrato</label>
+          <div class="pub-seg-group" id="pub-type-group" style="width:100%;">
+            <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectType(this,'fixo')" title="Valor &uacute;nico pelo projeto completo">&#128274; Pre&ccedil;o Fixo</button>
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectType(this,'hora')" title="Cobrado por horas trabalhadas">&#9201; Por Hora</button>
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectType(this,'recorrente')" title="Contrato mensal ou recorrente">&#128260; Recorrente</button>
           </div>
           <input type="hidden" id="proj-type-val" value="fixo">
         </div>
@@ -8195,8 +8219,7 @@ section { padding: 64px 0; }
       <div style="border-top:1px solid var(--border-2);padding-top:10px;margin-bottom:16px;">
         <button class="pub-advanced-toggle" onclick="pubToggleAdvanced()" type="button">
           <span id="pub-adv-arrow" style="font-size:10px;">&#9654;</span>
-          Adicionar habilidades desejadas ou anexar PDF
-        </button>
+          Habilidades desejadas &amp; Briefing em PDF (opcional)</button>
         <div id="pub-advanced-panel" style="display:none;padding-top:12px;">
 
           <!-- Skills chips -->
@@ -11860,10 +11883,14 @@ function submitProject() {
   if (!ok) return;
   _setBtnLoading(btn, true);
 
+  var subcatEl = document.getElementById('proj-subcat');
+  var subcat   = subcatEl ? subcatEl.value : '';
+
   var projData = {
     title:       t ? t.value.trim() : '',
     description: d ? d.value.trim() : '',
     category:    c ? c.value : '',
+    subcat:      subcat,
     budgetMin:   bMin,
     budgetMax:   bMax,
     deadline:    deadline,
@@ -17273,13 +17300,29 @@ function pubInitModal() {
   if (ql) { ql.textContent=''; ql.style.color=''; }
 
   /* Reseta botões segmentados — deadline: ativo=30d */
-  document.querySelectorAll('#overlay-publish .pub-seg-btn').forEach(function(b){
-    b.classList.remove('active');
+  document.querySelectorAll('#pub-deadline-group .pub-seg-btn').forEach(function(b){
+    b.classList.toggle('active', (b.textContent||'').trim() === '30d');
   });
-  var dlBtns = document.querySelectorAll('#pub-deadline-group .pub-seg-btn');
-  dlBtns.forEach(function(b){ if ((b.textContent||'').trim()==='30d') b.classList.add('active'); });
-  var typeBtns = document.querySelectorAll('#overlay-publish .pub-seg-group:not(#pub-deadline-group) .pub-seg-btn');
-  if (typeBtns.length) typeBtns[0].classList.add('active');
+  var ddHid = document.getElementById('proj-deadline-days');
+  if (ddHid) ddHid.value = '30';
+  var dlHint = document.getElementById('pub-deadline-hint');
+  if (dlHint) dlHint.textContent = '';
+
+  /* Reseta tipo de contrato — ativo=Preço Fixo */
+  document.querySelectorAll('#pub-type-group .pub-seg-btn').forEach(function(b, i){
+    b.classList.toggle('active', i === 0);
+  });
+  var typeHid = document.getElementById('proj-type-val');
+  if (typeHid) typeHid.value = 'fixo';
+
+  /* Oculta e limpa seção de subcategoria */
+  var subSec = document.getElementById('pub-subcat-section');
+  if (subSec) subSec.style.display = 'none';
+  var subChips = document.getElementById('pub-subcat-chips');
+  if (subChips) subChips.innerHTML = '';
+  var subHid = document.getElementById('proj-subcat');
+  if (subHid) subHid.value = '';
+  window._pubSelectedSubcat = '';
 
   /* Fecha painel avançado */
   var panel = document.getElementById('pub-advanced-panel');
@@ -17327,8 +17370,63 @@ function pubSelectCat(btn, key) {
   if (hid) hid.value = key;
   var err = document.getElementById('err-proj-cat');
   if (err) err.textContent = '';
+
+  /* Limpa subcat anterior */
+  window._pubSelectedSubcat = '';
+  var subHid = document.getElementById('proj-subcat');
+  if (subHid) subHid.value = '';
+
+  /* Renderiza subcategorias a partir de _PDF_SUBAREAS (compartilhado com perfil) */
+  var subSec   = document.getElementById('pub-subcat-section');
+  var subChips = document.getElementById('pub-subcat-chips');
+  if (!subSec || !subChips) return;
+
+  var catData = (typeof _PDF_SUBAREAS !== 'undefined') ? _PDF_SUBAREAS[key] : null;
+  if (!catData || !catData.subs || catData.subs.length === 0) {
+    subSec.style.display = 'none';
+    subChips.innerHTML = '';
+    return;
+  }
+
+  subChips.innerHTML = catData.subs.map(function(sub) {
+    return '<button class="pub-subcat-chip" type="button" ' +
+      'onclick="pubSelectSubcat(this,\'' + sub.key + '\')" ' +
+      'data-sub="' + sub.key + '">' + sub.label + '</button>';
+  }).join('');
+  subSec.style.display = 'block';
 }
 window.pubSelectCat = pubSelectCat;
+
+/* Seleciona/deseleciona uma subcategoria no modal de publicação */
+function pubSelectSubcat(btn, subKey) {
+  var chips = document.querySelectorAll('#pub-subcat-chips .pub-subcat-chip');
+  var isActive = btn.classList.contains('active');
+  chips.forEach(function(c){ c.classList.remove('active'); });
+  var subHid = document.getElementById('proj-subcat');
+  if (isActive) {
+    /* Clicou novamente — deseleciona */
+    if (subHid) subHid.value = '';
+    window._pubSelectedSubcat = '';
+  } else {
+    btn.classList.add('active');
+    if (subHid) subHid.value = subKey;
+    window._pubSelectedSubcat = subKey;
+  }
+}
+window.pubSelectSubcat = pubSelectSubcat;
+
+/* Mostra hint de prazo ao selecionar opção urgente */
+function pubDeadlineHint(days) {
+  var hints = {
+    5:  '⚡ Urgente — ideal para tarefas rápidas e simples',
+    7:  '🏃 Curto prazo — tarefas focadas e bem definidas',
+    15: '📅 Médio prazo — equilíbrio entre qualidade e velocidade',
+    30: '🗓️ Prazo padrão — maioria dos projetos freelance',
+    60: '📆 Projeto extenso — trabalhos complexos ou de longo prazo'
+  };
+  var hint = document.getElementById('pub-deadline-hint');
+  if (hint) hint.textContent = hints[days] || '';
+}
 
 function pubUpdateTitle(inp) {
   var len = inp.value.length;
@@ -17359,6 +17457,7 @@ function pubSelectDeadline(btn, days) {
   btn.classList.add('active');
   var hid = document.getElementById('proj-deadline-days');
   if (hid) hid.value = days;
+  if (typeof pubDeadlineHint === 'function') pubDeadlineHint(days);
 }
 window.pubSelectDeadline = pubSelectDeadline;
 
