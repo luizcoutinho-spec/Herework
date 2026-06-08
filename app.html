@@ -10305,6 +10305,10 @@ async function _sbGetDashStats() {
 /* ── PERFIL: Salvar ───────────────────────────────────────────── */
 async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
+  /* Garante JWT válido e sincroniza _session.uid */
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbSaveProfile: sem sessão Supabase ativa'); return false; }
+  if (_session) _session.uid = user.id; /* atualiza uid caso tenha sido apagado */
   var updatePayload = {
     name:        data.name,
     bio:         data.bio,
@@ -11401,7 +11405,14 @@ window.setRegType = setRegType;
 var _session = null; // { name, email, type }
 
 function _setSession(name, email, type, isAdmin) {
+  /* Preserva campos que só o Supabase conhece (uid, avatar_url) */
+  var _prevUid    = _session ? _session.uid        : null;
+  var _prevAvatar = _session ? _session.avatar_url : null;
+  var _prevPlan   = _session ? _session.plan       : null;
   _session = { name: name, email: email, type: type, isAdmin: !!isAdmin };
+  if (_prevUid)    _session.uid        = _prevUid;
+  if (_prevAvatar) _session.avatar_url = _prevAvatar;
+  if (_prevPlan)   _session.plan       = _prevPlan;
 
   /* Persiste no localStorage para sobreviver ao refresh */
   try {
@@ -16021,7 +16032,11 @@ function dashSaveProfile() {
     var _savedUid  = _session.uid;
     var _savedType = newType;
     _sbSaveProfile(profileData, extMeta).then(function(ok) {
-      if (!ok) { console.warn('dashSaveProfile: Supabase update falhou silenciosamente'); return; }
+      if (!ok) {
+        console.warn('dashSaveProfile: Supabase update falhou');
+        showToast('Erro ao salvar no servidor. Verifique sua conexão e tente novamente.', 'error');
+        return;
+      }
 
       /* Invalida cache do perfil para forçar releitura na próxima abertura */
       if (window._realProfileCache && window._realProfileCache[_savedUid]) {
