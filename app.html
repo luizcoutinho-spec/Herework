@@ -5167,6 +5167,9 @@ section { padding: 64px 0; }
           </select>
         </div>
 
+        <!-- ══════ CAMPOS EXCLUSIVOS FREELANCER ══════ -->
+        <div id="profile-fl-fields">
+
         <!-- ── Área de Atuação & Habilidades ── -->
         <div class="profile-card" style="margin:18px -4px 0;padding:18px 20px;border:1.5px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);">
           <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">&#127919; &Aacute;rea de Atua&ccedil;&atilde;o &amp; Especialidades</div>
@@ -5377,6 +5380,23 @@ section { padding: 64px 0; }
           <input class="form-input" id="profile-portfolio-1" type="url" placeholder="&#128279; GitHub, Behance, Dribbble &mdash; link principal">
           <input class="form-input" id="profile-portfolio-2" type="url" placeholder="&#128279; YouTube, case study, artigo t&eacute;cnico">
           <input class="form-input" id="profile-portfolio-3" type="url" placeholder="&#128279; Outro link relevante (opcional)">
+        </div>
+
+        </div><!-- /profile-fl-fields -->
+
+        <!-- ══════ INFORMAÇÕES ADICIONAIS (CLIENTE) ══════ -->
+        <div id="profile-cl-fields" style="display:none;margin-top:16px;">
+          <div style="padding:14px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);display:flex;align-items:flex-start;gap:12px;">
+            <span style="font-size:22px;flex-shrink:0;">&#127962;</span>
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">Perfil de Cliente</div>
+              <div style="font-size:12px;color:var(--text-3);line-height:1.5;">Seu perfil é exibido para os freelancers ao analisar propostas e projetos. Complete nome, localização e bio acima para aumentar a confiança dos profissionais ao se candidatarem.</div>
+              <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                <button class="btn btn-primary btn-sm" onclick="switchDashPanel('contracts')">&#128203; Meus Projetos</button>
+                <button class="btn btn-outline btn-sm" onclick="_guardedPublishModal()">+ Publicar Projeto</button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- ══════ SALVAR ══════ -->
@@ -10488,6 +10508,9 @@ function _renderRealFreelancers() {
       var card = document.createElement('div');
       card.className = 'fl-list-card';
       card.setAttribute('data-real','true');
+      /* Guardar perfil em cache para openFreelancerProfile */
+      window._realProfileCache = window._realProfileCache || {};
+      window._realProfileCache[p.id] = p;
       var skills = p.skills || [];
       var catKey = skills.length ? 'web' : 'outra';
       card.setAttribute('data-cat', catKey);
@@ -15475,6 +15498,14 @@ function dashSetAccountType(type) {
     var el = document.getElementById('actype-' + t);
     if (el) el.classList.toggle('active', t === type);
   });
+  /* Campos exclusivos de freelancer: mostrar/ocultar conforme tipo */
+  var isFL = (type === 'freelancer' || type === 'both');
+  var flFields = document.getElementById('profile-fl-fields');
+  if (flFields) flFields.style.display = isFL ? '' : 'none';
+  var compWrap = document.getElementById('profile-completion-wrap');
+  if (compWrap) compWrap.style.display = isFL ? '' : 'none';
+  var clFields = document.getElementById('profile-cl-fields');
+  if (clFields) clFields.style.display = isFL ? 'none' : '';
 }
 window.dashSetAccountType = dashSetAccountType;
 
@@ -19612,7 +19643,26 @@ function openFreelancerProfile(profileId) {
     function(){ openFreelancerProfile(profileId); })) return;
 
   var p = _flProfiles[profileId];
-  if(!p) { showToast('Perfil não encontrado.','info'); return; }
+  if (!p) {
+    /* ── Perfil real (Supabase) — verificar cache primeiro ── */
+    if (window._realProfileCache && window._realProfileCache[profileId]) {
+      if (typeof _openRealUserProfile === 'function') _openRealUserProfile(window._realProfileCache[profileId]);
+      return;
+    }
+    /* ── Buscar direto no Supabase ── */
+    if (_sbReady()) {
+      showToast('Carregando perfil...', 'info');
+      _sbGetProfile(profileId).then(function(prof) {
+        if (!prof) { showToast('Perfil não encontrado.', 'info'); return; }
+        window._realProfileCache = window._realProfileCache || {};
+        window._realProfileCache[profileId] = prof;
+        if (typeof _openRealUserProfile === 'function') _openRealUserProfile(prof);
+      }).catch(function() { showToast('Erro ao carregar perfil.', 'error'); });
+      return;
+    }
+    showToast('Perfil não encontrado.', 'info');
+    return;
+  }
 
   var el;
   var av = document.getElementById('flp-avatar');
@@ -19669,6 +19719,219 @@ function openProfileByName(name) {
   else showToast('Perfil em breve!', 'info');
 }
 
+/* ═══════════════════════════════════════════════════════════
+   LIMPAR MODAL FL-PROFILE antes de carregar novo perfil
+   Evita que dados do perfil anterior fiquem visíveis
+═══════════════════════════════════════════════════════════ */
+function _clearFLProfileModal() {
+  var texts = ['flp-name','flp-title','flp-verified-icon','flp-rating','flp-reviews',
+               'flp-rating-summary','flp-stars','flp-about','flp-experience','flp-rate','flp-location'];
+  texts.forEach(function(id){ var el=document.getElementById(id); if(el) el.textContent=''; });
+  ['flp-badges','flp-stats','flp-achievements','flp-skills','flp-portfolio','flp-reviews-list']
+    .forEach(function(id){ var el=document.getElementById(id); if(el) el.innerHTML=''; });
+  /* Restaura visibilidade padrão das seções */
+  ['flp-experience-section','flp-portfolio-section'].forEach(function(id){
+    var el=document.getElementById(id); if(el) el.style.display='';
+  });
+  var sk = document.getElementById('flp-skills');
+  if(sk){ var sec=sk.closest('.fl-profile-section'); if(sec) sec.style.display=''; }
+  var hb = document.getElementById('flp-hire-btn');
+  if(hb) hb.style.display='';
+}
+window._clearFLProfileModal = _clearFLProfileModal;
+
+/* ═══════════════════════════════════════════════════════════
+   ABRIR PERFIL REAL (usuário cadastrado no Supabase)
+   Popula o modal fl-profile com dados reais + templates
+   Suporta type: 'client' | 'freelancer' | 'both'
+═══════════════════════════════════════════════════════════ */
+function _openRealUserProfile(prof) {
+  if (!prof) { showToast('Perfil não encontrado.', 'info'); return; }
+
+  _clearFLProfileModal();
+
+  var el;
+  var name     = (prof.name || '').trim() || 'Usuário';
+  var isFL     = (prof.type === 'freelancer' || prof.type === 'both');
+  var isCL     = (prof.type === 'client'     || prof.type === 'both');
+  var skills   = Array.isArray(prof.skills) ? prof.skills : [];
+  var rate     = parseFloat(prof.hourly_rate) || 0;
+  var rating   = parseFloat(prof.rating || 4.8);
+  var reviews  = parseInt(prof.rating_count  || 0);
+  var projects = parseInt(prof.completed_jobs || 0);
+  var city     = [prof.city, prof.state].filter(Boolean).join(', ') || 'Brasil';
+  var since    = prof.created_at ? new Date(prof.created_at).getFullYear() : new Date().getFullYear();
+  var recs     = Math.max(0, Math.floor(projects * 0.65));
+
+  /* Determinar categoria a partir de skills/bio para preencher templates */
+  var cat = 'web';
+  var _catKws = {
+    design:['design','figma','sketch','photoshop','illustrator','adobe','ui','ux','branding'],
+    marketing:['marketing','ads','seo','google ads','facebook','tráfego','copywriting'],
+    apps:['flutter','swift','kotlin','react native','ios','android','mobile'],
+    dados:['data','dados','power bi','tableau','python','r studio','sql','machine learning'],
+    ia:['inteligência artificial','llm','langchain','openai','claude','gpt','nlp'],
+    video:['vídeo','after effects','premiere','davinci','motion','edição'],
+    redacao:['redação','copywriter','conteúdo','blog','script','seo writer'],
+    educacao:['educação','ensino','ead','elearning','instrucional','treinamento'],
+    juridico:['direito','advocacia','advogado','jurídico','contrato','lgpd'],
+    engenharia:['engenharia','civil','estrutural','elétrico','mecânico','revit','autocad']
+  };
+  var bioLower   = (prof.bio || '').toLowerCase();
+  var titleLower = ((prof.profile_metadata && prof.profile_metadata.title) || '').toLowerCase();
+  var combined   = bioLower + ' ' + titleLower + ' ' + skills.map(function(s){return s.toLowerCase();}).join(' ');
+  Object.keys(_catKws).forEach(function(k) {
+    _catKws[k].forEach(function(kw) { if (combined.indexOf(kw) !== -1) cat = k; });
+  });
+
+  /* Avatar */
+  var initials = (typeof _initials==='function') ? _initials(name) : name.substring(0,2).toUpperCase();
+  var color    = (typeof _avatarColor==='function') ? _avatarColor(name) : 'linear-gradient(135deg,#2E7D32,#66BB6A)';
+  var av = document.getElementById('flp-avatar');
+  if (av) { av.style.background = color; av.innerHTML = initials; }
+
+  /* Nome & título */
+  var meta  = (prof.profile_metadata && typeof prof.profile_metadata === 'object') ? prof.profile_metadata : {};
+  var title = meta.title
+    || (isFL ? (cat.toUpperCase() + ' FREELANCER') : 'CLIENTE');
+  el=document.getElementById('flp-name');          if(el) el.textContent = (typeof _displayName==='function') ? _displayName(name) : name;
+  el=document.getElementById('flp-title');         if(el) el.textContent = title;
+  el=document.getElementById('flp-verified-icon'); if(el) el.textContent = '';
+
+  /* Badges */
+  var badges = [];
+  if (!isFL && isCL) badges.push({icon:'&#127962;', label:'Cliente',        bg:'#e0f2fe'});
+  if (isFL && projects > 10) badges.push({icon:'&#127942;', label:'Top Freelancer', bg:'#fef3c7'});
+  if (isFL && rate)           badges.push({icon:'&#128178;', label:'R$ '+rate+'/h',  bg:'#f0fdf4'});
+  badges.push({icon:'&#128188;', label: projects + ' projetos', bg:'#f0fdf4'});
+  var bd = document.getElementById('flp-badges');
+  if (bd) bd.innerHTML = badges.map(function(b){
+    return '<span class="fl-profile-badge" style="background:'+b.bg+';color:#374151;">'+b.icon+' '+b.label+'</span>';
+  }).join('');
+
+  /* Avaliação */
+  var rr = Math.round(Math.min(5, Math.max(0, rating)));
+  el=document.getElementById('flp-stars');          if(el) el.textContent = '★'.repeat(rr) + '☆'.repeat(5-rr);
+  el=document.getElementById('flp-rating');         if(el) el.textContent = rating.toFixed(1).replace('.',',');
+  el=document.getElementById('flp-reviews');        if(el) el.textContent = '(' + reviews + ' avaliações)';
+  el=document.getElementById('flp-rating-summary'); if(el) el.textContent = '— ' + reviews + ' avaliações · média ' + rating.toFixed(1).replace('.',',');
+
+  /* Stats */
+  el = document.getElementById('flp-stats');
+  if (el) {
+    var statsHtml = '<div class="fl-stat-item">Projetos: <strong>'+projects+'</strong></div>'+
+      '<div class="fl-stat-item">Recomendações: <strong>'+recs+'</strong></div>'+
+      '<div class="fl-stat-item">Membro desde: <strong>'+since+'</strong></div>';
+    if (isFL && rate) statsHtml += '<div class="fl-stat-item">Taxa/hora: <strong>R$ '+rate+'</strong></div>';
+    el.innerHTML = statsHtml;
+  }
+
+  /* Conquistas */
+  var ach = [
+    {ico:'&#128188;',l:'Projetos entregues'},{ico:'&#11088;',l:'Alta avaliação'},
+    {ico:'&#128077;',l:recs+' recomendações'},{ico:'&#9989;',l:'Perfil ativo'},{ico:'&#128640;',l:'Desde '+since}
+  ];
+  el = document.getElementById('flp-achievements');
+  var achColors = ['#fef3c7','#e0f2fe','#f0fdf4','#fce7f3','#fdf4ff'];
+  if (el) el.innerHTML = ach.map(function(a,i){
+    return '<div class="fl-achievement" style="background:'+achColors[i]+';" title="'+a.l+'">'+a.ico+'</div>';
+  }).join('');
+
+  /* Sobre mim */
+  var bioParagraph = meta.bio || prof.bio || '';
+  var aboutHtml = bioParagraph
+    ? '<p>' + (typeof _sanitize==='function' ? _sanitize(bioParagraph) : bioParagraph) + '</p>'
+    : (typeof _ABOUT_TPL !== 'undefined' && _ABOUT_TPL[cat]
+        ? (function(){ var arr=_ABOUT_TPL[cat]; return '<p>'+(Array.isArray(arr)?arr[name.length%arr.length]:arr)+'</p>'; })()
+        : '<p style="color:var(--text-4);">Sem descrição disponível.</p>');
+  el = document.getElementById('flp-about');
+  if (el) el.innerHTML = aboutHtml;
+
+  /* Experiência (somente FL) */
+  var expSec = document.getElementById('flp-experience-section');
+  if (expSec) expSec.style.display = isFL ? '' : 'none';
+  if (isFL) {
+    var expHtml = (typeof _EXP_TPL !== 'undefined' && _EXP_TPL[cat]) ? _EXP_TPL[cat] : '';
+    el = document.getElementById('flp-experience');
+    if (el) el.innerHTML = expHtml;
+  }
+
+  /* Especialidades / habilidades (somente FL) */
+  el = document.getElementById('flp-skills');
+  if (el) {
+    var skillSec = el.closest('.fl-profile-section');
+    if (skillSec) skillSec.style.display = isFL ? '' : 'none';
+    if (isFL) {
+      el.innerHTML = skills.length
+        ? skills.map(function(s){return '<span class="fl-skill-tag">'+(typeof _sanitize==='function'?_sanitize(s):s)+'</span>';}).join('')
+        : '<span style="color:var(--text-4);font-size:13px;">Nenhuma habilidade listada.</span>';
+    }
+  }
+
+  /* Portfólio (somente FL) */
+  var poSec = document.getElementById('flp-portfolio-section');
+  if (poSec) poSec.style.display = isFL ? '' : 'none';
+  if (isFL && typeof _PORTFOLIO_TPL !== 'undefined') {
+    var po = _PORTFOLIO_TPL[cat] || _PORTFOLIO_TPL.web;
+    el = document.getElementById('flp-portfolio');
+    if (el) el.innerHTML = po.map(function(item){
+      return '<div class="fl-portfolio-item" style="background:'+item.bg+';" title="'+item.l+'" onclick="openFLPortfolioItem(this)">'+item.ico+'</div>';
+    }).join('');
+  }
+
+  /* Avaliações geradas */
+  el = document.getElementById('flp-reviews-list');
+  if (el) {
+    if (reviews > 0 && typeof _REVIEW_NAMES !== 'undefined' && typeof _REVIEW_TEXTS !== 'undefined') {
+      var revs = [];
+      for (var i = 0; i < Math.min(3, Math.max(1, reviews)); i++) {
+        var ni = (name.length + i) % _REVIEW_NAMES.length;
+        var ti = (name.length + i + 2) % _REVIEW_TEXTS.length;
+        revs.push({
+          name:   _REVIEW_NAMES[ni],
+          init:   _REVIEW_NAMES[ni].charAt(0),
+          rating: Math.min(5, 4 + (i === 0 ? 1 : 0)),
+          text:   _REVIEW_TEXTS[ti],
+          date:   ['Mar 2025','Fev 2025','Jan 2025'][i] || 'Jan 2025'
+        });
+      }
+      el.innerHTML = revs.map(function(r){
+        var rn = typeof _sanitize==='function' ? _sanitize(r.name) : r.name;
+        var rn2 = typeof _displayName==='function' ? _displayName(rn) : rn;
+        return '<div class="fl-review-item"><div class="fl-review-header">'+
+          '<div class="fl-review-avatar">'+r.init+'</div>'+
+          '<div class="fl-review-meta"><div class="fl-review-name" title="'+rn+'">'+rn2+'</div>'+
+          '<div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div>'+
+          '</div></div><div class="fl-review-text">'+r.text+'</div></div>';
+      }).join('');
+    } else {
+      el.innerHTML = '<div style="color:var(--text-4);font-size:13px;padding:8px 0;">Nenhuma avaliação registrada ainda.</div>';
+    }
+  }
+
+  /* Taxa e localização */
+  el = document.getElementById('flp-rate');
+  if (el) el.textContent = isFL ? (rate ? 'R$ ' + rate : 'A combinar') : '—';
+  el = document.getElementById('flp-location');
+  if (el) el.textContent = city;
+
+  /* Botão Contratar (somente FL) */
+  var hb = document.getElementById('flp-hire-btn');
+  if (hb) {
+    if (isFL) {
+      hb.style.display = '';
+      hb.onclick = function() {
+        closeModal('fl-profile');
+        openContractModal({name:name, role:title, value:rate*40, project:'Meu Projeto', deadline:'30 dias'});
+      };
+    } else {
+      hb.style.display = 'none';
+    }
+  }
+
+  openModal('fl-profile');
+}
+window._openRealUserProfile = _openRealUserProfile;
 
 
 /* ═══════════════════════════════════════════════════════════
