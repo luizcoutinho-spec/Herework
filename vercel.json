@@ -1,6 +1,12 @@
 {
   "headers": [
     {
+      "source": "/",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, must-revalidate" }
+      ]
+    },
+    {
       "source": "/(.*)",
       "headers": [
         {
@@ -32,6 +38,20 @@
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'"
         }
       ]
+    }
+  ],
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.herework.com.br" }],
+      "destination": "/coming-soon.html",
+      "statusCode": 307
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "herework.com.br" }],
+      "destination": "/coming-soon.html",
+      "statusCode": 307
     }
   ],
   "rewrites": [
