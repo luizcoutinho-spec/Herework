@@ -9415,7 +9415,7 @@ async function _sbRestoreSession() {
       var user = r.data.session.user;
       var prof = await _sbGetProfile(user.id);
       if (prof) {
-        _setSession(prof.name, prof.email, prof.type);
+        _setSession(prof.name, prof.email, prof.type, prof.is_admin);
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
         _session.avatar_url = prof.avatar_url || null;
@@ -9636,6 +9636,21 @@ async function _sbGetMyProjects() {
   if (!_sbReady() || !_session) return [];
   var r = await _sb.from('projects').select('*, proposals(count)').eq('client_id', _session.uid).order('created_at', { ascending: false });
   return r.data || [];
+}
+
+/* ── PROJETOS: Excluir publicação ─────────────────────────────── */
+/* Exclui o projeto do Supabase. Requer policy RLS "projects_delete":
+     USING (auth.uid() = client_id OR EXISTS (SELECT 1 FROM profiles
+       WHERE id = auth.uid() AND is_admin = true))
+   Rode a migração em supabase_schema.sql se ainda não aplicou. */
+async function _sbDeleteProject(id) {
+  if (!_sbReady() || !_session || !id) return false;
+  /* Garante sessão Supabase ativa — sem isso a policy RLS bloqueia o DELETE. */
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbDeleteProject: sem sessão Supabase ativa.'); return false; }
+  var r = await _sb.from('projects').delete().eq('id', id);
+  if (r.error) { console.warn('_sbDeleteProject error:', r.error.message || r.error); return false; }
+  return true;
 }
 
 /* ── REALTIME: Escutar mensagens novas ────────────────────────── */
@@ -10390,7 +10405,7 @@ function submitLogin() {
         /* Criar perfil com dados do Auth */
         prof = { name: res.user.user_metadata && res.user.user_metadata.name ? res.user.user_metadata.name : e.value.split('@')[0], email: e.value.trim(), type: 'client' };
       }
-      _setSession(prof.name, prof.email, prof.type);
+      _setSession(prof.name, prof.email, prof.type, prof.is_admin);
       _session.uid = res.user.id;
       _session.avatar_url = prof.avatar_url || null;
       if (e) e.value = ''; if (p) p.value = '';
@@ -10424,13 +10439,13 @@ function setRegType(type) {
 /* ─── Estado de sessão simulado ─── */
 var _session = null; // { name, email, type }
 
-function _setSession(name, email, type) {
-  _session = { name: name, email: email, type: type };
+function _setSession(name, email, type, isAdmin) {
+  _session = { name: name, email: email, type: type, isAdmin: !!isAdmin };
 
   /* Persiste no localStorage para sobreviver ao refresh */
   try {
     localStorage.setItem('hw_session', JSON.stringify({
-      name: name, email: email, type: type,
+      name: name, email: email, type: type, isAdmin: !!isAdmin,
       ts: Date.now()
     }));
   } catch(e) {}
@@ -12785,7 +12800,9 @@ function _publisherChip(profile, createdAt) {
   return '<div class="proj-publisher-chip" style="display:flex;align-items:center;gap:8px;margin-top:10px;">' +
     avatarHTML +
     '<div style="line-height:1.3;">' +
-      '<div style="font-size:12.5px;font-weight:600;color:var(--text);">' + _sanitize(name) + '</div>' +
+      /* Exibição padronizada "Primeiro N." — nome completo permanece intacto no banco;
+         apenas a camada de exibição é formatada (ver _displayName). */
+      '<div style="font-size:12.5px;font-weight:600;color:var(--text);" title="' + _sanitize(name) + '">' + _sanitize(_displayName(name)) + '</div>' +
       '<div style="font-size:11px;color:var(--text-4);" title="' + _sanitize(when) + '">📅 Publicado ' + _sanitize(_timeAgo(createdAt)) + (when ? ' · ' + _sanitize(when) : '') + '</div>' +
     '</div>' +
   '</div>';
@@ -12826,6 +12843,10 @@ function _realProjCard(p) {
       '</div>' +
       '<div class="proj-list-actions">' +
         '<span class="proj-proposals">' + props + ' propostas</span>' +
+        /* Botão Excluir — visível apenas para o autor da publicação ou administradores */
+        (_canDeleteProject(p)
+          ? '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>'
+          : '') +
         '<button class="btn btn-green btn-sm" onclick="openProposalFor(this)">Enviar Proposta</button>' +
       '</div>' +
     '</div>' +
@@ -12868,6 +12889,73 @@ function _addPublishedProjectToUI(proj) {
     if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
   } catch(e) {}
 }
+/* ── Verifica se o usuário atual tem permissão para excluir um projeto ──────
+   Retorna true se: (a) o usuário logado é o autor da publicação, OU
+                   (b) o usuário logado tem perfil admin (is_admin), OU
+                   (c) a sessão de administrador do sistema está ativa (_adminAuth).
+   Nota: usa typeof para evitar ReferenceError se _adminAuth nunca foi atribuído. */
+function _canDeleteProject(p) {
+  if (!p) return false;
+  var isAuthor  = !!(_session && _session.uid && p.client_id && _session.uid === p.client_id);
+  var isAdmin   = !!(_session && _session.isAdmin === true) ||
+                  (typeof _adminAuth !== 'undefined' && _adminAuth === true);
+  return isAuthor || isAdmin;
+}
+
+/* ── Exclui uma publicação com confirmação, remoção imediata da UI e log de auditoria */
+async function _deletePublishedProject(projectId, btnEl) {
+  if (!projectId) return;
+  /* Localiza o card pai — suporta tanto .proj-list-card (feed público) quanto
+     .dash-proj-card (painel "Meus Projetos Publicados") */
+  var card     = btnEl ? btnEl.closest('.proj-list-card, .dash-proj-card') : null;
+  var titleEl  = card  ? card.querySelector('.proj-list-title, .dash-proj-title') : null;
+  var projTitle = titleEl ? titleEl.textContent.trim() : 'esta publicação';
+
+  /* Confirmação — evita remoções acidentais */
+  if (!confirm('Tem certeza que deseja excluir a publicação\n"' + projTitle + '"?\n\nEsta ação não pode ser desfeita — a publicação será removida permanentemente da plataforma.')) {
+    return;
+  }
+
+  /* Feedback visual imediato enquanto aguarda o banco */
+  if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = 'Excluindo…'; }
+
+  try {
+    var ok = await _sbDeleteProject(projectId);
+    if (!ok) {
+      showToast('Não foi possível excluir a publicação. Verifique sua conexão ou permissões.', 'error');
+      if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = '🗑️ Excluir'; }
+      return;
+    }
+
+    /* Remover IMEDIATAMENTE de todas as áreas onde o card aparece na interface —
+       sem necessidade de recarregar a página. Usa [data-real-id] para localizar
+       tanto o card no feed público quanto no painel de perfil. */
+    document.querySelectorAll('[data-real-id="' + projectId + '"]').forEach(function(el) {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    });
+    delete _realProjectsLoaded[projectId];
+
+    /* Atualizar contador de projetos no feed público */
+    var grid = document.getElementById('proj-list-grid');
+    var projCount = document.getElementById('proj-count');
+    if (grid && projCount) projCount.textContent = grid.querySelectorAll('.proj-list-card').length;
+
+    /* Re-renderizar "Meus Projetos Publicados" para refletir a exclusão no banco */
+    if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+
+    /* Log de auditoria — usuário responsável + data/hora (timestamp gerado por _secLog) */
+    var who = (_session && (_session.name || _session.email)) ||
+              ((typeof _adminAuth !== 'undefined' && _adminAuth === true) ? 'Administrador do sistema' : 'Usuário desconhecido');
+    _secLog('PROJECT_DELETE', 'Publicação "' + projTitle + '" (ID ' + projectId + ') excluída por ' + who);
+
+    showToast('Publicação excluída com sucesso.', 'success');
+  } catch(e) {
+    console.warn('_deletePublishedProject:', e);
+    showToast('Erro ao excluir: ' + (e.message || e), 'error');
+    if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = '🗑️ Excluir'; }
+  }
+}
+
 /* Carrega e renderiza, em "Meu Perfil → Meus Projetos Publicados", os projetos
    reais do usuário logado (Supabase), com nome/foto/data do publicador implícitos
    (o próprio usuário) e dados persistidos — substitui o estado vazio padrão. */
@@ -12889,7 +12977,9 @@ async function _refreshMyPublishedProjects() {
     el.innerHTML = list.map(function(p) {
       var budget    = p.budget_max ? ('R$ ' + Math.round(p.budget_max).toLocaleString('pt-BR')) : 'A combinar';
       var proposals = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
-      return '<div class="dash-proj-card">' +
+      /* data-real-id permite que _deletePublishedProject encontre e remova
+         este card usando querySelectorAll('[data-real-id="..."]') */
+      return '<div class="dash-proj-card" data-real-id="' + _sanitize(p.id) + '">' +
         '<div class="dash-proj-card-top">' +
           '<div class="dash-proj-title">' + _sanitize(p.title) + '</div>' +
           _statusBadge('waiting', 'Aguardando propostas') +
@@ -12908,6 +12998,8 @@ async function _refreshMyPublishedProjects() {
                 ? ('Você recebeu ' + proposals + ' proposta' + (proposals===1?'':'s') + ' para este projeto.')
                 : 'Ainda não há propostas para este projeto.') + '\',\'info\')">📩 Ver Propostas</button>' +
             '<button class="btn btn-outline btn-sm" onclick="showToast(\'Edição de projeto disponível em breve!\',\'info\')">✏️ Editar</button>' +
+            /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
+            '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -12990,9 +13082,14 @@ if (document.readyState === 'loading') {
    openDashboard()). Sem isso, a checagem retorna 'undefined' e a chamada é
    silenciosamente ignorada — por isso os projetos publicados pelo usuário nunca
    eram inseridos em "Encontrar Projetos" nem em "Meu Perfil → Contratos". */
-window._loadRealProjects          = _loadRealProjects;
-window._addPublishedProjectToUI   = _addPublishedProjectToUI;
+window._loadRealProjects           = _loadRealProjects;
+window._addPublishedProjectToUI    = _addPublishedProjectToUI;
 window._refreshMyPublishedProjects = _refreshMyPublishedProjects;
+/* Expor funções de exclusão no escopo global — necessário para os atributos
+   onclick="..." dos botões "Excluir" em _realProjCard e _refreshMyPublishedProjects,
+   que resolvem identificadores pelo objeto window (escopo global). */
+window._deletePublishedProject     = _deletePublishedProject;
+window._canDeleteProject           = _canDeleteProject;
 
 })();
 
@@ -13280,7 +13377,7 @@ function openContractModal(opts) {
   // Populate step 1
   var el;
   el = document.getElementById('c-avatar');        if(el) el.textContent = _contractCtx.name.charAt(0).toUpperCase();
-  el = document.getElementById('c-fl-name');       if(el) el.textContent = _contractCtx.name;
+  el = document.getElementById('c-fl-name');       if(el){ el.textContent = _displayName(_contractCtx.name); el.title = _contractCtx.name; }
   el = document.getElementById('c-fl-role');       if(el) el.textContent = _contractCtx.role;
   el = document.getElementById('c-value');         if(el) el.textContent = fmt(_contractCtx.value);
   el = document.getElementById('c-proj-name');     if(el) el.textContent = _contractCtx.project;
@@ -13292,9 +13389,9 @@ function openContractModal(opts) {
   el = document.getElementById('c-escrow-display');if(el) el.textContent = fmt(_contractCtx.value);
   el = document.getElementById('c-deadline-display');if(el) el.textContent = _contractCtx.deadline;
   el = document.getElementById('c-release-amount');if(el) el.textContent = fmt(_contractCtx.value);
-  el = document.getElementById('c-release-name');  if(el) el.textContent = _contractCtx.name;
+  el = document.getElementById('c-release-name');  if(el){ el.textContent = _displayName(_contractCtx.name); el.title = _contractCtx.name; }
   el = document.getElementById('c-approve-amount');if(el) el.textContent = fmt(_contractCtx.value);
-  el = document.getElementById('contract-modal-title'); if(el) el.textContent = 'Contratar ' + _contractCtx.name;
+  el = document.getElementById('contract-modal-title'); if(el) el.textContent = 'Contratar ' + _displayName(_contractCtx.name);
 
   // Reset
   var agree = document.getElementById('contract-agree');
@@ -13351,7 +13448,7 @@ window.contractStep2 = function contractStep2() {
     if (!amount) amount = 2160;
 
     var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
-    var flName = (_contractCtx && _contractCtx.name)    ? _contractCtx.name    : 'Freelancer';
+    var flName = (_contractCtx && _contractCtx.name)    ? _displayName(_contractCtx.name) : 'Freelancer';
 
     /* 3. Fechar modal */
     closeModal('contract');
@@ -14379,7 +14476,7 @@ function openChatModal(opts) {
   /* Header */
   var el;
   el = document.getElementById('chat-av');          if(el) el.textContent = withName.charAt(0).toUpperCase();
-  el = document.getElementById('chat-with-name');   if(el) el.textContent = withName;
+  el = document.getElementById('chat-with-name');   if(el){ el.textContent = _displayName(withName); el.title = withName; }
   el = document.getElementById('chat-proj-chip');   if(el) el.textContent = projTitle;
   el = document.getElementById('chat-typing-name'); if(el) el.textContent = withName.split(' ')[0] + ' está digitando...';
 
@@ -14912,6 +15009,26 @@ function admContractAction(action, contractId) {
     initAdminContracts();
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   PADRONIZAÇÃO DE EXIBIÇÃO DE NOMES — HereWork
+   Converte "Nome Completo" → "Primeiro N." para exibição pública em
+   feeds, perfis, comentários, avaliações, propostas, contratos e chat.
+   Ex.: "Luiz Coutinho" → "Luiz C." | "Maria Fernanda Silva" → "Maria F."
+
+   IMPORTANTE — afeta SOMENTE a camada de exibição (UI/UX):
+   o nome completo permanece intacto e inalterado no banco de dados
+   (Supabase "profiles.name"), em _session e em qualquer outra estrutura
+   de dados. Esta função NUNCA deve ser usada para gravar/persistir nomes —
+   apenas para formatar o texto exibido na tela no momento da renderização.
+═══════════════════════════════════════════════════════════ */
+function _displayName(fullName) {
+  if (!fullName || typeof fullName !== 'string') return fullName || '';
+  var parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length < 2) return parts[0] || '';
+  return parts[0] + ' ' + parts[1].charAt(0).toUpperCase() + '.';
+}
+window._displayName = _displayName;
 
 /* ═══════════════════════════════════════════════════════════
    SECURITY FRAMEWORK — HereWork
@@ -16625,7 +16742,7 @@ function openDemoProfile(btnEl) {
   }
   el=document.getElementById('flp-reviews-list');
   if(el) el.innerHTML=revs.map(function(r){
-    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name">'+r.name+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
+    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name" title="'+_sanitize(r.name)+'">'+_sanitize(_displayName(r.name))+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
   }).join('');
 
   /* Rate & location */
@@ -16973,7 +17090,7 @@ function openFreelancerProfile(profileId) {
   var av = document.getElementById('flp-avatar');
   if(av){ av.style.background=p.color; av.innerHTML=p.init; }
 
-  el=document.getElementById('flp-name');  if(el) el.textContent=p.name;
+  el=document.getElementById('flp-name');  if(el){ el.textContent=_displayName(p.name); el.title=p.name; }
   el=document.getElementById('flp-title'); if(el) el.textContent=p.title;
   el=document.getElementById('flp-verified-icon'); if(el) el.textContent=p.verified?'✅':'';
 
@@ -17006,7 +17123,7 @@ function openFreelancerProfile(profileId) {
 
   var rl=document.getElementById('flp-reviews-list');
   if(rl) rl.innerHTML=(p.reviewsList||[]).map(function(r){
-    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name">'+r.name+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
+    return '<div class="fl-review-item"><div class="fl-review-header"><div class="fl-review-avatar">'+r.init+'</div><div class="fl-review-meta"><div class="fl-review-name" title="'+_sanitize(r.name)+'">'+_sanitize(_displayName(r.name))+'</div><div class="fl-review-date">'+r.date+' · <span class="fl-review-stars">'+'★'.repeat(r.rating)+'</span></div></div></div><div class="fl-review-text">'+r.text+'</div></div>';
   }).join('');
 
   el=document.getElementById('flp-rate');     if(el) el.textContent=p.rate;

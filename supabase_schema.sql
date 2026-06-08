@@ -215,6 +215,12 @@ CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "projects_read"   ON projects FOR SELECT USING (true);
 CREATE POLICY "projects_insert" ON projects FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
 CREATE POLICY "projects_update" ON projects FOR UPDATE USING (auth.uid() = client_id);
+-- Projects: exclusão — autor da publicação OU administrador do sistema (profiles.is_admin = true).
+-- Sem esta policy o botão "Excluir" do app falha silenciosamente (RLS bloqueia o DELETE).
+CREATE POLICY "projects_delete" ON projects FOR DELETE USING (
+  auth.uid() = client_id
+  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)
+);
 
 -- Proposals: freelancer cria, partes envolvidas lêem
 CREATE POLICY "proposals_read"   ON proposals FOR SELECT USING (auth.uid() = freelancer_id OR auth.uid() = (SELECT client_id FROM projects WHERE id = project_id));
@@ -255,3 +261,14 @@ CREATE INDEX IF NOT EXISTS idx_proposals_fl       ON proposals(freelancer_id);
 CREATE INDEX IF NOT EXISTS idx_contracts_client   ON contracts(client_id);
 CREATE INDEX IF NOT EXISTS idx_contracts_fl       ON contracts(freelancer_id);
 CREATE INDEX IF NOT EXISTS idx_messages_contract  ON messages(contract_id);
+
+-- ═══════════════════════════════════════════════════════════════
+-- MIGRAÇÃO — Exclusão de publicações por administradores
+-- (necessária para a policy "projects_delete" acima reconhecer admins)
+-- Execute este bloco no SQL Editor do Supabase. Seguro para rodar em
+-- bases já existentes — não afeta dados nem usuários atuais
+-- (a coluna nasce com DEFAULT false, ninguém vira admin automaticamente).
+-- Depois de rodar, marque manualmente o(s) usuário(s) administrador(es):
+--   UPDATE profiles SET is_admin = true WHERE email = 'email-do-admin@herework.com.br';
+-- ═══════════════════════════════════════════════════════════════
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;
