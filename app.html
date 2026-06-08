@@ -10399,7 +10399,7 @@ async function _sbGetFreelancers() {
   if (!_sbReady()) return [];
   try {
     var r = await _sb.from('profiles')
-      .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,plan')
+      .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,plan,created_at,profile_metadata')
       .in('type', ['freelancer','both'])
       .order('rating', { ascending: false })
       .limit(20);
@@ -10458,7 +10458,14 @@ function _renderRealFreelancers() {
       window._realProfileCache = window._realProfileCache || {};
       window._realProfileCache[p.id] = p;
       var skills = p.skills || [];
-      var catKey = skills.length ? 'web' : 'outra';
+      /* Determina categoria real via profile_metadata.selected_subareas */
+      var catKey = 'outra';
+      try {
+        var _pm = p.profile_metadata;
+        if (_pm && _pm.selected_subareas && _pm.selected_subareas.length) {
+          catKey = _pm.selected_subareas[0].cat || 'outra';
+        }
+      } catch(_e) {}
       card.setAttribute('data-cat', catKey);
       card.setAttribute('data-rate', p.hourly_rate || 0);
       card.setAttribute('data-rating', p.rating || 5.0);
@@ -10500,9 +10507,8 @@ function _renderRealFreelancers() {
     });
     _realFLRendered = true;
 
-    /* Re-aplica filtros vigentes */
-    var filterSel = document.querySelector('#page-freelancers .sidebar select');
-    if (filterSel && filterSel.value) filterByCategory(filterSel);
+    /* Re-aplica filtros vigentes sem causar loop (applyAllFilters não chama showPage) */
+    if (typeof applyAllFilters === 'function') applyAllFilters('fl');
   });
 }
 
@@ -20642,9 +20648,6 @@ window.dashSaveProfile = function() {
 
   /* Call original save */
   _origDashSaveProfile && _origDashSaveProfile.call(this);
-
-  /* Add to freelancer grid after 1s */
-  setTimeout(addUserToFreelancerGrid, 1000);
 };
 
 /* Restore skills on session restore */
@@ -20667,8 +20670,7 @@ _restoreSession = function() {
         }
       }, 300);
     }
-    /* Add to grid if has skills */
-    if(s.skills && s.skills.length > 0) setTimeout(addUserToFreelancerGrid, 500);
+    /* Grid is populated by _renderRealFreelancers via showPage('freelancers') */
   } catch(e) {}
 };
 
