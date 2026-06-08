@@ -10305,10 +10305,27 @@ async function _sbGetDashStats() {
 /* ── PERFIL: Salvar ───────────────────────────────────────────── */
 async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
-  /* Garante JWT válido e sincroniza _session.uid */
-  var user = await _sbEnsureSession();
-  if (!user) { console.warn('_sbSaveProfile: sem sessão Supabase ativa'); return false; }
-  if (_session) _session.uid = user.id; /* atualiza uid caso tenha sido apagado */
+
+  /* Tenta sincronizar uid — mas não bloqueia o save se falhar */
+  var uid = _session.uid;
+  try {
+    var s0 = await _sb.auth.getSession();
+    var su = s0 && s0.data && s0.data.session && s0.data.session.user;
+    if (su) {
+      uid = su.id;
+      _session.uid = uid;
+    } else if (!uid) {
+      /* Tenta renovar token antes de desistir */
+      var rr = await _sb.auth.refreshSession();
+      if (rr && rr.data && rr.data.user) {
+        uid = rr.data.user.id;
+        _session.uid = uid;
+      }
+    }
+  } catch(e) { console.warn('_sbSaveProfile: session sync error', e); }
+
+  if (!uid) { console.warn('_sbSaveProfile: uid desconhecido — não é possível salvar'); return false; }
+
   var updatePayload = {
     name:        data.name,
     bio:         data.bio,
@@ -10323,11 +10340,11 @@ async function _sbSaveProfile(data, extMeta) {
   if (data.type && ['client','freelancer','both'].indexOf(data.type) !== -1) {
     updatePayload.type = data.type;
   }
-  /* Salva metadados extendidos em coluna JSONB (opcional — só se a coluna existir) */
+  /* Salva metadados extendidos em coluna JSONB */
   if (extMeta) {
     updatePayload.profile_metadata = extMeta;
   }
-  var r = await _sb.from('profiles').update(updatePayload).eq('id', _session.uid);
+  var r = await _sb.from('profiles').update(updatePayload).eq('id', uid);
   return !r.error;
 }
 
@@ -16027,41 +16044,10 @@ function dashSaveProfile() {
     skills:    (typeof _selectedSkills !== 'undefined' && _selectedSkills.length ? _selectedSkills.slice() : [])
   };
 
-  /* Salva no Supabase em background — não bloqueia o UX */
-  if (_sbReady() && _session && _session.uid) {
-    var _savedUid  = _session.uid;
-    var _savedType = newType;
-    _sbSaveProfile(profileData, extMeta).then(function(ok) {
-      if (!ok) {
-        console.warn('dashSaveProfile: Supabase update falhou');
-        showToast('Erro ao salvar no servidor. Verifique sua conexão e tente novamente.', 'error');
-        return;
-      }
-
-      /* Invalida cache do perfil para forçar releitura na próxima abertura */
-      if (window._realProfileCache && window._realProfileCache[_savedUid]) {
-        var c = window._realProfileCache[_savedUid];
-        c.name        = profileData.name;
-        c.bio         = profileData.bio;
-        c.city        = profileData.city;
-        c.state       = profileData.state;
-        c.hourly_rate = profileData.hourlyRate;
-        c.type        = _savedType;
-        if (extMeta) c.profile_metadata = extMeta;
-      }
-
-      /* Recarrega listagem de freelancers se o usuário é FL/both */
-      var isFL = (_savedType === 'freelancer' || _savedType === 'both');
-      if (isFL && typeof _renderRealFreelancers === 'function') {
-        _renderRealFreelancers();
-      }
-    });
-  }
-
+  /* ── Atualiza UI local (sempre, independente do Supabase) ── */
   setTimeout(function() {
     _setBtnLoading(btn, false);
     _setSession(newName, newEmail, newType, _session ? _session.isAdmin : false);
-    /* Persiste campos extras */
     if (_session) {
       _session.state = newState;
       _session.city  = newCity;
@@ -16072,24 +16058,51 @@ function dashSaveProfile() {
         localStorage.setItem('hw_session', JSON.stringify(s));
       } catch(e) {}
     }
-    /* Atualiza badge de tipo */
     var ptEl = document.getElementById('dash-profile-type');
     if (ptEl) ptEl.textContent = newType === 'both' ? '🔄 Cliente + Freelancer' : newType === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
-
     var dn = document.getElementById('dash-user-name');      if(dn) dn.textContent = newName.split(' ')[0];
     var pa = document.getElementById('dash-profile-avatar'); if(pa) pa.textContent = newName.charAt(0).toUpperCase();
     var pn = document.getElementById('dash-profile-name');   if(pn) pn.textContent = newName;
     var na = document.getElementById('nav-user-name');       if(na) na.textContent = newName.split(' ')[0];
     var av = document.getElementById('nav-user-avatar');     if(av) av.textContent = newName.charAt(0).toUpperCase();
-
-    /* Feedback específico se mudou o tipo */
-    if (_pendingAccountType !== null && _pendingAccountType !== (_session ? _session.type : 'client')) {
-      var labels = { client:'Cliente', freelancer:'Freelancer', both:'Cliente + Freelancer' };
-      showToast('Perfil atualizado! Conta alterada para ' + (labels[newType] || newType) + '.', 'success');
-    } else {
-      showToast('Perfil atualizado com sucesso!', 'success');
-    }
   }, 700);
+
+  /* ── Salva no Supabase e mostra toast baseado no resultado real ── */
+  if (_sbReady() && _session) {
+    var _savedType = newType;
+    _sbSaveProfile(profileData, extMeta).then(function(ok) {
+      if (!ok) {
+        console.warn('dashSaveProfile: falhou no Supabase');
+        showToast('Erro ao salvar. Faça login novamente e tente de novo.', 'error');
+        return;
+      }
+      /* Atualiza cache local */
+      var uid = _session && _session.uid;
+      if (uid && window._realProfileCache && window._realProfileCache[uid]) {
+        var c = window._realProfileCache[uid];
+        c.name = profileData.name; c.bio = profileData.bio;
+        c.city = profileData.city; c.state = profileData.state;
+        c.hourly_rate = profileData.hourlyRate; c.type = _savedType;
+        if (extMeta) c.profile_metadata = extMeta;
+      }
+      /* Recarrega listagem de freelancers */
+      var isFL = (_savedType === 'freelancer' || _savedType === 'both');
+      if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
+      /* Toast de sucesso — só aparece se o Supabase confirmou */
+      var labels = { client:'Cliente', freelancer:'Freelancer', both:'Cliente + Freelancer' };
+      var typeChanged = (_savedType !== ((_session && _session.type) || 'client'));
+      if (typeChanged) {
+        showToast('Perfil atualizado! Conta: ' + (labels[_savedType] || _savedType), 'success');
+      } else {
+        showToast('Perfil salvo com sucesso! ✓', 'success');
+      }
+    });
+  } else {
+    /* Sem Supabase — feedback local apenas */
+    setTimeout(function(){
+      showToast('Perfil atualizado localmente (modo demonstração).', 'info');
+    }, 750);
+  }
 }
 
 function dashCancelEdit() {
