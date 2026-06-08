@@ -36,6 +36,16 @@
   ],
   "rewrites": [
     {
+      "source": "/",
+      "has": [{ "type": "host", "value": "www.herework.com.br" }],
+      "destination": "/coming-soon.html"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "herework.com.br" }],
+      "destination": "/coming-soon.html"
+    },
+    {
       "source": "/(.*)",
       "has": [{ "type": "host", "value": "www.herework.com.br" }],
       "destination": "/coming-soon.html"
