@@ -11401,6 +11401,23 @@ function submitLogin() {
       if (e) e.value = ''; if (p) p.value = '';
       closeModal('login');
       showToast((lang()==='pt' ? '👋 Bem-vindo(a) de volta, ' : '👋 ¡Bienvenido/a de regreso, ') + prof.name.split(' ')[0] + '!', 'success');
+
+      /* Re-tenta save pendente (ex: sessão expirou durante edição de perfil) */
+      if (window._pendingProfileSave) {
+        var _ps = window._pendingProfileSave;
+        window._pendingProfileSave = null;
+        setTimeout(function() {
+          _sbSaveProfile(_ps.data, _ps.meta).then(function(ok) {
+            if (ok) {
+              var isFL = (_ps.type === 'freelancer' || _ps.type === 'both');
+              if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
+              showToast('Perfil salvo com sucesso! ✓', 'success');
+            }
+          });
+        }, 600);
+        return; /* não redireciona para dashboard — já estava lá */
+      }
+
       setTimeout(function(){ openDashboard(); }, 400);
     });
   } else {
@@ -16082,37 +16099,39 @@ function dashSaveProfile() {
   }, 700);
 
   /* ── Salva no Supabase e mostra toast baseado no resultado real ── */
-  if (_sbReady() && _session) {
-    var _savedType = newType;
-    _sbSaveProfile(profileData, extMeta).then(function(ok) {
+  function _doSave(pData, pMeta, pType) {
+    _sbSaveProfile(pData, pMeta).then(function(ok) {
       if (!ok) {
-        console.warn('dashSaveProfile: falhou no Supabase');
-        showToast('Erro ao salvar. Faça login novamente e tente de novo.', 'error');
+        /* Guarda dados pendentes e pede re-autenticação */
+        window._pendingProfileSave = { data: pData, meta: pMeta, type: pType };
+        showToast('Sessão expirada — entre novamente para salvar.', 'error');
+        setTimeout(function() {
+          var loginEmailEl = document.getElementById('login-email');
+          if (loginEmailEl && _session && _session.email) loginEmailEl.value = _session.email;
+          openModal('login');
+        }, 1200);
         return;
       }
+      window._pendingProfileSave = null;
       /* Atualiza cache local */
       var uid = _session && _session.uid;
       if (uid && window._realProfileCache && window._realProfileCache[uid]) {
         var c = window._realProfileCache[uid];
-        c.name = profileData.name; c.bio = profileData.bio;
-        c.city = profileData.city; c.state = profileData.state;
-        c.hourly_rate = profileData.hourlyRate; c.type = _savedType;
-        if (extMeta) c.profile_metadata = extMeta;
+        c.name = pData.name; c.bio = pData.bio;
+        c.city = pData.city; c.state = pData.state;
+        c.hourly_rate = pData.hourlyRate; c.type = pType;
+        if (pMeta) c.profile_metadata = pMeta;
       }
       /* Recarrega listagem de freelancers */
-      var isFL = (_savedType === 'freelancer' || _savedType === 'both');
+      var isFL = (pType === 'freelancer' || pType === 'both');
       if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
-      /* Toast de sucesso — só aparece se o Supabase confirmou */
-      var labels = { client:'Cliente', freelancer:'Freelancer', both:'Cliente + Freelancer' };
-      var typeChanged = (_savedType !== ((_session && _session.type) || 'client'));
-      if (typeChanged) {
-        showToast('Perfil atualizado! Conta: ' + (labels[_savedType] || _savedType), 'success');
-      } else {
-        showToast('Perfil salvo com sucesso! ✓', 'success');
-      }
+      showToast('Perfil salvo com sucesso! ✓', 'success');
     });
+  }
+
+  if (_sbReady() && _session) {
+    _doSave(profileData, extMeta, newType);
   } else {
-    /* Sem Supabase — feedback local apenas */
     setTimeout(function(){
       showToast('Perfil atualizado localmente (modo demonstração).', 'info');
     }, 750);
