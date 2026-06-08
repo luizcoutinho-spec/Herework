@@ -15849,53 +15849,62 @@ function dashSaveProfile() {
   var btn     = document.getElementById('profile-save-btn');
   var err     = document.getElementById('err-profile');
   if(err){ err.textContent=''; err.classList.remove('show'); }
-  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
+
+  /* ── Nome: usa DOM quando disponível, caso contrário usa sessão ── */
+  var newName = nameEl ? nameEl.value.trim() : (_session ? _session.name : '');
+  if (!newName) {
+    if(err){ err.textContent='Sessão inválida — faça login novamente.'; err.classList.add('show'); } return;
+  }
+  if (nameEl && newName.split(' ').length < 2) {
     if(err){ err.textContent='Informe o nome completo (nome e sobrenome).'; err.classList.add('show'); } return;
   }
   _setBtnLoading(btn, true);
 
-  var newName  = nameEl.value.trim();
   var newEmail = emailEl ? emailEl.value.trim() : (_session ? _session.email : '');
   var stateEl  = document.getElementById('profile-state');
   var cityEl   = document.getElementById('profile-city');
-  var newState = stateEl ? stateEl.value : '';
-  var newCity  = cityEl  ? cityEl.value  : '';
+  /* ── Estado/cidade: DOM quando presente, senão sessão ── */
+  var newState = stateEl ? stateEl.value : (_session ? (_session.state || '') : '');
+  var newCity  = cityEl  ? cityEl.value  : (_session ? (_session.city  || '') : '');
   var newType  = _pendingAccountType || (_session ? _session.type : 'client');
 
-  var bioEl    = document.getElementById('profile-bio');
-  var phoneEl  = document.getElementById('profile-phone');
-  var titleEl  = document.getElementById('profile-title');
-  var urlEl    = document.getElementById('profile-url');
+  var bioEl   = document.getElementById('profile-bio');
+  var phoneEl = document.getElementById('profile-phone');
 
-  /* ── Coleta campos extendidos ── */
-  function _gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
-  var extMeta = {
-    title:            _gv('profile-title'),
-    bio:              _gv('profile-bio'),
-    linkedin_url:     _gv('profile-url'),
-    portfolio_url:    _gv('profile-portfolio-url'),
-    timezone:         _gv('profile-timezone'),
-    hourly_rate:      _gv('profile-hourly-rate'),
-    project_min:      _gv('profile-project-min'),
-    exp_years:        _gv('profile-exp-years'),
-    exp_level:        _gv('profile-exp-level'),
-    billing_prefs:    _gv('profile-billing-prefs'),
-    availability:     _gv('profile-availability'),
-    hours_week:       _gv('profile-hours-week'),
-    work_regime:      _gv('profile-work-regime'),
-    proj_prefs:       _gv('profile-proj-prefs'),
-    languages:        _gv('profile-languages'),
-    ai_use:           _gv('profile-ai-use'),
-    ai_tools:         _gv('profile-ai-tools'),
-    education_level:  _gv('profile-education-level'),
-    education_area:   _gv('profile-education-area'),
-    certifications:   _gv('profile-certifications'),
-    portfolio_1:      _gv('profile-portfolio-1'),
-    portfolio_2:      _gv('profile-portfolio-2'),
-    portfolio_3:      _gv('profile-portfolio-3')
-  };
+  /* ── Cache de perfil real (Supabase) para fallback de campos removidos ── */
+  var _cachedProf = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
+
+  /* ── Coleta campos extendidos — _gv retorna null quando o campo não existe ── */
+  function _gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : null; }
+
+  /* Carrega metadata existente do localStorage como base */
+  var existingMeta = {};
+  try { existingMeta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x) {}
+
+  /* Mescla: só substitui campos que têm elemento no DOM */
+  var extMeta = JSON.parse(JSON.stringify(existingMeta));
+  var _metaPairs = [
+    ['profile-title','title'], ['profile-bio','bio'], ['profile-url','linkedin_url'],
+    ['profile-portfolio-url','portfolio_url'], ['profile-timezone','timezone'],
+    ['profile-hourly-rate','hourly_rate'], ['profile-project-min','project_min'],
+    ['profile-exp-years','exp_years'], ['profile-exp-level','exp_level'],
+    ['profile-billing-prefs','billing_prefs'], ['profile-availability','availability'],
+    ['profile-hours-week','hours_week'], ['profile-work-regime','work_regime'],
+    ['profile-proj-prefs','proj_prefs'], ['profile-languages','languages'],
+    ['profile-ai-use','ai_use'], ['profile-ai-tools','ai_tools'],
+    ['profile-education-level','education_level'], ['profile-education-area','education_area'],
+    ['profile-certifications','certifications'],
+    ['profile-portfolio-1','portfolio_1'], ['profile-portfolio-2','portfolio_2'],
+    ['profile-portfolio-3','portfolio_3']
+  ];
+  _metaPairs.forEach(function(pair) {
+    var val = _gv(pair[0]);
+    if (val !== null) extMeta[pair[1]] = val; /* só atualiza se o campo existe no DOM */
+  });
   /* ferramentas: JSON array */
-  try { extMeta.tools = JSON.parse(_gv('profile-tools') || '[]'); } catch(x) { extMeta.tools = []; }
+  var toolsRaw = _gv('profile-tools');
+  if (toolsRaw !== null) { try { extMeta.tools = JSON.parse(toolsRaw || '[]'); } catch(x) { extMeta.tools = []; } }
   /* persiste em localStorage */
   try { localStorage.setItem('hw_profile_meta', JSON.stringify(extMeta)); } catch(x) {}
 
@@ -15903,8 +15912,9 @@ function dashSaveProfile() {
 
   var profileData = {
     name:      newName,
-    bio:       bioEl   ? bioEl.value.trim()   : '',
-    phone:     phoneEl ? phoneEl.value.trim() : '',
+    /* bio e phone: DOM quando presente, senão cache Supabase ou metadata existente */
+    bio:       bioEl   ? bioEl.value.trim()   : (existingMeta.bio   || _cachedProf.bio   || ''),
+    phone:     phoneEl ? phoneEl.value.trim() : (_cachedProf.phone  || ''),
     city:      newCity,
     state:     newState,
     type:      newType,
