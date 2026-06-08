@@ -2436,6 +2436,65 @@ section { padding: 64px 0; }
 .profile-chip.active { border-color:var(--green); color:var(--green); background:#f0fdf4;
                        box-shadow:0 0 0 3px rgba(34,197,94,.12); }
 
+/* Accordion de categorias do perfil */
+.area-acc-row { border-bottom:1px solid var(--border-2); }
+.area-acc-row:last-child { border-bottom:none; }
+.area-acc-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:11px 14px; cursor:pointer; user-select:none;
+  background:var(--surface); transition:background .12s;
+}
+.area-acc-header:hover { background:var(--bg); }
+.area-acc-header.open { background:#f0fdf4; }
+.area-acc-icon { font-size:16px; margin-right:8px; flex-shrink:0; }
+.area-acc-label { font-size:13px; font-weight:600; color:var(--text); flex:1; }
+.area-acc-count {
+  font-size:11px; font-weight:700; color:#fff;
+  background:var(--green); border-radius:10px;
+  padding:1px 7px; margin-right:8px; display:none;
+}
+.area-acc-count.visible { display:inline; }
+.area-acc-arrow {
+  font-size:14px; color:var(--text-4);
+  transition:transform .2s; display:inline-block;
+}
+.area-acc-header.open .area-acc-arrow { transform:rotate(90deg); }
+.area-acc-body {
+  padding:12px 14px 14px; background:var(--bg);
+  border-top:1px solid var(--border-2); display:none;
+}
+.area-acc-body.open { display:block; }
+.area-acc-sub-chips { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:0; }
+
+/* Sub-chip especialidade */
+.area-sub-chip {
+  display:inline-flex; align-items:center; padding:5px 12px;
+  border:1.5px solid var(--border); border-radius:20px; cursor:pointer;
+  font-size:12px; font-weight:600; color:var(--text-3); background:var(--surface);
+  transition:all .13s; user-select:none;
+}
+.area-sub-chip:hover { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+.area-sub-chip.active {
+  border-color:var(--green); color:var(--green); background:#f0fdf4;
+  box-shadow:0 0 0 3px rgba(34,197,94,.1);
+}
+
+/* Skills grid dentro do accordion */
+.area-skills-grid {
+  display:flex; flex-wrap:wrap; gap:5px;
+  margin-top:10px; padding-top:10px;
+  border-top:1px dashed var(--border-2);
+}
+.area-skill-btn {
+  padding:4px 10px; border:1.5px solid var(--border); border-radius:14px;
+  cursor:pointer; font-size:11px; font-weight:500; color:var(--text-3);
+  background:var(--surface); transition:all .12s;
+}
+.area-skill-btn:hover { border-color:var(--green); color:var(--green); }
+.area-skill-btn.active {
+  border-color:var(--green); color:#fff; background:var(--green);
+}
+
 /* Divisores de seção dentro do form */
 .prof-section-divider {
   display:flex; align-items:center; gap:10px;
@@ -5099,43 +5158,19 @@ section { padding: 64px 0; }
 
         <!-- ── Área de Atuação & Habilidades ── -->
         <div class="profile-card" style="margin:18px -4px 0;padding:18px 20px;border:1.5px solid var(--border);border-radius:var(--radius-lg);background:var(--bg);">
-          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:14px;">&#127919; &Aacute;rea de Atua&ccedil;&atilde;o &amp; Especialidades</div>
-          
-          <div class="skills-area-row">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="profile-area">&Aacute;rea principal</label>
-              <select class="form-select" id="profile-area" onchange="loadProfileSubareas(this.value)">
-                <option value="">Selecione a &aacute;rea...</option>
-                <option value="administracao">Administra&ccedil;&atilde;o &amp; Contabilidade</option>
-                <option value="advogados">Advogados &amp; Leis</option>
-                <option value="atendimento">Atendimento ao Consumidor</option>
-                <option value="design">Design &amp; Cria&ccedil;&atilde;o</option>
-                <option value="educacao">Educa&ccedil;&atilde;o &amp; Consultoria</option>
-                <option value="engenharia">Engenharia &amp; Arquitetura</option>
-                <option value="escrita">Escrita</option>
-                <option value="fotografia">Fotografia &amp; AudioVisual</option>
-                <option value="suporte">Suporte Administrativo</option>
-                <option value="traducao">Tradu&ccedil;&atilde;o</option>
-                <option value="vendas">Vendas &amp; Marketing</option>
-                <option value="web">Web, Mobile &amp; Software</option>
-                <option value="outra">Outra Categoria</option>
-              </select>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="profile-subarea">Sub&aacute;rea</label>
-              <select class="form-select" id="profile-subarea" onchange="loadProfileSkillsList(document.getElementById('profile-area').value, this.value)" disabled>
-                <option value="">Selecione a &aacute;rea primeiro...</option>
-              </select>
-            </div>
-          </div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;">&#127919; &Aacute;rea de Atua&ccedil;&atilde;o &amp; Especialidades</div>
+          <div style="font-size:11px;color:var(--text-4);margin-bottom:14px;">Selecione suas &aacute;reas de atua&ccedil;&atilde;o e as respectivas especialidades &mdash; m&uacute;ltiplas categorias permitidas</div>
 
-          <div id="profile-skills-section" style="display:none;">
-            <label for="profile-skills-grid" class="form-label" style="margin-bottom:6px;">Especialidades &amp; Habilidades <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
-            <div class="skills-grid" id="profile-skills-grid"></div>
-          </div>
+          <!-- Hidden compat inputs (lidos por save/restore legado) -->
+          <input type="hidden" id="profile-area" value="">
+          <input type="hidden" id="profile-subarea" value="">
 
-          <div id="profile-selected-skills-wrap" style="margin-top:12px;display:none;">
-            <label class="form-label" style="margin-bottom:4px;" aria-label="Habilidades selecionadas:">Habilidades selecionadas:</label>
+          <!-- Accordion de categorias -->
+          <div id="profile-areas-accordion" style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;"></div>
+
+          <!-- Skills selecionadas (global) -->
+          <div id="profile-selected-skills-wrap" style="margin-top:14px;display:none;">
+            <label class="form-label" style="margin-bottom:6px;">Habilidades selecionadas <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
             <div class="selected-skills-wrap" id="profile-selected-skills"></div>
             <div class="skills-count-hint" id="profile-skills-hint">0 de 15 selecionadas</div>
           </div>
@@ -15572,6 +15607,20 @@ function _initProfileExtended() {
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x) {}
 
+  /* ── Accordion de áreas ── */
+  /* Restaura subcategorias salvas */
+  if (meta.selected_subareas && Array.isArray(meta.selected_subareas)) {
+    _selectedSubareas = meta.selected_subareas.slice();
+  } else {
+    _selectedSubareas = [];
+  }
+  /* Restaura skills salvas */
+  if (meta.skills && Array.isArray(meta.skills)) {
+    _selectedSkills = meta.skills.slice();
+  }
+  if (typeof renderProfileAreasAccordion === 'function') renderProfileAreasAccordion();
+  if (typeof _renderSelectedSkills === 'function') _renderSelectedSkills();
+
   /* Título */
   var titleEl = document.getElementById('profile-title');
   if (titleEl && meta.title) titleEl.value = meta.title;
@@ -19526,6 +19575,232 @@ function openProfileByName(name) {
 /* ═══════════════════════════════════════════════════════════
    BANCO DE HABILIDADES — Área / Subárea / Skills
 ═══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   TAXONOMIA PDF — 13 categorias oficiais com subcategorias e skills
+   Fonte: Categorias.pdf (HereWork)
+   ══════════════════════════════════════════════════════════════════ */
+var _PDF_SUBAREAS = {
+  administracao:{ icon:'📊', label:'Administração & Contabilidade', subs:[
+    { key:'analise-dados', label:'Análise de Dados & Estatística', skills:['Power BI','Tableau','Excel Avançado','Google Analytics','SQL','Python para Dados','Estatística Aplicada','Google Data Studio','Dashboard Gerencial','KPIs','Data Visualization','Looker'] },
+    { key:'contabilidade', label:'Contabilidade', skills:['Simples Nacional','Lucro Presumido','Lucro Real','BPO Contábil','SPED Contábil','Balanço Patrimonial','DRE Contábil','Conciliação Bancária','ECD/ECF','IRPJ/CSLL','PIS/COFINS','Nota Fiscal Eletrônica','eSocial','MEI/ME'] },
+    { key:'financeiro', label:'Financeiro', skills:['Fluxo de Caixa','DRE','Budget/Orçamento','Forecast','Valuation','EBITDA','Capital de Giro','Gestão de Caixa','Contas a Pagar/Receber','Planejamento Financeiro','Controladoria','CFO as a Service','KPIs Financeiros','SAP','TOTVS','Omie'] },
+    { key:'gestao-projetos', label:'Gestão de Projetos', skills:['Scrum','Kanban','PMI/PMBOK','JIRA','Trello','Asana','MS Project','Gestão de Riscos','Cronograma','EAP','SAFe','OKR','Reuniões de Status','Relatórios de Progresso','Prince2'] },
+    { key:'planejamento', label:'Planejamento de Negócios', skills:['Planejamento Estratégico','Business Plan','Canvas de Negócio','Análise SWOT','OKR','KPIs','BSC','Análise de Mercado','Modelo de Negócio','Pitch Deck','Gestão de Mudança','Benchmarking'] },
+    { key:'rh', label:'Recursos Humanos', skills:['Recrutamento & Seleção','Onboarding','Avaliação de Desempenho','PDI','Plano de Cargos','Folha de Pagamento','eSocial','CLT','DISC','People Analytics','Employer Branding','Treinamento & Desenvolvimento','NPS Interno','eNPS','Cultura Organizacional'] }
+  ]},
+  advogados:{ icon:'⚖️', label:'Advogados & Leis', subs:[
+    { key:'ambiental', label:'Ambiental', skills:['Licenciamento Ambiental','CONAMA','IBAMA','EIA/RIMA','Compliance Ambiental','Crimes Ambientais','Direito Hídrico','Responsabilidade Ambiental Empresarial'] },
+    { key:'civil', label:'Civil', skills:['Contratos Civis','Responsabilidade Civil','Usucapião','Posse e Propriedade','Indenizações','Danos Morais','Danos Materiais','Inventário','Sucessões','Testamento'] },
+    { key:'conciliacao', label:'Conciliação & Mediação', skills:['Mediação','Arbitragem','Conciliação','CEJUSC','ADR','Acordo Extrajudicial','Câmara de Arbitragem','Negociação','Resolução de Conflitos'] },
+    { key:'consumidor', label:'Consumidor', skills:['CDC','PROCON','Defesa do Consumidor','E-commerce e CDC','Práticas Abusivas','Recall','Responsabilidade do Fornecedor','SAC Legal','Publicidade Enganosa'] },
+    { key:'contratos', label:'Contratos', skills:['Elaboração de Contratos','Revisão Contratual','NDA','Contratos de Prestação de Serviços','SLAs','Termos de Uso','Política de Privacidade','Contratos Internacionais','Contratos de Software'] },
+    { key:'criminal', label:'Criminal', skills:['Defesa Criminal','Júri Popular','Habeas Corpus','Crimes Financeiros','Direito Penal Econômico','Crimes Digitais','Crimes contra a Honra','Audiências Criminais','Crimes contra a Administração'] },
+    { key:'empresarial', label:'Empresarial', skills:['Direito Societário','Constituição de Empresa','Fusões e Aquisições','M&A','Joint Venture','Corporate Governance','Compliance','LGPD Empresarial','Due Diligence Jurídica','Recuperação Judicial'] },
+    { key:'familia', label:'Família', skills:['Divórcio','Guarda de Filhos','Pensão Alimentícia','Adoção','União Estável','Inventário','Testamento','Curatela','Tutela','Alienação Parental'] },
+    { key:'imigracao', label:'Imigração & Internacional', skills:['Visto de Trabalho','Residência Permanente','Naturalização','Direito Internacional','Tratados','Extradição','Apostilamento','Cidadania Italiana/Portuguesa'] },
+    { key:'imoveis', label:'Imóveis', skills:['Compra e Venda','Locação','Registro de Imóveis','Regularização de Imóveis','Incorporação Imobiliária','Loteamento','Usucapião Imobiliário','Due Diligence Imobiliária'] },
+    { key:'previdenciario', label:'Previdenciário', skills:['INSS','Aposentadoria','BPC/LOAS','Auxílio-Doença','Pensão por Morte','Revisão de Benefícios','RGPS','RPPS','Planejamento Previdenciário','Aposentadoria Especial'] },
+    { key:'prop-intelectual', label:'Propriedade Intelectual', skills:['Registro de Marca','Patente','Direito Autoral','Software e IP','INPI','Modelo de Utilidade','Desenho Industrial','Trade Secret','Licenciamento','Franchising'] },
+    { key:'relacoes-domesticas', label:'Relações Domésticas', skills:['Violência Doméstica','Lei Maria da Penha','Medida Protetiva','Divórcio Litigioso','Guarda','Alimentos','Proteção à Mulher','Violência Psicológica'] },
+    { key:'trabalhista', label:'Trabalhista', skills:['Defesa Trabalhista','CLT','Reclamação Trabalhista','Rescisão','Assédio Moral','Assédio Sexual','NR','Compliance Trabalhista','Acordos Coletivos','Processo do Trabalho','MEI vs. CLT'] },
+    { key:'tributacao', label:'Tributação', skills:['Planejamento Tributário','IRPJ/CSLL','PIS/COFINS','ICMS','ISS','Simples Nacional','Lucro Real','Recuperação de Créditos','Defesa Fiscal','Processo Administrativo Tributário','CARF'] }
+  ]},
+  atendimento:{ icon:'🎧', label:'Atendimento ao Consumidor', subs:[
+    { key:'atendimento-cs', label:'Atendimento ao Consumidor', skills:['Zendesk','Intercom','Freshdesk','HubSpot Service','CSAT','NPS','CES','SLA','Omnichannel','Chatbot','Central de Ajuda','Base de Conhecimento','Gestão de Reclamações','Customer Success'] },
+    { key:'suporte-tecnico', label:'Suporte Técnico', skills:['Help Desk','N1/N2/N3','ITIL','Jira Service','ServiceNow','Suporte Remoto','Active Directory','Office 365','Google Workspace','Windows Server','Gestão de Chamados','SLA Técnico','Zoho Desk'] }
+  ]},
+  design:{ icon:'🎨', label:'Design & Criação', subs:[
+    { key:'animacao', label:'Animação', skills:['After Effects','Lottie','Animação 2D','Animação 3D','Explainer Video','Motion Graphics','Stop Motion','Animação de Personagem','CSS Animation','GIF Animado','Adobe Animate','Rive'] },
+    { key:'apresentacao', label:'Apresentação', skills:['PowerPoint','Google Slides','Keynote','Canva','Pitch Deck','Apresentação Executiva','Infográfico','Data Visualization','Slides Corporativos','Apresentação Interativa','Prezi'] },
+    { key:'design-3d', label:'Design 3D', skills:['Blender','Cinema 4D','3ds Max','Maya','ZBrush','Renderização 3D','V-Ray','ArchViz','Product Visualization','3D para E-commerce','Modelagem 3D','Substance Painter'] },
+    { key:'design-moda', label:'Design de Moda', skills:['Ficha Técnica','Modelagem','Pilotagem','Consultoria de Imagem','Lookbook','Coleção','Fashion Branding','Ilustração de Moda','CAD Vestuário','Estilo','Editorial de Moda'] },
+    { key:'design-produto', label:'Design de Produto', skills:['UI/UX Design','Wireframe','Prototipagem','Figma','Adobe XD','Design System','User Research','Teste de Usabilidade','Acessibilidade WCAG','Design Thinking','Service Design','Jobs to be Done'] },
+    { key:'design-grafico', label:'Design Gráfico', skills:['Photoshop','Illustrator','InDesign','Canva','Flyer','Banner Digital','Post Social','Identidade Visual','Catálogo','Material Impresso','Cardápio','Folder'] },
+    { key:'diagramacao', label:'Diagramação', skills:['InDesign','Affinity Publisher','QuarkXPress','Editorial','Livro','Revista','Jornal','Catálogo','e-Book','Formatação ABNT','Diagrama Técnico','Apostila'] },
+    { key:'ilustracao', label:'Ilustração', skills:['Ilustração Digital','Procreate','Illustrator','Wacom','Arte Conceitual','Personagem','HQ/Quadrinho','Ilustração Editorial','Children Books','Pixel Art','NFT Art','Infográfico'] },
+    { key:'logotipos', label:'Logotipos', skills:['Logotipo','Logomarca','Redesign de Logo','Logotipo Vetorial','Branding','Manual de Marca','Tipografia Personalizada','Paleta de Cores','Símbolo','Wordmark','Monograma'] },
+    { key:'motion-design', label:'Motion Design', skills:['After Effects','Motion Graphics','Kinetic Typography','Animação de Logo','Intro de Vídeo','Bumper Ad','Lower Third','Data Motion','Broadcast Design','Adobe Animate','HUD Animation'] },
+    { key:'rotulos', label:'Rótulos e Embalagens', skills:['Embalagem','Rótulo','Packaging Design','Dieline','Prototipagem de Embalagem','Ecodesign','Food Packaging','Cosmetics Packaging','Retail Display','Estrutural'] }
+  ]},
+  educacao:{ icon:'📚', label:'Educação & Consultoria', subs:[
+    { key:'agricultura', label:'Agricultura', skills:['Agronegócio','Manejo','Irrigação','Agronomia','Zootecnia','Agricultura Familiar','Horticultura','Controle de Pragas','Consultoria Rural','Mecanização Agrícola'] },
+    { key:'assessor-invest', label:'Assessor de Investimentos', skills:['Renda Fixa','Renda Variável','Fundos de Investimento','FII','Previdência Privada','Planejamento Financeiro Pessoal','Análise Fundamentalista','Carteira de Investimentos','CFP','CPA-10/20','AAI','Plataforma de Investimentos'] },
+    { key:'consultoria-pessoal', label:'Consultoria Pessoal', skills:['Coaching de Vida','Coaching de Carreira','Mentoria','Psicologia','Terapia Online','Desenvolvimento Pessoal','PNL','Mindfulness','Life Design','Autoconhecimento','Coaching Executivo'] },
+    { key:'corretor', label:'Corretor', skills:['Corretor de Imóveis','CRECI','Avaliação de Imóveis','Locação','Venda de Imóveis','Lançamentos Imobiliários','Imóvel Comercial','Consultoria Imobiliária','Financiamento Imobiliário','Permuta'] },
+    { key:'ensino-fundamental', label:'Fundamental & Ensino Médio', skills:['Matemática','Português','Inglês','Ciências','História','Geografia','Física','Química','Biologia','Reforço Escolar','Preparação ENEM','Preparação Vestibular','Aulas Online'] },
+    { key:'idiomas-ensino', label:'Idiomas', skills:['Inglês','Espanhol','Francês','Alemão','Italiano','Japonês','Mandarim','Business English','IELTS Prep','TOEFL Prep','Conversação','Inglês para Executivos','Aulas Online de Idiomas'] },
+    { key:'negocios-financas', label:'Negócios & Finanças', skills:['Consultoria Empresarial','Finanças para Não Financeiros','Gestão Financeira','Excel Financeiro','Modelagem Financeira','Valuation para Empreendedores','Mentoria de Negócios','Startups','Captação de Recursos'] },
+    { key:'saude-consultoria', label:'Saúde & Fitness', skills:['Personal Trainer','Nutrição','Psicologia','Fisioterapia','Médico Consultor','Saúde Ocupacional','Ginástica Laboral','Bem-estar Corporativo','Mindfulness','Pilates Online','Yoga','Coaching de Saúde'] }
+  ]},
+  engenharia:{ icon:'🏗️', label:'Engenharia & Arquitetura', subs:[
+    { key:'arquitetura', label:'Arquitetura', skills:['Projeto Arquitetônico','AutoCAD','Revit','BIM','Renderização 3D','Lumion','V-Ray','Projeto Executivo','Aprovação Prefeitura','ART/RRT','Compatibilização de Projetos','Memorial Descritivo'] },
+    { key:'design-interiores', label:'Design de Interiores', skills:['Projeto de Interiores','3D Residencial','3D Comercial','Moodboard','Memorial Descritivo','Planta Mobiliada','Decoração','Reforma','Gerenciamento de Obra','Ambientação','Interiores Comerciais'] },
+    { key:'design-industrial', label:'Design Industrial', skills:['Produto Industrial','AutoCAD Industrial','SolidWorks','CATIA','Prototipagem','Ergonomia','Design para Manufatura','Ficha Técnica Industrial','NR-12','Tolerâncias Dimensionais'] },
+    { key:'engenharia-civil', label:'Engenharia Civil', skills:['Projetos Estruturais','AutoCAD','Revit','BIM','Cálculo Estrutural','Projetos Hidráulicos','Projetos Elétricos','AVCB','Laudo Técnico','Topografia','Orçamento de Obra','Inspeção Predial'] },
+    { key:'eletrica-eletronica', label:'Engenharia Elétrica & Eletrônica', skills:['Projetos Elétricos','AutoCAD Elétrico','SPDA','Subestação','Automação Elétrica','SCADA','PLC','Arduino','IoT','Energia Solar Fotovoltaica','Eficiência Energética','NR-10'] },
+    { key:'mecanica', label:'Engenharia Mecânica', skills:['Projetos Mecânicos','SolidWorks','CATIA','Ansys','Elementos Finitos','AutoCAD Mecânico','Termodinâmica','Hidráulica Industrial','Pneumática','Manutenção Industrial','Lean Manufacturing','TPM'] },
+    { key:'quimica', label:'Engenharia Química', skills:['Processos Químicos','Controle de Qualidade','ISO 9001','Segurança Química','ETA/ETE','Laudos Técnicos','PPRA','PCMSO','NR-15','Análise de Risco Químico','FISPQ'] },
+    { key:'modelagem-cad', label:'Modelagem 3D & CAD', skills:['AutoCAD','SolidWorks','Fusion 360','CATIA','Inventor','Modelagem Paramétrica','Desenho Técnico','GD&T','Tolerâncias','Impressão 3D','Prototipagem Rápida','Engenharia Reversa'] }
+  ]},
+  escrita:{ icon:'✍️', label:'Escrita', subs:[
+    { key:'assessoria-imprensa', label:'Assessoria de Imprensa', skills:['Press Release','Nota para Imprensa','Media Relations','Gestão de Crise','Clipping','Pautas Jornalísticas','Releases de Produto','Entrevistas Coletivas','Comunicação Corporativa','ESG Communication'] },
+    { key:'copywriting', label:'Copywriting', skills:['Copy para Landing Page','Copy para Anúncios','Email Marketing','VSL (Video Sales Letter)','Headlines','CTAs','Storytelling','Copy para WhatsApp','Sequência de E-mails','Carta de Vendas','Neuromarketing','Long Copy'] },
+    { key:'curriculo', label:'Currículo & Carta de Apresentação', skills:['Currículo Profissional','Currículo ATS-Friendly','LinkedIn Profile Optimization','Cover Letter','Carta de Apresentação','Perfil Executivo','Bio Profissional','Currículo para Expatriado','Currículo em Inglês'] },
+    { key:'edicao-revisao', label:'Edição & Revisão', skills:['Revisão Ortográfica','Revisão Gramatical','Edição de Texto','Normalização ABNT','Ghostwriting','Proofreading','Revisão Técnica','Edição Estrutural','Style Guide','Revisão de Livros','Copydesk'] },
+    { key:'jornalismo', label:'Jornalismo', skills:['Reportagem','Entrevista Jornalística','Coluna','Artigo de Opinião','Jornalismo Digital','Fact-checking','Jornalismo Investigativo','Jornalismo de Dados','Webjornalismo','Podcast Jornalístico','Curadoria de Conteúdo'] },
+    { key:'redacao', label:'Redação', skills:['Artigos de Blog','Artigos SEO','Conteúdo para Site','Posts LinkedIn','Descrição de Produto','Ebook','Whitepaper','Newsletter','Comunicado Interno','Relatório Executivo','Conteúdo Técnico','Microcopy'] },
+    { key:'roteiro', label:'Roteiro', skills:['Roteiro para Vídeo','Roteiro para Podcast','Roteiro Publicitário','Roteiro para YouTuber','Script para Telemarketing','Roteiro de Treinamento','Roteiro Institucional','Roteiro para Curso Online','Storyboard'] }
+  ]},
+  fotografia:{ icon:'🎬', label:'Fotografia & AudioVisual', subs:[
+    { key:'audio-edicao', label:'Áudio - Edição e Produção', skills:['Ableton Live','Logic Pro','Pro Tools','FL Studio','Mixagem','Masterização','Produção Musical','Jingle','Sound Design','ADR','Trilha Sonora','Composição','Arranjo','Engenharia de Áudio'] },
+    { key:'cinegrafismo', label:'Cinegrafismo', skills:['Filmagem Profissional','Drone','Steadicam','Gimbal','Iluminação','Direção de Fotografia','Camera Operator','Cobertura de Eventos','Vídeo Institucional','Entrevistas Filmadas','Transmissão ao Vivo'] },
+    { key:'edicao-imagens', label:'Edição de Imagens', skills:['Photoshop','Lightroom','Retoque Fotográfico','Color Grading','Composição Digital','Background Removal','HDR','Normalização em Lote','Manipulação Digital','Tratamento de Pele','Edição para E-commerce'] },
+    { key:'fotografia', label:'Fotografia', skills:['Fotografia de Produto','Fotografia Corporativa','Eventos','Retratos Profissionais','Fotografia Arquitetural','E-commerce','Moda','Gastronomia','Fotojornalismo','Drone Fotografia','Fotografia Social','Wedding'] },
+    { key:'locucao', label:'Locução & Narração', skills:['Locução Comercial','Narração','Voice-over','URA','Audiolivro','Locução para EAD','Dublagem','Voz Institucional','Podcast Host','Microfone Profissional','Locução em Inglês','ISDN/Source Connect'] },
+    { key:'video-edicao', label:'Vídeo - Edição e Produção', skills:['Premiere Pro','DaVinci Resolve','Final Cut Pro','After Effects','Corte e Montagem','Color Grading','Legendagem','Reels e Shorts','YouTube','Vídeo para Redes Sociais','Vídeo Educacional','Motion Graphic para Vídeo'] }
+  ]},
+  suporte:{ icon:'🗂️', label:'Suporte Administrativo', subs:[
+    { key:'assistente-virtual', label:'Assistente Virtual', skills:['Gestão de Agenda','E-mail Profissional','Atendimento Remoto','CRM','Organização','Apresentações','Suporte ao CEO/Diretor','Relatórios','Google Workspace','Microsoft 365','Notion','Trello','Secretária Executiva'] },
+    { key:'entrada-dados', label:'Entrada de Dados', skills:['Digitação','Organização de Banco de Dados','Excel','Google Sheets','CRM','ERP','Formulários','Migração de Dados','Validação de Dados','Formatação de Dados','OCR','Catalogação'] },
+    { key:'pesquisa-online', label:'Pesquisa Online', skills:['Pesquisa de Mercado','Pesquisa Acadêmica','Coleta de Dados','Web Scraping','Análise de Concorrência','Benchmarking','Curadoria de Fontes','Relatório de Pesquisa','Desk Research','Análise de Tendências'] },
+    { key:'planilhas', label:'Planilhas e Relatórios', skills:['Excel Avançado','Google Sheets','Power BI','Fórmulas Avançadas','Tabela Dinâmica','Dashboard','VBA/Macros','Power Query','Automação de Planilhas','Relatórios Gerenciais','Google Looker Studio'] },
+    { key:'transcricao', label:'Transcrição', skills:['Transcrição de Áudio','Transcrição de Vídeo','Legendagem SRT','Atas de Reunião','Entrevistas','Transcrição Jurídica','Transcrição Médica','Revisão de Transcrição','Otter.ai','Descript','Whisper AI'] }
+  ]},
+  traducao:{ icon:'🌍', label:'Tradução', subs:[
+    { key:'alemao', label:'Alemão', skills:['Tradução PT→DE','Tradução DE→PT','Revisão em Alemão','Localização DE','Legendagem DE','Tradução Técnica DE','Tradução Jurídica DE','Interpretação DE','SDL Trados','memoQ','Nível Nativo/Fluente'] },
+    { key:'chines', label:'Chinês', skills:['Tradução PT→ZH','Tradução ZH→PT','Mandarim','Cantonês','Localização ZH','Legendagem ZH','Tradução Técnica ZH','Simplified Chinese','Traditional Chinese','Pinyin','HSK'] },
+    { key:'espanhol', label:'Espanhol', skills:['Tradução PT→ES','Tradução ES→PT','Revisão em Espanhol','Localização ES','Legendagem ES','Tradução Técnica ES','Espanhol Rioplatense','Espanhol Mexicano','Espanhol Neutro','SDL Trados','memoQ'] },
+    { key:'frances', label:'Francês', skills:['Tradução PT→FR','Tradução FR→PT','Revisão em Francês','Localização FR','Legendagem FR','Tradução Técnica FR','Francês Canadense','Tradução Jurídica FR','SDL Trados','memoQ'] },
+    { key:'ingles', label:'Inglês', skills:['Tradução PT→EN','Tradução EN→PT','Revisão em Inglês','Localização EN','Legendagem EN','Tradução Técnica EN','Tradução Jurídica EN','Tradução Médica EN','Juramentada EN','SDL Trados','memoQ','Wordfast'] },
+    { key:'italiano', label:'Italiano', skills:['Tradução PT→IT','Tradução IT→PT','Revisão em Italiano','Localização IT','Legendagem IT','Tradução Técnica IT','Tradução Jurídica IT','SDL Trados','memoQ'] },
+    { key:'japones', label:'Japonês', skills:['Tradução PT→JA','Tradução JA→PT','Kanji','Hiragana','Katakana','Localização JA','Legendagem JA','Tradução Técnica JA','Mangá','Anime Subtitling','SDL Trados','JLPT N1-N5'] }
+  ]},
+  vendas:{ icon:'📣', label:'Vendas & Marketing', subs:[
+    { key:'comercial', label:'Comercial', skills:['Vendas B2B','Vendas B2C','Prospecção','SDR/BDR','Inside Sales','Field Sales','Salesforce','HubSpot CRM','Pipedrive','Funil de Vendas','Negociação','Account Management','Pós-venda','Key Account'] },
+    { key:'midias-sociais', label:'Gestão de Mídias Sociais', skills:['Instagram','Facebook','LinkedIn','TikTok','YouTube','Pinterest','X (Twitter)','Calendário Editorial','Community Management','Stories','Reels','Social Selling','Engajamento','Social Commerce'] },
+    { key:'marketing-digital', label:'Marketing Digital', skills:['Google Ads','Meta Ads','TikTok Ads','LinkedIn Ads','Email Marketing','Automação de Marketing','HubSpot','RD Station','ActiveCampaign','Funil de Vendas','Lead Generation','A/B Testing','ROAS','CPA','Growth Hacking'] },
+    { key:'pesquisa-mercado', label:'Pesquisa de Mercado', skills:['Pesquisa Qualitativa','Pesquisa Quantitativa','Focus Group','Survey','Análise de Concorrência','Benchmarking','NPS','CSAT','Segmentação de Mercado','Análise de Tendências','Jobs to be Done','Análise SWOT'] },
+    { key:'relacoes-publicas', label:'Relações Públicas', skills:['Assessoria de Imprensa','Press Release','Media Relations','Gestão de Crise','Eventos Corporativos','Branding','Porta-Voz','Stakeholder Management','ESG','Comunicação Institucional','Patrocínio'] },
+    { key:'seo', label:'SEO - Search Engine Optimization', skills:['SEO Técnico','SEO On-Page','SEO Off-Page','Link Building','Pesquisa de Palavras-chave','Semrush','Ahrefs','Google Search Console','Core Web Vitals','Schema Markup','SEO Local','SEO para E-commerce','Google Analytics 4'] }
+  ]},
+  web:{ icon:'💻', label:'Web, Mobile & Software', subs:[
+    { key:'banco-dados', label:'Banco de Dados', skills:['SQL','PostgreSQL','MySQL','MongoDB','Redis','Oracle','SQL Server','BigQuery','Elasticsearch','DBA','Modelagem de Dados','Migration','Performance Tuning','Backup e Restore','Supabase','Firebase'] },
+    { key:'cloud', label:'Cloud Computing', skills:['AWS','Azure','Google Cloud','Docker','Kubernetes','Terraform','Ansible','CI/CD','DevOps','Serverless','Lambda','EC2','S3','Cloud Architecture','FinOps','Site Reliability Engineering','GitHub Actions','Jenkins'] },
+    { key:'ia-integracao', label:'Criação & Integração com IA', skills:['ChatGPT API / OpenAI','Claude API','Gemini','LangChain','LlamaIndex','RAG','Fine-tuning','n8n','Make/Integromat','Zapier','Agentes de IA','Automação com IA','Chatbot','Voice AI','Prompt Engineering','CrewAI'] },
+    { key:'games', label:'Desenvolvimento de Games', skills:['Unity','Unreal Engine','C#','C++','Blueprint','Game Design','Gameplay Mechanics','Monetização F2P','App Store','Google Play','Blender 3D para Games','Arte 2D','Pixel Art','UX de Games','Multiplayer'] },
+    { key:'desktop', label:'Desenvolvimento Desktop', skills:['Electron.js','C#/.NET','WPF','WinForms','Python Desktop (PyQt/Tkinter)','Java Desktop','Rust','Go','Instaladores','Cross-platform','Windows/macOS/Linux','Tauri'] },
+    { key:'mobile', label:'Desenvolvimento Mobile', skills:['Flutter','React Native','Swift (iOS)','Kotlin (Android)','Expo','Firebase','Push Notifications','In-App Purchase','App Store Deploy','Google Play Deploy','Testes Mobile','Fastlane','Deep Linking'] },
+    { key:'web-dev', label:'Desenvolvimento Web', skills:['React','Next.js','Vue.js','Angular','TypeScript','JavaScript','Node.js','PHP/Laravel','Python/Django','REST API','GraphQL','WordPress','Webflow','Shopify','Fullstack','Astro','Remix'] },
+    { key:'testes', label:'Teste de Software', skills:['QA','Testes Funcionais','Testes de Regressão','Selenium','Cypress','Jest','Playwright','Testes de Performance','JMeter','Postman','Testes de API','BDD/Gherkin','TDD','Bug Report','Automação de QA'] },
+    { key:'ux-ui', label:'UX/UI & Web Design', skills:['Figma','Adobe XD','Sketch','Wireframe','Prototipagem','Design System','User Research','Teste de Usabilidade','Acessibilidade WCAG','Design Responsivo','Landing Page Design','Atomic Design','Framer','Webflow Design'] }
+  ]}
+};
+
+/* ── Funções do Accordion de Áreas ─────────────────────────────── */
+
+/* Renderiza o accordion completo no #profile-areas-accordion */
+function renderProfileAreasAccordion() {
+  var container = document.getElementById('profile-areas-accordion');
+  if (!container) return;
+
+  var html = '';
+  Object.keys(_PDF_SUBAREAS).forEach(function(catKey) {
+    var cat = _PDF_SUBAREAS[catKey];
+    var subsHtml = cat.subs.map(function(sub) {
+      var isActive = _selectedSubareas.some(function(s){ return s.cat===catKey && s.sub===sub.key; });
+      return '<button class="area-sub-chip' + (isActive?' active':'') + '" type="button" ' +
+        'onclick="toggleProfileSubarea(this,\'' + catKey + '\',\'' + sub.key + '\')" ' +
+        'data-cat="' + catKey + '" data-sub="' + sub.key + '">' +
+        sub.label + '</button>';
+    }).join('');
+
+    var activeCount = _selectedSubareas.filter(function(s){ return s.cat===catKey; }).length;
+    html +=
+      '<div class="area-acc-row" id="area-row-' + catKey + '">' +
+        '<div class="area-acc-header" id="area-hdr-' + catKey + '" onclick="toggleAreaAccordion(\'' + catKey + '\')">' +
+          '<span class="area-acc-icon">' + cat.icon + '</span>' +
+          '<span class="area-acc-label">' + cat.label + '</span>' +
+          '<span class="area-acc-count' + (activeCount>0?' visible':'') + '" id="area-cnt-' + catKey + '">' + activeCount + '</span>' +
+          '<span class="area-acc-arrow">&#10095;</span>' +
+        '</div>' +
+        '<div class="area-acc-body" id="area-body-' + catKey + '">' +
+          '<div class="area-acc-sub-chips">' + subsHtml + '</div>' +
+          '<div id="area-skills-' + catKey + '"></div>' +
+        '</div>' +
+      '</div>';
+  });
+  container.innerHTML = html;
+}
+window.renderProfileAreasAccordion = renderProfileAreasAccordion;
+
+/* Abre/fecha uma linha do accordion */
+function toggleAreaAccordion(catKey) {
+  var hdr  = document.getElementById('area-hdr-'  + catKey);
+  var body = document.getElementById('area-body-' + catKey);
+  if (!hdr || !body) return;
+  var isOpen = body.classList.contains('open');
+  /* Fecha todos */
+  document.querySelectorAll('.area-acc-body.open').forEach(function(b){ b.classList.remove('open'); });
+  document.querySelectorAll('.area-acc-header.open').forEach(function(h){ h.classList.remove('open'); });
+  if (!isOpen) {
+    body.classList.add('open');
+    hdr.classList.add('open');
+  }
+}
+window.toggleAreaAccordion = toggleAreaAccordion;
+
+/* Variável global com subcategorias selecionadas */
+var _selectedSubareas = [];
+
+/* Seleciona/deseleciona uma subcategoria + mostra suas skills */
+function toggleProfileSubarea(btn, catKey, subKey) {
+  var idx = _selectedSubareas.findIndex(function(s){ return s.cat===catKey && s.sub===subKey; });
+  if (idx !== -1) {
+    _selectedSubareas.splice(idx, 1);
+    btn.classList.remove('active');
+  } else {
+    var cat = _PDF_SUBAREAS[catKey];
+    var sub = cat && cat.subs.find(function(s){ return s.key===subKey; });
+    if (sub) {
+      _selectedSubareas.push({ cat:catKey, sub:subKey, label:sub.label });
+      btn.classList.add('active');
+    }
+  }
+  /* Atualiza contador do header */
+  var cnt = document.getElementById('area-cnt-' + catKey);
+  var activeCount = _selectedSubareas.filter(function(s){ return s.cat===catKey; }).length;
+  if (cnt) { cnt.textContent = activeCount; cnt.classList.toggle('visible', activeCount>0); }
+
+  /* Atualiza hidden inputs de compatibilidade (usa primeira subcat selecionada) */
+  var areaHid = document.getElementById('profile-area');
+  var subHid  = document.getElementById('profile-subarea');
+  if (areaHid) areaHid.value = _selectedSubareas.length > 0 ? _selectedSubareas[0].cat : '';
+  if (subHid)  subHid.value  = _selectedSubareas.length > 0 ? _selectedSubareas[0].sub : '';
+
+  /* Mostra skills da subcategoria clicada */
+  _showSubSkills(catKey, subKey, btn.classList.contains('active'));
+  profileUpdateCompletion();
+}
+window.toggleProfileSubarea = toggleProfileSubarea;
+
+/* Renderiza o grid de skills de uma subcategoria dentro do accordion */
+function _showSubSkills(catKey, subKey, show) {
+  var container = document.getElementById('area-skills-' + catKey);
+  if (!container) return;
+  if (!show) { container.innerHTML = ''; return; }
+  var cat = _PDF_SUBAREAS[catKey];
+  var sub = cat && cat.subs.find(function(s){ return s.key===subKey; });
+  if (!sub) return;
+  var html = '<div class="area-skills-grid">' +
+    sub.skills.map(function(sk) {
+      var isAct = _selectedSkills.indexOf(sk) !== -1;
+      return '<button class="area-skill-btn' + (isAct?' active':'') + '" type="button" ' +
+        'onclick="toggleProfileSkill(this,\'' + sk.replace(/'/g,"\\'") + '\')">' + sk + '</button>';
+    }).join('') +
+    '</div>';
+  container.innerHTML = html;
+}
+
 var _SKILLS_DB = {
   design:{ label:'Design & Criação', subareas:{
     'id-visual':{ label:'Identidade Visual', skills:['Logotipo','Redesign de Marca','Manual de Marca','Paleta de Cores','Tipografia','Papelaria Corporativa','Embalagem','Rótulo','Assinatura Visual','Branding Estratégico'] },
@@ -19840,6 +20115,14 @@ window.dashSaveProfile = function() {
     } catch(e) {}
   }
 
+  /* Persist selected subareas + skills to profile_meta */
+  try {
+    var pm = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}');
+    pm.selected_subareas = _selectedSubareas.slice();
+    pm.skills = _selectedSkills.slice();
+    localStorage.setItem('hw_profile_meta', JSON.stringify(pm));
+  } catch(e) {}
+
   /* Call original save */
   _origDashSaveProfile && _origDashSaveProfile.call(this);
 
@@ -19876,22 +20159,17 @@ _restoreSession = function() {
 var _origOpenDashSkills = window.openDashboard;
 window.openDashboard = function() {
   _origOpenDashSkills.call(this);
+  /* O accordion é inicializado via _initProfileExtended (chamado em openDashboard) */
+  /* Backward compat: se não houver _selectedSubareas, restaura do hw_session */
   setTimeout(function() {
     try {
       var s = JSON.parse(localStorage.getItem('hw_session') || '{}');
-      var areaEl = document.getElementById('profile-area');
-      var subEl  = document.getElementById('profile-subarea');
-      if(areaEl && s.area)    { areaEl.value = s.area; loadProfileSubareas(s.area); }
-      if(subEl  && s.subarea) {
-        setTimeout(function(){
-          subEl.value = s.subarea;
-          loadProfileSkillsList(s.area, s.subarea);
-          _selectedSkills = (s.skills || []).slice();
-          _renderSelectedSkills();
-        }, 150);
+      if (s.skills && _selectedSkills.length === 0) {
+        _selectedSkills = s.skills.slice();
+        if (typeof _renderSelectedSkills === 'function') _renderSelectedSkills();
       }
     } catch(e) {}
-  }, 400);
+  }, 500);
 };
 
 
