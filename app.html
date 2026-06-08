@@ -8147,14 +8147,16 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-proj-cat"></div>
       </div>
 
-      <!-- 1b. Especialidade (subcategoria — aparece após categoria selecionada) -->
+      <!-- 1b. Especialidades (subcategorias — aparecem após categoria selecionada) -->
       <div id="pub-subcat-section" style="display:none;margin-bottom:16px;">
-        <label class="form-label" style="margin-bottom:6px;">
-          Especialidade
-          <span style="font-size:11px;font-weight:400;color:var(--text-4);">&mdash; opcional, mas aumenta a qualidade das propostas</span>
+        <label class="form-label" style="margin-bottom:4px;">
+          Especialidades
+          <span style="font-size:11px;font-weight:400;color:var(--text-4);">&mdash; m&uacute;ltiplas permitidas &middot; aumentam a qualidade das propostas</span>
         </label>
+        <div style="font-size:11px;color:var(--text-4);margin-bottom:6px;">Clique para selecionar &mdash; clique novamente para remover</div>
         <div id="pub-subcat-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
-        <input type="hidden" id="proj-subcat">
+        <div id="pub-subcat-selected-hint" style="display:none;font-size:11px;color:var(--green);font-weight:600;margin-top:6px;"></div>
+        <input type="hidden" id="proj-subcat" value="[]">
       </div>
 
       <!-- 2. Título -->
@@ -11907,13 +11909,21 @@ function submitProject() {
   _setBtnLoading(btn, true);
 
   var subcatEl = document.getElementById('proj-subcat');
-  var subcat   = subcatEl ? subcatEl.value : '';
+  var subcats  = [];
+  try { subcats = JSON.parse(subcatEl ? subcatEl.value : '[]') || []; } catch(x) {
+    /* fallback: valor antigo pode ser string simples */
+    var raw = subcatEl ? subcatEl.value : '';
+    subcats = raw ? [raw] : [];
+  }
+  /* subcat_display: string legível para exibição nos cards */
+  var subcatDisplay = subcats.join(', ');
 
   var projData = {
     title:       t ? t.value.trim() : '',
     description: d ? d.value.trim() : '',
     category:    c ? c.value : '',
-    subcat:      subcat,
+    subcat:      subcatDisplay,
+    subcats:     subcats,
     budgetMin:   bMin,
     budgetMax:   bMax,
     deadline:    deadline,
@@ -14129,22 +14139,42 @@ function _realProjCard(p) {
   var catKey   = _catKeyFromLabel(catLabel);
   var bMin     = Number(p.budget_min || 0), bMax = Number(p.budget_max || 0);
   var budStr   = bMax ? ('R$ ' + Math.round(bMin).toLocaleString('pt-BR') + ' – ' + Math.round(bMax).toLocaleString('pt-BR')) : 'A combinar';
-  var typeLbl  = p.type === 'recorrente' ? 'Recorrente' : 'Preço Fixo';
+  var typeLbl  = p.type === 'recorrente' ? 'Recorrente' : p.type === 'hora' ? 'Por Hora' : 'Preço Fixo';
   var tagCls   = p.type === 'recorrente' ? 'tag-blue' : 'tag-green';
   var dlStr    = p.type === 'recorrente' ? 'Por mês' : (p.deadline_days ? ('Prazo: ' + p.deadline_days + ' dias') : '');
   var profile  = p.profiles || null;
   var props    = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
 
+  /* Especialidades: subcat pode ser string CSV (legado) ou JSON array */
+  var subcatArr = [];
+  if (p.subcat) {
+    try {
+      var parsed = JSON.parse(p.subcat);
+      subcatArr = Array.isArray(parsed) ? parsed : (p.subcat ? p.subcat.split(',') : []);
+    } catch(x) {
+      subcatArr = p.subcat.split(',').map(function(s){return s.trim();}).filter(Boolean);
+    }
+  }
+  var subcatChipsHtml = subcatArr.length
+    ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin:8px 0 4px;">' +
+        subcatArr.map(function(s){
+          return '<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">' + _sanitize(s) + '</span>';
+        }).join('') +
+      '</div>'
+    : '';
+
   return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-cat="' + _sanitize(catKey) +
-    '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) + '">' +
+    '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) +
+    '" data-subcat="' + _sanitize(subcatArr.join(',')) + '">' +
     '<div class="proj-list-header">' +
       '<div class="proj-list-left">' +
         '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">' +
           '<span class="proj-cat">' + _sanitize(catLabel) + '</span>' +
           '<span class="tag ' + tagCls + '">' + typeLbl + '</span>' +
-          '<span class="tag" style="background:#e8f5e9;color:var(--green);">✅ Publicado por usuário</span>' +
+          '<span class="tag" style="background:#e8f5e9;color:var(--green);">&#10003; Publicado por usu&aacute;rio</span>' +
         '</div>' +
         '<div class="proj-list-title">' + _sanitize(p.title) + '</div>' +
+        subcatChipsHtml +
       '</div>' +
       '<div class="proj-list-right">' +
         '<div class="proj-list-budget">' + budStr + '</div>' +
@@ -14308,10 +14338,20 @@ async function _refreshMyPublishedProjects() {
           _statusBadge('waiting', 'Aguardando propostas') +
         '</div>' +
         '<div class="dash-proj-meta">' +
-          '<span>💰 ' + budget + '</span>' +
-          '<span>📩 ' + proposals + ' proposta' + (proposals === 1 ? '' : 's') + ' recebida' + (proposals === 1 ? '' : 's') + '</span>' +
-          '<span>🕐 Publicado ' + _sanitize(_timeAgo(p.created_at)) + '</span>' +
+          '<span>&#128200; ' + budget + '</span>' +
+          '<span>&#128233; ' + proposals + ' proposta' + (proposals === 1 ? '' : 's') + ' recebida' + (proposals === 1 ? '' : 's') + '</span>' +
+          '<span>&#128336; Publicado ' + _sanitize(_timeAgo(p.created_at)) + '</span>' +
         '</div>' +
+        (function(){
+          /* Especialidades salvas: string CSV ou JSON */
+          var sArr = [];
+          if (p.subcat) {
+            try { var sp=JSON.parse(p.subcat); sArr=Array.isArray(sp)?sp:(p.subcat?p.subcat.split(',').map(function(x){return x.trim();}).filter(Boolean):[]); }
+            catch(x){ sArr=p.subcat.split(',').map(function(s){return s.trim();}).filter(Boolean); }
+          }
+          return sArr.length ? '<div style="display:flex;flex-wrap:wrap;gap:5px;margin:6px 0 2px;">' +
+            sArr.map(function(s){return '<span style="font-size:11px;font-weight:600;padding:2px 9px;border-radius:12px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">'+_sanitize(s)+'</span>';}).join('')+'</div>' : '';
+        })() +
         '<div class="dash-proj-desc">' + _sanitize(p.description) + '</div>' +
         _publisherChip(who, p.created_at) +
         '<div class="dash-proj-footer">' +
@@ -17346,14 +17386,16 @@ function pubInitModal() {
   var typeHid = document.getElementById('proj-type-val');
   if (typeHid) typeHid.value = 'fixo';
 
-  /* Oculta e limpa seção de subcategoria */
+  /* Oculta e limpa seção de subcategorias */
   var subSec = document.getElementById('pub-subcat-section');
   if (subSec) subSec.style.display = 'none';
   var subChips = document.getElementById('pub-subcat-chips');
   if (subChips) subChips.innerHTML = '';
   var subHid = document.getElementById('proj-subcat');
-  if (subHid) subHid.value = '';
-  window._pubSelectedSubcat = '';
+  if (subHid) subHid.value = '[]';
+  var subHint = document.getElementById('pub-subcat-selected-hint');
+  if (subHint) { subHint.style.display='none'; subHint.textContent=''; }
+  window._pubSelectedSubcats = [];
 
   /* Fecha painel avançado */
   var panel = document.getElementById('pub-advanced-panel');
@@ -17402,10 +17444,12 @@ function pubSelectCat(btn, key) {
   var err = document.getElementById('err-proj-cat');
   if (err) err.textContent = '';
 
-  /* Limpa subcat anterior */
-  window._pubSelectedSubcat = '';
+  /* Limpa especialidades anteriores ao trocar de categoria */
+  window._pubSelectedSubcats = [];
   var subHid = document.getElementById('proj-subcat');
-  if (subHid) subHid.value = '';
+  if (subHid) subHid.value = '[]';
+  var subHint2 = document.getElementById('pub-subcat-selected-hint');
+  if (subHint2) { subHint2.style.display='none'; subHint2.textContent=''; }
 
   /* Renderiza subcategorias a partir de _PDF_SUBAREAS (compartilhado com perfil) */
   var subSec   = document.getElementById('pub-subcat-section');
@@ -17428,20 +17472,37 @@ function pubSelectCat(btn, key) {
 }
 window.pubSelectCat = pubSelectCat;
 
-/* Seleciona/deseleciona uma subcategoria no modal de publicação */
+/* Seleciona/deseleciona uma ou mais especialidades no modal de publicação (multi-select) */
 function pubSelectSubcat(btn, subKey) {
-  var chips = document.querySelectorAll('#pub-subcat-chips .pub-subcat-chip');
-  var isActive = btn.classList.contains('active');
-  chips.forEach(function(c){ c.classList.remove('active'); });
+  /* Toggle do chip clicado */
+  btn.classList.toggle('active');
+
+  /* Coleta todas as subcats ativas → array */
+  var selected = [];
+  document.querySelectorAll('#pub-subcat-chips .pub-subcat-chip.active').forEach(function(c) {
+    var k = c.getAttribute('data-sub');
+    if (k) selected.push(k);
+  });
+  window._pubSelectedSubcats = selected;
+
+  /* Persiste como JSON no hidden input */
   var subHid = document.getElementById('proj-subcat');
-  if (isActive) {
-    /* Clicou novamente — deseleciona */
-    if (subHid) subHid.value = '';
-    window._pubSelectedSubcat = '';
-  } else {
-    btn.classList.add('active');
-    if (subHid) subHid.value = subKey;
-    window._pubSelectedSubcat = subKey;
+  if (subHid) subHid.value = JSON.stringify(selected);
+
+  /* Hint visual de seleção */
+  var hint = document.getElementById('pub-subcat-selected-hint');
+  if (hint) {
+    if (selected.length === 0) {
+      hint.style.display = 'none';
+      hint.textContent   = '';
+    } else {
+      hint.style.display = '';
+      var labels = [];
+      document.querySelectorAll('#pub-subcat-chips .pub-subcat-chip.active').forEach(function(c){
+        labels.push(c.textContent.trim());
+      });
+      hint.textContent = '✓ ' + selected.length + ' selecionada' + (selected.length > 1 ? 's' : '') + ': ' + labels.join(', ');
+    }
   }
 }
 window.pubSelectSubcat = pubSelectSubcat;
