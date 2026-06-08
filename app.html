@@ -5071,6 +5071,14 @@ section { padding: 64px 0; }
           <div style="flex-shrink:0;font-size:12px;font-weight:700;color:var(--green);" id="profile-completion-pct">0%</div>
         </div>
 
+        <!-- ══════ BLOCO FIXO: Informações Pessoais ══════ -->
+        <div style="border:1.5px solid var(--green);border-radius:var(--radius-lg);padding:16px 18px 4px;background:#f0fdf4;margin-bottom:16px;">
+          <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;">
+            <span style="font-size:14px;">📌</span>
+            <span style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;">Informações Pessoais</span>
+            <span style="font-size:10px;color:#4ade80;font-weight:500;background:#dcfce7;border:1px solid #bbf7d0;border-radius:20px;padding:1px 7px;margin-left:2px;">Sempre visível</span>
+          </div>
+
         <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div class="form-group">
             <label class="form-label" for="profile-name">Nome completo <span style="color:#ef4444;">*</span></label>
@@ -5234,6 +5242,8 @@ section { padding: 64px 0; }
             </optgroup>
           </select>
         </div>
+
+        </div><!-- /bloco-fixo informações pessoais -->
 
         <!-- ══════ CAMPOS EXCLUSIVOS FREELANCER ══════ -->
         <div id="profile-fl-fields">
@@ -5478,8 +5488,12 @@ section { padding: 64px 0; }
       </div>
 
       <!-- Alterar senha -->
-      <div class="profile-card">
-        <div class="dash-section-title" style="margin-bottom:16px;"><span>&#128274;</span> Alterar Senha</div>
+      <div class="profile-card" style="border:1.5px solid var(--green);background:#f0fdf4;">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:14px;">
+          <span style="font-size:14px;">&#128274;</span>
+          <span style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.6px;">Alterar Senha</span>
+          <span style="font-size:10px;color:#4ade80;font-weight:500;background:#dcfce7;border:1px solid #bbf7d0;border-radius:20px;padding:1px 7px;margin-left:2px;">Sempre visível</span>
+        </div>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
           <div class="form-group" style="margin-bottom:0;">
             <label class="form-label" for="pwd-current">Senha atual</label>
