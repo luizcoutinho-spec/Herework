@@ -9597,7 +9597,9 @@ async function _sbCreateTicket(data) {
 /* ── PROJETOS: Meus projetos ──────────────────────────────────── */
 async function _sbGetMyProjects() {
   if (!_sbReady() || !_session) return [];
-  var r = await _sb.from('projects').select('*, proposals(count)').eq('client_id', _session.uid).order('created_at', { ascending: false });
+  /* Exclui projetos marcados como 'cancelled' — usados como soft-delete
+     quando a policy RLS "projects_delete" ainda não foi aplicada. */
+  var r = await _sb.from('projects').select('*, proposals(count)').eq('client_id', _session.uid).neq('status', 'cancelled').order('created_at', { ascending: false });
   return r.data || [];
 }
 
@@ -9667,13 +9669,28 @@ async function _sbDeleteProject(id) {
     }
     /* ── Verificação pós-delete ─────────────────────────────────────────────
        Sem policy RLS "projects_delete" o Supabase retorna {error:null} mas
-       não apaga nada.  Consultar o banco confirma o resultado real. */
+       não apaga nada. Consultamos o banco para confirmar o resultado real. */
     var chk = await _sb.from('projects').select('id').eq('id', id).maybeSingle();
     if (!chk.error && chk.data) {
-      console.warn('_sbDeleteProject: projeto ainda existe após DELETE — policy RLS "projects_delete" ausente. Execute a migração em supabase_schema.sql no SQL Editor do Supabase.');
+      /* Hard delete bloqueado por RLS — tentar soft-delete via UPDATE.
+         A policy "projects_update" EXISTE e permite ao dono atualizar
+         o próprio projeto. status='cancelled' oculta o projeto do feed
+         e do painel sem exigir nenhuma migration adicional. */
+      console.info('_sbDeleteProject: hard delete bloqueado por RLS, tentando soft-delete (status=cancelled)…');
+      var sd = await _sb.from('projects').update({ status: 'cancelled' }).eq('id', id);
+      if (sd.error) {
+        console.warn('_sbDeleteProject soft-delete error:', sd.error.message || sd.error);
+        return false;
+      }
+      /* Verificar que o UPDATE foi aceito */
+      var sdChk = await _sb.from('projects').select('status').eq('id', id).maybeSingle();
+      if (!sdChk.error && sdChk.data && sdChk.data.status === 'cancelled') {
+        console.info('_sbDeleteProject: soft-delete OK — projeto marcado como cancelled e oculto da UI.');
+        return true; /* sucesso: projeto não aparece mais em nenhuma listagem */
+      }
       return false;
     }
-    return true;
+    return true; /* hard delete confirmado */
   } catch(e) {
     console.warn('_sbDeleteProject cascade fallback exception:', e);
     return false;
