@@ -377,3 +377,29 @@ $$;
 -- Garantir que apenas usuários autenticados possam chamar a função
 REVOKE ALL ON FUNCTION delete_project_cascade(UUID) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION delete_project_cascade(UUID) TO authenticated;
+
+-- ═══════════════════════════════════════════════════════════════
+-- MIGRAÇÃO — Perfil Dual (Cliente + Freelancer)
+--
+-- Permite que um único usuário atue como Cliente, Freelancer ou Ambos.
+-- Altera o CHECK constraint da coluna `type` da tabela `profiles`
+-- para aceitar o novo valor 'both'.
+--
+-- Execute no SQL Editor do Supabase. Seguro para rodar múltiplas vezes.
+-- Nenhum dado existente é afetado (usuários atuais permanecem 'client'
+-- ou 'freelancer' até atualizarem o perfil).
+-- ═══════════════════════════════════════════════════════════════
+
+-- 1. Remove o constraint antigo e recria aceitando 'both'
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_type_check;
+ALTER TABLE profiles ADD CONSTRAINT profiles_type_check
+  CHECK (type IN ('client', 'freelancer', 'both'));
+
+-- 2. Atualiza o DEFAULT (mantém 'client' como padrão)
+-- (o DEFAULT já é 'client', nenhuma alteração necessária)
+
+-- 3. Garante que a coluna aceita o novo valor
+-- (já garantido pelo constraint acima)
+
+-- Verificação opcional: retorna todos os tipos distintos existentes
+-- SELECT DISTINCT type FROM profiles;

@@ -2401,6 +2401,29 @@ section { padding: 64px 0; }
 .pub-skill-chip button:hover { color:#ef4444; }
 
 /* ═══════════════════════════════════════
+   TIPO DE CONTA — cards de seleção
+═══════════════════════════════════════ */
+.actype-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+}
+.actype-card {
+  border:2px solid var(--border); border-radius:var(--radius-md);
+  padding:14px 10px; cursor:pointer; transition:all .15s;
+  text-align:center; background:var(--surface); user-select:none;
+}
+.actype-card:hover  { border-color:var(--green); background:#f0fdf4; }
+.actype-card.active {
+  border-color:var(--green); background:#f0fdf4;
+  box-shadow:0 0 0 3px rgba(34,197,94,.15);
+}
+.actype-icon  { font-size:22px; margin-bottom:5px; }
+.actype-label { font-size:12px; font-weight:700; color:var(--text); line-height:1.3; }
+.actype-desc  { font-size:10px; color:var(--text-3); margin-top:3px; line-height:1.4; }
+@media(max-width:480px){
+  .actype-grid { grid-template-columns:1fr; }
+}
+
+/* ═══════════════════════════════════════
    CONTRATO + GARANTIA — MODAL
 ═══════════════════════════════════════ */
 #overlay-contract .modal { max-width:560px; padding:0; overflow:hidden; }
@@ -4897,6 +4920,34 @@ section { padding: 64px 0; }
           <div style="margin-left:auto;">
             <div style="font-size:11px;color:var(--text-4);text-align:right;">Membro desde</div>
             <div style="font-size:13px;font-weight:600;color:var(--text);text-align:right;" id="dash-member-since">2025</div>
+          </div>
+        </div>
+
+        <!-- ── Tipo de Conta ── -->
+        <div style="margin:16px 0;padding:16px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);">
+          <div style="font-size:12px;font-weight:700;color:var(--text-2);margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+            &#128260; Tipo de Conta
+            <span style="font-size:11px;font-weight:400;color:var(--text-4);">— como voc&ecirc; quer usar a plataforma</span>
+          </div>
+          <div class="actype-grid" id="actype-grid-profile">
+            <div class="actype-card" id="actype-client" onclick="dashSetAccountType('client')">
+              <div class="actype-icon">&#127968;</div>
+              <div class="actype-label">Cliente</div>
+              <div class="actype-desc">Publicar projetos e contratar</div>
+            </div>
+            <div class="actype-card" id="actype-freelancer" onclick="dashSetAccountType('freelancer')">
+              <div class="actype-icon">&#129489;&#8205;&#128187;</div>
+              <div class="actype-label">Freelancer</div>
+              <div class="actype-desc">Enviar propostas e trabalhar</div>
+            </div>
+            <div class="actype-card" id="actype-both" onclick="dashSetAccountType('both')">
+              <div class="actype-icon">&#128260;</div>
+              <div class="actype-label">Cliente + Freelancer</div>
+              <div class="actype-desc">Fazer tudo &mdash; recomendado</div>
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-4);margin-top:8px;">
+            &#128161; Altere e clique em <strong>Salvar Altera&ccedil;&otilde;es</strong> para confirmar. A mudan&ccedil;a &eacute; instant&acirc;nea e pode ser revertida a qualquer momento.
           </div>
         </div>
 
@@ -7519,9 +7570,26 @@ section { padding: 64px 0; }
       <button class="modal-close" onclick="closeModal('register')">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;gap:10px;margin-bottom:18px;">
-        <button id="reg-type-client" class="btn btn-green btn-sm" style="flex:1;" onclick="setRegType('client',this)" data-pt="Sou Empresa / Cliente" data-es="Soy Empresa / Cliente">Sou Empresa / Cliente</button>
-        <button id="reg-type-fl" class="btn btn-outline btn-sm" style="flex:1;" onclick="setRegType('freelancer',this)" data-pt="Sou Freelancer" data-es="Soy Freelancer">Sou Freelancer</button>
+      <!-- Sele&ccedil;&atilde;o de tipo de conta -->
+      <div style="margin-bottom:18px;">
+        <div style="font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:8px;">Como voc&ecirc; quer usar a plataforma?</div>
+        <div class="actype-grid" id="reg-type-grid">
+          <div class="actype-card active" id="reg-type-client" onclick="setRegType('client')">
+            <div class="actype-icon">&#127968;</div>
+            <div class="actype-label">Cliente</div>
+            <div class="actype-desc">Publicar projetos e contratar freelancers</div>
+          </div>
+          <div class="actype-card" id="reg-type-fl" onclick="setRegType('freelancer')">
+            <div class="actype-icon">&#129489;&#8205;&#128187;</div>
+            <div class="actype-label">Freelancer</div>
+            <div class="actype-desc">Enviar propostas e oferecer servi&ccedil;os</div>
+          </div>
+          <div class="actype-card" id="reg-type-both" onclick="setRegType('both')">
+            <div class="actype-icon">&#128260;</div>
+            <div class="actype-label">Ambos</div>
+            <div class="actype-desc">Contratar e trabalhar como freelancer</div>
+          </div>
+        </div>
       </div>
       <div class="form-group">
         <label for="reg-name" class="form-label" data-pt="Nome completo" data-es="Nombre completo">Nome completo</label>
@@ -9648,7 +9716,7 @@ async function _sbGetDashStats() {
 /* ── PERFIL: Salvar ───────────────────────────────────────────── */
 async function _sbSaveProfile(data) {
   if (!_sbReady() || !_session) return false;
-  var r = await _sb.from('profiles').update({
+  var updatePayload = {
     name:        data.name,
     bio:         data.bio,
     city:        data.city,
@@ -9657,7 +9725,12 @@ async function _sbSaveProfile(data) {
     hourly_rate: data.hourlyRate,
     skills:      data.skills || [],
     updated_at:  new Date().toISOString()
-  }).eq('id', _session.uid);
+  };
+  /* Inclui type apenas quando fornecido e válido */
+  if (data.type && ['client','freelancer','both'].indexOf(data.type) !== -1) {
+    updatePayload.type = data.type;
+  }
+  var r = await _sb.from('profiles').update(updatePayload).eq('id', _session.uid);
   return !r.error;
 }
 
@@ -9847,6 +9920,118 @@ function showPage(name) {
   if (mnav) mnav.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
   closeMobileMenu();
+  /* Quando abre a página de freelancers, injeta perfis reais do Supabase */
+  if (name === 'freelancers' && _sbReady()) {
+    setTimeout(function(){ if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers(); }, 100);
+  }
+}
+
+/* ── Freelancers: busca perfis reais (type = freelancer | both) ── */
+async function _sbGetFreelancers() {
+  if (!_sbReady()) return [];
+  try {
+    var r = await _sb.from('profiles')
+      .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,plan')
+      .in('type', ['freelancer','both'])
+      .order('rating', { ascending: false })
+      .limit(20);
+    return r.data || [];
+  } catch(e) { return []; }
+}
+
+/* ── Gera iniciais (ex: "Luiz Coutinho" → "LC") ── */
+function _initials(name) {
+  if (!name) return '?';
+  var parts = name.trim().split(/\s+/);
+  return (parts[0].charAt(0) + (parts.length > 1 ? parts[parts.length-1].charAt(0) : '')).toUpperCase();
+}
+
+/* ── Cores de avatar baseadas no nome ── */
+var _AVATAR_COLORS = [
+  'linear-gradient(135deg,#2E7D32,#66BB6A)',
+  'linear-gradient(135deg,#1565C0,#42A5F5)',
+  'linear-gradient(135deg,#6A1B9A,#CE93D8)',
+  'linear-gradient(135deg,#E65100,#FFA726)',
+  'linear-gradient(135deg,#00695C,#4DB6AC)',
+  'linear-gradient(135deg,#C62828,#EF9A9A)',
+  'linear-gradient(135deg,#37474F,#90A4AE)'
+];
+function _avatarColor(name) {
+  var n = 0; for (var i=0;i<(name||'').length;i++) n += name.charCodeAt(i);
+  return _AVATAR_COLORS[n % _AVATAR_COLORS.length];
+}
+
+/* Categoria → data-cat mapeamento */
+var _CAT_MAP = {
+  web:'web', design:'design', administracao:'admin', advogados:'law',
+  atendimento:'support', educacao:'education', engenharia:'engineering',
+  escrita:'writing', fotografia:'photo', suporte:'admin',
+  traducao:'translation', vendas:'marketing'
+};
+
+/* ── Injeta perfis reais no topo da listagem ── */
+var _realFLRendered = false;
+function _renderRealFreelancers() {
+  var grid = document.getElementById('fl-list-grid');
+  if (!grid) return;
+  /* Remove cards reais anteriores para evitar duplicação */
+  grid.querySelectorAll('.fl-list-card[data-real="true"]').forEach(function(el){ el.parentNode.removeChild(el); });
+  _realFLRendered = false;
+
+  _sbGetFreelancers().then(function(profiles) {
+    if (!profiles || !profiles.length) return;
+    /* Cria um fragmento para inserir antes dos cards estáticos */
+    var first = grid.querySelector('.fl-list-card');
+    profiles.forEach(function(p) {
+      var card = document.createElement('div');
+      card.className = 'fl-list-card';
+      card.setAttribute('data-real','true');
+      var skills = p.skills || [];
+      var catKey = skills.length ? 'web' : 'outra';
+      card.setAttribute('data-cat', catKey);
+      card.setAttribute('data-rate', p.hourly_rate || 0);
+      card.setAttribute('data-rating', p.rating || 5.0);
+      card.setAttribute('data-verified','false');
+      card.setAttribute('data-top','false');
+      card.setAttribute('data-recs','0');
+      var initials = _initials(p.name);
+      var color    = _avatarColor(p.name);
+      var skillChips = skills.slice(0,5).map(function(s){ return '<span class="fl-skill">'+s+'</span>'; }).join('');
+      var location = [p.city, p.state].filter(Boolean).join(', ') || 'Brasil';
+      var rate = p.hourly_rate ? 'R$ ' + parseFloat(p.hourly_rate).toLocaleString('pt-BR') : 'A combinar';
+      var rateSmall = p.hourly_rate ? '<small>/hora</small>' : '';
+      var badge = p.type === 'both' ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;border-radius:20px;padding:2px 8px;font-weight:600;">Dual</span>' : '';
+      card.innerHTML = [
+        '<div class="fl-list-avatar" style="background:' + color + ';">' + initials + '</div>',
+        '<div class="fl-list-body">',
+          '<div class="fl-list-top">',
+            '<span class="fl-list-name">' + p.name + '</span>',
+            badge,
+          '</div>',
+          '<div class="fl-list-role">' + (p.bio ? p.bio.split('.')[0] + ' — ' + location : 'Freelancer — ' + location) + '</div>',
+          '<div class="fl-list-bio">' + (p.bio || '') + '</div>',
+          skillChips ? '<div class="fl-skills" style="margin-bottom:8px;">' + skillChips + '</div>' : '',
+          '<div class="fl-list-meta">',
+            '<span>⭐ ' + parseFloat(p.rating||5).toFixed(1) + ' (' + (p.rating_count||0) + ' avaliações)</span>',
+            '<span>📁 ' + (p.completed_jobs||0) + ' projetos</span>',
+          '</div>',
+        '</div>',
+        '<div class="fl-list-right">',
+          '<div class="fl-list-rate">' + rate + rateSmall + '</div>',
+          '<button class="btn btn-green btn-sm" onclick="openContractModal({name:\'' + p.name.replace(/'/g,"\\'") + '\',role:\'Freelancer\',value:0,project:\'Meu Projeto\',deadline:\'30 dias\'})">Contratar</button>',
+          '<button class="btn btn-outline btn-sm" onclick="openFreelancerProfile(\'' + (p.id||'') + '\')">Ver Perfil</button>',
+        '</div>'
+      ].join('');
+      /* Insere no topo do grid */
+      if (first) grid.insertBefore(card, first);
+      else grid.appendChild(card);
+    });
+    _realFLRendered = true;
+
+    /* Re-aplica filtros vigentes */
+    var filterSel = document.querySelector('#page-freelancers .sidebar select');
+    if (filterSel && filterSel.value) filterByCategory(filterSel);
+  });
 }
 
 /* ═══════════════════════════════════════════
@@ -10356,8 +10541,8 @@ function openModal(id) {
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
   }
-  if (id === 'publish' && _session && _session.type === 'freelancer') {
-    showToast('Apenas clientes podem publicar projetos.', 'warn');
+  if (id === 'publish' && _session && _session.type === 'freelancer' && !_isBoth()) {
+    showToast('Apenas clientes podem publicar projetos. Altere seu tipo de conta em "Meu Perfil" para também atuar como Cliente.', 'warn');
     return;
   }
   /* Proposta: qualquer usuário logado pode enviar */
@@ -10599,14 +10784,20 @@ function submitLogin() {
   }
 }
 
-var regType = 'client'; /* tipo selecionado no registro */
+var regType = 'client'; /* tipo selecionado no registro: 'client' | 'freelancer' | 'both' */
 function setRegType(type) {
   regType = type;
-  var cBtn = document.getElementById('reg-type-client');
-  var fBtn = document.getElementById('reg-type-fl');
-  if (cBtn) cBtn.className = type==='client'     ? 'btn btn-green btn-sm' : 'btn btn-outline btn-sm';
-  if (fBtn) fBtn.className = type==='freelancer'  ? 'btn btn-green btn-sm' : 'btn btn-outline btn-sm';
+  var map = { client:'client', freelancer:'fl', both:'both' };
+  ['client','fl','both'].forEach(function(k) {
+    var el = document.getElementById('reg-type-' + k);
+    if (el) el.classList.toggle('active', map[k] === undefined ? false :
+      (k === 'client' && type === 'client') ||
+      (k === 'fl'     && type === 'freelancer') ||
+      (k === 'both'   && type === 'both')
+    );
+  });
 }
+window.setRegType = setRegType;
 /* ─── Estado de sessão simulado ─── */
 var _session = null; // { name, email, type }
 
@@ -10636,6 +10827,16 @@ function _setSession(name, email, type, isAdmin) {
     if (avEl)   avEl.textContent   = name.charAt(0).toUpperCase();
   }
 }
+
+/* ── Helpers de tipo de conta ─────────────────────────────── *
+   _isFL()  → true se o usuário atua como Freelancer (freelancer ou both)
+   _isCL()  → true se o usuário atua como Cliente    (client ou both)
+   _isBoth()→ true se é perfil duplo
+ * ──────────────────────────────────────────────────────────── */
+function _isFL()   { return !!(_session && (_session.type === 'freelancer' || _session.type === 'both')); }
+function _isCL()   { return !_session || (_session.type !== 'freelancer'); }
+function _isBoth() { return !!(_session && _session.type === 'both'); }
+window._isFL = _isFL; window._isCL = _isCL; window._isBoth = _isBoth;
 
 /* ════════════════════════════════════════════════════════════
    SISTEMA DE PLANOS — HereWork
@@ -10822,7 +11023,7 @@ function _registerPlanUsage(resourceKey, amount) {
 
 /* ── Limite vigente para o usuário atual, conforme tipo + plano ── */
 function _getResourceLimit(resourceKey) {
-  var type  = (_session && _session.type === 'freelancer') ? 'freelancer' : 'client';
+  var type  = _isFL() ? 'freelancer' : 'client';
   var tier  = _getUserPlan();                                 /* 'free' | 'pro' | 'enterprise' */
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
   var plan  = table[tier] || table.free;
@@ -10831,7 +11032,7 @@ function _getResourceLimit(resourceKey) {
 
 /* ── Próximo plano disponível e seus benefícios (jornada de upgrade) ── */
 function _getNextPlanInfo() {
-  var type = (_session && _session.type === 'freelancer') ? 'freelancer' : 'client';
+  var type = _isFL() ? 'freelancer' : 'client';
   var tier = _getUserPlan();
   if (type === 'freelancer') {
     if (tier === 'free') return { key:'pro', name:'Premium', price:'R$ 49/mês', benefits:[
@@ -13785,6 +13986,25 @@ var _ADM_MIGRATIONS = [
       return 'unknown';
     },
     sql: "ALTER TABLE proposals ADD COLUMN IF NOT EXISTS attachments TEXT[] DEFAULT '{}';"
+  },
+  {
+    id: 'dual_profile_type',
+    name: 'Constraint: profiles.type aceita &quot;both&quot;',
+    icon: '🔄',
+    critical: false,
+    desc: 'Permite que um usuário seja Cliente + Freelancer ao mesmo tempo. Adiciona o valor <code>both</code> ao CHECK constraint da coluna <code>profiles.type</code>.',
+    check: async function() {
+      if (!_sbReady()) return 'unknown';
+      /* Tenta inserir um row com type='both' e faz rollback — forma segura de testar o constraint */
+      var pat = _admGetPAT();
+      if (pat) {
+        var r = await _admRunSql("SELECT 1 FROM information_schema.check_constraints WHERE constraint_name='profiles_type_check' AND check_clause LIKE '%both%'", pat);
+        if (r.ok) return (r.rows && r.rows.length > 0) ? 'applied' : 'missing';
+        return 'error';
+      }
+      return 'unknown';
+    },
+    sql: "ALTER TABLE profiles DROP CONSTRAINT IF EXISTS profiles_type_check;\nALTER TABLE profiles ADD CONSTRAINT profiles_type_check\n  CHECK (type IN ('client', 'freelancer', 'both'));"
   }
 ];
 
@@ -14684,7 +14904,8 @@ function openDashboard() {
   el = document.getElementById('dash-profile-avatar'); if(el) el.textContent = name.charAt(0).toUpperCase();
   el = document.getElementById('dash-profile-name');   if(el) el.textContent = name;
   el = document.getElementById('dash-profile-email');  if(el) el.textContent = email;
-  el = document.getElementById('dash-profile-type');   if(el) el.textContent = type === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
+  el = document.getElementById('dash-profile-type');
+  if(el) el.textContent = type === 'both' ? '🔄 Cliente + Freelancer' : type === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
   el = document.getElementById('dash-member-since');   if(el) el.textContent = new Date().getFullYear();
   el = document.getElementById('profile-name');        if(el) el.value = name;
   el = document.getElementById('profile-email');       if(el) el.value = email;
@@ -14704,6 +14925,9 @@ function openDashboard() {
      garantindo que permaneçam visíveis após recarregar a página ou novo login */
   if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
 
+  /* Inicializa o seletor de tipo de conta no painel de perfil */
+  if (typeof _initAcTypeUI === 'function') _initAcTypeUI();
+
   switchDashPanel('profile');
   showPage('dashboard');
 }
@@ -14714,7 +14938,7 @@ function openDashboardContracts() {
   /* Wait for render then switch to contracts tab */
   setTimeout(function() {
     switchDashPanel('contracts');
-    switchContractView(_session.type === 'freelancer' ? 'freelancer' : 'client');
+    switchContractView(_isFL() && !_isBoth() ? 'freelancer' : 'client');
   }, 100);
 }
 
@@ -14738,6 +14962,24 @@ function switchContractView(view) {
   });
 }
 
+/* ── Tipo de conta — seletor no painel de perfil ── */
+var _pendingAccountType = null; /* null = sem alteração pendente */
+
+function dashSetAccountType(type) {
+  _pendingAccountType = type;
+  ['client','freelancer','both'].forEach(function(t) {
+    var el = document.getElementById('actype-' + t);
+    if (el) el.classList.toggle('active', t === type);
+  });
+}
+window.dashSetAccountType = dashSetAccountType;
+
+function _initAcTypeUI() {
+  var cur = (_session && _session.type) || 'client';
+  _pendingAccountType = null; /* reseta o pending ao abrir */
+  dashSetAccountType(cur);
+}
+
 function dashSaveProfile() {
   var nameEl  = document.getElementById('profile-name');
   var emailEl = document.getElementById('profile-email');
@@ -14748,28 +14990,69 @@ function dashSaveProfile() {
     if(err){ err.textContent='Informe o nome completo (nome e sobrenome).'; err.classList.add('show'); } return;
   }
   _setBtnLoading(btn, true);
+
+  var newName  = nameEl.value.trim();
+  var newEmail = emailEl ? emailEl.value.trim() : (_session ? _session.email : '');
+  var stateEl  = document.getElementById('profile-state');
+  var cityEl   = document.getElementById('profile-city');
+  var newState = stateEl ? stateEl.value : '';
+  var newCity  = cityEl  ? cityEl.value  : '';
+  var newType  = _pendingAccountType || (_session ? _session.type : 'client');
+
+  var bioEl    = document.getElementById('profile-bio');
+  var phoneEl  = document.getElementById('profile-phone');
+  var titleEl  = document.getElementById('profile-title');
+  var urlEl    = document.getElementById('profile-url');
+
+  var profileData = {
+    name:      newName,
+    bio:       bioEl   ? bioEl.value.trim()   : '',
+    phone:     phoneEl ? phoneEl.value.trim() : '',
+    city:      newCity,
+    state:     newState,
+    type:      newType,
+    hourlyRate: null,
+    skills:    []
+  };
+
+  /* Salva no Supabase em background — não bloqueia o UX */
+  if (_sbReady() && _session && _session.uid) {
+    _sbSaveProfile(profileData).then(function(ok) {
+      if (!ok) console.warn('dashSaveProfile: Supabase update falhou silenciosamente');
+    });
+  }
+
   setTimeout(function() {
     _setBtnLoading(btn, false);
-    var newName  = nameEl.value.trim();
-    var newEmail = emailEl ? emailEl.value.trim() : (_session ? _session.email : '');
-    var stateEl  = document.getElementById('profile-state');
-    var newState = stateEl ? stateEl.value : '';
-    _setSession(newName, newEmail, _session ? _session.type : 'client');
-    /* Save extra fields in session */
+    _setSession(newName, newEmail, newType, _session ? _session.isAdmin : false);
+    /* Persiste campos extras */
     if (_session) {
       _session.state = newState;
+      _session.city  = newCity;
+      _pendingAccountType = null;
       try {
         var s = JSON.parse(localStorage.getItem('hw_session') || '{}');
-        s.state = newState;
+        s.state = newState; s.city = newCity;
         localStorage.setItem('hw_session', JSON.stringify(s));
       } catch(e) {}
     }
+    /* Atualiza badge de tipo */
+    var ptEl = document.getElementById('dash-profile-type');
+    if (ptEl) ptEl.textContent = newType === 'both' ? '🔄 Cliente + Freelancer' : newType === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
+
     var dn = document.getElementById('dash-user-name');      if(dn) dn.textContent = newName.split(' ')[0];
     var pa = document.getElementById('dash-profile-avatar'); if(pa) pa.textContent = newName.charAt(0).toUpperCase();
     var pn = document.getElementById('dash-profile-name');   if(pn) pn.textContent = newName;
     var na = document.getElementById('nav-user-name');       if(na) na.textContent = newName.split(' ')[0];
     var av = document.getElementById('nav-user-avatar');     if(av) av.textContent = newName.charAt(0).toUpperCase();
-    showToast('Perfil atualizado com sucesso!', 'success');
+
+    /* Feedback específico se mudou o tipo */
+    if (_pendingAccountType !== null && _pendingAccountType !== (_session ? _session.type : 'client')) {
+      var labels = { client:'Cliente', freelancer:'Freelancer', both:'Cliente + Freelancer' };
+      showToast('Perfil atualizado! Conta alterada para ' + (labels[newType] || newType) + '.', 'success');
+    } else {
+      showToast('Perfil atualizado com sucesso!', 'success');
+    }
   }, 700);
 }
 
