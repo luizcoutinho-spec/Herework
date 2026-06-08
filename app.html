@@ -2355,6 +2355,51 @@ section { padding: 64px 0; }
   border-radius: 50%; transition: all var(--transition);
 }
 .pdf-file-remove:hover { background: #fee2e2; color: #ef4444; }
+
+/* ═══════════════════════════════════════
+   PUBLICAR PROJETO — MODAL REDESENHADO
+═══════════════════════════════════════ */
+.pub-cat-grid { display:flex; flex-wrap:wrap; gap:7px; }
+.pub-cat-chip {
+  display:inline-flex; align-items:center; gap:5px; padding:7px 13px;
+  border:1.5px solid var(--border); border-radius:20px; cursor:pointer;
+  font-size:12px; font-weight:600; color:var(--text-2); background:var(--surface);
+  transition:all .15s; user-select:none; white-space:nowrap; line-height:1;
+}
+.pub-cat-chip:hover  { border-color:var(--green); color:var(--green); background:#f0fdf4; }
+.pub-cat-chip.active { border-color:var(--green); color:var(--green); background:#f0fdf4;
+                       box-shadow:0 0 0 3px rgba(34,197,94,.15); }
+.pub-seg-group {
+  display:inline-flex; border:1.5px solid var(--border);
+  border-radius:var(--radius); overflow:hidden;
+}
+.pub-seg-btn {
+  padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer;
+  border:none; border-right:1px solid var(--border);
+  background:var(--surface); color:var(--text-3); transition:all .15s;
+}
+.pub-seg-btn:last-child { border-right:none; }
+.pub-seg-btn:hover  { background:var(--bg); color:var(--text); }
+.pub-seg-btn.active { background:var(--green); color:#fff; border-color:var(--green); }
+.pub-quality-bar  { height:3px; border-radius:2px; background:var(--border-2); margin-top:5px; overflow:hidden; }
+.pub-quality-fill { height:100%; border-radius:2px; transition:width .35s, background .35s; width:0%; }
+.pub-advanced-toggle {
+  display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600;
+  color:var(--text-3); cursor:pointer; background:none; border:none; padding:8px 0;
+  transition:color .15s;
+}
+.pub-advanced-toggle:hover { color:var(--green); }
+.pub-skill-chip {
+  display:inline-flex; align-items:center; gap:5px; padding:4px 10px;
+  background:var(--bg); border:1.5px solid var(--border); border-radius:20px;
+  font-size:12px; font-weight:600; color:var(--text-2);
+}
+.pub-skill-chip button {
+  border:none; background:none; cursor:pointer; color:var(--text-4);
+  font-size:13px; line-height:1; padding:0; transition:color .15s;
+}
+.pub-skill-chip button:hover { color:#ef4444; }
+
 /* ═══════════════════════════════════════
    CONTRATO + GARANTIA — MODAL
 ═══════════════════════════════════════ */
@@ -7508,93 +7553,157 @@ section { padding: 64px 0; }
 
 <!-- MODAL: PUBLICAR PROJETO -->
 <div class="overlay" id="overlay-publish" onclick="if(event.target===this)closeModal('publish')">
-  <div class="modal modal-lg">
-    <div class="modal-header">
+  <div class="modal modal-lg" style="max-width:640px;">
+    <div class="modal-header" style="padding-bottom:12px;">
       <div>
-        <div class="modal-title" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</div>
-        <div class="modal-subtitle" data-pt="Descreva o que você precisa e receba propostas em minutos" data-es="Describe lo que necesitas y recibe propuestas en minutos">Descreva o que você precisa e receba propostas em minutos</div>
+        <div class="modal-title">Publicar Projeto</div>
+        <div class="modal-subtitle">Pronto em menos de 60&nbsp;segundos &middot; gratuito</div>
       </div>
-      <button class="modal-close" onclick="closeModal('publish')">✕</button>
+      <button class="modal-close" onclick="closeModal('publish')">&#x2715;</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="padding-top:6px;">
+
+      <!-- 1. Categoria — chips visuais (1 clique, sem dropdown) -->
+      <div class="form-group" style="margin-bottom:16px;">
+        <label class="form-label" style="margin-bottom:8px;">
+          Categoria <span style="color:#ef4444;">*</span>
+        </label>
+        <div class="pub-cat-grid" id="pub-cat-chips"><!-- renderizado por pubInitModal() --></div>
+        <input type="hidden" id="proj-cat">
+        <div class="form-error" id="err-proj-cat"></div>
+      </div>
+
+      <!-- 2. Título -->
       <div class="form-group">
-        <label for="proj-title" class="form-label" data-pt="Título do projeto" data-es="Título del proyecto">Título do projeto</label>
-        <input class="form-input" id="proj-title" type="text" data-placeholder-pt="Ex: Desenvolvimento de site institucional em React" data-placeholder-es="Ej: Desarrollo de sitio web institucional en React" placeholder="Ex: Desenvolvimento de site institucional em React">
-        <div class="form-error" id="err-proj-title"></div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label for="proj-cat" class="form-label" data-pt="Categoria" data-es="Categoría">Categoria</label>
-          <select class="form-select" id="proj-cat">
-            <option value="" data-pt="Selecione uma categoria" data-es="Seleccione una categor&iacute;a">Selecione uma categoria</option>
-            <option data-pt="Administra&ccedil;&atilde;o &amp; Contabilidade" data-es="Administraci&oacute;n &amp; Contabilidad">Administra&ccedil;&atilde;o &amp; Contabilidade</option>
-            <option data-pt="Advogados &amp; Leis" data-es="Abogados &amp; Leyes">Advogados &amp; Leis</option>
-            <option data-pt="Atendimento ao Consumidor" data-es="Atenci&oacute;n al Consumidor">Atendimento ao Consumidor</option>
-            <option data-pt="Design &amp; Cria&ccedil;&atilde;o" data-es="Dise&ntilde;o &amp; Creaci&oacute;n">Design &amp; Cria&ccedil;&atilde;o</option>
-            <option data-pt="Educa&ccedil;&atilde;o &amp; Consultoria" data-es="Educaci&oacute;n &amp; Consultor&iacute;a">Educa&ccedil;&atilde;o &amp; Consultoria</option>
-            <option data-pt="Engenharia &amp; Arquitetura" data-es="Ingenier&iacute;a &amp; Arquitectura">Engenharia &amp; Arquitetura</option>
-            <option data-pt="Escrita" data-es="Escritura">Escrita</option>
-            <option data-pt="Fotografia &amp; AudioVisual" data-es="Fotograf&iacute;a &amp; Audiovisual">Fotografia &amp; AudioVisual</option>
-            <option data-pt="Suporte Administrativo" data-es="Soporte Administrativo">Suporte Administrativo</option>
-            <option data-pt="Tradu&ccedil;&atilde;o" data-es="Traducci&oacute;n">Tradu&ccedil;&atilde;o</option>
-            <option data-pt="Vendas &amp; Marketing" data-es="Ventas &amp; Marketing">Vendas &amp; Marketing</option>
-            <option data-pt="Web, Mobile &amp; Software" data-es="Web, Mobile &amp; Software">Web, Mobile &amp; Software</option>
-            <option data-pt="Outra Categoria" data-es="Otra Categor&iacute;a">Outra Categoria</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="proj-budget" class="form-label" data-pt="Orçamento (R$)" data-es="Presupuesto (R$)">Orçamento (R$)</label>
-          <input class="form-input" id="proj-budget" type="text" data-placeholder-pt="Ex: 1.500 – 3.000" data-placeholder-es="Ej: 1.500 – 3.000" placeholder="Ex: 1.500 – 3.000">
-          <div class="form-error" id="err-proj-budget"></div>
+        <label for="proj-title" class="form-label">
+          T&iacute;tulo do projeto <span style="color:#ef4444;">*</span>
+        </label>
+        <input class="form-input" id="proj-title" type="text" maxlength="100"
+          placeholder="Ex: Desenvolvimento de e-commerce em React + WooCommerce"
+          oninput="pubUpdateTitle(this)">
+        <div style="display:flex;justify-content:space-between;margin-top:3px;">
+          <div class="form-error" id="err-proj-title" style="margin:0;"></div>
+          <span id="pub-title-count" style="font-size:11px;color:var(--text-4);">0/100</span>
         </div>
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label" data-pt="Tipo de contrato" data-es="Tipo de contrato" aria-label="Tipo de contrato">Tipo de contrato</label>
-          <select class="form-select">
-            <option data-pt="Preço fixo" data-es="Precio fijo">Preço fixo</option>
-            <option data-pt="Por hora" data-es="Por hora">Por hora</option>
-            <option data-pt="Recorrente" data-es="Recurrente">Recorrente</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label" data-pt="Prazo de entrega" data-es="Plazo de entrega" aria-label="Prazo de entrega">Prazo de entrega</label>
-          <select class="form-select">
-            <option data-pt="Até 7 dias" data-es="Hasta 7 días">Até 7 dias</option>
-            <option data-pt="Até 15 dias" data-es="Hasta 15 días">Até 15 dias</option>
-            <option data-pt="Até 30 dias" data-es="Hasta 30 días" selected>Até 30 dias</option>
-            <option data-pt="Mais de 30 dias" data-es="Más de 30 días">Mais de 30 dias</option>
-          </select>
-        </div>
-      </div>
+
+      <!-- 3. Descrição + indicador de qualidade -->
       <div class="form-group">
-        <label for="proj-desc" class="form-label" data-pt="Descrição detalhada" data-es="Descripción detallada">Descrição detalhada</label>
-        <textarea class="form-textarea" id="proj-desc" data-placeholder-pt="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." data-placeholder-es="Describe en detalle lo que necesitas, objetivos, referencias, entregables esperados..." placeholder="Descreva com detalhes o que você precisa, objetivos, referências, entregas esperadas..." style="min-height:130px;"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">
+          <label for="proj-desc" class="form-label" style="margin:0;">
+            Descri&ccedil;&atilde;o <span style="color:#ef4444;">*</span>
+          </label>
+          <span id="pub-desc-quality" style="font-size:11px;font-weight:700;color:var(--text-4);transition:color .3s;"></span>
+        </div>
+        <textarea class="form-textarea" id="proj-desc"
+          placeholder="Descreva o trabalho a ser feito, objetivos, entregas esperadas, refer&ecirc;ncias e qualquer restri&ccedil;&atilde;o t&eacute;cnica."
+          style="min-height:108px;" oninput="pubUpdateDesc(this)"></textarea>
+        <div class="pub-quality-bar">
+          <div class="pub-quality-fill" id="pub-desc-bar"></div>
+        </div>
         <div class="form-error" id="err-proj-desc"></div>
       </div>
-      <div class="form-group">
-        <label for="proj-pdf-drop-zone" class="form-label">Anexar Briefing / Documento em PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(opcional &middot; m&aacute;x. 10 MB)</span></label>
-        <div class="pdf-upload-area" id="proj-pdf-drop-zone" onclick="document.getElementById('proj-pdf-input').click()"
-          ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
-          <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected2(this)">
-          <div id="proj-pdf-placeholder">
-            <div class="pdf-upload-icon">&#128196;</div>
-            <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
-            <div class="pdf-upload-sub">Briefing, especifica&ccedil;&atilde;o t&eacute;cnica, wireframe &middot; somente .pdf &middot; m&aacute;x. 10 MB</div>
+
+      <!-- 4. Orçamento + Prazo + Tipo — grid 2 colunas -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
+
+        <!-- Orçamento -->
+        <div>
+          <label class="form-label" style="margin-bottom:6px;">
+            Or&ccedil;amento <span style="color:#ef4444;">*</span>
+          </label>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:12px;color:var(--text-3);white-space:nowrap;font-weight:600;">R$</span>
+            <input class="form-input" id="proj-budget-min" type="number" min="0" placeholder="M&iacute;n"
+              style="flex:1;padding:8px 10px;" oninput="pubSyncBudget()">
+            <span style="color:var(--text-4);font-weight:600;">&mdash;</span>
+            <input class="form-input" id="proj-budget-max" type="number" min="0" placeholder="M&aacute;x"
+              style="flex:1;padding:8px 10px;" oninput="pubSyncBudget()">
           </div>
+          <label style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;color:var(--text-3);cursor:pointer;">
+            <input type="checkbox" id="proj-budget-tbd" onchange="pubToggleBudgetTBD(this)">
+            A combinar
+          </label>
+          <input type="hidden" id="proj-budget">
+          <div class="form-error" id="err-proj-budget"></div>
         </div>
-        <div class="pdf-file-preview" id="proj-pdf-preview">
-          <span class="pdf-file-icon">&#128213;</span>
-          <div class="pdf-file-info">
-            <div class="pdf-file-name" id="proj-pdf-name">arquivo.pdf</div>
-            <div class="pdf-file-size" id="proj-pdf-size">0 KB</div>
+
+        <!-- Prazo + Tipo -->
+        <div>
+          <label class="form-label" style="margin-bottom:6px;">Prazo de entrega</label>
+          <div class="pub-seg-group" style="width:100%;">
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,7)">7d</button>
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,15)">15d</button>
+            <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectDeadline(this,30)">30d</button>
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectDeadline(this,60)">60d+</button>
           </div>
-          <button type="button" class="pdf-file-remove" onclick="pdfRemove2(event)" title="Remover">&#x2715;</button>
+          <input type="hidden" id="proj-deadline-days" value="30">
+
+          <label class="form-label" style="margin-bottom:6px;margin-top:12px;">Tipo de contrato</label>
+          <div class="pub-seg-group" style="width:100%;">
+            <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectType(this,'fixo')">Pre&ccedil;o Fixo</button>
+            <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectType(this,'recorrente')">Recorrente</button>
+          </div>
+          <input type="hidden" id="proj-type-val" value="fixo">
         </div>
-        <div class="form-error" id="err-proj-pdf"></div>
       </div>
-      <button class="btn btn-primary btn-block btn-lg" onclick="submitProject()" data-pt="🚀 Publicar Projeto Agora" data-es="🚀 Publicar Proyecto Ahora">🚀 Publicar Projeto Agora</button>
-      <div class="modal-switch-link" style="font-size:12px;color:var(--text-3);margin-top:10px;" data-pt="Publicação gratuita · Receba propostas em minutos · Pagamento seguro via Garantia" data-es="Publicación gratuita · Recibe propuestas en minutos · Pago seguro vía escrow">Publicação gratuita · Receba propostas em minutos · Pagamento seguro via Garantia</div>
+
+      <!-- 5. Detalhes opcionais (colapsável) -->
+      <div style="border-top:1px solid var(--border-2);padding-top:10px;margin-bottom:16px;">
+        <button class="pub-advanced-toggle" onclick="pubToggleAdvanced()" type="button">
+          <span id="pub-adv-arrow" style="font-size:10px;">&#9654;</span>
+          Adicionar habilidades desejadas ou anexar PDF
+        </button>
+        <div id="pub-advanced-panel" style="display:none;padding-top:12px;">
+
+          <!-- Skills chips -->
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom:5px;">
+              Habilidades desejadas
+              <span style="font-size:11px;font-weight:400;color:var(--text-4);">(opcional &middot; m&aacute;x. 8 &middot; tecle Enter)</span>
+            </label>
+            <input class="form-input" id="proj-skills-input" type="text"
+              placeholder="Ex: React, Figma, Node.js &mdash; pressione Enter para adicionar"
+              onkeydown="pubAddSkill(event)">
+            <div id="pub-skills-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:0;"></div>
+          </div>
+
+          <!-- PDF briefing -->
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom:5px;">
+              Briefing em PDF
+              <span style="font-size:11px;font-weight:400;color:var(--text-4);">(opcional &middot; m&aacute;x. 10 MB)</span>
+            </label>
+            <div class="pdf-upload-area" id="proj-pdf-drop-zone"
+              onclick="document.getElementById('proj-pdf-input').click()"
+              ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
+              <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected2(this)">
+              <div id="proj-pdf-placeholder">
+                <div class="pdf-upload-icon">&#128196;</div>
+                <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
+                <div class="pdf-upload-sub">Especifica&ccedil;&atilde;o t&eacute;cnica, wireframe, briefing &middot; somente .pdf &middot; m&aacute;x. 10 MB</div>
+              </div>
+            </div>
+            <div class="pdf-file-preview" id="proj-pdf-preview">
+              <span class="pdf-file-icon">&#128213;</span>
+              <div class="pdf-file-info">
+                <div class="pdf-file-name" id="proj-pdf-name">arquivo.pdf</div>
+                <div class="pdf-file-size" id="proj-pdf-size">0 KB</div>
+              </div>
+              <button type="button" class="pdf-file-remove" onclick="pdfRemove2(event)" title="Remover">&#x2715;</button>
+            </div>
+            <div class="form-error" id="err-proj-pdf"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <button class="btn btn-primary btn-block btn-lg" onclick="submitProject()">
+        &#128640; Publicar Projeto Agora
+      </button>
+      <div style="text-align:center;font-size:12px;color:var(--text-4);margin-top:10px;line-height:1.6;">
+        &#10003; Publica&ccedil;&atilde;o gratuita &nbsp;&middot;&nbsp; &#9889; Propostas em minutos &nbsp;&middot;&nbsp; &#128274; Pagamento seguro via Garantia
+      </div>
     </div>
   </div>
 </div>
@@ -11025,36 +11134,64 @@ function submitProject() {
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
   }
-  /* Validação de limite do plano em tempo real — antes de executar a ação */
+  /* Validação de limite do plano em tempo real */
   if (!_checkPlanLimit('projects_month')) { closeModal('publish'); return; }
-  var t   = document.getElementById('proj-title');
-  var d   = document.getElementById('proj-desc');
-  var c   = document.getElementById('proj-cat');
-  var b   = document.getElementById('proj-budget');
-  var btn = document.querySelector('#overlay-publish .btn-primary');
-  var ok  = _vField(t,'err-proj-title',  lang()==='pt'?'Título obrigatório':'Título obligatorio')
-          & _vField(d,'err-proj-desc',   lang()==='pt'?'Descrição obrigatória':'Descripción obligatoria')
-          & _vField(b,'err-proj-budget', lang()==='pt'?'Informe o orçamento':'Ingresa el presupuesto');
-  if (c && !c.value) { c.classList.add('error'); ok = false; } else if (c) c.classList.remove('error');
+
+  var t    = document.getElementById('proj-title');
+  var d    = document.getElementById('proj-desc');
+  var c    = document.getElementById('proj-cat');
+  var btn  = document.querySelector('#overlay-publish .btn-primary');
+
+  /* Lê orçamento do novo modal (min/max + A combinar) */
+  var tbd     = document.getElementById('proj-budget-tbd');
+  var bMinEl  = document.getElementById('proj-budget-min');
+  var bMaxEl  = document.getElementById('proj-budget-max');
+  var errBEl  = document.getElementById('err-proj-budget');
+  var isTBD   = tbd && tbd.checked;
+  var bMin    = isTBD ? 0 : (parseFloat((bMinEl||{}).value||'0') || 0);
+  var bMax    = isTBD ? 0 : (parseFloat((bMaxEl||{}).value||'0') || 0);
+
+  var deadline = parseInt(((document.getElementById('proj-deadline-days')||{}).value)||'30', 10) || 30;
+  var type     = ((document.getElementById('proj-type-val')||{}).value) || 'fixo';
+  var skills   = window._pubSelectedSkills || [];
+
+  /* Validação */
+  var ok = true;
+  ok = _vField(t,'err-proj-title','Título obrigatório') & ok;
+  ok = _vField(d,'err-proj-desc','Descrição obrigatória') & ok;
+
+  /* Categoria — hidden input preenchido pelos chips */
+  var catErr = document.getElementById('err-proj-cat');
+  if (!c || !c.value) {
+    if (catErr) catErr.textContent = 'Selecione uma categoria';
+    ok = false;
+  } else {
+    if (catErr) catErr.textContent = '';
+  }
+
+  /* Orçamento — obrigatório, exceto A combinar */
+  if (!isTBD && bMax === 0 && bMin === 0) {
+    if (errBEl) errBEl.textContent = 'Informe o orçamento ou marque "A combinar"';
+    ok = false;
+  } else {
+    if (errBEl) errBEl.textContent = '';
+  }
+
   if (!ok) return;
   _setBtnLoading(btn, true);
 
-  var budgetStr = b ? b.value.replace(/[R$\s.]/g,'').replace(',','.') : '0';
-  var budgetNum = parseFloat(budgetStr) || 0;
   var projData = {
     title:       t ? t.value.trim() : '',
     description: d ? d.value.trim() : '',
     category:    c ? c.value : '',
-    budgetMin:   budgetNum * 0.8,
-    budgetMax:   budgetNum,
-    deadline:    30,
-    type:        'fixo',
-    skills:      []
+    budgetMin:   bMin,
+    budgetMax:   bMax,
+    deadline:    deadline,
+    type:        type,
+    skills:      skills
   };
 
   if (_sbReady()) {
-    /* Confirmar sessão Supabase ativa antes de tentar publicar — evita o
-       erro genérico quando o token expirou ou a sessão local está dessincronizada */
     _sbEnsureSession().then(function(user) {
       if (!user) {
         _setBtnLoading(btn, false);
@@ -11068,11 +11205,8 @@ function submitProject() {
         _setBtnLoading(btn, false);
         if (!proj) { showToast('Erro ao publicar projeto. Tente novamente.','error'); return; }
         closeModal('publish');
-        if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
         showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
-        /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
         _registerPlanUsage('projects_month');
-        /* Exibir imediatamente em "Projetos Ativos" e em "Meu Perfil → Meus Projetos Publicados" */
         if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
       }).catch(function(err) {
         _setBtnLoading(btn, false);
@@ -11085,9 +11219,7 @@ function submitProject() {
     setTimeout(function(){
       _setBtnLoading(btn, false);
       closeModal('publish');
-      if (t) t.value = ''; if (d) d.value = ''; if (b) b.value = '';
       showToast('🚀 Projeto publicado com sucesso! (modo demo)','success');
-      /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
       _registerPlanUsage('projects_month');
     }, 900);
   }
@@ -15819,11 +15951,230 @@ function _requireAuth(message, afterLoginFn) {
 }
 window._requireAuth = _requireAuth;
 
+/* ═══════════════════════════════════════════════════════════════
+   PUBLICAR PROJETO — Modal redesenhado
+   ═══════════════════════════════════════════════════════════════ */
+window._PUB_CATS = [
+  { key:'administracao', label:'Administração &amp; Contabilidade', icon:'📊' },
+  { key:'advogados',     label:'Advogados &amp; Leis',              icon:'⚖️' },
+  { key:'atendimento',   label:'Atendimento ao Consumidor',         icon:'🎧' },
+  { key:'design',        label:'Design &amp; Criação',              icon:'🎨' },
+  { key:'educacao',      label:'Educação &amp; Consultoria',        icon:'📚' },
+  { key:'engenharia',    label:'Engenharia &amp; Arquitetura',      icon:'🏗️' },
+  { key:'escrita',       label:'Escrita',                           icon:'✍️' },
+  { key:'fotografia',    label:'Fotografia &amp; AudioVisual',      icon:'📸' },
+  { key:'suporte',       label:'Suporte Administrativo',            icon:'🗂️' },
+  { key:'traducao',      label:'Tradução',                          icon:'🌐' },
+  { key:'vendas',        label:'Vendas &amp; Marketing',            icon:'📣' },
+  { key:'web',           label:'Web, Mobile &amp; Software',        icon:'💻' },
+  { key:'outra',         label:'Outra Categoria',                   icon:'📦' }
+];
+window._pubSelectedSkills = [];
+
+function pubInitModal() {
+  /* Limpa campos */
+  ['proj-title','proj-desc','proj-skills-input'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  ['proj-budget-min','proj-budget-max','proj-budget'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.value = '';
+  });
+  var tbd = document.getElementById('proj-budget-tbd');
+  if (tbd) { tbd.checked = false; }
+  var bMin = document.getElementById('proj-budget-min');
+  var bMax = document.getElementById('proj-budget-max');
+  if (bMin) bMin.disabled = false;
+  if (bMax) bMax.disabled = false;
+  var hidCat = document.getElementById('proj-cat');
+  if (hidCat) hidCat.value = '';
+  var ddEl = document.getElementById('proj-deadline-days');
+  if (ddEl) ddEl.value = '30';
+  var typeEl = document.getElementById('proj-type-val');
+  if (typeEl) typeEl.value = 'fixo';
+  window._pubSelectedSkills = [];
+
+  /* Reseta contadores e indicadores */
+  var tc = document.getElementById('pub-title-count');
+  if (tc) tc.textContent = '0/100';
+  var bar = document.getElementById('pub-desc-bar');
+  if (bar) { bar.style.width='0%'; bar.style.background=''; }
+  var ql = document.getElementById('pub-desc-quality');
+  if (ql) { ql.textContent=''; ql.style.color=''; }
+
+  /* Reseta botões segmentados — deadline: ativo=30d */
+  document.querySelectorAll('#overlay-publish .pub-seg-btn').forEach(function(b){
+    b.classList.remove('active');
+  });
+  var dlBtns = document.querySelectorAll('#pub-deadline-group .pub-seg-btn');
+  dlBtns.forEach(function(b){ if ((b.textContent||'').trim()==='30d') b.classList.add('active'); });
+  var typeBtns = document.querySelectorAll('#overlay-publish .pub-seg-group:not(#pub-deadline-group) .pub-seg-btn');
+  if (typeBtns.length) typeBtns[0].classList.add('active');
+
+  /* Fecha painel avançado */
+  var panel = document.getElementById('pub-advanced-panel');
+  if (panel) panel.style.display='none';
+  var arrow = document.getElementById('pub-adv-arrow');
+  if (arrow) arrow.textContent='▶';
+
+  /* Limpa chips de skills */
+  var sc = document.getElementById('pub-skills-chips');
+  if (sc) sc.innerHTML='';
+
+  /* Limpa PDF preview */
+  var prev = document.getElementById('proj-pdf-preview');
+  if (prev) prev.style.display='none';
+  var placeholder = document.getElementById('proj-pdf-placeholder');
+  if (placeholder) placeholder.style.display='';
+  window._projPdfFile = null;
+
+  /* Limpa erros */
+  ['err-proj-cat','err-proj-title','err-proj-desc','err-proj-budget','err-proj-pdf'].forEach(function(id){
+    var el = document.getElementById(id); if (el) el.textContent='';
+  });
+
+  /* Renderiza chips de categoria */
+  var grid = document.getElementById('pub-cat-chips');
+  if (!grid) return;
+  grid.innerHTML = '';
+  window._PUB_CATS.forEach(function(cat) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'pub-cat-chip';
+    btn.innerHTML = '<span style="font-size:14px;">' + cat.icon + '</span><span>' + cat.label + '</span>';
+    btn.onclick = function(){ pubSelectCat(btn, cat.key, cat.label); };
+    grid.appendChild(btn);
+  });
+}
+window.pubInitModal = pubInitModal;
+
+function pubSelectCat(btn, key) {
+  /* Desativa todos os chips, ativa o clicado */
+  var chips = document.querySelectorAll('#pub-cat-chips .pub-cat-chip');
+  chips.forEach(function(c){ c.classList.remove('active'); });
+  btn.classList.add('active');
+  var hid = document.getElementById('proj-cat');
+  if (hid) hid.value = key;
+  var err = document.getElementById('err-proj-cat');
+  if (err) err.textContent = '';
+}
+window.pubSelectCat = pubSelectCat;
+
+function pubUpdateTitle(inp) {
+  var len = inp.value.length;
+  var counter = document.getElementById('pub-title-count');
+  if (counter) counter.textContent = len + '/100';
+}
+window.pubUpdateTitle = pubUpdateTitle;
+
+function pubUpdateDesc(inp) {
+  var len = inp.value.trim().length;
+  var bar = document.getElementById('pub-desc-bar');
+  var lbl = document.getElementById('pub-desc-quality');
+  var pct, color, text;
+  if (len === 0)        { pct=0;   color='#e5e7eb'; text=''; }
+  else if (len < 80)    { pct=20;  color='#ef4444'; text='Muito curta'; }
+  else if (len < 150)   { pct=45;  color='#f97316'; text='Regular'; }
+  else if (len < 300)   { pct=70;  color='#eab308'; text='Boa'; }
+  else if (len < 500)   { pct=88;  color='#22c55e'; text='Ótima'; }
+  else                  { pct=100; color='#16a34a'; text='Excelente ✓'; }
+  if (bar) { bar.style.width = pct + '%'; bar.style.background = color; }
+  if (lbl) { lbl.textContent = text; lbl.style.color = color; }
+}
+window.pubUpdateDesc = pubUpdateDesc;
+
+function pubSelectDeadline(btn, days) {
+  var group = document.getElementById('pub-deadline-group');
+  if (group) group.querySelectorAll('.pub-seg-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var hid = document.getElementById('proj-deadline-days');
+  if (hid) hid.value = days;
+}
+window.pubSelectDeadline = pubSelectDeadline;
+
+function pubSelectType(btn, type) {
+  /* Encontra o grupo pai e desativa todos os botões irmãos */
+  var group = btn.closest ? btn.closest('.pub-seg-group') : btn.parentElement;
+  if (group) group.querySelectorAll('.pub-seg-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  var hid = document.getElementById('proj-type-val');
+  if (hid) hid.value = type;
+}
+window.pubSelectType = pubSelectType;
+
+function pubSyncBudget() {
+  var bMax = document.getElementById('proj-budget-max');
+  var hid  = document.getElementById('proj-budget');
+  if (hid && bMax) hid.value = bMax.value;
+  var err = document.getElementById('err-proj-budget');
+  if (err) err.textContent = '';
+}
+window.pubSyncBudget = pubSyncBudget;
+
+function pubToggleBudgetTBD(cb) {
+  var bMin = document.getElementById('proj-budget-min');
+  var bMax = document.getElementById('proj-budget-max');
+  var hid  = document.getElementById('proj-budget');
+  if (cb.checked) {
+    if (bMin) { bMin.disabled=true; bMin.value=''; }
+    if (bMax) { bMax.disabled=true; bMax.value=''; }
+    if (hid)  hid.value = '0';
+    var err = document.getElementById('err-proj-budget');
+    if (err) err.textContent = '';
+  } else {
+    if (bMin) bMin.disabled=false;
+    if (bMax) bMax.disabled=false;
+    if (hid)  hid.value = '';
+  }
+}
+window.pubToggleBudgetTBD = pubToggleBudgetTBD;
+
+function pubToggleAdvanced() {
+  var panel = document.getElementById('pub-advanced-panel');
+  var arrow = document.getElementById('pub-adv-arrow');
+  if (!panel) return;
+  var open = panel.style.display !== 'none';
+  panel.style.display = open ? 'none' : 'block';
+  if (arrow) arrow.textContent = open ? '▶' : '▼';
+}
+window.pubToggleAdvanced = pubToggleAdvanced;
+
+function pubAddSkill(e) {
+  if (e.key !== 'Enter' && e.key !== ',') return;
+  e.preventDefault();
+  var inp = document.getElementById('proj-skills-input');
+  if (!inp) return;
+  var val = inp.value.replace(',','').trim();
+  if (!val) return;
+  if (window._pubSelectedSkills.length >= 8) {
+    showToast('Máximo de 8 habilidades atingido.','warn'); inp.value=''; return;
+  }
+  if (window._pubSelectedSkills.indexOf(val) !== -1) { inp.value=''; return; }
+  window._pubSelectedSkills.push(val);
+  var container = document.getElementById('pub-skills-chips');
+  if (container) {
+    var chip = document.createElement('span');
+    chip.className = 'pub-skill-chip';
+    chip.innerHTML = '<span>' + val + '</span><button type="button" onclick="pubRemoveSkill(this,\'' + val.replace(/'/g,"\\'") + '\')" title="Remover">✕</button>';
+    container.appendChild(chip);
+  }
+  inp.value = '';
+}
+window.pubAddSkill = pubAddSkill;
+
+function pubRemoveSkill(btn, val) {
+  var idx = window._pubSelectedSkills.indexOf(val);
+  if (idx !== -1) window._pubSelectedSkills.splice(idx,1);
+  var chip = btn.closest ? btn.closest('.pub-skill-chip') : btn.parentElement;
+  if (chip) chip.parentNode.removeChild(chip);
+}
+window.pubRemoveSkill = pubRemoveSkill;
+
 /* Ponto de entrada para "Publicar Projeto" — substitui os inline guards
    espalhados pelos botões; centraliza a validação e a mensagem correta. */
 function _guardedPublishModal() {
   if (!_requireAuth('Você precisa estar logado para publicar um projeto.')) return;
   openModal('publish');
+  setTimeout(function(){ if (typeof pubInitModal === 'function') pubInitModal(); }, 50);
 }
 window._guardedPublishModal = _guardedPublishModal;
 
