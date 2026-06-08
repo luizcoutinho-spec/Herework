@@ -7366,6 +7366,53 @@ section { padding: 64px 0; }
       </div>
     </div>
 
+    <!-- ─────────────────────────────────────────────────────────
+         BANCO DE DADOS — MIGRAÇÕES
+    ───────────────────────────────────────────────────────── -->
+    <div class="admin-section-title" style="margin-top:8px;"><span>🗄️</span> Banco de Dados &mdash; Migra&ccedil;&otilde;es</div>
+
+    <!-- Config: Personal Access Token -->
+    <div class="admin-panel" style="margin-bottom:14px;padding:16px 18px;">
+      <div style="display:flex;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:240px;">
+          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;">🔑 Personal Access Token (Supabase)</div>
+          <div style="font-size:11px;color:var(--text-3);margin-bottom:8px;">Necess&aacute;rio para verificar status e executar migrations. Obtenha em <strong>app.supabase.com/account/tokens</strong>. Salvo apenas nesta sess&atilde;o.</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <input type="password" id="adm-mig-pat"
+              placeholder="sbp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:monospace;background:var(--bg);color:var(--text);"
+              oninput="_admSavePAT(this.value)">
+            <button class="adm-mini-btn danger" onclick="_admClearPAT()">Limpar</button>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;padding-top:20px;">
+          <button class="adm-mini-btn primary" onclick="_admCheckAllMigrations()">&#9654; Verificar todas</button>
+          <a id="adm-supabase-sql-link" href="https://app.supabase.com/project/_/sql/new"
+             target="_blank" class="adm-mini-btn" style="text-decoration:none;text-align:center;">&#128279; Abrir SQL Editor</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards de migration -->
+    <div id="adm-mig-list" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;"></div>
+
+    <!-- Console SQL customizado -->
+    <div class="admin-section-title" style="margin-top:6px;"><span>💻</span> Console SQL</div>
+    <div class="admin-panel" style="padding:0;overflow:hidden;margin-bottom:32px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--border-2);background:var(--bg);">
+        <span style="font-size:12px;color:var(--text-3);">Requer Personal Access Token configurado acima.</span>
+        <div style="display:flex;gap:6px;">
+          <button class="adm-mini-btn" onclick="document.getElementById('adm-sql-console').value='';document.getElementById('adm-sql-result').style.display='none';">Limpar</button>
+          <button class="adm-mini-btn primary" onclick="_admRunCustomSql()">&#9654; Executar</button>
+        </div>
+      </div>
+      <textarea id="adm-sql-console"
+        placeholder="-- Cole aqui qualquer SQL para executar no banco&#10;-- Ex.: SELECT * FROM projects LIMIT 5;"
+        style="width:100%;height:140px;padding:14px 16px;border:none;outline:none;font-family:monospace;font-size:12px;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;border-bottom:1px solid var(--border-2);"></textarea>
+      <div id="adm-sql-result"
+        style="display:none;padding:12px 16px;font-family:monospace;font-size:11px;background:var(--bg);overflow-x:auto;max-height:220px;overflow-y:auto;"></div>
+    </div>
+
   </div><!-- /admin-wrap -->
 
 
@@ -12445,7 +12492,10 @@ function _quickHash(s) {
 function showAdminPage() {
   if (_adminAuth) {
     showPage('admin');
-    setTimeout(function(){ initAdminContracts(); }, 50);
+    setTimeout(function(){
+      initAdminContracts();
+      if (typeof _admInitMigPanel === 'function') _admInitMigPanel();
+    }, 50);
   } else {
     openModal('admin-login');
     setTimeout(function() {
@@ -13487,6 +13537,297 @@ window._refreshMyPublishedProjects = _refreshMyPublishedProjects;
    que resolvem identificadores pelo objeto window (escopo global). */
 window._deletePublishedProject     = _deletePublishedProject;
 window._canDeleteProject           = _canDeleteProject;
+
+/* ══════════════════════════════════════════════════════════════════
+   ADMIN: MIGRATION MANAGER
+   Painel de migrações do banco de dados no Admin do Herework.
+   Permite verificar status, copiar SQL e executar via
+   Supabase Management API (requer Personal Access Token).
+══════════════════════════════════════════════════════════════════ */
+
+var _ADM_MIGRATIONS = [
+  {
+    id: 'projects_delete',
+    name: 'RLS: projects_delete',
+    icon: '🗑️',
+    critical: true,
+    desc: 'Permite que o autor exclua seu projeto. <strong>SEM ESTA POLICY o botão "Excluir" falha silenciosamente</strong> (Supabase retorna {error:null} mas não apaga nada).',
+    check: async function() {
+      var pat = _admGetPAT();
+      if (pat) {
+        var r = await _admRunSql("SELECT 1 FROM pg_policies WHERE tablename='projects' AND policyname='projects_delete'", pat);
+        if (r.ok) return (r.rows && r.rows.length > 0) ? 'applied' : 'missing';
+        return 'error';
+      }
+      return 'unknown';
+    },
+    sql: 'DROP POLICY IF EXISTS "projects_delete" ON projects;\nCREATE POLICY "projects_delete" ON projects FOR DELETE USING (\n  auth.uid() = client_id\n  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)\n);'
+  },
+  {
+    id: 'delete_cascade_rpc',
+    name: 'RPC: delete_project_cascade',
+    icon: '⚙️',
+    critical: true,
+    desc: 'Função SECURITY DEFINER que exclui mensagens → contratos → propostas → projeto em uma única transação segura, sem depender de policies individuais.',
+    check: async function() {
+      if (!_sbReady()) return 'unknown';
+      /* Chamar com UUID inválido — se existir, retorna {ok:false, error:'project_not_found'}.
+         Se não existir, Supabase retorna PGRST202. */
+      var r = await _sb.rpc('delete_project_cascade', { p_project_id: '00000000-0000-0000-0000-000000000000' });
+      if (!r.error) return 'applied';
+      var code = String(r.error.code  || '').toUpperCase();
+      var msg  = String(r.error.message || '').toLowerCase();
+      if (code === 'PGRST202' || msg.includes('could not find') || msg.includes('does not exist')) return 'missing';
+      /* Qualquer outro erro significa que a função existe e respondeu */
+      return 'applied';
+    },
+    sql: 'DROP FUNCTION IF EXISTS delete_project_cascade(UUID);\nCREATE OR REPLACE FUNCTION delete_project_cascade(p_project_id UUID)\nRETURNS JSONB LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$\nDECLARE\n  v_client_id UUID;\n  v_contract_ids UUID[];\nBEGIN\n  SELECT client_id INTO v_client_id FROM projects WHERE id = p_project_id;\n  IF v_client_id IS NULL THEN\n    RETURN jsonb_build_object(\'ok\', false, \'error\', \'project_not_found\');\n  END IF;\n  IF v_client_id <> auth.uid() AND NOT EXISTS (\n    SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = TRUE\n  ) THEN\n    RETURN jsonb_build_object(\'ok\', false, \'error\', \'permission_denied\');\n  END IF;\n  SELECT ARRAY(SELECT id FROM contracts WHERE project_id = p_project_id) INTO v_contract_ids;\n  IF v_contract_ids IS NOT NULL AND array_length(v_contract_ids, 1) > 0 THEN\n    DELETE FROM messages  WHERE contract_id = ANY(v_contract_ids);\n    DELETE FROM contracts WHERE project_id  = p_project_id;\n  END IF;\n  DELETE FROM proposals WHERE project_id = p_project_id;\n  DELETE FROM projects  WHERE id = p_project_id;\n  RETURN jsonb_build_object(\'ok\', true);\nEND;\n$$;\nREVOKE ALL ON FUNCTION delete_project_cascade(UUID) FROM PUBLIC;\nGRANT EXECUTE ON FUNCTION delete_project_cascade(UUID) TO authenticated;'
+  },
+  {
+    id: 'delete_rls_pack',
+    name: 'RLS Pack: contracts + proposals + messages DELETE',
+    icon: '🔒',
+    critical: false,
+    desc: 'Policies de exclusão para contratos, propostas e mensagens — necessárias para o fallback manual de cascade quando a RPC não está disponível.',
+    check: async function() {
+      var pat = _admGetPAT();
+      if (pat) {
+        var r = await _admRunSql("SELECT count(*) AS n FROM pg_policies WHERE tablename IN ('contracts','proposals','messages') AND cmd='DELETE'", pat);
+        if (r.ok && r.rows && r.rows.length > 0) {
+          var n = parseInt((r.rows[0].n || r.rows[0].count || '0'), 10);
+          if (n >= 3) return 'applied';
+          if (n >  0) return 'partial';
+          return 'missing';
+        }
+        return 'error';
+      }
+      return 'unknown';
+    },
+    sql: 'DROP POLICY IF EXISTS "contracts_delete" ON contracts;\nCREATE POLICY "contracts_delete" ON contracts FOR DELETE USING (\n  auth.uid() = client_id\n  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)\n);\n\nDROP POLICY IF EXISTS "proposals_delete" ON proposals;\nCREATE POLICY "proposals_delete" ON proposals FOR DELETE USING (\n  auth.uid() = freelancer_id\n  OR auth.uid() = (SELECT client_id FROM projects WHERE id = project_id)\n  OR EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND is_admin = true)\n);\n\nDROP POLICY IF EXISTS "messages_delete" ON messages;\nCREATE POLICY "messages_delete" ON messages FOR DELETE USING (\n  auth.uid() IN (\n    SELECT client_id     FROM contracts WHERE id = contract_id\n    UNION\n    SELECT freelancer_id FROM contracts WHERE id = contract_id\n  )\n);'
+  },
+  {
+    id: 'is_admin_column',
+    name: 'Coluna: profiles.is_admin',
+    icon: '👤',
+    critical: false,
+    desc: 'Coluna booleana que identifica administradores do sistema. Necessária para as policies de exclusão.',
+    check: async function() {
+      if (!_sbReady()) return 'unknown';
+      var r = await _sb.from('profiles').select('is_admin').limit(1);
+      if (!r.error) return 'applied';
+      var c = String(r.error.code || ''); var m = String(r.error.message || '').toLowerCase();
+      if (c === '42703' || m.includes('is_admin')) return 'missing';
+      return 'unknown';
+    },
+    sql: "ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_admin BOOLEAN NOT NULL DEFAULT false;\n-- Para tornar um usuário admin (substitua o e-mail abaixo):\n-- UPDATE profiles SET is_admin = true WHERE email = 'admin@seudominio.com.br';"
+  },
+  {
+    id: 'attachments_column',
+    name: 'Coluna: proposals.attachments',
+    icon: '📎',
+    critical: false,
+    desc: 'Array de URLs para anexos em propostas (PDFs, documentos de suporte).',
+    check: async function() {
+      if (!_sbReady()) return 'unknown';
+      var r = await _sb.from('proposals').select('attachments').limit(1);
+      if (!r.error) return 'applied';
+      var c = String(r.error.code || ''); var m = String(r.error.message || '').toLowerCase();
+      if (c === '42703' || m.includes('attachments')) return 'missing';
+      return 'unknown';
+    },
+    sql: "ALTER TABLE proposals ADD COLUMN IF NOT EXISTS attachments TEXT[] DEFAULT '{}';"
+  }
+];
+
+function _admGetProjectRef() {
+  try {
+    var m = String(_SUPA_URL || '').match(/https?:\/\/([a-z0-9]+)\.supabase\.co/i);
+    return m ? m[1] : null;
+  } catch(e) { return null; }
+}
+function _admGetPAT() {
+  try { return sessionStorage.getItem('hw_adm_pat') || ''; } catch(e) { return ''; }
+}
+function _admSavePAT(v) {
+  try {
+    if (v) sessionStorage.setItem('hw_adm_pat', v.trim());
+    else   sessionStorage.removeItem('hw_adm_pat');
+    var ref = _admGetProjectRef();
+    var el  = document.getElementById('adm-supabase-sql-link');
+    if (el && ref) el.href = 'https://app.supabase.com/project/' + ref + '/sql/new';
+  } catch(e) {}
+}
+function _admClearPAT() {
+  try { sessionStorage.removeItem('hw_adm_pat'); } catch(e) {}
+  var inp = document.getElementById('adm-mig-pat');
+  if (inp) inp.value = '';
+  showToast('Token removido da sessão.', 'info');
+}
+async function _admRunSql(sql, pat) {
+  var ref = _admGetProjectRef();
+  if (!ref) return { ok: false, error: 'URL do Supabase inválida — verifique _SUPA_URL.' };
+  if (!pat) return { ok: false, error: 'Personal Access Token não configurado.' };
+  try {
+    var res = await fetch('https://api.supabase.com/v1/projects/' + ref + '/database/query', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + pat, 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ query: sql })
+    });
+    var json = await res.json();
+    if (!res.ok) return { ok: false, error: String(json.message || json.error || ('HTTP ' + res.status)) };
+    return { ok: true, rows: Array.isArray(json) ? json : (json.rows || []) };
+  } catch(e) { return { ok: false, error: e.message || String(e) }; }
+}
+function _admStatusHTML(status) {
+  var map = {
+    applied:  '<span class="status-pill pill-green">&#10003; Aplicada</span>',
+    missing:  '<span class="status-pill pill-red">&#10007; N&atilde;o aplicada</span>',
+    partial:  '<span class="status-pill pill-orange">&#9888; Parcialmente aplicada</span>',
+    checking: '<span class="status-pill pill-blue">&#8987; Verificando&hellip;</span>',
+    unknown:  '<span class="status-pill pill-gray">&#10067; Insira o token ou clique Verificar</span>',
+    error:    '<span class="status-pill pill-orange">&#9888; Erro na verifica&ccedil;&atilde;o</span>'
+  };
+  return map[status] || map.unknown;
+}
+function _admRenderMigrations() {
+  var el = document.getElementById('adm-mig-list');
+  if (!el) return;
+  el.innerHTML = _ADM_MIGRATIONS.map(function(m) {
+    var border = m.critical ? 'border-left:4px solid #ef4444;' : 'border-left:4px solid #d1d5db;';
+    var escaped = m.sql
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/'/g,'&#39;');
+    return '<div class="admin-panel" id="adm-mig-card-' + m.id + '" style="padding:0;overflow:hidden;">' +
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 16px;' + border + '">' +
+        '<div style="flex:1;min-width:180px;">' +
+          '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">' +
+            '<span style="font-size:16px;">' + m.icon + '</span>' +
+            '<span style="font-size:13px;font-weight:700;color:var(--text);font-family:monospace;">' + m.name + '</span>' +
+            (m.critical ? '<span class="status-pill pill-red" style="font-size:10px;padding:1px 7px;">CR&Iacute;TICO</span>' : '') +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--text-3);margin-bottom:8px;">' + m.desc + '</div>' +
+          '<div id="adm-mig-status-' + m.id + '">' + _admStatusHTML('unknown') + '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;padding-top:2px;">' +
+          '<button class="adm-mini-btn" onclick="_admCheckOneMigration(\'' + m.id + '\')">&#128269; Verificar</button>' +
+          '<button class="adm-mini-btn" onclick="_admCopySql(\'' + m.id + '\')">&#128203; Copiar SQL</button>' +
+          '<button class="adm-mini-btn primary" onclick="_admExecMigration(\'' + m.id + '\')">&#128640; Executar</button>' +
+          '<button class="adm-mini-btn" onclick="_admToggleSql(\'' + m.id + '\')">&#128065; SQL</button>' +
+        '</div>' +
+      '</div>' +
+      '<div id="adm-mig-sql-' + m.id + '" style="display:none;padding:12px 16px;background:var(--bg);border-top:1px solid var(--border-2);">' +
+        '<pre style="margin:0;font-size:11px;font-family:monospace;color:var(--text-2);white-space:pre-wrap;word-break:break-word;line-height:1.6;">' + escaped + '</pre>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+async function _admCheckOneMigration(id) {
+  var m = _ADM_MIGRATIONS.find(function(x) { return x.id === id; });
+  if (!m) return;
+  var el = document.getElementById('adm-mig-status-' + id);
+  if (el) el.innerHTML = _admStatusHTML('checking');
+  try {
+    var status = await m.check();
+    if (el) el.innerHTML = _admStatusHTML(status);
+  } catch(e) {
+    if (el) el.innerHTML = _admStatusHTML('error');
+    console.warn('_admCheckOneMigration [' + id + ']:', e);
+  }
+}
+async function _admCheckAllMigrations() {
+  _ADM_MIGRATIONS.forEach(function(m) { _admCheckOneMigration(m.id); });
+}
+async function _admExecMigration(id) {
+  var m = _ADM_MIGRATIONS.find(function(x) { return x.id === id; });
+  if (!m) return;
+  var pat = _admGetPAT();
+  if (!pat) { showToast('Insira o Personal Access Token para executar migrações.', 'error'); return; }
+  if (!_admGetProjectRef()) { showToast('URL do Supabase não reconhecida.', 'error'); return; }
+  var preview = m.sql.length > 180 ? m.sql.substring(0, 180) + '…' : m.sql;
+  if (!confirm('Executar migration:\n"' + m.name + '"\n\n' + preview + '\n\nConfirmar?')) return;
+  var el = document.getElementById('adm-mig-status-' + id);
+  if (el) el.innerHTML = _admStatusHTML('checking');
+  var r = await _admRunSql(m.sql, pat);
+  if (r.ok) {
+    showToast('✅ Migration "' + m.name + '" executada!', 'success');
+    _secLog('DB_MIGRATION', 'Migration "' + m.name + '" aplicada pelo admin');
+    setTimeout(function() { _admCheckOneMigration(id); }, 600);
+  } else {
+    if (el) el.innerHTML = _admStatusHTML('error');
+    showToast('Erro: ' + r.error, 'error');
+    console.warn('_admExecMigration [' + id + ']:', r.error);
+  }
+}
+function _admCopySql(id) {
+  var m = _ADM_MIGRATIONS.find(function(x) { return x.id === id; });
+  if (!m) return;
+  var copied = function() { showToast('SQL copiado!', 'success'); };
+  try {
+    navigator.clipboard.writeText(m.sql).then(copied, function() {
+      var ta = document.createElement('textarea');
+      ta.value = m.sql; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta); copied();
+    });
+  } catch(e) {
+    var ta = document.createElement('textarea');
+    ta.value = m.sql; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0;';
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); copied();
+  }
+}
+function _admToggleSql(id) {
+  var el = document.getElementById('adm-mig-sql-' + id);
+  if (el) el.style.display = (el.style.display === 'none') ? 'block' : 'none';
+}
+async function _admRunCustomSql() {
+  var ta  = document.getElementById('adm-sql-console');
+  var res = document.getElementById('adm-sql-result');
+  var sql = ta ? ta.value.trim() : '';
+  if (!sql) { showToast('Digite um comando SQL antes de executar.', 'info'); return; }
+  var pat = _admGetPAT();
+  if (!pat) { showToast('Insira o Personal Access Token para executar SQL.', 'error'); return; }
+  if (res) { res.style.display = 'block'; res.innerHTML = '<span style="color:var(--text-3);">&#8987; Executando&hellip;</span>'; }
+  var r = await _admRunSql(sql, pat);
+  if (r.ok) {
+    var out;
+    if (r.rows && r.rows.length > 0) {
+      out = JSON.stringify(r.rows, null, 2).replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      out = '<span style="color:#16a34a;">&#10003; ' + r.rows.length + ' linha(s) retornada(s):</span>\n<pre style="margin:6px 0 0;font-size:11px;color:var(--text-2);">' + out + '</pre>';
+    } else {
+      out = '<span style="color:#16a34a;">&#10003; Executado com sucesso. Nenhuma linha retornada.</span>';
+    }
+    if (res) res.innerHTML = out;
+    _secLog('DB_SQL_EXEC', 'SQL customizado executado (' + sql.length + ' chars)');
+  } else {
+    if (res) res.innerHTML = '<span style="color:#dc2626;">&#10007; ' + (r.error || 'Erro desconhecido').replace(/</g,'&lt;') + '</span>';
+  }
+}
+function _admInitMigPanel() {
+  _admRenderMigrations();
+  var pat = _admGetPAT();
+  var inp = document.getElementById('adm-mig-pat');
+  if (inp && pat) inp.value = pat;
+  /* Atualiza link SQL Editor com o ref do projeto */
+  var ref = _admGetProjectRef();
+  var el  = document.getElementById('adm-supabase-sql-link');
+  if (el && ref) el.href = 'https://app.supabase.com/project/' + ref + '/sql/new';
+  /* Auto-verificar o que for possível sem PAT (ex.: RPC via _sb) */
+  _ADM_MIGRATIONS.forEach(function(m) {
+    if (m.id === 'delete_cascade_rpc' || m.id === 'is_admin_column' || m.id === 'attachments_column') {
+      _admCheckOneMigration(m.id);
+    }
+  });
+}
+window._admSavePAT            = _admSavePAT;
+window._admClearPAT           = _admClearPAT;
+window._admCheckAllMigrations = _admCheckAllMigrations;
+window._admCheckOneMigration  = _admCheckOneMigration;
+window._admExecMigration      = _admExecMigration;
+window._admCopySql            = _admCopySql;
+window._admToggleSql          = _admToggleSql;
+window._admRunCustomSql       = _admRunCustomSql;
+window._admInitMigPanel       = _admInitMigPanel;
 
 })();
 
