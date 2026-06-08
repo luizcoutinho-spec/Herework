@@ -52,6 +52,12 @@
       "has": [{ "type": "host", "value": "herework.com.br" }],
       "destination": "/coming-soon.html",
       "statusCode": 307
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "herework.vercel.app" }],
+      "destination": "/app.html",
+      "statusCode": 307
     }
   ],
   "rewrites": [
