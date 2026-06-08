@@ -4084,7 +4084,7 @@ section { padding: 64px 0; }
     <div class="header-auth">
       <button id="nav-login-btn" class="btn-login" onclick="openModal('login')" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <button id="nav-register-btn" class="btn btn-green btn-sm" onclick="openModal('register')" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-      <button class="btn btn-primary btn-sm" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+      <button class="btn btn-primary btn-sm" onclick="_guardedPublishModal()" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
       <!-- User chip (shown when logged in) -->
       <div id="nav-user-chip" style="display:none;align-items:center;gap:8px;background:var(--surface);border:1.5px solid var(--border);border-radius:40px;padding:5px 14px 5px 6px;cursor:pointer;" onclick="toggleUserMenu()">
         <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--green),#66BB6A);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;" id="nav-user-avatar">U</div>
@@ -4124,7 +4124,7 @@ section { padding: 64px 0; }
   <div class="mobile-menu-auth">
     <button class="btn btn-outline btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('login');},150)" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
     <button class="btn btn-green btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('register');},150)" data-pt="Cadastrar-se" data-es="Registrarse">Cadastrar-se</button>
-    <button class="btn btn-primary btn-block" onclick="closeMobileMenu();if(!_session||!_session.name){setTimeout(function(){showToast('Voce precisa estar logado para publicar!','warn');var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},150);return;}setTimeout(function(){openModal('publish');},150)" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
+    <button class="btn btn-primary btn-block" onclick="closeMobileMenu();setTimeout(function(){_guardedPublishModal();},150)" data-pt="Publicar Projeto" data-es="Publicar Proyecto">Publicar Projeto</button>
   </div>
 </div>
 
@@ -4451,7 +4451,7 @@ section { padding: 64px 0; }
       </div>
 
       <div style="text-align:center;margin-top:44px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-primary btn-lg" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
+        <button class="btn btn-primary btn-lg" onclick="_guardedPublishModal()" data-pt="📋 Publicar Projeto" data-es="📋 Publicar Proyecto">📋 Publicar Projeto</button>
         <button class="btn btn-outline btn-lg" onclick="showPage('how')" data-pt="Saiba mais →" data-es="Saber más →">Saiba mais →</button>
       </div>
     </div>
@@ -4773,7 +4773,7 @@ section { padding: 64px 0; }
         Publique seu projeto gratuitamente e receba propostas de profissionais qualificados em minutos.
       </p>
       <div class="cta-actions">
-        <button class="btn btn-white btn-xl" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')"
+        <button class="btn btn-white btn-xl" onclick="_guardedPublishModal()"
           data-pt="📋 Publicar Projeto Grátis" data-es="📋 Publicar Proyecto Gratis">
           📋 Publicar Projeto Grátis
         </button>
@@ -5086,7 +5086,7 @@ section { padding: 64px 0; }
         <div class="dash-section">
           <div class="dash-section-title" style="display:flex;align-items:center;justify-content:space-between;">
             <div><span>&#128203;</span> Projetos Publicados &mdash; Aguardando Propostas</div>
-            <button class="btn btn-primary btn-sm" onclick="if(!_session||!_session.name){showToast('Voce precisa estar logado para publicar!','warn');setTimeout(function(){var ov=document.getElementById('overlay-login');if(ov)ov.classList.add('open');},300);return;}openModal('publish')">+ Publicar</button>
+            <button class="btn btn-primary btn-sm" onclick="_guardedPublishModal()">+ Publicar</button>
           </div>
           <div id="dash-client-waiting"></div>
         </div>
@@ -10185,8 +10185,8 @@ function openModal(id) {
   var _needLogin = (id === 'publish' || id === 'proposal');
   if (_needLogin && (!_session || !_session.name)) {
     var _msg = id === 'publish'
-      ? 'Voce precisa estar logado para publicar um projeto!'
-      : 'Voce precisa estar logado para enviar uma proposta!';
+      ? 'Você precisa estar logado para publicar um projeto.'
+      : 'Você precisa estar logado para enviar uma proposta.';
     showToast(_msg, 'warn');
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
@@ -10958,7 +10958,7 @@ function submitRegister() {
 
 function submitProject() {
   if (!_session || !_session.name) {
-    showToast('Você precisa estar logado para publicar um projeto!','warn');
+    showToast('Você precisa estar logado para publicar um projeto.','warn');
     closeModal('publish');
     setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
     return;
@@ -13106,16 +13106,10 @@ function openProposalFor(btn) {
     deadline: card ? (card.getAttribute('data-deadline') || '0') : '0'
   };
 
-  /* Se não logado — abrir login com callback para reabrir após login */
-  if (!_session || !_session.name) {
-    showToast('Faça login para enviar uma proposta.', 'warn');
-    window._afterLoginCallback = function() {
-      window._afterLoginCallback = null;
-      _openProposalModal(window._pendingProposal);
-    };
-    setTimeout(function(){ openModal('login'); }, 350);
-    return;
-  }
+  /* Se não logado — bloqueia ação, exibe aviso e abre login (via _requireAuth centralizado) */
+  if (!_requireAuth('Você precisa estar logado para enviar uma proposta.', function() {
+    _openProposalModal(window._pendingProposal);
+  })) return;
 
   _openProposalModal(window._pendingProposal);
 }
@@ -13357,6 +13351,10 @@ function _pdfReset2() { pdfRemove2({ stopPropagation: function(){} }); }
 var _contractCtx = { name:'', role:'', value:0, project:'', deadline:'30 dias', rating:0 };
 
 function openContractModal(opts) {
+  /* Ação restrita — exige autenticação válida */
+  if (!_requireAuth('Você precisa estar logado para contratar um profissional.', function() {
+    openContractModal(opts);
+  })) return;
   opts = opts || {};
   _contractCtx = {
     name:     opts.name     || 'Freelancer',
@@ -15031,6 +15029,50 @@ function _displayName(fullName) {
 window._displayName = _displayName;
 
 /* ═══════════════════════════════════════════════════════════
+   GUARD DE AUTENTICAÇÃO — HereWork
+   Valida sessão antes de executar ações restritas.
+   Centraliza a lógica de bloqueio para evitar inconsistências
+   entre telas, conforme regra de negócio de segurança.
+═══════════════════════════════════════════════════════════ */
+
+/* _requireAuth(message, afterLoginFn)
+   Retorna true  → usuário autenticado, ação pode prosseguir.
+   Retorna false → usuário não autenticado; exibe aviso e abre
+                   tela de login. Se afterLoginFn for fornecida,
+                   ela é executada automaticamente após login. */
+function _requireAuth(message, afterLoginFn) {
+  if (_session && _session.name) return true;
+
+  /* Interrompe a operação e notifica o usuário */
+  showToast(message || 'Você precisa estar logado para realizar esta ação.', 'warn');
+
+  /* Registra callback para re-executar a ação após login bem-sucedido */
+  if (typeof afterLoginFn === 'function') {
+    window._afterLoginCallback = function() {
+      window._afterLoginCallback = null;
+      afterLoginFn();
+    };
+  }
+
+  /* Abre modal de login após breve delay (permite que o toast apareça primeiro) */
+  setTimeout(function() {
+    var ov = document.getElementById('overlay-login');
+    if (ov) ov.classList.add('open');
+  }, 350);
+
+  return false;
+}
+window._requireAuth = _requireAuth;
+
+/* Ponto de entrada para "Publicar Projeto" — substitui os inline guards
+   espalhados pelos botões; centraliza a validação e a mensagem correta. */
+function _guardedPublishModal() {
+  if (!_requireAuth('Você precisa estar logado para publicar um projeto.')) return;
+  openModal('publish');
+}
+window._guardedPublishModal = _guardedPublishModal;
+
+/* ═══════════════════════════════════════════════════════════
    SECURITY FRAMEWORK — HereWork
 ═══════════════════════════════════════════════════════════ */
 
@@ -16645,6 +16687,10 @@ function openDemoProfile(btnEl) {
   var card = btnEl ? btnEl.closest('.fl-list-card') : null;
   if(!card) { showToast('Perfil não disponível.', 'info'); return; }
 
+  /* Ação restrita — exige autenticação válida */
+  if (!_requireAuth('Você precisa estar logado para visualizar este perfil.',
+    function(){ openDemoProfile(btnEl); })) return;
+
   /* Extract data from card DOM */
   var name    = (card.querySelector('.fl-list-name') || {}).textContent || 'Freelancer';
   var role    = (card.querySelector('.fl-list-role') || {}).textContent || '';
@@ -17083,6 +17129,10 @@ var _flProfileMap = {
 };
 
 function openFreelancerProfile(profileId) {
+  /* Ação restrita — exige autenticação válida */
+  if (!_requireAuth('Você precisa estar logado para visualizar este perfil.',
+    function(){ openFreelancerProfile(profileId); })) return;
+
   var p = _flProfiles[profileId];
   if(!p) { showToast('Perfil não encontrado.','info'); return; }
 
