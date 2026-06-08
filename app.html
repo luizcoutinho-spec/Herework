@@ -5592,20 +5592,189 @@ section { padding: 64px 0; }
           </div>
           <div id="dash-my-received" style="padding:0 18px;"></div>
         </div>
-        <div class="profile-card" style="margin-top:16px;">
-          <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:12px;">&#127968; Dados Banc&aacute;rios para Recebimento</div>
-          <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:var(--radius);border:1.5px dashed var(--border);">
-            <span style="font-size:24px;">&#127968;</span>
-            <div>
-              <div style="font-size:13px;font-weight:600;color:var(--text);">Nenhuma conta banc&aacute;ria cadastrada</div>
-              <div style="font-size:11px;color:var(--text-4);">Cadastre seus dados para receber os pagamentos</div>
+        <!-- ════ DADOS BANCÁRIOS CARD ════ -->
+        <div class="profile-card" style="margin-top:16px;" id="bank-account-card">
+
+          <!-- Cabeçalho -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:20px;">&#127968;</span>
+              <div>
+                <div style="font-size:14px;font-weight:700;color:var(--text);">Conta Banc&aacute;ria para Recebimento</div>
+                <div style="font-size:11px;color:var(--text-4);">Necess&aacute;rio para liberar pagamentos dos seus projetos</div>
+              </div>
             </div>
-            <button class="btn btn-primary btn-sm" style="margin-left:auto;" onclick="showToast('Duvidas sobre pagamentos: financeiro@herework.com.br','info')">+ Adicionar Conta</button>
+            <!-- Badge de status -->
+            <span id="bank-status-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">
+              &#10003; Conta verificada
+            </span>
           </div>
-          <div style="margin-top:10px;font-size:11px;color:var(--text-4);">
-            &#9889; Pagamentos liberados ap&oacute;s aprova&ccedil;&atilde;o do cliente &nbsp;&middot;&nbsp; Prazo: 1-3 dias &uacute;teis
+
+          <!-- Alerta de segurança -->
+          <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);margin-bottom:18px;font-size:12px;color:#92400e;">
+            <span style="font-size:14px;flex-shrink:0;">&#128274;</span>
+            <span>Seus dados banc&aacute;rios s&atilde;o criptografados e usados <strong>exclusivamente</strong> para transfer&ecirc;ncias dos pagamentos aprovados na plataforma.</span>
           </div>
-        </div>
+
+          <!-- Tipo de Pessoa -->
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom:8px;">Tipo de Titular <span style="color:#ef4444;">*</span></label>
+            <div style="display:flex;gap:8px;">
+              <button class="profile-chip active" type="button" id="bank-pf-btn" onclick="bankTogglePersonType('pf')" data-val="pf"
+                style="flex:1;justify-content:center;padding:10px 8px;font-size:13px;">
+                &#128100; Pessoa F&iacute;sica (CPF)
+              </button>
+              <button class="profile-chip" type="button" id="bank-pj-btn" onclick="bankTogglePersonType('pj')" data-val="pj"
+                style="flex:1;justify-content:center;padding:10px 8px;font-size:13px;">
+                &#127970; Pessoa Jur&iacute;dica (CNPJ)
+              </button>
+            </div>
+            <input type="hidden" id="bank-person-type" value="pf">
+          </div>
+
+          <!-- Campos PF -->
+          <div id="bank-pf-fields">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-holder-name">Nome completo do Titular <span style="color:#ef4444;">*</span></label>
+                <input class="form-input" id="bank-holder-name" type="text" maxlength="120"
+                  placeholder="Exatamente como no documento">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-cpf">CPF <span style="color:#ef4444;">*</span></label>
+                <input class="form-input" id="bank-cpf" type="text" maxlength="14"
+                  placeholder="000.000.000-00" oninput="bankMaskCPF(this)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Campos PJ -->
+          <div id="bank-pj-fields" style="display:none;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-razao-social">Raz&atilde;o Social <span style="color:#ef4444;">*</span></label>
+                <input class="form-input" id="bank-razao-social" type="text" maxlength="120"
+                  placeholder="Nome da empresa conforme CNPJ">
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-cnpj">CNPJ <span style="color:#ef4444;">*</span></label>
+                <input class="form-input" id="bank-cnpj" type="text" maxlength="18"
+                  placeholder="00.000.000/0000-00" oninput="bankMaskCNPJ(this)">
+              </div>
+            </div>
+          </div>
+
+          <!-- Banco -->
+          <div class="form-group">
+            <label class="form-label" for="bank-bank">Banco <span style="color:#ef4444;">*</span></label>
+            <select class="form-select" id="bank-bank">
+              <option value="">Selecione um banco...</option>
+              <option value="001">001 &mdash; Banco do Brasil</option>
+              <option value="033">033 &mdash; Santander</option>
+              <option value="104">104 &mdash; Caixa Econ&ocirc;mica Federal</option>
+              <option value="237">237 &mdash; Bradesco</option>
+              <option value="341">341 &mdash; Ita&uacute; Unibanco</option>
+              <option value="756">756 &mdash; Sicoob</option>
+              <option value="748">748 &mdash; Sicredi</option>
+              <option value="077">077 &mdash; Banco Inter</option>
+              <option value="260">260 &mdash; Nu Pagamentos (Nubank)</option>
+              <option value="290">290 &mdash; PagBank (PagSeguro)</option>
+              <option value="380">380 &mdash; PicPay</option>
+              <option value="323">323 &mdash; Mercado Pago</option>
+              <option value="336">336 &mdash; C6 Bank</option>
+              <option value="212">212 &mdash; Banco Original</option>
+              <option value="422">422 &mdash; Banco Safra</option>
+              <option value="070">070 &mdash; BRB</option>
+              <option value="041">041 &mdash; Banrisul</option>
+              <option value="389">389 &mdash; Banco Mercantil</option>
+              <option value="136">136 &mdash; Unicred</option>
+              <option value="iti">Iti (Ita&uacute;)</option>
+              <option value="next">Next (Bradesco)</option>
+              <option value="will">Will Bank</option>
+              <option value="outro">Outro banco</option>
+            </select>
+          </div>
+
+          <!-- Tipo de Conta + Agência + Conta -->
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Tipo de Conta <span style="color:#ef4444;">*</span></label>
+              <div style="display:flex;gap:6px;margin-top:2px;">
+                <button class="profile-chip active" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="corrente" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Corrente</button>
+                <button class="profile-chip" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="poupanca" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Poupan&ccedil;a</button>
+                <button class="profile-chip" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="pagamento" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Pagamento</button>
+              </div>
+              <input type="hidden" id="bank-acc-type" value="corrente">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="bank-agency">Ag&ecirc;ncia <span style="color:#ef4444;">*</span>
+                <span style="font-size:10px;font-weight:400;color:var(--text-4);">(sem d&iacute;gito)</span>
+              </label>
+              <input class="form-input" id="bank-agency" type="text" maxlength="6"
+                placeholder="0000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Conta <span style="color:#ef4444;">*</span></label>
+              <div style="display:flex;gap:4px;align-items:flex-end;">
+                <input class="form-input" id="bank-account" type="text" maxlength="12"
+                  placeholder="00000000" style="flex:1;"
+                  oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)">
+                <div style="display:flex;flex-direction:column;gap:2px;">
+                  <span style="font-size:10px;color:var(--text-4);text-align:center;white-space:nowrap;">D&iacute;gito</span>
+                  <input class="form-input" id="bank-account-digit" type="text" maxlength="1"
+                    placeholder="0" style="width:40px;text-align:center;padding:8px 4px;"
+                    oninput="this.value=this.value.replace(/[^0-9xX]/g,'').slice(0,1).toUpperCase()">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Seção Pix (destaque especial) -->
+          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:var(--radius);padding:14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+              <span style="font-size:18px;">&#9889;</span>
+              <span style="font-size:13px;font-weight:700;color:#15803d;">Chave Pix</span>
+              <span style="font-size:10px;color:#16a34a;background:#bbf7d0;padding:2px 7px;border-radius:10px;font-weight:600;">RECOMENDADO</span>
+            </div>
+            <div style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-pix-type" style="font-size:11px;">Tipo de chave</label>
+                <select class="form-select" id="bank-pix-type" onchange="bankUpdatePixPlaceholder()" style="font-size:12px;">
+                  <option value="">Nenhuma</option>
+                  <option value="cpf">CPF</option>
+                  <option value="cnpj">CNPJ</option>
+                  <option value="email">E-mail</option>
+                  <option value="telefone">Telefone</option>
+                  <option value="aleatoria">Chave Aleat&oacute;ria</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label" for="bank-pix-key" style="font-size:11px;">Chave Pix</label>
+                <input class="form-input" id="bank-pix-key" type="text"
+                  placeholder="Selecione o tipo primeiro" style="font-size:13px;">
+              </div>
+            </div>
+            <div style="font-size:11px;color:#16a34a;margin-top:8px;">
+              &#9989; Recebimentos via Pix s&atilde;o instant&acirc;neos ap&oacute;s aprova&ccedil;&atilde;o do cliente
+            </div>
+          </div>
+
+          <!-- Botões -->
+          <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;">
+            <span id="bank-saved-hint" style="font-size:11px;color:var(--text-4);display:none;">&#128260; Dados carregados do &uacute;ltimo salvamento</span>
+            <button class="btn btn-outline" type="button" onclick="bankClear()">Limpar</button>
+            <button class="btn btn-primary" type="button" id="bank-save-btn" onclick="bankSave()">
+              &#10003; Salvar Dados Banc&aacute;rios
+            </button>
+          </div>
+          <div class="form-error" id="err-bank" style="margin-top:8px;text-align:right;"></div>
+
+          <!-- Rodapé segurança -->
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-2);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <span style="font-size:11px;color:var(--text-4);">&#128274; Dados criptografados &nbsp;&middot;&nbsp; &#9889; Pagamentos via Pix em at&eacute; 1 dia &uacute;til &nbsp;&middot;&nbsp; &#128202; Hist&oacute;rico de pagamentos rastreado</span>
+          </div>
+
+        </div><!-- /bank-account-card -->
       </div>
 
     </div><!-- /payments panel -->
@@ -15646,6 +15815,217 @@ function dashChangePassword() {
   }, 600);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   DADOS BANCÁRIOS — funções do formulário de conta bancária
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Alterna PF ↔ PJ */
+function bankTogglePersonType(type) {
+  document.getElementById('bank-person-type').value = type;
+  var pfFields = document.getElementById('bank-pf-fields');
+  var pjFields = document.getElementById('bank-pj-fields');
+  var pfBtn    = document.getElementById('bank-pf-btn');
+  var pjBtn    = document.getElementById('bank-pj-btn');
+  if (pfFields) pfFields.style.display = type === 'pf' ? '' : 'none';
+  if (pjFields) pjFields.style.display = type === 'pj' ? '' : 'none';
+  if (pfBtn)    pfBtn.classList.toggle('active', type === 'pf');
+  if (pjBtn)    pjBtn.classList.toggle('active', type === 'pj');
+}
+window.bankTogglePersonType = bankTogglePersonType;
+
+/* Chip único para tipo de conta */
+function bankSelectChip(btn, group) {
+  var parent = btn.closest('[style]') || btn.parentElement;
+  if (parent) {
+    parent.querySelectorAll('.profile-chip').forEach(function(c) { c.classList.remove('active'); });
+  }
+  btn.classList.add('active');
+  if (group === 'acc-type') {
+    var hid = document.getElementById('bank-acc-type');
+    if (hid) hid.value = btn.dataset.val || '';
+  }
+}
+window.bankSelectChip = bankSelectChip;
+
+/* Máscara CPF: 000.000.000-00 */
+function bankMaskCPF(inp) {
+  var v = inp.value.replace(/\D/g,'').slice(0,11);
+  if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  inp.value = v;
+}
+window.bankMaskCPF = bankMaskCPF;
+
+/* Máscara CNPJ: 00.000.000/0000-00 */
+function bankMaskCNPJ(inp) {
+  var v = inp.value.replace(/\D/g,'').slice(0,14);
+  if (v.length > 12) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5');
+  else if (v.length > 8) v = v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,'$1.$2.$3/$4');
+  else if (v.length > 5) v = v.replace(/(\d{2})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,3})/,'$1.$2');
+  inp.value = v;
+}
+window.bankMaskCNPJ = bankMaskCNPJ;
+
+/* Atualiza placeholder do campo Pix conforme tipo */
+function bankUpdatePixPlaceholder() {
+  var typeEl = document.getElementById('bank-pix-type');
+  var keyEl  = document.getElementById('bank-pix-key');
+  if (!typeEl || !keyEl) return;
+  var placeholders = {
+    cpf:      '000.000.000-00',
+    cnpj:     '00.000.000/0000-00',
+    email:    'seuemail@exemplo.com',
+    telefone: '+55 (11) 90000-0000',
+    aleatoria:'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'
+  };
+  keyEl.placeholder = placeholders[typeEl.value] || 'Selecione o tipo primeiro';
+  keyEl.value = '';
+}
+window.bankUpdatePixPlaceholder = bankUpdatePixPlaceholder;
+
+/* Salva dados bancários no localStorage (+ Supabase se disponível) */
+function bankSave() {
+  var btn    = document.getElementById('bank-save-btn');
+  var err    = document.getElementById('err-bank');
+  if (err) { err.textContent = ''; err.classList.remove('show'); }
+
+  var type   = (document.getElementById('bank-person-type') || {}).value || 'pf';
+  var isPF   = type === 'pf';
+
+  /* Coleta campos */
+  function gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : ''; }
+
+  var holderName  = isPF ? gv('bank-holder-name') : gv('bank-razao-social');
+  var holderDoc   = isPF ? gv('bank-cpf')          : gv('bank-cnpj');
+  var bankCode    = gv('bank-bank');
+  var accType     = gv('bank-acc-type');
+  var agency      = gv('bank-agency');
+  var account     = gv('bank-account');
+  var accDigit    = gv('bank-account-digit');
+  var pixType     = gv('bank-pix-type');
+  var pixKey      = gv('bank-pix-key');
+
+  /* Validações mínimas */
+  if (!holderName) {
+    if (err) { err.textContent = 'Informe o nome do titular.'; err.classList.add('show'); } return;
+  }
+  if (!holderDoc) {
+    if (err) { err.textContent = isPF ? 'Informe o CPF.' : 'Informe o CNPJ.'; err.classList.add('show'); } return;
+  }
+  if (!bankCode) {
+    if (err) { err.textContent = 'Selecione o banco.'; err.classList.add('show'); } return;
+  }
+  if (!agency || !account) {
+    if (err) { err.textContent = 'Informe agência e número da conta.'; err.classList.add('show'); } return;
+  }
+
+  var bankData = {
+    person_type:  type,
+    holder_name:  holderName,
+    holder_doc:   holderDoc,
+    bank_code:    bankCode,
+    acc_type:     accType,
+    agency:       agency,
+    account:      account,
+    acc_digit:    accDigit,
+    pix_type:     pixType,
+    pix_key:      pixKey,
+    saved_at:     new Date().toISOString()
+  };
+
+  /* Persiste em localStorage */
+  try { localStorage.setItem('hw_bank_data', JSON.stringify(bankData)); } catch(x) {}
+
+  /* Persiste em Supabase se disponível */
+  if (typeof _sbReady === 'function' && _sbReady() && _session && _session.uid) {
+    _sb.from('profiles').update({
+      profile_metadata: Object.assign(
+        (function(){ try{ return JSON.parse(localStorage.getItem('hw_profile_meta')||'{}'); }catch(e){return {};} })(),
+        { bank: bankData }
+      ),
+      updated_at: new Date().toISOString()
+    }).eq('id', _session.uid).then(function(r) {
+      if (r && r.error) console.warn('bankSave: Supabase update falhou:', r.error.message);
+    });
+  }
+
+  /* Feedback visual */
+  if (btn) { _setBtnLoading(btn, true); }
+  setTimeout(function() {
+    if (btn) { _setBtnLoading(btn, false); }
+    var badge = document.getElementById('bank-status-badge');
+    if (badge) badge.style.display = '';
+    showToast('✅ Dados bancários salvos com sucesso!', 'success');
+  }, 600);
+}
+window.bankSave = bankSave;
+
+/* Limpa o formulário bancário */
+function bankClear() {
+  ['bank-holder-name','bank-razao-social','bank-cpf','bank-cnpj',
+   'bank-bank','bank-agency','bank-account','bank-account-digit',
+   'bank-pix-key'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  var pixType = document.getElementById('bank-pix-type');
+  if (pixType) { pixType.value = ''; bankUpdatePixPlaceholder(); }
+  bankTogglePersonType('pf');
+  /* reset chip tipo conta */
+  var parent = document.getElementById('bank-acc-type');
+  if (parent && parent.previousElementSibling) {
+    parent.previousElementSibling.querySelectorAll('.profile-chip').forEach(function(c,i) {
+      c.classList.toggle('active', i===0);
+    });
+  }
+  var hid = document.getElementById('bank-acc-type');
+  if (hid) hid.value = 'corrente';
+  var badge = document.getElementById('bank-status-badge');
+  if (badge) badge.style.display = 'none';
+  try { localStorage.removeItem('hw_bank_data'); } catch(x) {}
+  showToast('Dados bancários limpos.', 'info');
+}
+window.bankClear = bankClear;
+
+/* Carrega dados bancários salvos ao abrir painel */
+function bankLoad() {
+  var data = {};
+  try { data = JSON.parse(localStorage.getItem('hw_bank_data') || '{}'); } catch(x) {}
+  if (!data.bank_code) return; /* nada salvo */
+
+  function sv(id, val) { var el = document.getElementById(id); if (el && val) el.value = val; }
+
+  bankTogglePersonType(data.person_type || 'pf');
+  sv('bank-holder-name',   data.holder_name);
+  sv('bank-razao-social',  data.holder_name);  /* reutiliza para PJ */
+  sv('bank-cpf',           data.holder_doc);
+  sv('bank-cnpj',          data.holder_doc);
+  sv('bank-bank',          data.bank_code);
+  sv('bank-agency',        data.agency);
+  sv('bank-account',       data.account);
+  sv('bank-account-digit', data.acc_digit);
+  sv('bank-pix-type',      data.pix_type);
+  sv('bank-pix-key',       data.pix_key);
+  bankUpdatePixPlaceholder();
+
+  /* Restaura chip tipo de conta */
+  if (data.acc_type) {
+    document.querySelectorAll('.profile-chip[onclick*="bank-acc-type"]').forEach(function(c) {
+      c.classList.toggle('active', c.dataset.val === data.acc_type);
+    });
+    var hidAcc = document.getElementById('bank-acc-type');
+    if (hidAcc) hidAcc.value = data.acc_type;
+  }
+
+  var badge = document.getElementById('bank-status-badge');
+  if (badge) badge.style.display = '';
+  var hint = document.getElementById('bank-saved-hint');
+  if (hint) hint.style.display = '';
+}
+window.bankLoad = bankLoad;
+
 function dashDeleteAccount() {
   if(confirm('Tem certeza que deseja excluir sua conta? Esta ação é irreversível.')) {
     _clearSession();
@@ -17536,6 +17916,8 @@ function switchPayHistory(tab) {
     if(btn) btn.classList.toggle('active', t === tab);
     if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
   });
+  /* Carrega dados bancários ao abrir aba de recebimentos */
+  if (tab === 'in' && typeof bankLoad === 'function') bankLoad();
 }
 
 /* ─── Update payment summary cards ─── */
