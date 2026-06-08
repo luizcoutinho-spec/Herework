@@ -9557,13 +9557,14 @@ async function _sbGetMyProjects() {
 /* ── PROJETOS: Excluir publicação ─────────────────────────────────────────────
    Estratégia em dois níveis:
    1. RPC `delete_project_cascade` (SECURITY DEFINER) — exclui mensagens →
-      contratos → propostas → projeto em uma única transação segura, ignorando
-      restrições FK individuais.  Requer a migração em supabase_schema.sql.
-   2. Fallback manual em cascata — caso a RPC ainda não exista no banco.
+      contratos → propostas → projeto em uma única transação segura.
+      Requer a migração em supabase_schema.sql aplicada no Supabase.
+   2. Fallback manual em cascata — ativo quando a RPC ainda não existe.
 
-   Em ambos os casos `_sbEnsureSession` garante que o JWT está ativo antes do
-   DELETE; sem isso, o RLS bloqueia silenciosamente (retorna {error:null, data:[]})
-   mesmo que o usuário apareça "logado" na UI. */
+   NOTA: o PostgREST retorna PGRST202 (não 42883) quando a função não existe.
+   O fallback verifica se o projeto realmente sumiu do banco para detectar
+   bloqueio silencioso de RLS (sem policy DELETE o Supabase retorna {error:null}
+   mas não apaga nada — o projeto reaparece após _refreshMyPublishedProjects). */
 async function _sbDeleteProject(id) {
   if (!_sbReady() || !_session || !id) return false;
   var user = await _sbEnsureSession();
@@ -9572,41 +9573,57 @@ async function _sbDeleteProject(id) {
   /* ── Nível 1: RPC cascade (preferido) ───────────────────────────────────── */
   try {
     var rpc = await _sb.rpc('delete_project_cascade', { p_project_id: id });
-    /* 42883 = function does not exist → cair no fallback */
-    if (rpc.error && rpc.error.code === '42883') {
-      console.info('_sbDeleteProject: RPC não encontrada, usando fallback manual.');
-    } else if (rpc.error) {
-      console.warn('_sbDeleteProject RPC error:', rpc.error.message || rpc.error);
-      return false;
+    if (rpc.error) {
+      var ec  = (rpc.error.code    || '');
+      var em  = (rpc.error.message || '').toLowerCase();
+      /* PGRST202 (PostgREST) ou 42883 (Postgres) = função não existe → fallback */
+      var notFound = ec === 'PGRST202' || ec === '42883'
+                     || em.includes('could not find the function')
+                     || em.includes('does not exist');
+      if (!notFound) {
+        console.warn('_sbDeleteProject RPC error [' + ec + ']:', rpc.error.message);
+        return false;
+      }
+      console.info('_sbDeleteProject: RPC não encontrada (' + ec + '), usando fallback. Execute a migração em supabase_schema.sql para ativar a exclusão segura.');
+      /* cai no Nível 2 */
     } else {
-      /* RPC executou — verificar retorno { ok: true/false } */
+      /* RPC existiu e executou — verificar retorno { ok: true/false } */
       if (rpc.data && rpc.data.ok === false) {
-        console.warn('_sbDeleteProject RPC denied:', rpc.data.error);
+        console.warn('_sbDeleteProject RPC negada:', rpc.data.error);
         return false;
       }
       return true;
     }
   } catch(e) {
     console.warn('_sbDeleteProject RPC exception:', e);
+    /* Tenta fallback mesmo assim */
   }
 
   /* ── Nível 2: fallback — cascata manual ─────────────────────────────────── */
   /* Ordem obrigatória: messages → contracts → proposals → projects
-     (FK constraints: messages→contracts→projects, proposals→projects) */
+     (FK: messages→contracts, proposals→projects, contracts→projects sem CASCADE) */
   try {
+    /* Deletar contratos vinculados (e suas mensagens) */
     var cQ = await _sb.from('contracts').select('id').eq('project_id', id);
     if (!cQ.error && cQ.data && cQ.data.length > 0) {
       var cIds = cQ.data.map(function(c) { return c.id; });
-      var mDel = await _sb.from('messages').delete().in('contract_id', cIds);
-      if (mDel.error) console.warn('_sbDeleteProject: messages delete error:', mDel.error.message);
-      var cDel = await _sb.from('contracts').delete().eq('project_id', id);
-      if (cDel.error) console.warn('_sbDeleteProject: contracts delete error:', cDel.error.message);
+      await _sb.from('messages').delete().in('contract_id', cIds);
+      await _sb.from('contracts').delete().eq('project_id', id);
     }
-    var pDel = await _sb.from('proposals').delete().eq('project_id', id);
-    if (pDel.error) console.warn('_sbDeleteProject: proposals delete error:', pDel.error.message);
+    /* Deletar propostas (há CASCADE no banco, mas explícito para maior segurança) */
+    await _sb.from('proposals').delete().eq('project_id', id);
+    /* Deletar o projeto */
     var r = await _sb.from('projects').delete().eq('id', id);
     if (r.error) {
-      console.warn('_sbDeleteProject: projects delete error:', r.error.message || r.error);
+      console.warn('_sbDeleteProject fallback — projects DELETE error:', r.error.message || r.error);
+      return false;
+    }
+    /* ── Verificação pós-delete ─────────────────────────────────────────────
+       Sem policy RLS "projects_delete" o Supabase retorna {error:null} mas
+       não apaga nada.  Consultar o banco confirma o resultado real. */
+    var chk = await _sb.from('projects').select('id').eq('id', id).maybeSingle();
+    if (!chk.error && chk.data) {
+      console.warn('_sbDeleteProject: projeto ainda existe após DELETE — policy RLS "projects_delete" ausente. Execute a migração em supabase_schema.sql no SQL Editor do Supabase.');
       return false;
     }
     return true;
