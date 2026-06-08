@@ -10480,11 +10480,16 @@ function _renderRealFreelancers() {
       var rate = p.hourly_rate ? 'R$ ' + parseFloat(p.hourly_rate).toLocaleString('pt-BR') : 'A combinar';
       var rateSmall = p.hourly_rate ? '<small>/hora</small>' : '';
       var badge = p.type === 'both' ? '<span style="font-size:10px;background:#e0f2fe;color:#0369a1;border-radius:20px;padding:2px 8px;font-weight:600;">Dual</span>' : '';
+      /* Exibe "Nome P." — primeiro nome + inicial do segundo */
+      var _nameParts = (p.name || '').trim().split(/\s+/);
+      var displayName = _nameParts.length > 1
+        ? _nameParts[0] + ' ' + _nameParts[1].charAt(0).toUpperCase() + '.'
+        : _nameParts[0] || p.name;
       card.innerHTML = [
         '<div class="fl-list-avatar" style="background:' + color + ';">' + initials + '</div>',
         '<div class="fl-list-body">',
           '<div class="fl-list-top">',
-            '<span class="fl-list-name">' + p.name + '</span>',
+            '<span class="fl-list-name">' + displayName + '</span>',
             badge,
           '</div>',
           '<div class="fl-list-role">' + (p.bio ? p.bio.split('.')[0] + ' — ' + location : 'Freelancer — ' + location) + '</div>',
