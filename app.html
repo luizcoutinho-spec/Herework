@@ -6918,7 +6918,7 @@ section { padding: 64px 0; }
           </div>
           <div class="faq-cards-answer show" id="faq-ans-client">
             <div class="faq-answer-prefix">R.</div>
-            <div class="faq-answer-text" id="faq-ans-client-text">Publicar projetos &eacute; 100% gratuito. Voc&ecirc; s&oacute; paga uma comiss&atilde;o de servi&ccedil;o quando o projeto for conclu&iacute;do com sucesso. A taxa varia conforme o plano escolhido (8% no gratuito, at&eacute; 4% no Premium).</div>
+            <div class="faq-answer-text" id="faq-ans-client-text">Publicar projetos &eacute; 100% gratuito. Voc&ecirc; s&oacute; paga uma comiss&atilde;o de servi&ccedil;o quando o projeto for conclu&iacute;do com sucesso. A taxa varia conforme o plano: 20% no B&aacute;sico, 12% no Profissional e 8% no Enterprise.</div>
           </div>
         </div>
       </div>
@@ -7269,7 +7269,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gerente de sucesso dedicado" data-es="Gerente de éxito dedicado">Gerente de sucesso dedicado</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Comissão mais baixa da plataforma" data-es="Comisión más baja de la plataforma">Comissão mais baixa da plataforma</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 7% sobre projetos" data-es="Comisión reducida: 7% sobre proyectos">Comissão reduzida: 7% sobre projetos</div>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão reduzida: 8% sobre projetos" data-es="Comisión reducida: 8% sobre proyectos">Comissão reduzida: 8% sobre projetos</div>
             <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(isAnnual?79:99,'Plano Elite · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
           </div>
 
@@ -7319,7 +7319,7 @@ section { padding: 64px 0; }
               <td data-pt="Taxa de comissão" data-es="Tasa de comisión">Taxa de comissão</td>
               <td><span class="compare-val">20%</span></td>
               <td><span class="compare-val">10–12%</span></td>
-              <td><span class="compare-val">7%</span></td>
+              <td><span class="compare-val">8%</span></td>
             </tr>
             <tr><td class="compare-section-row" colspan="4" data-pt="Suporte & Relatórios" data-es="Soporte & Reportes">Suporte & Relatórios</td></tr>
             <tr>
@@ -8585,7 +8585,7 @@ section { padding: 64px 0; }
             <span class="contract-item-value" id="c-deadline">30 dias</span>
           </div>
           <div class="contract-item">
-            <span class="contract-item-label">&#128181; Taxa da plataforma (8%)</span>
+            <span class="contract-item-label" id="c-fee-label">&#128181; Taxa da plataforma (20%)</span>
             <span class="contract-item-value" id="c-fee">R$ 0</span>
           </div>
           <div class="contract-item" style="border-color:var(--green);background:#f0fdf4;">
@@ -10591,6 +10591,40 @@ async function _sbGetFreelancers() {
   } catch(e) { return []; }
 }
 
+/* ── Remove perfil da listagem de freelancers (muda type → 'client') ── */
+async function _removeFreelancerListing(uid, btn) {
+  if (!uid || !_sbReady()) { showToast('Erro: não foi possível remover.', 'error'); return; }
+  if (!confirm('Remover seu perfil da listagem de freelancers?\n\nVocê continuará com acesso à plataforma como cliente. É possível reativar depois pelo seu perfil.')) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Removendo…'; }
+  try {
+    var r = await _sb.from('profiles')
+      .update({ type: 'client', updated_at: new Date().toISOString() })
+      .eq('id', uid);
+    if (r.error) throw r.error;
+    /* Remove card da DOM */
+    var card = btn ? btn.closest('.fl-list-card') : null;
+    if (card) {
+      card.style.transition = 'opacity 0.4s, transform 0.4s';
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.95)';
+      setTimeout(function(){ if (card.parentNode) card.parentNode.removeChild(card); }, 420);
+    }
+    /* Atualiza sessão local */
+    if (_session && _session.uid === uid) {
+      _session.type = 'client';
+      try {
+        var _hs = JSON.parse(localStorage.getItem('hw_session') || '{}');
+        _hs.type = 'client';
+        localStorage.setItem('hw_session', JSON.stringify(_hs));
+      } catch(x) {}
+    }
+    showToast('✅ Perfil removido da listagem de freelancers.', 'success');
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '🗑️ Remover da listagem'; }
+    showToast('Erro ao remover: ' + (e.message || 'tente novamente.'), 'error');
+  }
+}
+
 /* ── Gera iniciais (ex: "Luiz Coutinho" → "LC") ── */
 function _initials(name) {
   if (!name) return '?';
@@ -10689,12 +10723,17 @@ function _renderRealFreelancers() {
       var displayName = _nameParts.length > 1
         ? _nameParts[0] + ' ' + _nameParts[1].charAt(0).toUpperCase() + '.'
         : _nameParts[0] || p.name;
+      var _isOwnCard = _session && p.id === _session.uid;
+      var _ownBtns = _isOwnCard
+        ? '<button class="btn btn-sm" style="background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;margin-top:4px;" onclick="_removeFreelancerListing(\'' + (p.id||'') + '\', this)">🗑️ Remover da listagem</button>'
+        : '';
       card.innerHTML = [
         '<div class="fl-list-avatar" style="background:' + color + ';">' + initials + '</div>',
         '<div class="fl-list-body">',
           '<div class="fl-list-top">',
             '<span class="fl-list-name">' + displayName + '</span>',
             badge,
+            _isOwnCard ? '<span style="font-size:10px;background:#fef9c3;color:#854d0e;border-radius:20px;padding:2px 8px;font-weight:600;margin-left:6px;">Você</span>' : '',
           '</div>',
           '<div class="fl-list-role">' + (p.bio ? p.bio.split('.')[0] + ' — ' + location : 'Freelancer — ' + location) + '</div>',
           '<div class="fl-list-bio">' + (p.bio || '') + '</div>',
@@ -10706,8 +10745,9 @@ function _renderRealFreelancers() {
         '</div>',
         '<div class="fl-list-right">',
           '<div class="fl-list-rate">' + rate + rateSmall + '</div>',
-          '<button class="btn btn-green btn-sm" onclick="openContractModal({name:\'' + p.name.replace(/'/g,"\\'") + '\',role:\'Freelancer\',value:0,project:\'Meu Projeto\',deadline:\'30 dias\'})">Contratar</button>',
+          _isOwnCard ? '' : '<button class="btn btn-green btn-sm" onclick="openContractModal({name:\'' + p.name.replace(/'/g,"\\'") + '\',role:\'Freelancer\',value:0,project:\'Meu Projeto\',deadline:\'30 dias\'})">Contratar</button>',
           '<button class="btn btn-outline btn-sm" onclick="openFreelancerProfile(\'' + (p.id||'') + '\')">Ver Perfil</button>',
+          _ownBtns,
         '</div>'
       ].join('');
       /* Insere no topo do grid */
@@ -11614,7 +11654,13 @@ function _getPlanLabel() {
   }
 }
 function _getPlanCommission() {
-  return _isPro() ? 0.12 : 0.20;
+  /* Tabela de comissões por tipo de usuário e plano:
+     Freelancer → Grátis:20%  Premium(pro):10%  Elite(enterprise):8%
+     Cliente    → Básico:20%  Profissional(pro):12%  Enterprise:8%   */
+  var tier = _getUserPlan();      /* 'free' | 'pro' | 'enterprise' */
+  if (tier === 'enterprise') return 0.08;
+  if (tier === 'pro') return _isFL() ? 0.10 : 0.12;
+  return 0.20;
 }
 function _requirePro(featureName) {
   if (_isPro()) return true;
@@ -11734,15 +11780,23 @@ function openAdvancedReports() {
 /* Limites por tipo de usuário e plano — Infinity = sem limite.
    Ajuste aqui para alterar cotas sem tocar na lógica de aplicação. */
 var _PLAN_LIMITS = {
+  /* ── Clientes ──────────────────────────────────────────────────────
+     Básico (free)        : 3 projetos/mês, 0 convites,    comissão 20%
+     Profissional (pro)   : ilimitados,     ilimitados,     comissão 12%
+     Enterprise           : ilimitados,     ilimitados,     comissão  8% */
   client: {
-    free:       { projects_month: 3,        direct_invites: 0,        candidates_per_project: 10 },
-    pro:        { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity },
-    enterprise: { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity }
+    free:       { projects_month: 3,        direct_invites: 0,        candidates_per_project: 10,       commission: 0.20 },
+    pro:        { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity, commission: 0.12 },
+    enterprise: { projects_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity, commission: 0.08 }
   },
+  /* ── Freelancers ───────────────────────────────────────────────────
+     Grátis          : 10 propostas/mês, portfólio até 5, comissão 20%
+     Premium (pro)   : ilimitadas,       ilimitado,        comissão 10%
+     Elite (enterp.) : ilimitadas,       ilimitado,        comissão  8% */
   freelancer: {
-    free:       { proposals_month: 10,       portfolio_items: 5,        verified_badges: 0 },
-    pro:        { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: 1 },
-    enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity }
+    free:       { proposals_month: 10,       portfolio_items: 5,        verified_badges: 0,        commission: 0.20 },
+    pro:        { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: 1,        commission: 0.10 },
+    enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission: 0.08 }
   }
 };
 
@@ -11798,7 +11852,7 @@ function _getNextPlanInfo() {
       'Selo de verificação Premium no perfil', 'Saque via Pix'
     ]};
     if (tier === 'pro') return { key:'enterprise', name:'Elite', price:'R$ 99/mês', benefits:[
-      'Tudo do plano Premium', 'Comissão ainda menor: 7%', 'Prioridade nos resultados de busca',
+      'Tudo do plano Premium', 'Comissão ainda menor: 8%', 'Prioridade nos resultados de busca',
       "Badge 'Elite' exclusivo no perfil"
     ]};
     return null;
@@ -13358,7 +13412,7 @@ _IP.guide = {
        '<li>Use garantia para garantir recebimento</li>' +
        '<li>Cases reais aumentam convers&atilde;o em 3&times;</li></ul></div>' +
        '<div style="background:var(--green-light);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:13px;">' +
-       '<b style="color:var(--green-dark);">Taxa:</b> 12% &bull; Plano Pro: 8% &bull; Elite: 5%</div>' +
+       '<b style="color:var(--green-dark);">Comiss&atilde;o:</b> Gr&aacute;tis: 20% &bull; Premium: 10% &bull; Elite: 8%</div>' +
        '<button class="btn btn-green btn-block" onclick="closeModal(\'info\');showPage(\'pricing\')">Ver planos e taxas &rarr;</button>'
   },
   es: { t: 'C&oacute;mo Cobrar',
@@ -15459,7 +15513,8 @@ function openContractModal(opts) {
     rating:   0
   };
 
-  var _comm = (typeof _getPlanCommission === 'function') ? _getPlanCommission() : 0.20;
+  var _comm    = (typeof _getPlanCommission === 'function') ? _getPlanCommission() : 0.20;
+  var _commPct = Math.round(_comm * 100);  /* Ex: 0.20 → 20 */
   var fee   = Math.round(_contractCtx.value * _comm);
   var total = _contractCtx.value + fee;
   _contractCtx.fee   = fee;
@@ -15474,6 +15529,7 @@ function openContractModal(opts) {
   el = document.getElementById('c-value');         if(el) el.textContent = fmt(_contractCtx.value);
   el = document.getElementById('c-proj-name');     if(el) el.textContent = _contractCtx.project;
   el = document.getElementById('c-deadline');      if(el) el.textContent = _contractCtx.deadline;
+  el = document.getElementById('c-fee-label');     if(el) el.textContent = '💵 Taxa da plataforma (' + _commPct + '%)';
   el = document.getElementById('c-fee');           if(el) el.textContent = 'R$ ' + fmt(fee);
   el = document.getElementById('c-total');         if(el) el.textContent = 'R$ ' + fmt(total);
   el = document.getElementById('c-pix-amount');    if(el) el.textContent = total;
@@ -15956,6 +16012,20 @@ function switchDashPanel(panel) {
     if(pnl) pnl.style.display = p === panel ? 'block' : 'none';
   });
   if(panel === 'payments' && typeof _updatePaymentSummary === 'function') _updatePaymentSummary();
+  /* Sincroniza toggles de notificação com preferências salvas */
+  if(panel === 'settings') {
+    var _np = (typeof _hwNotifPrefs !== 'undefined') ? _hwNotifPrefs : {};
+    var _notifMap = {
+      'notif-proposals':  _np.email_proposals  !== false,
+      'notif-messages':   _np.email_messages   !== false,
+      'notif-contracts':  _np.email_contracts  !== false,
+      'notif-newsletter': _np.email_newsletter === true
+    };
+    Object.keys(_notifMap).forEach(function(id) {
+      var el = document.getElementById(id);
+      if(el) el.checked = _notifMap[id];
+    });
+  }
 }
 
 function switchContractView(view) {
@@ -21403,6 +21473,26 @@ async function confirmStripePayment() {
       if (_spContractId) {
         /* ── Pagamento de garantia de contrato ── */
         showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
+        /* Notificação por e-mail de contrato para ambas as partes */
+        if (typeof hwNotifyContract === 'function' && typeof _session !== 'undefined' && _session) {
+          var _cCtx = (typeof _contractCtx !== 'undefined') ? _contractCtx : {};
+          /* Notifica o freelancer (se tiver e-mail disponível) */
+          if (_cCtx.email) {
+            hwNotifyContract(_cCtx.email, 'paid', {
+              projectName: _cCtx.project || '',
+              partnerName: _session.name  || '',
+              value:       _cCtx.value    || 0
+            });
+          }
+          /* Notifica o próprio cliente (usuário logado) */
+          if (_session.email) {
+            hwNotifyContract(_session.email, 'paid', {
+              projectName: _cCtx.project || '',
+              partnerName: _cCtx.name    || '',
+              value:       _cCtx.value   || 0
+            });
+          }
+        }
         setTimeout(function() {
           closeStripePayment();
           if (typeof _goContractStep === 'function') _goContractStep(3);
@@ -21472,8 +21562,8 @@ if (document.readyState === 'loading') {
 <script>
 /* ── Configuração global ──────────────────────────────────────────── */
 var _HW_EMAIL_CONFIG = {
-  apiKey:  '',    /* ← Cole aqui: re_xxxxxxxxxx  (Resend API key) */
-  from:    'HereWork <contato@herework.com.br>',
+  apiKey:  '',   /* API key movida para variável de ambiente RESEND_API_KEY no Vercel (seguro) */
+  from:    'HereWork <onboarding@resend.dev>',
   replyTo: 'contato@herework.com.br',
   baseUrl: 'https://herework.com.br'
 };
@@ -21562,13 +21652,7 @@ function _hwCheckPref(type) {
 }
 
 async function _hwSendEmail(to, subject, html, text) {
-  if (!_HW_EMAIL_CONFIG.apiKey) {
-    console.info('[HW Email] Simulação — API key não configurada.\n  Para: ' + to + '\n  Assunto: ' + subject);
-    _hwLog('email_simulated', { to: to, subject: subject });
-    return { ok: false, reason: 'api_key_not_configured' };
-  }
-
-  /* Anti-duplicata */
+  /* Anti-duplicata (5 min) */
   var dk = to + '|' + subject;
   if (_hwEmailSentCache[dk] && Date.now() - _hwEmailSentCache[dk] < 300000) {
     _hwLog('email_duplicate', { to: to, subject: subject });
@@ -21577,23 +21661,14 @@ async function _hwSendEmail(to, subject, html, text) {
   _hwEmailSentCache[dk] = Date.now();
 
   try {
-    var res = await fetch('https://api.resend.com/emails', {
+    /* Chama o relay seguro no Vercel — API key fica server-side */
+    var res = await fetch('/api/send-email', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + _HW_EMAIL_CONFIG.apiKey
-      },
-      body: JSON.stringify({
-        from: _HW_EMAIL_CONFIG.from,
-        to: [to],
-        reply_to: _HW_EMAIL_CONFIG.replyTo,
-        subject: subject,
-        html: html,
-        text: text || subject
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to: to, subject: subject, html: html, text: text || subject })
     });
     var data = await res.json();
-    if (data.id) {
+    if (data.ok) {
       _hwLog('email_sent', { to: to, subject: subject, resend_id: data.id });
       return { ok: true, id: data.id };
     }
@@ -21601,8 +21676,8 @@ async function _hwSendEmail(to, subject, html, text) {
     if (res.status === 429) {
       setTimeout(function() { _hwSendEmail(to, subject, html, text); }, 5000);
     }
-    _hwLog('email_failed', { to: to, subject: subject, error: data.message, status: res.status });
-    return { ok: false, reason: data.message };
+    _hwLog('email_failed', { to: to, subject: subject, error: data.error, status: res.status });
+    return { ok: false, reason: data.error };
   } catch(e) {
     _hwLog('email_error', { to: to, subject: subject, error: e.message });
     return { ok: false, reason: e.message };
@@ -21771,10 +21846,10 @@ async function hwSendNewsletter(recipientEmail, data) {
 window._hwTriggerProposalEmail = function(projId, value, days, coverLetter) {
   if (!_hwCheckPref('email_proposals')) return;
   if (!(typeof _sbReady === 'function' && _sbReady()) || !projId) return;
-  _sb.from('projects').select('title,user_id').eq('id', projId).single().then(function(r) {
+  _sb.from('projects').select('title,client_id').eq('id', projId).single().then(function(r) {
     if (!r.data) return;
     var projTitle = r.data.title || 'Projeto';
-    var ownerId   = r.data.user_id;
+    var ownerId   = r.data.client_id;
     if (!ownerId) return;
     _sb.from('profiles').select('email').eq('id', ownerId).single().then(function(pr) {
       if (!pr.data || !pr.data.email) return;
