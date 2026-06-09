@@ -14494,8 +14494,11 @@ function _publisherChip(profile, createdAt) {
 }
 /* Cartão de projeto real (publicado por um usuário, vindo do Supabase) */
 function _realProjCard(p) {
-  var catLabel = p.category || '';
-  var catKey   = _catKeyFromLabel(catLabel);
+  /* p.category é a chave interna (ex.: 'design', 'ia-dados') — não um rótulo.
+     catKey é a chave usada em data-cat (para os filtros da página);
+     catLabel é o rótulo legível exibido no badge (ex.: 'Design & Criação'). */
+  var catKey   = p.category || '';
+  var catLabel = (CATS[catKey] && CATS[catKey].l) ? CATS[catKey].l : catKey;
   var bMin     = Number(p.budget_min || 0), bMax = Number(p.budget_max || 0);
   var budStr   = bMax ? ('R$ ' + Math.round(bMin).toLocaleString('pt-BR') + ' – ' + Math.round(bMax).toLocaleString('pt-BR')) : 'A combinar';
   var typeLbl  = p.type === 'recorrente' ? 'Recorrente' : p.type === 'hora' ? 'Por Hora' : 'Preço Fixo';
