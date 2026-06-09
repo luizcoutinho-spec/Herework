@@ -9998,6 +9998,14 @@ async function _sbRestoreSession() {
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
         _session.avatar_url = prof.avatar_url || null;
+        /* Plano do usuário: DB → auth metadata → localStorage → 'free' */
+        var _planRaw = prof.plan
+          || (_authMeta.plan || null)
+          || null;
+        try { _planRaw = _planRaw || localStorage.getItem('hw_plan'); } catch(x) {}
+        var _validPlans = ['free','pro','enterprise'];
+        _session.plan = (_validPlans.indexOf(_planRaw) !== -1) ? _planRaw : 'free';
+        try { localStorage.setItem('hw_plan', _session.plan); } catch(x) {}
         /* Persiste campos que _setSession() não inclui mas o formulário precisa */
         _session.state = prof.state || '';
         _session.city  = prof.city  || '';
@@ -11503,6 +11511,7 @@ function _setSession(name, email, type, isAdmin) {
   try {
     localStorage.setItem('hw_session', JSON.stringify({
       name: name, email: email, type: type, isAdmin: !!isAdmin,
+      plan: (_session && _session.plan) || null,
       ts: Date.now()
     }));
   } catch(e) {}
@@ -11995,6 +12004,10 @@ function _restoreSession() {
 
     /* Restaura silenciosamente — sem redirect para dashboard */
     _session = { name: data.name, email: data.email, type: data.type || 'client' };
+    /* Plano: hw_session.plan → hw_plan → 'free' */
+    var _rsPlan = data.plan || null;
+    try { _rsPlan = _rsPlan || localStorage.getItem('hw_plan'); } catch(x) {}
+    _session.plan = (['free','pro','enterprise'].indexOf(_rsPlan) !== -1) ? _rsPlan : 'free';
     /* Persiste state/city que dashSaveProfile() armazena em hw_session */
     if (data.state) _session.state = data.state;
     if (data.city)  _session.city  = data.city;
@@ -14160,6 +14173,46 @@ function submitCardPayment() {
   closeModal('payment');
   openStripePayment({ amount: amount, contractId: window._activeContractId||'', description: desc, title: desc });
 }
+/* Ativa o plano na sessão, localStorage e Supabase auth metadata */
+function _activatePlan(planName) {
+  if (!planName) return;
+  /* Mapeia nome comercial → tier interno */
+  var tierMap = {
+    'profissional': 'pro',
+    'professional': 'pro',
+    'premium':      'pro',
+    'elite':        'enterprise',
+    'enterprise':   'enterprise',
+    'pro':          'pro'
+  };
+  var tier = tierMap[planName.toLowerCase()] || 'pro';
+
+  /* 1. Atualiza sessão em memória */
+  if (_session) _session.plan = tier;
+
+  /* 2. Persiste em localStorage (hw_plan + hw_session) */
+  try { localStorage.setItem('hw_plan', tier); } catch(e) {}
+  try {
+    var _hs = JSON.parse(localStorage.getItem('hw_session') || '{}');
+    _hs.plan = tier;
+    localStorage.setItem('hw_session', JSON.stringify(_hs));
+  } catch(e) {}
+
+  /* 3. Persiste no Supabase auth metadata (cross-device) */
+  if (_sbReady()) {
+    _sb.auth.updateUser({ data: { plan: tier, plan_name: planName } })
+      .catch(function(e){ console.warn('_activatePlan updateUser:', e); });
+  }
+
+  /* 4. Tenta gravar na tabela profiles (se coluna existir) */
+  if (_sbReady() && _session && _session.uid) {
+    _sb.from('profiles').update({ plan: tier }).eq('id', _session.uid)
+      .catch(function(e){ /* coluna pode não existir — silencioso */ });
+  }
+
+  console.info('[HereWork] Plano ativado:', tier, '(' + planName + ')');
+}
+
 function _showPaySuccess(method) {
   var cnt = document.getElementById('pay-content'); if(cnt) cnt.style.display='none';
   var suc = document.getElementById('pay-success');
@@ -14171,6 +14224,8 @@ function _showPaySuccess(method) {
     ? 'Pagamento PIX confirmado! Seu plano foi ativado. Você receberá um e-mail de confirmação em instantes.'
     : 'Pagamento aprovado pela operadora. Seu plano foi ativado. Você receberá um e-mail com a nota fiscal em breve.';
   if(suc) { suc.style.display='flex'; setTimeout(function(){ suc.classList.add('show'); }, 20); }
+  /* Ativar plano na sessão (evita que o usuário continue vendo limites do plano gratuito) */
+  if (window._payCtx && window._payCtx.plan) _activatePlan(window._payCtx.plan);
   showToast((method==='pix'?'⚡ PIX confirmado!':'💳 Pagamento aprovado!') + ' Plano ativado com sucesso.', 'success');
 }
 
@@ -21344,12 +21399,22 @@ async function confirmStripePayment() {
       // Sucesso!
       document.getElementById('sp-element-container').style.display = 'none';
       document.getElementById('sp-success').style.display           = 'block';
-      showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
 
-      setTimeout(function() {
-        closeStripePayment();
-        if (typeof _goContractStep === 'function') _goContractStep(3);
-      }, 2500);
+      if (_spContractId) {
+        /* ── Pagamento de garantia de contrato ── */
+        showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
+        setTimeout(function() {
+          closeStripePayment();
+          if (typeof _goContractStep === 'function') _goContractStep(3);
+        }, 2500);
+      } else {
+        /* ── Pagamento de assinatura de plano ── */
+        if (window._payCtx && window._payCtx.plan) _activatePlan(window._payCtx.plan);
+        showToast('🎉 Plano ativado com sucesso! Aproveite todos os benefícios.', 'success');
+        setTimeout(function() {
+          closeStripePayment();
+        }, 2500);
+      }
     }
 
   } catch(err) {
