@@ -10111,7 +10111,8 @@ async function _sbCreateProject(data) {
     budget_max:    data.budgetMax,
     deadline_days: data.deadline,
     type:          data.type,
-    skills_needed: data.skills || []
+    skills_needed: data.skills || [],
+    status:        'open'
   }).select('*, profiles(name, avatar_url, rating)').single();
   if (r.error) { console.warn('_sbCreateProject error:', r.error.message || r.error); return null; }
   return r.data || null;
