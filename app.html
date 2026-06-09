@@ -10225,12 +10225,13 @@ async function _sbSaveProfile(data, extMeta) {
       if (r2.error) console.error('[sbSave] retry sem metadata erro:', r2.error.message);
     }
 
-    /* ── Tentativa 3: campos básicos ── */
+    /* ── Tentativa 3: campos básicos (inclui type para não perder mudança de tipo) ── */
     var safePayload = {
       id: uid, email: payload.email, name: payload.name, bio: payload.bio,
       city: payload.city, state: payload.state, phone: payload.phone,
       hourly_rate: payload.hourly_rate, skills: payload.skills, updated_at: payload.updated_at
     };
+    if (payload.type) safePayload.type = payload.type;
     var r3 = await _sb.from('profiles').upsert(safePayload, { onConflict: 'id' }).select('id');
     if (!r3.error && r3.data && r3.data.length > 0) return true;
     console.error('[sbSave] tentativa final erro:', r3.error && r3.error.message);
@@ -15944,8 +15945,16 @@ function dashSaveProfile() {
   /* ── Cache de perfil real (Supabase) — usado para fallback de tipo e skills ── */
   var _cachedProf = (_session && _session.uid && window._realProfileCache)
     ? (window._realProfileCache[_session.uid] || {}) : {};
-  /* type: explícito pelo usuário > cache Supabase > sessão (localStorage — pode ser stale) */
-  var newType  = _pendingAccountType || _cachedProf.type || (_session ? _session.type : 'client');
+  /* type: lê do botão ativo (fonte mais confiável) > _pendingAccountType > cache > sessão */
+  var newType = (function() {
+    /* Testa na ordem: 'both' primeiro (para não confundir com 'client'/'freelancer' parciais) */
+    var _types = ['both', 'freelancer', 'client'];
+    for (var _ti = 0; _ti < _types.length; _ti++) {
+      var _el = document.getElementById('actype-' + _types[_ti]);
+      if (_el && _el.classList.contains('active')) return _types[_ti];
+    }
+    return _pendingAccountType || _cachedProf.type || (_session ? _session.type : 'client');
+  })();
 
   var bioEl   = document.getElementById('profile-bio');
   var phoneEl = document.getElementById('profile-phone');
