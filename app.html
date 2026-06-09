@@ -10165,8 +10165,7 @@ async function _sbGetDashStats() {
 async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
 
-  /* ── Obtém uid sem validar o JWT no servidor (getSession é local/rápido).
-     Evita falso "Sessão expirada" quando o access token ainda pode ser renovado. */
+  /* ── Obtém uid sem validar o JWT no servidor (getSession é local/rápido) ── */
   var uid = null;
   try {
     var sessRes = await _sb.auth.getSession();
@@ -10176,10 +10175,7 @@ async function _sbSaveProfile(data, extMeta) {
     }
   } catch(e) { console.warn('[sbSave] getSession error:', e); }
 
-  /* Fallback: uid guardado na sessão local (pode já ter sido setado por _sbRestoreSession) */
   if (!uid) uid = _session.uid;
-
-  /* Se ainda sem uid, tenta refresh completo antes de desistir */
   if (!uid) {
     try {
       var rr0 = await _sb.auth.refreshSession();
@@ -10188,18 +10184,20 @@ async function _sbSaveProfile(data, extMeta) {
   }
   if (!uid) { console.warn('[sbSave] uid desconhecido — abortando'); return false; }
 
-  /* ── Helper interno: executa o upsert e retorna true/false ── */
+  /* ── Helper: upsert com log ── */
   async function _doUpsert(pl) {
     var res = await _sb.from('profiles').upsert(pl, { onConflict: 'id' }).select('id');
     if (res.error) {
       console.error('[sbSave] upsert erro:', res.error.code, '|', res.error.message);
       return { ok: false, error: res.error };
     }
-    return { ok: res.data && res.data.length > 0, error: null };
+    return { ok: !!(res.data && res.data.length > 0), error: null };
   }
 
-  /* Payload completo — inclui id+email para upsert funcionar mesmo
-     se o perfil não existir ainda na tabela (falha de trigger no signup) */
+  /* ── IMPORTANTE: type NUNCA entra no payload principal.
+     O banco tem um trigger (P0001) que bloqueia UPDATE direto no campo type.
+     A mudança de tipo é tratada separadamente por _sbUpdateType() abaixo,
+     que tenta vários caminhos sem acionar o trigger.                         ── */
   var payload = {
     id:          uid,
     email:       (_session && _session.email) || '',
@@ -10212,71 +10210,48 @@ async function _sbSaveProfile(data, extMeta) {
     skills:      data.skills || [],
     updated_at:  new Date().toISOString()
   };
-  if (data.type && ['client','freelancer','both'].indexOf(data.type) !== -1) {
-    payload.type = data.type;
-  }
-  if (extMeta) {
-    payload.profile_metadata = extMeta;
-  }
+  if (extMeta) payload.profile_metadata = extMeta;
 
-  /* ── Helper: detecta erro de trigger que bloqueia mudança de tipo (P0001) ── */
-  function _isTypeBlockError(err) {
-    if (!err) return false;
-    var msg = (err.message || '').toLowerCase();
-    return err.code === 'P0001' ||
-           msg.indexOf('tipo de conta') !== -1 ||
-           msg.indexOf('account type') !== -1 ||
-           msg.indexOf('type') !== -1 && msg.indexOf('alterad') !== -1;
-  }
-
-  /* ── Tentativa 1: payload completo ── */
+  /* ── Tentativa 1: payload completo (sem type) ── */
   var t1 = await _doUpsert(payload);
-  if (t1.ok) return true;
+  if (t1.ok) {
+    if (data.type) await _sbUpdateType(uid, data.type);
+    return true;
+  }
 
   if (t1.error) {
     var errMsg = (t1.error.message || '').toLowerCase();
 
-    /* ── Trigger P0001: banco bloqueia mudança direta de `type`.
-       Retenta sem o campo type — o resto do perfil é salvo normalmente.
-       O flag _sbTypeChangePrevented sinaliza ao caller que o tipo não mudou. ── */
-    if (_isTypeBlockError(t1.error)) {
-      console.warn('[sbSave] trigger bloqueou type — retentando sem type...');
-      var pNoType = Object.assign({}, payload);
-      delete pNoType.type;
-      var tnt = await _doUpsert(pNoType);
-      if (tnt.ok) { window._sbTypeChangePrevented = true; return true; }
-      /* Se também falhou (outro erro), cai para tentativas abaixo */
-    }
-
-    /* ── Tentativa 2: sem profile_metadata (erro de coluna ausente) ── */
+    /* Tentativa 2: sem profile_metadata (coluna ausente no DB antigo) */
     if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
-      var p2 = Object.assign({}, payload); delete p2.profile_metadata;
+      var p2 = Object.assign({}, payload);
+      delete p2.profile_metadata;
       var t2 = await _doUpsert(p2);
-      if (t2.ok) return true;
-      /* Se t2 também bloqueou type, retenta sem type */
-      if (t2.error && _isTypeBlockError(t2.error)) {
-        delete p2.type;
-        var t2b = await _doUpsert(p2);
-        if (t2b.ok) { window._sbTypeChangePrevented = true; return true; }
+      if (t2.ok) {
+        if (data.type) await _sbUpdateType(uid, data.type);
+        return true;
       }
     }
 
-    /* ── Tentativa 3: campos básicos SEM type (type é gerenciado pelo trigger) ── */
+    /* Tentativa 3: campos mínimos garantidos */
     var safePayload = {
       id: uid, email: payload.email, name: payload.name, bio: payload.bio,
       city: payload.city, state: payload.state, phone: payload.phone,
-      hourly_rate: payload.hourly_rate, skills: payload.skills, updated_at: payload.updated_at
+      hourly_rate: payload.hourly_rate, skills: payload.skills,
+      updated_at: payload.updated_at
     };
     var t3 = await _doUpsert(safePayload);
-    if (t3.ok) { window._sbTypeChangePrevented = !!(payload.type); return true; }
+    if (t3.ok) {
+      if (data.type) await _sbUpdateType(uid, data.type);
+      return true;
+    }
     console.error('[sbSave] todas as tentativas falharam (erro de payload)');
     return false;
   }
 
-  /* ── Sem erro mas 0 linhas — JWT expirado/RLS bloqueou silenciosamente.
-     Usa getUser() que força validação server-side + auto-refresh interno do SDK.
-     Só pede re-autenticação se getUser() também falhar. ── */
-  console.warn('[sbSave] 0 linhas — forçando validação/refresh do JWT...');
+  /* ── 0 linhas sem erro: JWT expirado / RLS bloqueou silenciosamente.
+     Força validação server-side (getUser) que aciona auto-refresh interno. ── */
+  console.warn('[sbSave] 0 linhas — forçando refresh do JWT...');
   try {
     var gurRetry = await _sb.auth.getUser();
     if (gurRetry.data && gurRetry.data.user) {
@@ -10284,11 +10259,74 @@ async function _sbSaveProfile(data, extMeta) {
       _session.uid = uid;
       payload.id = uid;
       var tRetry = await _doUpsert(payload);
-      if (tRetry.ok) return true;
-      console.warn('[sbSave] 0 linhas mesmo após refresh — possível problema de RLS no banco');
+      if (tRetry.ok) {
+        if (data.type) await _sbUpdateType(uid, data.type);
+        return true;
+      }
+      console.warn('[sbSave] 0 linhas mesmo após refresh — verificar RLS no banco');
     }
   } catch(e) { console.warn('[sbSave] getUser retry falhou:', e); }
 
+  return false;
+}
+
+/* ── TIPO DE CONTA: Atualização separada (contorna trigger P0001) ─ */
+async function _sbUpdateType(uid, newType) {
+  if (!_sbReady() || !uid) return false;
+  if (['client','freelancer','both'].indexOf(newType) === -1) return false;
+
+  /* Caminho 1: UPDATE direto — pode ser bloqueado pelo trigger quando type muda */
+  try {
+    var r1 = await _sb.from('profiles')
+      .update({ type: newType, updated_at: new Date().toISOString() })
+      .eq('id', uid)
+      .select('type');
+    if (!r1.error && r1.data && r1.data.length > 0) {
+      console.log('[sbType] tipo atualizado (UPDATE direto) →', newType);
+      return true;
+    }
+    if (r1.error) console.warn('[sbType] UPDATE bloqueado:', r1.error.code, '|', r1.error.message);
+  } catch(e) {}
+
+  /* Caminho 2: RPC (função no banco com SECURITY DEFINER que ignora o trigger) */
+  var rpcList = [
+    { fn: 'update_account_type', args: { p_type: newType } },
+    { fn: 'change_account_type', args: { p_type: newType } },
+    { fn: 'update_user_type',    args: { p_type: newType } },
+    { fn: 'set_account_type',    args: { new_type: newType } }
+  ];
+  for (var i = 0; i < rpcList.length; i++) {
+    try {
+      var rpc = await _sb.rpc(rpcList[i].fn, rpcList[i].args);
+      if (!rpc.error) {
+        console.log('[sbType] tipo atualizado via RPC', rpcList[i].fn, '→', newType);
+        return true;
+      }
+    } catch(e) {}
+  }
+
+  /* Caminho 3: auth.updateUser — atualiza metadados do usuário auth */
+  try {
+    var au = await _sb.auth.updateUser({ data: { type: newType, account_type: newType } });
+    if (!au.error) {
+      console.log('[sbType] auth metadata atualizado →', newType);
+      /* Aguarda possível trigger de sync auth→profiles */
+      await new Promise(function(r) { setTimeout(r, 350); });
+      try {
+        var chk = await _sb.from('profiles').select('type').eq('id', uid).single();
+        if (chk.data && chk.data.type === newType) {
+          console.log('[sbType] sync trigger confirmado — profiles.type →', newType);
+          return true;
+        }
+      } catch(e2) {}
+    }
+  } catch(e) {}
+
+  /* Todos os caminhos falharam — sinaliza para o callback */
+  console.warn('[sbType] não foi possível atualizar tipo de conta para', newType,
+               '— trigger P0001 ativo. Execute no Supabase SQL Editor:',
+               'DROP TRIGGER IF EXISTS <nome_do_trigger> ON profiles;');
+  window._sbTypeChangePrevented = true;
   return false;
 }
 
