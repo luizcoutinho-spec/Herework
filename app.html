@@ -10165,27 +10165,38 @@ async function _sbGetDashStats() {
 async function _sbSaveProfile(data, extMeta) {
   if (!_sbReady() || !_session) return false;
 
-  /* getUser() valida o JWT com o servidor (ao contrário de getSession() que
-     só lê o localStorage — pode retornar token expirado sem erro) */
+  /* ── Obtém uid sem validar o JWT no servidor (getSession é local/rápido).
+     Evita falso "Sessão expirada" quando o access token ainda pode ser renovado. */
   var uid = null;
   try {
-    var userRes = await _sb.auth.getUser();
-    if (userRes.data && userRes.data.user) {
-      uid = userRes.data.user.id;
+    var sessRes = await _sb.auth.getSession();
+    if (sessRes.data && sessRes.data.session && sessRes.data.session.user) {
+      uid = sessRes.data.session.user.id;
       _session.uid = uid;
-    } else {
-      /* JWT inválido ou expirado — tenta renovar */
-      var rr = await _sb.auth.refreshSession();
-      if (rr.data && rr.data.user) {
-        uid = rr.data.user.id;
-        _session.uid = uid;
-      }
     }
-  } catch(e) { console.warn('[sbSave] auth check error:', e); }
+  } catch(e) { console.warn('[sbSave] getSession error:', e); }
 
-  /* Último recurso: uid salvo na sessão local */
+  /* Fallback: uid guardado na sessão local (pode já ter sido setado por _sbRestoreSession) */
   if (!uid) uid = _session.uid;
+
+  /* Se ainda sem uid, tenta refresh completo antes de desistir */
+  if (!uid) {
+    try {
+      var rr0 = await _sb.auth.refreshSession();
+      if (rr0.data && rr0.data.user) { uid = rr0.data.user.id; _session.uid = uid; }
+    } catch(e) {}
+  }
   if (!uid) { console.warn('[sbSave] uid desconhecido — abortando'); return false; }
+
+  /* ── Helper interno: executa o upsert e retorna true/false ── */
+  async function _doUpsert(pl) {
+    var res = await _sb.from('profiles').upsert(pl, { onConflict: 'id' }).select('id');
+    if (res.error) {
+      console.error('[sbSave] upsert erro:', res.error.code, '|', res.error.message);
+      return { ok: false, error: res.error };
+    }
+    return { ok: res.data && res.data.length > 0, error: null };
+  }
 
   /* Payload completo — inclui id+email para upsert funcionar mesmo
      se o perfil não existir ainda na tabela (falha de trigger no signup) */
@@ -10208,23 +10219,18 @@ async function _sbSaveProfile(data, extMeta) {
     payload.profile_metadata = extMeta;
   }
 
-  /* ── Tentativa 1: payload completo ──
-     .select('id') é essencial: quando o RLS bloqueia silenciosamente
-     (JWT expirado), o Supabase retorna {data:[], error:null}.
-     Verificar data.length > 0 distingue salvo real de bloqueio silencioso. */
-  var r = await _sb.from('profiles').upsert(payload, { onConflict: 'id' }).select('id');
-  if (r.error) {
-    console.error('[sbSave] upsert erro:', r.error.code, '|', r.error.message);
-    var errMsg = (r.error.message || '').toLowerCase();
+  /* ── Tentativa 1: payload completo ── */
+  var t1 = await _doUpsert(payload);
+  if (t1.ok) return true;
 
-    /* ── Tentativa 2: sem profile_metadata ── */
+  /* ── Tentativa 2: sem profile_metadata (erro de coluna ausente) ── */
+  if (t1.error) {
+    var errMsg = (t1.error.message || '').toLowerCase();
     if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
-      delete payload.profile_metadata;
-      var r2 = await _sb.from('profiles').upsert(payload, { onConflict: 'id' }).select('id');
-      if (!r2.error && r2.data && r2.data.length > 0) return true;
-      if (r2.error) console.error('[sbSave] retry sem metadata erro:', r2.error.message);
+      var p2 = Object.assign({}, payload); delete p2.profile_metadata;
+      var t2 = await _doUpsert(p2);
+      if (t2.ok) return true;
     }
-
     /* ── Tentativa 3: campos básicos (inclui type para não perder mudança de tipo) ── */
     var safePayload = {
       id: uid, email: payload.email, name: payload.name, bio: payload.bio,
@@ -10232,20 +10238,28 @@ async function _sbSaveProfile(data, extMeta) {
       hourly_rate: payload.hourly_rate, skills: payload.skills, updated_at: payload.updated_at
     };
     if (payload.type) safePayload.type = payload.type;
-    var r3 = await _sb.from('profiles').upsert(safePayload, { onConflict: 'id' }).select('id');
-    if (!r3.error && r3.data && r3.data.length > 0) return true;
-    console.error('[sbSave] tentativa final erro:', r3.error && r3.error.message);
+    var t3 = await _doUpsert(safePayload);
+    if (t3.ok) return true;
+    console.error('[sbSave] todas as tentativas falharam (erro de payload)');
     return false;
   }
 
-  /* Sem erro — verificar se alguma linha foi realmente afetada */
-  if (!r.data || r.data.length === 0) {
-    /* RLS bloqueou silenciosamente (JWT expirado no servidor) */
-    console.warn('[sbSave] 0 linhas retornadas — JWT expirado, RLS bloqueou');
-    return false;
-  }
+  /* ── Sem erro mas 0 linhas — JWT expirado/RLS bloqueou silenciosamente.
+     Tenta renovar o token e retentar 1× antes de pedir re-autenticação. ── */
+  console.warn('[sbSave] 0 linhas — tentando renovar token...');
+  try {
+    var rrRetry = await _sb.auth.refreshSession();
+    if (rrRetry.data && rrRetry.data.user) {
+      uid = rrRetry.data.user.id;
+      _session.uid = uid;
+      payload.id = uid;
+      var tRetry = await _doUpsert(payload);
+      if (tRetry.ok) return true;
+    }
+  } catch(e) { console.warn('[sbSave] refresh falhou:', e); }
 
-  return true;
+  console.warn('[sbSave] RLS bloqueou mesmo após refresh — re-auth necessária');
+  return false;
 }
 
 /* ── MENSAGENS: Buscar ────────────────────────────────────────── */
