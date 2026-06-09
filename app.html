@@ -5048,6 +5048,54 @@ section { padding: 64px 0; }
           </div>
         </div>
 
+        <!-- ══════ LOCALIZAÇÃO ══════ -->
+        <div style="margin:16px 0 0;">
+          <div class="prof-section-divider" style="margin-top:18px;">
+            <span class="prof-section-title">&#128205; Localiza&ccedil;&atilde;o</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="profile-state">Estado</label>
+              <select class="form-select" id="profile-state" onchange="loadCitiesForState(this.value)">
+                <option value="">Selecione...</option>
+                <option value="AC">AC &mdash; Acre</option>
+                <option value="AL">AL &mdash; Alagoas</option>
+                <option value="AP">AP &mdash; Amap&aacute;</option>
+                <option value="AM">AM &mdash; Amazonas</option>
+                <option value="BA">BA &mdash; Bahia</option>
+                <option value="CE">CE &mdash; Cear&aacute;</option>
+                <option value="DF">DF &mdash; Distrito Federal</option>
+                <option value="ES">ES &mdash; Esp&iacute;rito Santo</option>
+                <option value="GO">GO &mdash; Goi&aacute;s</option>
+                <option value="MA">MA &mdash; Maranh&atilde;o</option>
+                <option value="MT">MT &mdash; Mato Grosso</option>
+                <option value="MS">MS &mdash; Mato Grosso do Sul</option>
+                <option value="MG">MG &mdash; Minas Gerais</option>
+                <option value="PA">PA &mdash; Par&aacute;</option>
+                <option value="PB">PB &mdash; Para&iacute;ba</option>
+                <option value="PR">PR &mdash; Paran&aacute;</option>
+                <option value="PE">PE &mdash; Pernambuco</option>
+                <option value="PI">PI &mdash; Piau&iacute;</option>
+                <option value="RJ">RJ &mdash; Rio de Janeiro</option>
+                <option value="RN">RN &mdash; Rio Grande do Norte</option>
+                <option value="RS">RS &mdash; Rio Grande do Sul</option>
+                <option value="RO">RO &mdash; Rond&ocirc;nia</option>
+                <option value="RR">RR &mdash; Roraima</option>
+                <option value="SC">SC &mdash; Santa Catarina</option>
+                <option value="SP">SP &mdash; S&atilde;o Paulo</option>
+                <option value="SE">SE &mdash; Sergipe</option>
+                <option value="TO">TO &mdash; Tocantins</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="profile-city">Cidade</label>
+              <select class="form-select" id="profile-city">
+                <option value="">Selecione o estado primeiro...</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         <!-- Completude do perfil -->
         <div class="profile-completion-wrap" id="profile-completion-wrap">
           <div style="flex-shrink:0;">
@@ -11236,8 +11284,8 @@ function submitLogin() {
         setTimeout(function() {
           _sbSaveProfile(_ps.data, _ps.meta).then(function(ok) {
             if (ok) {
-              var isFL = (_ps.type === 'freelancer' || _ps.type === 'both');
-              if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
+              /* Recarrega listagem sempre (mesmo padrão do _doSave principal) */
+              if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
               showToast('Perfil salvo com sucesso! ✓', 'success');
             } else {
               showToast('Erro ao salvar — execute as migrações do banco e tente novamente.', 'error');
