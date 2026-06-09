@@ -10005,7 +10005,10 @@ async function _sbRestoreSession() {
       var user = r.data.session.user;
       var prof = await _sbGetProfile(user.id);
       if (prof) {
-        _setSession(prof.name, prof.email, prof.type, prof.is_admin);
+        /* 'both' é armazenado em profile_metadata (enum account_type pode não ter 'both') */
+        var _effType = (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both')
+          ? 'both' : (prof.type || 'client');
+        _setSession(prof.name, prof.email, _effType, prof.is_admin);
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
         _session.avatar_url = prof.avatar_url || null;
@@ -10015,6 +10018,7 @@ async function _sbRestoreSession() {
         /* Cache do perfil completo — usado para fallback de tipo/skills no formulário */
         window._realProfileCache = window._realProfileCache || {};
         window._realProfileCache[user.id] = prof;
+        window._realProfileCache[user.id].type = _effType; /* usa tipo efetivo (pode ser 'both') */
       }
     }
     /* Listener para mudanças de autenticação */
@@ -10283,9 +10287,18 @@ async function _sbUpdateType(uid, newType) {
   if (!_sbReady() || !uid) return false;
   if (['client','freelancer','both'].indexOf(newType) === -1) return false;
 
+  /* 'both' é salvo em profile_metadata.account_type_override pelo upsert principal.
+     A coluna type (enum) pode não ter o valor 'both' — não tenta UPDATE na coluna. */
+  if (newType === 'both') {
+    console.log('[sbType] tipo "both" persistido via profile_metadata.account_type_override');
+    return true;
+  }
+
   /* Lê o tipo atual do cache local para decidir a estratégia */
   var _cachedType = (_session && _session.uid && window._realProfileCache && window._realProfileCache[_session.uid])
     ? (window._realProfileCache[_session.uid].type || null) : null;
+  /* Se vinha de 'both', o tipo real no banco pode ser 'client'/'freelancer'; ignora como cachedType */
+  if (_cachedType === 'both') _cachedType = null;
 
   /* Se tipo não mudou, não é necessário atualizar */
   if (_cachedType && _cachedType === newType) return true;
@@ -16080,6 +16093,9 @@ function dashSaveProfile() {
 
   /* Mescla: só substitui campos que têm elemento no DOM */
   var extMeta = JSON.parse(JSON.stringify(existingMeta));
+  /* 'both' fica em profile_metadata (enum pode não ter 'both'); outros tipos limpam o override */
+  if (newType === 'both') extMeta.account_type_override = 'both';
+  else delete extMeta.account_type_override;
   var _metaPairs = [
     ['profile-title','title'], ['profile-bio','bio'], ['profile-url','linkedin_url'],
     ['profile-portfolio-url','portfolio_url'], ['profile-timezone','timezone'],
