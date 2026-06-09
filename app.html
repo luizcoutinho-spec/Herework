@@ -9953,6 +9953,9 @@ async function _sbRestoreSession() {
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
         _session.avatar_url = prof.avatar_url || null;
+        /* Persiste campos que _setSession() não inclui mas o formulário precisa */
+        _session.state = prof.state || '';
+        _session.city  = prof.city  || '';
         /* Cache do perfil completo — usado para fallback de tipo/skills no formulário */
         window._realProfileCache = window._realProfileCache || {};
         window._realProfileCache[user.id] = prof;
@@ -11784,6 +11787,9 @@ function _restoreSession() {
 
     /* Restaura silenciosamente — sem redirect para dashboard */
     _session = { name: data.name, email: data.email, type: data.type || 'client' };
+    /* Persiste state/city que dashSaveProfile() armazena em hw_session */
+    if (data.state) _session.state = data.state;
+    if (data.city)  _session.city  = data.city;
 
     var chip     = document.getElementById('nav-user-chip');
     var loginBtn = document.getElementById('nav-login-btn');
@@ -15484,8 +15490,13 @@ function openDashboard() {
   el = document.getElementById('dash-member-since');   if(el) el.textContent = new Date().getFullYear();
   el = document.getElementById('profile-name');        if(el) el.value = name;
   el = document.getElementById('profile-email');       if(el) el.value = email;
+  /* Estado e cidade: _session (persistido em save) > cache Supabase > vazio */
+  var _odCache = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
   var stEl = document.getElementById('profile-state');
-  if(stEl && _session && _session.state) stEl.value = _session.state;
+  var ctEl = document.getElementById('profile-city');
+  if (stEl) stEl.value = (_session && _session.state) || _odCache.state || '';
+  if (ctEl) ctEl.value = (_session && _session.city)  || _odCache.city  || '';
 
   el = document.getElementById('dct-client-count'); if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
   el = document.getElementById('dct-fl-count');     if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
@@ -15716,8 +15727,16 @@ window.profileUpdateCompletion = profileUpdateCompletion;
 
 /* ── INIT EXTENDED: preenche campos ao abrir ────────────────────── */
 function _initProfileExtended() {
+  /* Cache Supabase — fonte autoritativa quando localStorage está vazio ou foi limpo */
+  var _rpc = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
+
   var meta = {};
   try { meta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x) {}
+  /* Se hw_profile_meta vazio (novo navegador / localStorage limpo), usa profile_metadata do Supabase */
+  if (Object.keys(meta).length === 0 && _rpc.profile_metadata && typeof _rpc.profile_metadata === 'object') {
+    try { meta = JSON.parse(JSON.stringify(_rpc.profile_metadata)); } catch(x) {}
+  }
 
   /* ── Accordion de áreas ── */
   /* Restaura subcategorias salvas */
@@ -15726,9 +15745,7 @@ function _initProfileExtended() {
   } else {
     _selectedSubareas = [];
   }
-  /* Restaura skills — localStorage primeiro, depois cache Supabase como fallback */
-  var _rpc = (_session && _session.uid && window._realProfileCache)
-    ? (window._realProfileCache[_session.uid] || {}) : {};
+  /* Restaura skills — meta (localStorage ou profile_metadata Supabase) e depois coluna skills direto */
   if (meta.skills && Array.isArray(meta.skills) && meta.skills.length) {
     _selectedSkills = meta.skills.slice();
   } else if (_rpc.skills && Array.isArray(_rpc.skills) && _rpc.skills.length) {
@@ -15751,9 +15768,12 @@ function _initProfileExtended() {
   var portEl = document.getElementById('profile-portfolio-url');
   if (portEl && meta.portfolio_url) portEl.value = meta.portfolio_url;
 
-  /* Valor hora / mínimo */
+  /* Valor hora / mínimo — meta.hourly_rate (localStorage/profile_metadata) OU coluna direta Supabase */
   var hrEl = document.getElementById('profile-hourly-rate');
-  if (hrEl && meta.hourly_rate) hrEl.value = meta.hourly_rate;
+  if (hrEl) {
+    var _hrFb = meta.hourly_rate || (_rpc.hourly_rate ? String(_rpc.hourly_rate) : '');
+    if (_hrFb) hrEl.value = _hrFb;
+  }
   var pmEl = document.getElementById('profile-project-min');
   if (pmEl && meta.project_min) pmEl.value = meta.project_min;
 
@@ -15830,12 +15850,10 @@ function _initProfileExtended() {
     if (pEl && meta['portfolio_' + n]) pEl.value = meta['portfolio_' + n];
   });
 
-  /* Bio — carrega do cache Supabase (prioritário) ou localStorage */
+  /* Bio — cache Supabase prioritário (coluna direta), depois meta (profile_metadata/localStorage) */
   var bioEl = document.getElementById('profile-bio');
   if (bioEl) {
-    var _cProf = (_session && _session.uid && window._realProfileCache)
-      ? (window._realProfileCache[_session.uid] || {}) : {};
-    var _bioVal = _cProf.bio || meta.bio || '';
+    var _bioVal = _rpc.bio || meta.bio || '';
     if (_bioVal) { bioEl.value = _bioVal; profileUpdateBioCount(bioEl); }
   }
 
