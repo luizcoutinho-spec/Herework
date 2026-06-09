@@ -10275,20 +10275,33 @@ async function _sbUpdateType(uid, newType) {
   if (!_sbReady() || !uid) return false;
   if (['client','freelancer','both'].indexOf(newType) === -1) return false;
 
-  /* Caminho 1: UPDATE direto — pode ser bloqueado pelo trigger quando type muda */
-  try {
-    var r1 = await _sb.from('profiles')
-      .update({ type: newType, updated_at: new Date().toISOString() })
-      .eq('id', uid)
-      .select('type');
-    if (!r1.error && r1.data && r1.data.length > 0) {
-      console.log('[sbType] tipo atualizado (UPDATE direto) →', newType);
-      return true;
-    }
-    if (r1.error) console.warn('[sbType] UPDATE bloqueado:', r1.error.code, '|', r1.error.message);
-  } catch(e) {}
+  /* Lê o tipo atual do cache local para decidir a estratégia */
+  var _cachedType = (_session && _session.uid && window._realProfileCache && window._realProfileCache[_session.uid])
+    ? (window._realProfileCache[_session.uid].type || null) : null;
 
-  /* Caminho 2: RPC (função no banco com SECURITY DEFINER que ignora o trigger) */
+  /* Se tipo não mudou, não é necessário atualizar */
+  if (_cachedType && _cachedType === newType) return true;
+
+  /* Caminho 1: UPDATE direto.
+     Só tenta quando NÃO sabemos o tipo atual (sem cache) — se sabemos que o tipo
+     está mudando, o trigger P0001 vai bloquear e gera um 400 desnecessário. */
+  if (!_cachedType) {
+    try {
+      var r1 = await _sb.from('profiles')
+        .update({ type: newType, updated_at: new Date().toISOString() })
+        .eq('id', uid)
+        .select('type');
+      if (!r1.error && r1.data && r1.data.length > 0) {
+        console.log('[sbType] tipo atualizado (UPDATE direto) →', newType);
+        return true;
+      }
+      if (r1.error && r1.error.code !== 'P0001') {
+        console.warn('[sbType] UPDATE erro inesperado:', r1.error.code, '|', r1.error.message);
+      }
+    } catch(e) {}
+  }
+
+  /* Caminho 2: RPC com SECURITY DEFINER (bypassa o trigger se existir no banco) */
   var rpcList = [
     { fn: 'update_account_type', args: { p_type: newType } },
     { fn: 'change_account_type', args: { p_type: newType } },
@@ -10305,27 +10318,26 @@ async function _sbUpdateType(uid, newType) {
     } catch(e) {}
   }
 
-  /* Caminho 3: auth.updateUser — atualiza metadados do usuário auth */
+  /* Caminho 3: auth.updateUser — atualiza metadados e aguarda possível sync */
   try {
     var au = await _sb.auth.updateUser({ data: { type: newType, account_type: newType } });
     if (!au.error) {
-      console.log('[sbType] auth metadata atualizado →', newType);
-      /* Aguarda possível trigger de sync auth→profiles */
-      await new Promise(function(r) { setTimeout(r, 350); });
+      await new Promise(function(r) { setTimeout(r, 400); });
       try {
         var chk = await _sb.from('profiles').select('type').eq('id', uid).single();
         if (chk.data && chk.data.type === newType) {
-          console.log('[sbType] sync trigger confirmado — profiles.type →', newType);
+          console.log('[sbType] profiles.type sincronizado via auth →', newType);
           return true;
         }
       } catch(e2) {}
     }
   } catch(e) {}
 
-  /* Todos os caminhos falharam — sinaliza para o callback */
-  console.warn('[sbType] não foi possível atualizar tipo de conta para', newType,
-               '— trigger P0001 ativo. Execute no Supabase SQL Editor:',
-               'DROP TRIGGER IF EXISTS <nome_do_trigger> ON profiles;');
+  /* Todos os caminhos falharam: trigger P0001 ativo sem bypass disponível */
+  console.warn('[sbType] trigger P0001 bloqueia mudança de tipo.',
+    'Para habilitar, execute no Supabase SQL Editor:\n',
+    'SELECT trigger_name FROM information_schema.triggers WHERE event_object_table=\'profiles\';\n',
+    'DROP TRIGGER IF EXISTS <nome> ON profiles;');
   window._sbTypeChangePrevented = true;
   return false;
 }
@@ -16185,7 +16197,7 @@ function dashSaveProfile() {
       if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
 
       if (_typeBlocked) {
-        showToast('Perfil salvo! ⚠️ Tipo de conta não pode ser alterado agora — tente mais tarde.', 'info');
+        showToast('Perfil salvo ✓  —  tipo de conta requer permissão especial no banco (ver console).', 'info');
       } else {
         showToast('Perfil salvo com sucesso! ✓', 'success');
       }
