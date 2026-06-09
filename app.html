@@ -10005,8 +10005,11 @@ async function _sbRestoreSession() {
       var user = r.data.session.user;
       var prof = await _sbGetProfile(user.id);
       if (prof) {
-        /* 'both' é armazenado em profile_metadata (enum account_type pode não ter 'both') */
-        var _effType = (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both')
+        /* 'both' é armazenado em auth user_metadata (enum profiles.type não tem 'both').
+           Prioridade: auth metadata → profile_metadata → type column */
+        var _authMeta = (user.user_metadata) || {};
+        var _effType = (_authMeta.account_type_override === 'both' ||
+                        (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both'))
           ? 'both' : (prof.type || 'client');
         _setSession(prof.name, prof.email, _effType, prof.is_admin);
         /* Guardar id e foto de perfil do Supabase na sessão */
@@ -10287,12 +10290,21 @@ async function _sbUpdateType(uid, newType) {
   if (!_sbReady() || !uid) return false;
   if (['client','freelancer','both'].indexOf(newType) === -1) return false;
 
-  /* 'both' é salvo em profile_metadata.account_type_override pelo upsert principal.
-     A coluna type (enum) pode não ter o valor 'both' — não tenta UPDATE na coluna. */
+  /* 'both' não existe na enum account_type do banco — persiste em auth user_metadata
+     (garantido pelo Supabase Auth, sem precisar de coluna extra na tabela profiles). */
   if (newType === 'both') {
-    console.log('[sbType] tipo "both" persistido via profile_metadata.account_type_override');
+    try {
+      var _auBoth = await _sb.auth.updateUser({ data: { account_type_override: 'both' } });
+      if (_auBoth.error) console.warn('[sbType] auth metadata write falhou:', _auBoth.error.message);
+    } catch(e) {}
+    console.log('[sbType] tipo "both" salvo em auth user_metadata.account_type_override');
     return true;
   }
+
+  /* Ao salvar 'client' ou 'freelancer', limpa o override de 'both' se estava ativo */
+  try {
+    var _auClr = await _sb.auth.updateUser({ data: { account_type_override: null } });
+  } catch(e) {}
 
   /* Lê o tipo atual do cache local para decidir a estratégia */
   var _cachedType = (_session && _session.uid && window._realProfileCache && window._realProfileCache[_session.uid])
