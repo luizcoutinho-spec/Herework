@@ -10517,12 +10517,18 @@ function _renderRealFreelancers() {
       window._realProfileCache = window._realProfileCache || {};
       window._realProfileCache[p.id] = p;
       var skills = p.skills || [];
-      /* Determina categoria real via profile_metadata.selected_subareas */
+      /* Determina categorias reais via profile_metadata.selected_subareas
+         — suporta múltiplas categorias (data-cat espaço-separado) */
       var catKey = 'outra';
       try {
         var _pm = p.profile_metadata;
         if (_pm && _pm.selected_subareas && _pm.selected_subareas.length) {
-          catKey = _pm.selected_subareas[0].cat || 'outra';
+          var _catSet = {};
+          _pm.selected_subareas.forEach(function(sa) {
+            if (sa && sa.cat) _catSet[sa.cat] = true;
+          });
+          var _catKeys = Object.keys(_catSet);
+          catKey = _catKeys.length ? _catKeys.join(' ') : 'outra';
         }
       } catch(_e) {}
       card.setAttribute('data-cat', catKey);
@@ -10765,12 +10771,14 @@ function applyAllFilters(prefix) {
     if (searchTerm && _norm(card.textContent).indexOf(searchTerm) === -1) show = false;
 
     if (show && selCats.length > 0) {
-      /* Normaliza categoria do card: aplica mapa de retrocompatibilidade */
-      var rawCat  = card.getAttribute('data-cat') || '';
-      var cardCat = (typeof _CAT_COMPAT !== 'undefined' && _CAT_COMPAT[rawCat]) ? _CAT_COMPAT[rawCat] : rawCat;
+      /* Suporta data-cat multi-valor (espaço-separado): freelancer aparece em TODAS as suas categorias */
+      var rawCats = (card.getAttribute('data-cat') || '').split(/\s+/).filter(Boolean);
       var catMatch = false;
-      selCats.forEach(function(sc) {
-        if (sc === cardCat) { catMatch = true; }
+      rawCats.forEach(function(rawCat) {
+        var cardCat = (typeof _CAT_COMPAT !== 'undefined' && _CAT_COMPAT[rawCat]) ? _CAT_COMPAT[rawCat] : rawCat;
+        selCats.forEach(function(sc) {
+          if (sc === cardCat) { catMatch = true; }
+        });
       });
       if (!catMatch) show = false;
     }
