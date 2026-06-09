@@ -15704,6 +15704,13 @@ function dashSetAccountType(type) {
     var el = document.getElementById('actype-' + t);
     if (el) el.classList.toggle('active', t === type);
   });
+  /* Badge abaixo do nome: atualiza em tempo real ao clicar */
+  var badge = document.getElementById('dash-profile-type');
+  if (badge) {
+    badge.textContent = type === 'both'       ? '🔄 Cliente + Freelancer'
+                      : type === 'freelancer' ? '🧑 Freelancer'
+                                              : '🏢 Cliente';
+  }
   /* Campos exclusivos de freelancer: mostrar/ocultar conforme tipo */
   var isFL = (type === 'freelancer' || type === 'both');
   var flFields = document.getElementById('profile-fl-fields');
