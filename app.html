@@ -4342,7 +4342,7 @@ section { padding: 64px 0; }
           data-placeholder-es="¿Qué necesitas? Ej: Logo, Sitio web, Redacción..."
           placeholder="O que você precisa? Ex: Logotipo, Site, Redação..."
         >
-        <select class="hero-search-select" id="hero-cat-select">
+        <select class="hero-search-select" id="hero-cat-select" aria-label="Categoria para busca">
           <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
           <option value="ia-dados" data-pt="IA, Dados &amp; Analytics" data-es="IA, Datos &amp; Analytics">IA, Dados &amp; Analytics</option>
           <option value="design" data-pt="Design &amp; Criação" data-es="Diseño &amp; Creación">Design &amp; Criação</option>
@@ -5007,7 +5007,7 @@ section { padding: 64px 0; }
               <span>&#128247;</span>
               <span>Alterar</span>
             </div>
-            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" onchange="profilePhotoSelected(this)">
+            <input type="file" id="profile-photo-input" accept="image/*" style="display:none;" aria-label="Foto de perfil" onchange="profilePhotoSelected(this)">
           </div>
           <div class="profile-avatar-info">
             <div class="name" id="dash-profile-name">Usu&aacute;rio</div>
@@ -5279,6 +5279,7 @@ section { padding: 64px 0; }
           </label>
           <input class="form-input" id="profile-tools-input" type="text"
             placeholder="Ex: Figma, VS Code, Notion, Jira, Photoshop, Slack..."
+            aria-label="Adicionar ferramenta de IA"
             onkeydown="profileAddTool(event)">
           <div id="profile-tools-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:0;"></div>
           <input type="hidden" id="profile-tools" value="[]">
@@ -5336,9 +5337,9 @@ section { padding: 64px 0; }
         </div>
         <label class="form-label" style="margin-bottom:8px;">&#128279; Links de Portf&oacute;lio</label>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          <input class="form-input" id="profile-portfolio-1" type="url" placeholder="&#128279; GitHub, Behance, Dribbble &mdash; link principal">
-          <input class="form-input" id="profile-portfolio-2" type="url" placeholder="&#128279; YouTube, case study, artigo t&eacute;cnico">
-          <input class="form-input" id="profile-portfolio-3" type="url" placeholder="&#128279; Outro link relevante (opcional)">
+          <input class="form-input" id="profile-portfolio-1" type="url" placeholder="&#128279; GitHub, Behance, Dribbble &mdash; link principal" aria-label="Link de portfólio principal">
+          <input class="form-input" id="profile-portfolio-2" type="url" placeholder="&#128279; YouTube, case study, artigo t&eacute;cnico" aria-label="Link de portfólio secundário">
+          <input class="form-input" id="profile-portfolio-3" type="url" placeholder="&#128279; Outro link relevante (opcional)" aria-label="Link de portfólio adicional">
         </div>
 
         </div><!-- /profile-fl-fields -->
@@ -5721,11 +5722,13 @@ section { padding: 64px 0; }
               <div style="display:flex;gap:4px;align-items:flex-end;">
                 <input class="form-input" id="bank-account" type="text" maxlength="12"
                   placeholder="00000000" style="flex:1;"
+                  aria-label="Número da conta"
                   oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)">
                 <div style="display:flex;flex-direction:column;gap:2px;">
                   <span style="font-size:10px;color:var(--text-4);text-align:center;white-space:nowrap;">D&iacute;gito</span>
                   <input class="form-input" id="bank-account-digit" type="text" maxlength="1"
                     placeholder="0" style="width:40px;text-align:center;padding:8px 4px;"
+                    aria-label="Dígito verificador da conta"
                     oninput="this.value=this.value.replace(/[^0-9xX]/g,'').slice(0,1).toUpperCase()">
                 </div>
               </div>
@@ -5924,7 +5927,7 @@ section { padding: 64px 0; }
       <div class="blog-search-wrap">
         <span class="blog-search-ico">&#128269;</span>
         <input class="blog-search-input" id="blog-search" type="text" maxlength="100"
-          placeholder="Buscar artigos..." oninput="blogSearch(this.value)">
+          placeholder="Buscar artigos..." aria-label="Buscar artigos no blog" oninput="blogSearch(this.value)">
       </div>
     </div>
   </div>
@@ -5951,7 +5954,7 @@ section { padding: 64px 0; }
       <div class="blog-newsletter-title">Receba os melhores conte&uacute;dos</div>
       <div class="blog-newsletter-sub">Artigos sobre freelancing, tecnologia e neg&oacute;cios toda semana.<br>Mais de 12.000 profissionais j&aacute; assinaram.</div>
       <div class="blog-newsletter-form">
-        <input class="blog-newsletter-input" id="blog-nl-email" type="email" placeholder="seu@email.com">
+        <input class="blog-newsletter-input" id="blog-nl-email" type="email" placeholder="seu@email.com" aria-label="E-mail para newsletter">
         <button class="btn btn-primary" onclick="subscribeBlog()">Assinar gr&aacute;tis</button>
       </div>
       <div style="font-size:11px;color:#64748b;margin-top:10px;">Sem spam &nbsp;&middot;&nbsp; Cancele quando quiser &nbsp;&middot;&nbsp; Conforme a LGPD</div>
@@ -5977,7 +5980,7 @@ section { padding: 64px 0; }
             data-placeholder-es="Buscar por nombre, habilidad o servicio..."
             placeholder="Buscar por nome, habilidade ou serviço...">
         </div>
-        <select id="fl-banner-cat" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+        <select id="fl-banner-cat" aria-label="Filtrar freelancers por categoria" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
           <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
           <option value="ia-dados" data-pt="IA, Dados &amp; Analytics" data-es="IA, Datos &amp; Analytics">IA, Dados &amp; Analytics</option>
           <option value="design" data-pt="Design &amp; Criação" data-es="Diseño &amp; Creación">Design &amp; Criação</option>
@@ -6414,7 +6417,7 @@ section { padding: 64px 0; }
             data-placeholder-es="Buscar proyectos por palabra clave..."
             placeholder="Buscar projetos por palavra-chave...">
         </div>
-        <select id="proj-banner-cat" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
+        <select id="proj-banner-cat" aria-label="Filtrar projetos por categoria" style="height:44px;padding:0 14px;border:1.5px solid var(--border-2);border-radius:var(--radius);font-size:14px;background:#fff;color:var(--text);outline:none;cursor:pointer;">
           <option data-pt="Todas as categorias" data-es="Todas las categorías">Todas as categorias</option>
           <option value="ia-dados" data-pt="IA, Dados &amp; Analytics" data-es="IA, Datos &amp; Analytics">IA, Dados &amp; Analytics</option>
           <option value="design" data-pt="Design &amp; Criação" data-es="Diseño &amp; Creación">Design &amp; Criação</option>
@@ -7904,6 +7907,7 @@ section { padding: 64px 0; }
           <div style="display:flex;gap:8px;align-items:center;">
             <input type="password" id="adm-mig-pat"
               placeholder="sbp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              aria-label="Token de acesso Supabase"
               style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--radius);font-size:12px;font-family:monospace;background:var(--bg);color:var(--text);"
               oninput="_admSavePAT(this.value)">
             <button class="adm-mini-btn danger" onclick="_admClearPAT()">Limpar</button>
@@ -7932,6 +7936,7 @@ section { padding: 64px 0; }
       </div>
       <textarea id="adm-sql-console"
         placeholder="-- Cole aqui qualquer SQL para executar no banco&#10;-- Ex.: SELECT * FROM projects LIMIT 5;"
+        aria-label="Console SQL do administrador"
         style="width:100%;height:140px;padding:14px 16px;border:none;outline:none;font-family:monospace;font-size:12px;background:var(--surface);color:var(--text);resize:vertical;box-sizing:border-box;border-bottom:1px solid var(--border-2);"></textarea>
       <div id="adm-sql-result"
         style="display:none;padding:12px 16px;font-family:monospace;font-size:11px;background:var(--bg);overflow-x:auto;max-height:220px;overflow-y:auto;"></div>
@@ -8123,10 +8128,10 @@ section { padding: 64px 0; }
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:12px;color:var(--text-3);white-space:nowrap;font-weight:600;">R$</span>
             <input class="form-input" id="proj-budget-min" type="number" min="0" placeholder="M&iacute;n"
-              style="flex:1;padding:8px 10px;" oninput="pubSyncBudget()">
+              style="flex:1;padding:8px 10px;" aria-label="Orçamento mínimo do projeto" oninput="pubSyncBudget()">
             <span style="color:var(--text-4);font-weight:600;">&mdash;</span>
             <input class="form-input" id="proj-budget-max" type="number" min="0" placeholder="M&aacute;x"
-              style="flex:1;padding:8px 10px;" oninput="pubSyncBudget()">
+              style="flex:1;padding:8px 10px;" aria-label="Orçamento máximo do projeto" oninput="pubSyncBudget()">
           </div>
           <label style="display:flex;align-items:center;gap:6px;margin-top:7px;font-size:12px;color:var(--text-3);cursor:pointer;">
             <input type="checkbox" id="proj-budget-tbd" onchange="pubToggleBudgetTBD(this)">
@@ -8174,6 +8179,7 @@ section { padding: 64px 0; }
             </label>
             <input class="form-input" id="proj-skills-input" type="text"
               placeholder="Ex: React, Figma, Node.js &mdash; pressione Enter para adicionar"
+              aria-label="Adicionar habilidade ao projeto"
               onkeydown="pubAddSkill(event)">
             <div id="pub-skills-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;min-height:0;"></div>
           </div>
@@ -8187,7 +8193,7 @@ section { padding: 64px 0; }
             <div class="pdf-upload-area" id="proj-pdf-drop-zone"
               onclick="document.getElementById('proj-pdf-input').click()"
               ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
-              <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected2(this)">
+              <input type="file" id="proj-pdf-input" accept=".pdf,application/pdf" aria-label="Anexar PDF do briefing" onchange="pdfSelected2(this)">
               <div id="proj-pdf-placeholder">
                 <div class="pdf-upload-icon">&#128196;</div>
                 <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
@@ -8265,7 +8271,7 @@ section { padding: 64px 0; }
         <label class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
         <div class="pdf-upload-area" id="pdf-drop-zone" onclick="document.getElementById('prop-pdf-input').click()"
           ondragover="pdfDragOver(event)" ondragleave="pdfDragLeave(event)" ondrop="pdfDrop(event)">
-          <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected(this)">
+          <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" aria-label="Anexar PDF da proposta" onchange="pdfSelected(this)">
           <div id="pdf-placeholder">
             <div class="pdf-upload-icon">&#128196;</div>
             <div class="pdf-upload-text">Clique ou arraste o PDF aqui</div>
@@ -8863,7 +8869,7 @@ section { padding: 64px 0; }
           onclick="document.getElementById('delivery-file-input').click()"
           ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryDrop(event)"
           style="margin-bottom:8px;">
-          <input type="file" id="delivery-file-input" accept=".pdf,application/pdf" multiple onchange="deliveryFilesSelected(this)">
+          <input type="file" id="delivery-file-input" accept=".pdf,application/pdf" multiple aria-label="Arquivos de entrega" onchange="deliveryFilesSelected(this)">
           <div id="delivery-placeholder">
             <div class="pdf-upload-icon">📎</div>
             <div class="pdf-upload-text">Clique ou arraste os arquivos PDF aqui</div>
@@ -8965,6 +8971,7 @@ section { padding: 64px 0; }
       <button class="chat-action-btn" onclick="chatAttachFile()" title="Anexar PDF">&#128206;</button>
       <textarea class="chat-input-box" id="chat-input"
         placeholder="Digite uma mensagem..."
+        aria-label="Mensagem do chat"
         rows="1"
         onkeydown="chatKeyDown(event)"
         oninput="chatAutoResize(this)"></textarea>
@@ -9287,7 +9294,7 @@ section { padding: 64px 0; }
         <label class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
         <div class="pdf-upload-area" id="apply-cv-zone" onclick="document.getElementById('apply-cv-input').click()"
           ondragover="applyDragOver(event)" ondragleave="applyDragLeave(event)" ondrop="applyDrop(event)">
-          <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" onchange="applyCVSelected(this)">
+          <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" aria-label="Currículo em PDF" onchange="applyCVSelected(this)">
           <div id="apply-cv-placeholder">
             <div class="pdf-upload-icon">&#128196;</div>
             <div class="pdf-upload-text">Clique ou arraste seu curr&iacute;culo aqui</div>
@@ -9330,6 +9337,7 @@ section { padding: 64px 0; }
         <span class="hc-search-ico">&#128269;</span>
         <input class="hc-search-input" id="hc-search" type="text" maxlength="100"
           placeholder="Buscar artigos, perguntas frequentes..."
+          aria-label="Buscar artigos de ajuda"
           oninput="hcSearch(this.value)">
       </div>
     </div>
@@ -9454,7 +9462,7 @@ section { padding: 64px 0; }
         <label class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
         <div class="pdf-upload-area" id="ticket-file-zone" style="padding:12px;"
           onclick="document.getElementById('ticket-file-input').click()">
-          <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" onchange="ticketFileSelected(this)">
+          <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" aria-label="Anexo do chamado de suporte" onchange="ticketFileSelected(this)">
           <div id="ticket-file-ph" style="text-align:center;font-size:12px;color:var(--text-4);">
             &#128206; Clique para anexar arquivo (PDF ou imagem &bull; m&aacute;x. 5 MB)
           </div>
@@ -9572,7 +9580,7 @@ section { padding: 64px 0; }
     <div class="form-group">
       <label class="form-label" for="login-pass" data-pt="Senha" data-es="Contraseña">Senha</label>
       <input class="form-input" id="admin-login-pass" type="password" autocomplete="off"
-        placeholder="••••••••••" onkeydown="if(event.key==='Enter')adminDoLogin()">
+        placeholder="••••••••••" aria-label="Senha do administrador" onkeydown="if(event.key==='Enter')adminDoLogin()">
       <div class="field-error" id="err-admin-pass"></div>
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:8px;" id="admin-login-btn" onclick="adminDoLogin()">
@@ -9800,7 +9808,7 @@ function openPixModal(opts) {
             '<div style="margin-bottom:12px;">' +
               '<div style="font-size:12px;color:var(--text-3);margin-bottom:6px;">Ou copie o código PIX:</div>' +
               '<div style="display:flex;gap:8px;align-items:stretch;">' +
-                '<input id="pix-code-input" type="text" readonly style="flex:1;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-family:monospace;" />' +
+                '<input id="pix-code-input" type="text" readonly aria-label="Código PIX" style="flex:1;font-size:11px;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text-2);font-family:monospace;" />' +
                 '<button class="btn btn-green btn-sm" onclick="copyPixCode()" style="flex-shrink:0;padding:8px 14px;">&#128203; Copiar</button>' +
               '</div>' +
             '</div>' +
@@ -12931,7 +12939,7 @@ function _renderAiPanel() {
     return [
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">',
         '<div style="min-width:155px;font-size:13px;color:var(--text-2);">'+label+'</div>',
-        '<input type="range" min="0" max="100" value="'+val+'" id="pmod-w-'+key+'" ',
+        '<input type="range" min="0" max="100" value="'+val+'" id="pmod-w-'+key+'" aria-label="'+label+'" ',
           'oninput="document.getElementById(\'pmod-wv-'+key+'\').textContent=this.value+\'%\';',
           'var t=0;[\'price\',\'deadline\',\'quality\',\'commercial\'].forEach(function(k){',
           't+=parseInt(document.getElementById(\'pmod-w-\'+k).value)||0;});',
@@ -19225,7 +19233,7 @@ function blogShowArticle(id) {
         '<div style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;">&#128231; Gostou do artigo?</div>' +
         '<div style="font-size:13px;color:var(--text-3);margin-bottom:14px;">Assine nossa newsletter e receba conte&uacute;do como este toda semana.</div>' +
         '<div style="display:flex;gap:8px;max-width:380px;margin:0 auto;">' +
-          '<input class="form-input" id="blog-art-nl-email" type="email" placeholder="seu@email.com" style="flex:1;">' +
+          '<input class="form-input" id="blog-art-nl-email" type="email" placeholder="seu@email.com" aria-label="E-mail para newsletter do artigo" style="flex:1;">' +
           '<button class="btn btn-primary" onclick="subscribeBlogInline()">Assinar</button>' +
         '</div>' +
       '</div>' +
@@ -21581,10 +21589,10 @@ function hwGetEmailLogs(n) {
         <!-- Campos extras para Boleto (aparecem dinamicamente) -->
         <div id="sp-boleto-fields" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;">
           <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;">&#128203; Dados para emissão do Boleto:</div>
-          <input id="sp-boleto-name"  class="form-input" placeholder="Nome completo" style="margin-bottom:8px;" />
-          <input id="sp-boleto-email" class="form-input" placeholder="E-mail" style="margin-bottom:8px;" />
-          <input id="sp-boleto-taxid" class="form-input" placeholder="CPF ou CNPJ" />
-          <input id="sp-boleto-cep" class="form-input" placeholder="CEP (ex: 01310-100)" style="margin-top:8px;" />
+          <input id="sp-boleto-name"  class="form-input" placeholder="Nome completo" aria-label="Nome completo para boleto" style="margin-bottom:8px;" />
+          <input id="sp-boleto-email" class="form-input" placeholder="E-mail" aria-label="E-mail para boleto" style="margin-bottom:8px;" />
+          <input id="sp-boleto-taxid" class="form-input" placeholder="CPF ou CNPJ" aria-label="CPF ou CNPJ para boleto" />
+          <input id="sp-boleto-cep" class="form-input" placeholder="CEP (ex: 01310-100)" aria-label="CEP para boleto" style="margin-top:8px;" />
           <div style="font-size:11px;color:var(--text-3);margin-top:6px;">&#9888;&#65039; Boleto expira em 3 dias úteis</div>
         </div>
 
