@@ -5136,7 +5136,7 @@ section { padding: 64px 0; }
           <span class="prof-section-title">&#128221; Apresenta&ccedil;&atilde;o &amp; Cargo</span>
         </div>
         <div class="form-group">
-          <label class="form-label">Apresenta&ccedil;&atilde;o / Cargo <span style="color:var(--text-4);font-weight:400;font-size:11px;">— exibido na listagem de freelancers</span></label>
+          <label class="form-label" for="profile-bio">Apresenta&ccedil;&atilde;o / Cargo <span style="color:var(--text-4);font-weight:400;font-size:11px;">— exibido na listagem de freelancers</span></label>
           <textarea class="form-input" id="profile-bio" rows="4" maxlength="1000"
             placeholder="Ex: Desenvolvedor Full-Stack especializado em React e Node.js. Ajudo empresas a transformar ideias em produtos digitais robustos."
             oninput="profileUpdateBioCount(this);profileUpdateCompletion()"
@@ -5155,7 +5155,7 @@ section { padding: 64px 0; }
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Valor por hora (R$)</label>
+            <label class="form-label" for="profile-hourly-rate">Valor por hora (R$)</label>
             <div style="position:relative;">
               <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--text-3);">R$</span>
               <input class="form-input" id="profile-hourly-rate" type="number" min="0" placeholder="Ex: 120"
@@ -5163,7 +5163,7 @@ section { padding: 64px 0; }
             </div>
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label">Valor m&iacute;nimo por projeto (R$)</label>
+            <label class="form-label" for="profile-project-min">Valor m&iacute;nimo por projeto (R$)</label>
             <div style="position:relative;">
               <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--text-3);">R$</span>
               <input class="form-input" id="profile-project-min" type="number" min="0" placeholder="Ex: 500"
@@ -6095,7 +6095,7 @@ section { padding: 64px 0; }
           </div>
           <div class="results-sort">
             <span data-pt="Ordenar por:" data-es="Ordenar por:">Ordenar por:</span>
-            <select>
+            <select name="fl-sort" aria-label="Ordenar freelancers por">
               <option data-pt="Relevância" data-es="Relevancia">Relevância</option>
               <option data-pt="Mais recentes" data-es="Más recientes">Mais recentes</option>
               <option data-pt="Maior avaliação" data-es="Mayor calificación">Maior avaliação</option>
@@ -6514,7 +6514,7 @@ section { padding: 64px 0; }
           </div>
           <div class="results-sort">
             <span data-pt="Ordenar por:" data-es="Ordenar por:">Ordenar por:</span>
-            <select>
+            <select name="proj-sort" aria-label="Ordenar projetos por">
               <option data-pt="Mais recentes" data-es="Más recientes">Mais recentes</option>
               <option data-pt="Maior orçamento" data-es="Mayor presupuesto">Maior orçamento</option>
               <option data-pt="Menor orçamento" data-es="Menor presupuesto">Menor orçamento</option>
@@ -8262,7 +8262,7 @@ section { padding: 64px 0; }
         <input class="form-input" type="url" id="prop-portfolio" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
       </div>
       <div class="form-group">
-        <label for="pdf-drop-zone" class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
+        <label class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
         <div class="pdf-upload-area" id="pdf-drop-zone" onclick="document.getElementById('prop-pdf-input').click()"
           ondragover="pdfDragOver(event)" ondragleave="pdfDragLeave(event)" ondrop="pdfDrop(event)">
           <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" onchange="pdfSelected(this)">
@@ -8484,7 +8484,7 @@ section { padding: 64px 0; }
           </div>
 
           <div class="form-group">
-            <label for="stripe-num-wrap" class="form-label">N&uacute;mero do cart&atilde;o</label>
+            <label class="form-label">N&uacute;mero do cart&atilde;o</label>
             <div class="stripe-element-wrap" id="stripe-num-wrap">
               <div id="stripe-card-number"></div>
             </div>
@@ -8493,13 +8493,13 @@ section { padding: 64px 0; }
 
           <div class="card-row">
             <div class="form-group" style="margin-bottom:0;">
-              <label for="stripe-exp-wrap" class="form-label">Validade</label>
+              <label class="form-label">Validade</label>
               <div class="stripe-element-wrap" id="stripe-exp-wrap">
                 <div id="stripe-card-expiry"></div>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label for="stripe-cvc-wrap" class="form-label">CVV</label>
+              <label class="form-label">CVV</label>
               <div class="stripe-element-wrap" id="stripe-cvc-wrap">
                 <div id="stripe-card-cvc"></div>
               </div>
@@ -8700,7 +8700,7 @@ section { padding: 64px 0; }
               <div class="form-error" id="err-c-stripe-name"></div>
             </div>
             <div class="form-group">
-              <label for="c-stripe-card-wrap" class="form-label">Dados do cart&atilde;o</label>
+              <label class="form-label">Dados do cart&atilde;o</label>
               <div class="stripe-element-wrap" id="c-stripe-card-wrap">
                 <div id="c-stripe-card-element"></div>
               </div>
@@ -8858,7 +8858,7 @@ section { padding: 64px 0; }
 
       <!-- Anexar arquivos (múltiplos PDFs) -->
       <div class="form-group">
-        <label for="delivery-drop-zone" class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
+        <label class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
         <div class="pdf-upload-area" id="delivery-drop-zone"
           onclick="document.getElementById('delivery-file-input').click()"
           ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryDrop(event)"
@@ -9284,7 +9284,7 @@ section { padding: 64px 0; }
 
       <!-- Upload CV -->
       <div class="form-group">
-        <label for="apply-cv-zone" class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
+        <label class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
         <div class="pdf-upload-area" id="apply-cv-zone" onclick="document.getElementById('apply-cv-input').click()"
           ondragover="applyDragOver(event)" ondragleave="applyDragLeave(event)" ondrop="applyDrop(event)">
           <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" onchange="applyCVSelected(this)">
@@ -9403,12 +9403,12 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body">
       <div class="form-group">
-        <label class="form-label" for="profile-name">Nome completo</label>
+        <label class="form-label" for="ticket-name">Nome completo</label>
         <input class="form-input" id="ticket-name" type="text" maxlength="80" placeholder="Seu nome">
         <div class="form-error" id="err-ticket-name"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" for="profile-email">E-mail</label>
+        <label class="form-label" for="ticket-email">E-mail</label>
         <input class="form-input" id="ticket-email" type="email" maxlength="120" placeholder="seu@email.com">
         <div class="form-error" id="err-ticket-email"></div>
       </div>
@@ -9451,7 +9451,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-ticket-desc"></div>
       </div>
       <div class="form-group">
-        <label for="ticket-file-zone" class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
+        <label class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
         <div class="pdf-upload-area" id="ticket-file-zone" style="padding:12px;"
           onclick="document.getElementById('ticket-file-input').click()">
           <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" onchange="ticketFileSelected(this)">
