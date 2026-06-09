@@ -10118,6 +10118,31 @@ async function _sbCreateProject(data) {
   return r.data || null;
 }
 
+/* ── PROJETOS: Atualizar ──────────────────────────────────────── */
+async function _sbUpdateProject(id, data) {
+  if (!_sbReady() || !_session || !id) return null;
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbUpdateProject: sem sessão ativa'); return null; }
+  var r = await _sb.from('projects')
+    .update({
+      title:         data.title,
+      description:   data.description,
+      category:      data.category,
+      budget_min:    data.budgetMin,
+      budget_max:    data.budgetMax,
+      deadline_days: data.deadline,
+      type:          data.type,
+      skills_needed: data.skills || [],
+      updated_at:    new Date().toISOString()
+    })
+    .eq('id', id)
+    .eq('client_id', user.id)
+    .select('*, profiles(name, avatar_url, rating)')
+    .single();
+  if (r.error) { console.warn('_sbUpdateProject error:', r.error.message || r.error); return null; }
+  return r.data || null;
+}
+
 /* ── PROJETOS: Listar públicos ────────────────────────────────── */
 async function _sbListProjects(filters) {
   if (!_sbReady()) return [];
@@ -12144,17 +12169,41 @@ function submitProject() {
         setTimeout(function(){ var ov=document.getElementById('overlay-login'); if(ov) ov.classList.add('open'); }, 350);
         return;
       }
-      _sbCreateProject(projData).then(function(proj) {
+      var _isEdit = !!window._editingProjectId;
+      var _editId  = window._editingProjectId || null;
+      var projPromise = _isEdit
+        ? _sbUpdateProject(_editId, projData)
+        : _sbCreateProject(projData);
+
+      projPromise.then(function(proj) {
         _setBtnLoading(btn, false);
-        if (!proj) { showToast('Erro ao publicar projeto. Tente novamente.','error'); return; }
+        if (!proj) {
+          showToast(_isEdit ? 'Erro ao atualizar projeto. Tente novamente.' : 'Erro ao publicar projeto. Tente novamente.', 'error');
+          return;
+        }
         closeModal('publish');
-        showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
-        _registerPlanUsage('projects_month');
-        if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
+        if (_isEdit) {
+          window._editingProjectId = null;
+          showToast('✅ Projeto atualizado com sucesso!', 'success');
+          /* Atualiza card em Encontrar Projetos (se estiver visível) */
+          var existingCard = document.querySelector('[data-real-id="' + proj.id + '"]');
+          if (existingCard && typeof _realProjCard === 'function') {
+            var newCardHtml = _realProjCard(proj);
+            var tmp = document.createElement('div');
+            tmp.innerHTML = newCardHtml;
+            existingCard.parentNode.replaceChild(tmp.firstElementChild, existingCard);
+          }
+          /* Recarrega lista de projetos no painel Contratos */
+          if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+        } else {
+          showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+          _registerPlanUsage('projects_month');
+          if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
+        }
       }).catch(function(err) {
         _setBtnLoading(btn, false);
         console.warn('submitProject:', err);
-        showToast('Erro ao publicar projeto. Tente novamente.','error');
+        showToast(_isEdit ? 'Erro ao atualizar projeto. Tente novamente.' : 'Erro ao publicar projeto. Tente novamente.','error');
       });
     });
   } else {
@@ -13016,30 +13065,137 @@ function _recalcAiRanking() {
 window._recalcAiRanking = _recalcAiRanking;
 
 /* ── Editar Projeto ──────────────────────────────────────── */
-function openEditProject(btn) {
-  var card      = btn ? btn.closest('[data-proj-id]') : null;
-  var titleText = '';
-  if (card) {
-    var b = card.querySelector('b') || card.querySelector('strong') || {};
-    titleText = (b.textContent || '').trim();
+function openEditProject(projId) {
+  if (!projId) return;
+  var ctx = window._projectCtxMap && window._projectCtxMap[projId];
+
+  /* Se não estiver em cache, busca no Supabase e reabre */
+  if (!ctx) {
+    if (!_sbReady()) { showToast('Você precisa estar logado para editar o projeto.', 'warn'); return; }
+    showToast('Carregando dados do projeto…', 'info');
+    _sb.from('projects').select('*').eq('id', projId).single().then(function(r) {
+      if (!r.data) { showToast('Erro ao carregar projeto.', 'error'); return; }
+      window._projectCtxMap = window._projectCtxMap || {};
+      window._projectCtxMap[projId] = {
+        title:        r.data.title        || '',
+        description:  r.data.description  || '',
+        category:     r.data.category     || '',
+        subcat:       r.data.subcat        || '[]',
+        skills:       r.data.skills_needed || [],
+        budgetMin:    r.data.budget_min    || 0,
+        budgetMax:    r.data.budget_max    || 0,
+        budgetTbd:    (!r.data.budget_min && !r.data.budget_max),
+        deadlineDays: r.data.deadline_days || 30,
+        type:         r.data.type          || 'fixo'
+      };
+      openEditProject(projId);
+    });
+    return;
   }
-  var titleEl = document.getElementById('proj-title');
-  if (titleEl) titleEl.value = titleText;
-  var ovPub = document.getElementById('overlay-publish');
-  if (ovPub) {
-    var mt = ovPub.querySelector('.modal-title');
-    if (mt) mt.textContent = 'Editar Projeto';
-    var btnPub = ovPub.querySelector('.btn-primary');
-    if (btnPub) {
-      btnPub.onclick = function() { closeModal('publish'); showToast('Projeto atualizado com sucesso!', 'success'); };
-      btnPub.textContent = 'Salvar Alteracoes';
+
+  /* Abrir modal e resetar completamente */
+  openModal('publish');
+  setTimeout(function() {
+    if (typeof pubInitModal === 'function') pubInitModal();
+    window._editingProjectId = projId;
+
+    /* Título do modal e botão */
+    var ovPub = document.getElementById('overlay-publish');
+    if (ovPub) {
+      var mt = ovPub.querySelector('.modal-title');
+      if (mt) mt.textContent = 'Editar Projeto';
+      var btnPub = ovPub.querySelector('.btn-primary');
+      if (btnPub) btnPub.textContent = '💾 Salvar Alterações';
     }
-    ovPub.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  } else {
-    showToast('Editor de projeto disponivel em breve!', 'info');
-  }
+
+    /* Campos de texto */
+    var titleEl = document.getElementById('proj-title');
+    if (titleEl) { titleEl.value = ctx.title; if (typeof pubUpdateTitle === 'function') pubUpdateTitle(titleEl); }
+    var descEl = document.getElementById('proj-desc');
+    if (descEl) { descEl.value = ctx.description; if (typeof pubUpdateDesc === 'function') pubUpdateDesc(descEl); }
+
+    /* Orçamento */
+    var bTbd = document.getElementById('proj-budget-tbd');
+    var bMin = document.getElementById('proj-budget-min');
+    var bMax = document.getElementById('proj-budget-max');
+    if (ctx.budgetTbd) {
+      if (bTbd) { bTbd.checked = true; if (typeof pubToggleBudgetTBD === 'function') pubToggleBudgetTBD(bTbd); }
+    } else {
+      if (bMin) bMin.value = ctx.budgetMin || '';
+      if (bMax) bMax.value = ctx.budgetMax || '';
+    }
+
+    /* Prazo */
+    var ddHid = document.getElementById('proj-deadline-days');
+    if (ddHid) ddHid.value = String(ctx.deadlineDays || 30);
+    document.querySelectorAll('#pub-deadline-group .pub-seg-btn').forEach(function(b) {
+      var txt = (b.textContent || b.innerText || '').replace(/[^0-9]/g, '');
+      var days = parseInt(txt, 10);
+      b.classList.toggle('active', days === (ctx.deadlineDays || 30));
+    });
+    /* fallback 60d+ */
+    if (ctx.deadlineDays > 30) {
+      var btnLast = document.querySelector('#pub-deadline-group .pub-seg-btn:last-child');
+      if (btnLast) { document.querySelectorAll('#pub-deadline-group .pub-seg-btn').forEach(function(b){ b.classList.remove('active'); }); btnLast.classList.add('active'); }
+    }
+
+    /* Tipo de contrato */
+    var typeHid = document.getElementById('proj-type-val');
+    if (typeHid) typeHid.value = ctx.type || 'fixo';
+    document.querySelectorAll('#pub-type-group .pub-seg-btn').forEach(function(b) {
+      var txt = (b.textContent || b.innerText || '').toLowerCase();
+      var isActive = (ctx.type === 'fixo' && txt.indexOf('fixo') !== -1) ||
+                     (ctx.type === 'hora' && txt.indexOf('hora') !== -1) ||
+                     (ctx.type === 'recorrente' && txt.indexOf('recorrente') !== -1);
+      b.classList.toggle('active', isActive);
+    });
+
+    /* Categoria — clicar no chip correspondente */
+    if (ctx.category) {
+      var catIdx = -1;
+      (window._PUB_CATS || []).forEach(function(cat, i) { if (cat.key === ctx.category) catIdx = i; });
+      var catChips = document.querySelectorAll('#pub-cat-chips .pub-cat-chip');
+      if (catIdx >= 0 && catChips[catIdx]) {
+        pubSelectCat(catChips[catIdx], ctx.category);
+
+        /* Subcategorias — definir após renderização dos chips de subcat */
+        var subcats = [];
+        try { subcats = JSON.parse(ctx.subcat); } catch(x) {
+          subcats = ctx.subcat ? ctx.subcat.split(',').map(function(s){ return s.trim(); }).filter(Boolean) : [];
+        }
+        if (subcats.length) {
+          setTimeout(function() {
+            var subHid = document.getElementById('proj-subcat');
+            if (subHid) subHid.value = JSON.stringify(subcats);
+            window._pubSelectedSubcats = subcats;
+            document.querySelectorAll('#pub-subcat-chips .pub-subcat-chip').forEach(function(sc) {
+              if (subcats.indexOf(sc.getAttribute('data-sub')) !== -1) sc.classList.add('active');
+            });
+            var hint = document.getElementById('pub-subcat-selected-hint');
+            if (hint && subcats.length) {
+              hint.style.display = '';
+              hint.textContent = '✓ ' + subcats.length + ' selecionada' + (subcats.length > 1 ? 's' : '');
+            }
+          }, 60);
+        }
+      }
+    }
+
+    /* Skills */
+    if (ctx.skills && ctx.skills.length) {
+      window._pubSelectedSkills = ctx.skills.slice();
+      var sc = document.getElementById('pub-skills-chips');
+      if (sc) {
+        sc.innerHTML = ctx.skills.map(function(s) {
+          return '<span class="pub-skill-chip">' + _sanitize(s) +
+            '<button type="button" onclick="pubRemoveSkill(this,\'' + _sanitize(s) + '\')">×</button></span>';
+        }).join('');
+      }
+    }
+
+  }, 80);
 }
+window.openEditProject = openEditProject;
 
 
 function init() {
@@ -14523,12 +14679,18 @@ async function _refreshMyPublishedProjects() {
     el.innerHTML = list.map(function(p) {
       var budget    = p.budget_max ? ('R$ ' + Math.round(p.budget_max).toLocaleString('pt-BR')) : 'A combinar';
       var proposals = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
-      /* Armazenar contexto do projeto para acesso seguro via _openProjectProposalsById */
+      /* Armazenar contexto do projeto para acesso seguro via _openProjectProposalsById e openEditProject */
       window._projectCtxMap[p.id] = {
-        title:       p.title,
-        budgetMin:   p.budget_min  || 0,
-        budgetMax:   p.budget_max  || 0,
-        deadlineDays: p.deadline_days || 30
+        title:        p.title        || '',
+        description:  p.description  || '',
+        category:     p.category     || '',
+        subcat:       p.subcat       || '[]',
+        skills:       p.skills_needed || [],
+        budgetMin:    p.budget_min   || 0,
+        budgetMax:    p.budget_max   || 0,
+        budgetTbd:    (!p.budget_min && !p.budget_max),
+        deadlineDays: p.deadline_days || 30,
+        type:         p.type         || 'fixo'
       };
       /* data-real-id permite que _deletePublishedProject encontre e remova
          este card usando querySelectorAll('[data-real-id="..."]') */
@@ -14561,7 +14723,7 @@ async function _refreshMyPublishedProjects() {
           '<div>' + _skillTags(p.skills_needed || []) + '</div>' +
           '<div class="dash-proj-actions">' +
             '<button class="btn btn-primary btn-sm" onclick="_openProjectProposalsById(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
-            '<button class="btn btn-outline btn-sm" onclick="showToast(\'Edição de projeto disponível em breve!\',\'info\')">✏️ Editar</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="openEditProject(\'' + _sanitize(p.id) + '\')">✏️ Editar</button>' +
             /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
             '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +
           '</div>' +
@@ -17688,6 +17850,16 @@ window._PUB_CATS = [
 window._pubSelectedSkills = [];
 
 function pubInitModal() {
+  /* Garante que saímos do modo edição ao abrir para novo projeto */
+  window._editingProjectId = null;
+  /* Restaura título e botão do modal (podem ter sido alterados pelo modo edição) */
+  var _ovPub = document.getElementById('overlay-publish');
+  if (_ovPub) {
+    var _mt = _ovPub.querySelector('.modal-title');
+    if (_mt) _mt.textContent = 'Publicar Projeto';
+    var _btnPub = _ovPub.querySelector('.btn-primary');
+    if (_btnPub) _btnPub.textContent = '🚀 Publicar Projeto Agora';
+  }
   /* Limpa campos */
   ['proj-title','proj-desc','proj-skills-input'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.value = '';
