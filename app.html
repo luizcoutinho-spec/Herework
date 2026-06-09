@@ -5125,7 +5125,7 @@ section { padding: 64px 0; }
 
           <!-- Skills selecionadas (global) -->
           <div id="profile-selected-skills-wrap" style="margin-top:14px;display:none;">
-            <label class="form-label" style="margin-bottom:6px;">Habilidades selecionadas <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></label>
+            <div class="form-label" style="margin-bottom:6px;">Habilidades selecionadas <span style="color:var(--text-4);font-weight:400;">(m&aacute;x. 15)</span></div>
             <div class="selected-skills-wrap" id="profile-selected-skills"></div>
             <div class="skills-count-hint" id="profile-skills-hint">0 de 15 selecionadas</div>
           </div>
@@ -5182,7 +5182,7 @@ section { padding: 64px 0; }
             </select>
           </div>
           <div class="form-group" style="margin-bottom:0;">
-            <label class="form-label" style="margin-bottom:6px;">N&iacute;vel profissional</label>
+            <div class="form-label" style="margin-bottom:6px;">N&iacute;vel profissional</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="iniciante">Iniciante</button>
               <button class="profile-chip" type="button" onclick="profileSelectChip(this,'exp-level')" data-val="intermediario">Intermedi&aacute;rio</button>
@@ -5193,7 +5193,7 @@ section { padding: 64px 0; }
           </div>
         </div>
         <div class="form-group" style="margin-bottom:0;">
-          <label class="form-label" style="margin-bottom:6px;">Modalidade de cobran&ccedil;a preferida</label>
+          <div class="form-label" style="margin-bottom:6px;">Modalidade de cobran&ccedil;a preferida</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="profile-chip" type="button" onclick="profileMultiChip(this,'billing')" data-val="hora">Por hora</button>
             <button class="profile-chip" type="button" onclick="profileMultiChip(this,'billing')" data-val="projeto">Por projeto</button>
@@ -5209,7 +5209,7 @@ section { padding: 64px 0; }
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
           <div>
-            <label class="form-label" style="margin-bottom:6px;">Status atual <span style="color:#ef4444;">*</span></label>
+            <div class="form-label" style="margin-bottom:6px;">Status atual <span style="color:#ef4444;">*</span></div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="profile-chip active" type="button" onclick="profileSelectChip(this,'avail')" data-val="disponivel" style="border-color:#16a34a;color:#16a34a;background:#f0fdf4;">&#128994; Dispon&iacute;vel</button>
               <button class="profile-chip" type="button" onclick="profileSelectChip(this,'avail')" data-val="breve">&#128993; Em breve</button>
@@ -5231,7 +5231,7 @@ section { padding: 64px 0; }
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
           <div>
-            <label class="form-label" style="margin-bottom:6px;">Regime preferido</label>
+            <div class="form-label" style="margin-bottom:6px;">Regime preferido</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'regime')" data-val="remoto">&#127968; Remoto</button>
               <button class="profile-chip" type="button" onclick="profileMultiChip(this,'regime')" data-val="hibrido">&#128260; H&iacute;brido</button>
@@ -5240,7 +5240,7 @@ section { padding: 64px 0; }
             <input type="hidden" id="profile-work-regime" value="remoto">
           </div>
           <div>
-            <label class="form-label" style="margin-bottom:6px;">Tipo de projeto preferido</label>
+            <div class="form-label" style="margin-bottom:6px;">Tipo de projeto preferido</div>
             <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button class="profile-chip" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="curto">Curto (&lt;1m)</button>
               <button class="profile-chip active" type="button" onclick="profileMultiChip(this,'proj-pref')" data-val="medio">M&eacute;dio (1-3m)</button>
@@ -5273,10 +5273,10 @@ section { padding: 64px 0; }
           <span class="prof-section-title">&#129302; Ferramentas &amp; IA</span>
         </div>
         <div class="form-group" style="margin-bottom:12px;">
-          <label class="form-label" style="margin-bottom:5px;">
+          <div class="form-label" style="margin-bottom:5px;">
             Ferramentas do dia a dia
             <span style="font-size:11px;font-weight:400;color:var(--text-4);">(pressione Enter para adicionar &middot; m&aacute;x. 10)</span>
-          </label>
+          </div>
           <input class="form-input" id="profile-tools-input" type="text"
             placeholder="Ex: Figma, VS Code, Notion, Jira, Photoshop, Slack..."
             aria-label="Adicionar ferramenta de IA"
@@ -5285,7 +5285,7 @@ section { padding: 64px 0; }
           <input type="hidden" id="profile-tools" value="[]">
         </div>
         <div class="form-group" style="margin-bottom:8px;">
-          <label class="form-label" style="margin-bottom:6px;">Usa intelig&ecirc;ncia artificial no trabalho?</label>
+          <div class="form-label" style="margin-bottom:6px;">Usa intelig&ecirc;ncia artificial no trabalho?</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="profile-chip" type="button" onclick="profileSelectChip(this,'ai-use');profileToggleAITools()" data-val="sim">&#9989; Sim, regularmente</button>
             <button class="profile-chip" type="button" onclick="profileSelectChip(this,'ai-use');profileToggleAITools()" data-val="as-vezes">&#9889; &Agrave;s vezes</button>
@@ -5294,7 +5294,7 @@ section { padding: 64px 0; }
           <input type="hidden" id="profile-ai-use">
         </div>
         <div id="profile-ai-tools-section" style="display:none;margin-top:10px;">
-          <label class="form-label" style="margin-bottom:6px;font-size:12px;">Quais ferramentas de IA voc&ecirc; utiliza?</label>
+          <div class="form-label" style="margin-bottom:6px;font-size:12px;">Quais ferramentas de IA voc&ecirc; utiliza?</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="chatgpt">ChatGPT</button>
             <button class="profile-chip" type="button" onclick="profileMultiChip(this,'ai-tools')" data-val="claude">Claude</button>
@@ -5335,7 +5335,7 @@ section { padding: 64px 0; }
             placeholder="Liste suas principais certifica&ccedil;&otilde;es. Ex: AWS Solutions Architect (2024), Scrum Master, Google Analytics, HubSpot..."
             style="min-height:65px;"></textarea>
         </div>
-        <label class="form-label" style="margin-bottom:8px;">&#128279; Links de Portf&oacute;lio</label>
+        <div class="form-label" style="margin-bottom:8px;">&#128279; Links de Portf&oacute;lio</div>
         <div style="display:flex;flex-direction:column;gap:8px;">
           <input class="form-input" id="profile-portfolio-1" type="url" placeholder="&#128279; GitHub, Behance, Dribbble &mdash; link principal" aria-label="Link de portfólio principal">
           <input class="form-input" id="profile-portfolio-2" type="url" placeholder="&#128279; YouTube, case study, artigo t&eacute;cnico" aria-label="Link de portfólio secundário">
@@ -5622,7 +5622,7 @@ section { padding: 64px 0; }
 
           <!-- Tipo de Pessoa -->
           <div class="form-group">
-            <label class="form-label" style="margin-bottom:8px;">Tipo de Titular <span style="color:#ef4444;">*</span></label>
+            <div class="form-label" style="margin-bottom:8px;">Tipo de Titular <span style="color:#ef4444;">*</span></div>
             <div style="display:flex;gap:8px;">
               <button class="profile-chip active" type="button" id="bank-pf-btn" onclick="bankTogglePersonType('pf')" data-val="pf"
                 style="flex:1;justify-content:center;padding:10px 8px;font-size:13px;">
@@ -5702,7 +5702,7 @@ section { padding: 64px 0; }
           <!-- Tipo de Conta + Agência + Conta -->
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Tipo de Conta <span style="color:#ef4444;">*</span></label>
+              <div class="form-label">Tipo de Conta <span style="color:#ef4444;">*</span></div>
               <div style="display:flex;gap:6px;margin-top:2px;">
                 <button class="profile-chip active" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="corrente" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Corrente</button>
                 <button class="profile-chip" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="poupanca" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Poupan&ccedil;a</button>
@@ -5718,7 +5718,7 @@ section { padding: 64px 0; }
                 placeholder="0000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Conta <span style="color:#ef4444;">*</span></label>
+              <div class="form-label">Conta <span style="color:#ef4444;">*</span></div>
               <div style="display:flex;gap:4px;align-items:flex-end;">
                 <input class="form-input" id="bank-account" type="text" maxlength="12"
                   placeholder="00000000" style="flex:1;"
@@ -8066,9 +8066,9 @@ section { padding: 64px 0; }
 
       <!-- 1. Categoria — chips visuais -->
       <div class="form-group" style="margin-bottom:12px;">
-        <label class="form-label" style="margin-bottom:8px;">
+        <div class="form-label" style="margin-bottom:8px;">
           Categoria <span style="color:#ef4444;">*</span>
-        </label>
+        </div>
         <div class="pub-cat-grid" id="pub-cat-chips"><!-- renderizado por pubInitModal() --></div>
         <input type="hidden" id="proj-cat">
         <div class="form-error" id="err-proj-cat"></div>
@@ -8076,10 +8076,10 @@ section { padding: 64px 0; }
 
       <!-- 1b. Especialidades (subcategorias — aparecem após categoria selecionada) -->
       <div id="pub-subcat-section" style="display:none;margin-bottom:16px;">
-        <label class="form-label" style="margin-bottom:4px;">
+        <div class="form-label" style="margin-bottom:4px;">
           Especialidades
           <span style="font-size:11px;font-weight:400;color:var(--text-4);">&mdash; m&uacute;ltiplas permitidas &middot; aumentam a qualidade das propostas</span>
-        </label>
+        </div>
         <div style="font-size:11px;color:var(--text-4);margin-bottom:6px;">Clique para selecionar &mdash; clique novamente para remover</div>
         <div id="pub-subcat-chips" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
         <div id="pub-subcat-selected-hint" style="display:none;font-size:11px;color:var(--green);font-weight:600;margin-top:6px;"></div>
@@ -8122,9 +8122,9 @@ section { padding: 64px 0; }
 
         <!-- Orçamento -->
         <div>
-          <label class="form-label" style="margin-bottom:6px;">
+          <div class="form-label" style="margin-bottom:6px;">
             Or&ccedil;amento <span style="color:#ef4444;">*</span>
-          </label>
+          </div>
           <div style="display:flex;align-items:center;gap:6px;">
             <span style="font-size:12px;color:var(--text-3);white-space:nowrap;font-weight:600;">R$</span>
             <input class="form-input" id="proj-budget-min" type="number" min="0" placeholder="M&iacute;n"
@@ -8143,7 +8143,7 @@ section { padding: 64px 0; }
 
         <!-- Prazo + Tipo -->
         <div>
-          <label class="form-label" style="margin-bottom:6px;">Prazo m&aacute;ximo de entrega</label>
+          <div class="form-label" style="margin-bottom:6px;">Prazo m&aacute;ximo de entrega</div>
           <div class="pub-seg-group" id="pub-deadline-group" style="width:100%;flex-wrap:wrap;">
             <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,5)" title="Urgente — menos de 6 dias">&lt;6d</button>
             <button class="pub-seg-btn" style="flex:1;min-width:0;" onclick="pubSelectDeadline(this,7)">7d</button>
@@ -8154,7 +8154,7 @@ section { padding: 64px 0; }
           <div id="pub-deadline-hint" style="font-size:11px;color:var(--text-4);margin-top:4px;min-height:14px;"></div>
           <input type="hidden" id="proj-deadline-days" value="30">
 
-          <label class="form-label" style="margin-bottom:6px;margin-top:10px;">Modalidade de contrato</label>
+          <div class="form-label" style="margin-bottom:6px;margin-top:10px;">Modalidade de contrato</div>
           <div class="pub-seg-group" id="pub-type-group" style="width:100%;">
             <button class="pub-seg-btn active" style="flex:1;" onclick="pubSelectType(this,'fixo')" title="Valor &uacute;nico pelo projeto completo">&#128274; Pre&ccedil;o Fixo</button>
             <button class="pub-seg-btn" style="flex:1;" onclick="pubSelectType(this,'hora')" title="Cobrado por horas trabalhadas">&#9201; Por Hora</button>
@@ -8173,10 +8173,10 @@ section { padding: 64px 0; }
 
           <!-- Skills chips -->
           <div class="form-group">
-            <label class="form-label" style="margin-bottom:5px;">
+            <div class="form-label" style="margin-bottom:5px;">
               Habilidades desejadas
               <span style="font-size:11px;font-weight:400;color:var(--text-4);">(opcional &middot; m&aacute;x. 8 &middot; tecle Enter)</span>
-            </label>
+            </div>
             <input class="form-input" id="proj-skills-input" type="text"
               placeholder="Ex: React, Figma, Node.js &mdash; pressione Enter para adicionar"
               aria-label="Adicionar habilidade ao projeto"
@@ -8186,10 +8186,10 @@ section { padding: 64px 0; }
 
           <!-- PDF briefing -->
           <div class="form-group">
-            <label class="form-label" style="margin-bottom:5px;">
+            <div class="form-label" style="margin-bottom:5px;">
               Briefing em PDF
               <span style="font-size:11px;font-weight:400;color:var(--text-4);">(opcional &middot; m&aacute;x. 10 MB)</span>
-            </label>
+            </div>
             <div class="pdf-upload-area" id="proj-pdf-drop-zone"
               onclick="document.getElementById('proj-pdf-input').click()"
               ondragover="pdfDragOver2(event)" ondragleave="pdfDragLeave2(event)" ondrop="pdfDrop2(event)">
@@ -8268,7 +8268,7 @@ section { padding: 64px 0; }
         <input class="form-input" type="url" id="prop-portfolio" data-placeholder-pt="https://seuportfolio.com" data-placeholder-es="https://tuportafolio.com" placeholder="https://seuportfolio.com">
       </div>
       <div class="form-group">
-        <label class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></label>
+        <div class="form-label">Anexar PDF <span style="font-size:11px;color:var(--text-4);font-weight:400;">(portfólio ou currículo · opcional · máx. 10 MB)</span></div>
         <div class="pdf-upload-area" id="pdf-drop-zone" onclick="document.getElementById('prop-pdf-input').click()"
           ondragover="pdfDragOver(event)" ondragleave="pdfDragLeave(event)" ondrop="pdfDrop(event)">
           <input type="file" id="prop-pdf-input" accept=".pdf,application/pdf" aria-label="Anexar PDF da proposta" onchange="pdfSelected(this)">
@@ -8490,7 +8490,7 @@ section { padding: 64px 0; }
           </div>
 
           <div class="form-group">
-            <label class="form-label">N&uacute;mero do cart&atilde;o</label>
+            <div class="form-label">N&uacute;mero do cart&atilde;o</div>
             <div class="stripe-element-wrap" id="stripe-num-wrap">
               <div id="stripe-card-number"></div>
             </div>
@@ -8499,13 +8499,13 @@ section { padding: 64px 0; }
 
           <div class="card-row">
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Validade</label>
+              <div class="form-label">Validade</div>
               <div class="stripe-element-wrap" id="stripe-exp-wrap">
                 <div id="stripe-card-expiry"></div>
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">CVV</label>
+              <div class="form-label">CVV</div>
               <div class="stripe-element-wrap" id="stripe-cvc-wrap">
                 <div id="stripe-card-cvc"></div>
               </div>
@@ -8706,7 +8706,7 @@ section { padding: 64px 0; }
               <div class="form-error" id="err-c-stripe-name"></div>
             </div>
             <div class="form-group">
-              <label class="form-label">Dados do cart&atilde;o</label>
+              <div class="form-label">Dados do cart&atilde;o</div>
               <div class="stripe-element-wrap" id="c-stripe-card-wrap">
                 <div id="c-stripe-card-element"></div>
               </div>
@@ -8844,7 +8844,7 @@ section { padding: 64px 0; }
 
       <!-- Checklist de entregáveis -->
       <div class="form-group">
-        <label class="form-label" aria-label="&#9989; Confirme os itens entregues">&#9989; Confirme os itens entregues</label>
+        <div class="form-label" aria-label="&#9989; Confirme os itens entregues">&#9989; Confirme os itens entregues</div>
         <div class="delivery-checklist" id="delivery-checklist">
           <!-- populated by JS -->
         </div>
@@ -8864,7 +8864,7 @@ section { padding: 64px 0; }
 
       <!-- Anexar arquivos (múltiplos PDFs) -->
       <div class="form-group">
-        <label class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></label>
+        <div class="form-label">&#128196; Anexar arquivos da entrega <span style="font-size:11px;color:var(--text-4);">(PDFs · máx. 10 MB cada)</span></div>
         <div class="pdf-upload-area" id="delivery-drop-zone"
           onclick="document.getElementById('delivery-file-input').click()"
           ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryDrop(event)"
@@ -8997,7 +8997,7 @@ section { padding: 64px 0; }
 
       <!-- Tipo de revisão -->
       <div class="form-group">
-        <label class="form-label" aria-label="Tipo de revisão">Tipo de revisão</label>
+        <div class="form-label" aria-label="Tipo de revisão">Tipo de revisão</div>
         <div class="revision-type-grid">
           <button class="revision-type-btn" id="rtype-scope" onclick="selectRevType('scope',this)">
             <span class="icon">&#128203;</span>Escopo / Conteúdo
@@ -9017,7 +9017,7 @@ section { padding: 64px 0; }
 
       <!-- Urgência -->
       <div class="form-group">
-        <label class="form-label" aria-label="Urgência">Urgência</label>
+        <div class="form-label" aria-label="Urgência">Urgência</div>
         <div class="revision-urgency-row">
           <button class="revision-urgency-btn low" id="rurg-low" onclick="selectRevUrgency('low')">
             &#128994; Baixa
@@ -9291,7 +9291,7 @@ section { padding: 64px 0; }
 
       <!-- Upload CV -->
       <div class="form-group">
-        <label class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></label>
+        <div class="form-label">Curr&iacute;culo em PDF <span style="color:#ef4444;">*</span></div>
         <div class="pdf-upload-area" id="apply-cv-zone" onclick="document.getElementById('apply-cv-input').click()"
           ondragover="applyDragOver(event)" ondragleave="applyDragLeave(event)" ondrop="applyDrop(event)">
           <input type="file" id="apply-cv-input" accept=".pdf,application/pdf" aria-label="Currículo em PDF" onchange="applyCVSelected(this)">
@@ -9435,7 +9435,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-ticket-category"></div>
       </div>
       <div class="form-group">
-        <label class="form-label" aria-label="Prioridade">Prioridade</label>
+        <div class="form-label" aria-label="Prioridade">Prioridade</div>
         <div style="display:flex;gap:8px;">
           <label style="flex:1;cursor:pointer;">
             <input type="radio" name="ticket-priority" value="low" checked style="accent-color:var(--green);">
@@ -9459,7 +9459,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-ticket-desc"></div>
       </div>
       <div class="form-group">
-        <label class="form-label">Anexo (opcional &mdash; PDF, imagem)</label>
+        <div class="form-label">Anexo (opcional &mdash; PDF, imagem)</div>
         <div class="pdf-upload-area" id="ticket-file-zone" style="padding:12px;"
           onclick="document.getElementById('ticket-file-input').click()">
           <input type="file" id="ticket-file-input" accept=".pdf,image/*" style="display:none;" aria-label="Anexo do chamado de suporte" onchange="ticketFileSelected(this)">
