@@ -10219,27 +10219,56 @@ async function _sbSaveProfile(data, extMeta) {
     payload.profile_metadata = extMeta;
   }
 
+  /* ── Helper: detecta erro de trigger que bloqueia mudança de tipo (P0001) ── */
+  function _isTypeBlockError(err) {
+    if (!err) return false;
+    var msg = (err.message || '').toLowerCase();
+    return err.code === 'P0001' ||
+           msg.indexOf('tipo de conta') !== -1 ||
+           msg.indexOf('account type') !== -1 ||
+           msg.indexOf('type') !== -1 && msg.indexOf('alterad') !== -1;
+  }
+
   /* ── Tentativa 1: payload completo ── */
   var t1 = await _doUpsert(payload);
   if (t1.ok) return true;
 
-  /* ── Tentativa 2: sem profile_metadata (erro de coluna ausente) ── */
   if (t1.error) {
     var errMsg = (t1.error.message || '').toLowerCase();
+
+    /* ── Trigger P0001: banco bloqueia mudança direta de `type`.
+       Retenta sem o campo type — o resto do perfil é salvo normalmente.
+       O flag _sbTypeChangePrevented sinaliza ao caller que o tipo não mudou. ── */
+    if (_isTypeBlockError(t1.error)) {
+      console.warn('[sbSave] trigger bloqueou type — retentando sem type...');
+      var pNoType = Object.assign({}, payload);
+      delete pNoType.type;
+      var tnt = await _doUpsert(pNoType);
+      if (tnt.ok) { window._sbTypeChangePrevented = true; return true; }
+      /* Se também falhou (outro erro), cai para tentativas abaixo */
+    }
+
+    /* ── Tentativa 2: sem profile_metadata (erro de coluna ausente) ── */
     if (errMsg.indexOf('profile_metadata') !== -1 || errMsg.indexOf('column') !== -1) {
       var p2 = Object.assign({}, payload); delete p2.profile_metadata;
       var t2 = await _doUpsert(p2);
       if (t2.ok) return true;
+      /* Se t2 também bloqueou type, retenta sem type */
+      if (t2.error && _isTypeBlockError(t2.error)) {
+        delete p2.type;
+        var t2b = await _doUpsert(p2);
+        if (t2b.ok) { window._sbTypeChangePrevented = true; return true; }
+      }
     }
-    /* ── Tentativa 3: campos básicos (inclui type para não perder mudança de tipo) ── */
+
+    /* ── Tentativa 3: campos básicos SEM type (type é gerenciado pelo trigger) ── */
     var safePayload = {
       id: uid, email: payload.email, name: payload.name, bio: payload.bio,
       city: payload.city, state: payload.state, phone: payload.phone,
       hourly_rate: payload.hourly_rate, skills: payload.skills, updated_at: payload.updated_at
     };
-    if (payload.type) safePayload.type = payload.type;
     var t3 = await _doUpsert(safePayload);
-    if (t3.ok) return true;
+    if (t3.ok) { window._sbTypeChangePrevented = !!(payload.type); return true; }
     console.error('[sbSave] todas as tentativas falharam (erro de payload)');
     return false;
   }
@@ -16066,21 +16095,55 @@ function dashSaveProfile() {
         return;
       }
       window._pendingProfileSave = null;
+
+      /* Verifica se o trigger do banco bloqueou a mudança de tipo */
+      var _typeBlocked = window._sbTypeChangePrevented;
+      window._sbTypeChangePrevented = false;
+
       /* Atualiza cache local — garante que existe mesmo se nunca foi populado */
       var uid = _session && _session.uid;
+      /* Tipo efetivo: se o trigger bloqueou, mantém o tipo original do cache/sessão */
+      var effectiveType = _typeBlocked
+        ? (uid && window._realProfileCache && window._realProfileCache[uid]
+            ? (window._realProfileCache[uid].type || pType) : pType)
+        : pType;
+
       if (uid) {
         window._realProfileCache = window._realProfileCache || {};
         if (!window._realProfileCache[uid]) window._realProfileCache[uid] = {};
         var c = window._realProfileCache[uid];
         c.name = pData.name; c.bio = pData.bio;
         c.city = pData.city; c.state = pData.state;
-        c.hourly_rate = pData.hourlyRate; c.type = pType;
+        c.hourly_rate = pData.hourlyRate;
+        /* Só atualiza type no cache se a mudança foi aceita pelo banco */
+        if (!_typeBlocked) c.type = pType;
         if (pData.skills) c.skills = pData.skills;
         if (pMeta) c.profile_metadata = pMeta;
       }
+
+      /* Corrige session e UI se o tipo foi bloqueado pelo trigger */
+      if (_typeBlocked) {
+        var origType = effectiveType;
+        _session.type = origType;
+        try {
+          var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}');
+          _hw.type = origType;
+          localStorage.setItem('hw_session', JSON.stringify(_hw));
+        } catch(e) {}
+        /* Reverte seletor de tipo para o valor real do banco */
+        if (typeof dashSetAccountType === 'function') dashSetAccountType(origType);
+        var ptEl2 = document.getElementById('dash-profile-type');
+        if (ptEl2) ptEl2.textContent = origType === 'both' ? '🔄 Cliente + Freelancer' : origType === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
+      }
+
       /* Sempre recarrega listagem de freelancers para refletir qualquer mudança */
       if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
-      showToast('Perfil salvo com sucesso! ✓', 'success');
+
+      if (_typeBlocked) {
+        showToast('Perfil salvo! ⚠️ Tipo de conta não pode ser alterado agora — tente mais tarde.', 'info');
+      } else {
+        showToast('Perfil salvo com sucesso! ✓', 'success');
+      }
     });
   }
 
