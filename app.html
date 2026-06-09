@@ -15652,7 +15652,13 @@ function openDashboard() {
   }
   var name  = _session.name  || 'Usuário';
   var email = _session.email || '';
-  var type  = _session.type  || 'client';
+  /* hw_saved_actype é a fonte definitiva para tipo de conta */
+  var type  = 'client';
+  try {
+    var _lsAt = localStorage.getItem('hw_saved_actype');
+    type = (_lsAt && ['client','freelancer','both'].indexOf(_lsAt) !== -1)
+           ? _lsAt : (_session.type || 'client');
+  } catch(e) { type = _session.type || 'client'; }
 
   var el;
   el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
@@ -15769,11 +15775,22 @@ function dashSetAccountType(type) {
 window.dashSetAccountType = dashSetAccountType;
 
 function _initAcTypeUI() {
-  /* Prioriza o tipo do cache Supabase (mais confiável que _session.type, que pode ser stale do localStorage) */
-  var _rp = (_session && _session.uid && window._realProfileCache)
-    ? (window._realProfileCache[_session.uid] || {}) : {};
-  var cur = _rp.type || (_session && _session.type) || 'client';
-  _pendingAccountType = null; /* reseta o pending ao abrir */
+  /* hw_saved_actype é a fonte definitiva — escrito sincronamente no save, lido aqui diretamente */
+  var cur = 'client';
+  try {
+    var _ls = localStorage.getItem('hw_saved_actype');
+    if (_ls && ['client','freelancer','both'].indexOf(_ls) !== -1) { cur = _ls; }
+    else {
+      var _rp = (_session && _session.uid && window._realProfileCache)
+        ? (window._realProfileCache[_session.uid] || {}) : {};
+      cur = _rp.type || (_session && _session.type) || 'client';
+    }
+  } catch(e) {
+    var _rp2 = (_session && _session.uid && window._realProfileCache)
+      ? (window._realProfileCache[_session.uid] || {}) : {};
+    cur = _rp2.type || (_session && _session.type) || 'client';
+  }
+  _pendingAccountType = null;
   dashSetAccountType(cur);
 }
 
