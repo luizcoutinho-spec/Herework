@@ -5736,28 +5736,28 @@ section { padding: 64px 0; }
               <div class="label">E-mail de propostas</div>
               <div class="desc">Receba e-mails quando alguém enviar proposta ao seu projeto</div>
             </div>
-            <label for="notif-proposals" class="admin-toggle"><input type="checkbox" checked id="notif-proposals"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-proposals" class="admin-toggle"><input type="checkbox" checked id="notif-proposals" onchange="saveNotifPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">E-mail de mensagens</div>
               <div class="desc">Notificação de novas mensagens no chat</div>
             </div>
-            <label for="notif-messages" class="admin-toggle"><input type="checkbox" checked id="notif-messages"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-messages" class="admin-toggle"><input type="checkbox" checked id="notif-messages" onchange="saveNotifPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">E-mail de contratos</div>
               <div class="desc">Atualizações sobre contratos e pagamentos</div>
             </div>
-            <label for="notif-contracts" class="admin-toggle"><input type="checkbox" checked id="notif-contracts"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-contracts" class="admin-toggle"><input type="checkbox" checked id="notif-contracts" onchange="saveNotifPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label">Newsletter HereWork</div>
               <div class="desc">Novidades, dicas e atualizações da plataforma</div>
             </div>
-            <label for="notif-newsletter" class="admin-toggle"><input type="checkbox" id="notif-newsletter"><span class="admin-toggle-slider"></span></label>
+            <label for="notif-newsletter" class="admin-toggle"><input type="checkbox" id="notif-newsletter" onchange="saveNotifPrefs()"><span class="admin-toggle-slider"></span></label>
           </div>
         </div>
       </div>
@@ -12029,6 +12029,10 @@ function submitProposal() {
     window._pendingProposal = null;
     /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
     _registerPlanUsage('proposals_month');
+    /* Notificação por e-mail para o dono do projeto */
+    if (typeof window._hwTriggerProposalEmail === 'function') {
+      window._hwTriggerProposalEmail(projId, value, days, coverLetter);
+    }
   }
 
   function onError(msg) {
@@ -16863,6 +16867,14 @@ function chatSendMessage() {
 
   inp.value = ''; chatAutoResize(inp);
   _chatRender(projId);
+  /* Notificação por e-mail para o destinatário */
+  if (typeof hwNotifyMessage === 'function' && typeof _chatCtx !== 'undefined' && _chatCtx.recipientEmail && _session) {
+    hwNotifyMessage(_chatCtx.recipientEmail, {
+      senderName:  _session.name || 'Usuário',
+      projectName: _chatCtx.projectName || '',
+      preview:     text
+    });
+  }
 
   /* Hide emoji picker */
   var ep = document.getElementById('chat-emoji-picker'); if(ep) ep.classList.remove('show');
@@ -20871,6 +20883,390 @@ if (document.readyState === 'loading') {
 } else {
   init(); /* DOM já carregado */
 }
+
+/* ─── Hook: carrega prefs de notificação ao abrir aba Configurações ─── */
+(function() {
+  var _origSDP = window.switchDashPanel;
+  window.switchDashPanel = function(panel) {
+    if (typeof _origSDP === 'function') _origSDP.apply(this, arguments);
+    if (panel === 'settings' && typeof _hwLoadNotifPrefs === 'function') {
+      _hwLoadNotifPrefs();
+    }
+  };
+})();
+</script>
+
+
+<!-- ═══════════════════════════════════════════════════════════════
+     SISTEMA DE NOTIFICAÇÕES POR E-MAIL — HereWork
+
+     Remetente oficial: contato@herework.com.br
+     Provider:          Resend (https://resend.com)
+                        Plano gratuito: 3.000 e-mails/mês
+
+     SETUP (1× após deploy):
+       1. Crie conta em https://resend.com
+       2. Verifique o domínio herework.com.br (TXT / DKIM / SPF)
+       3. Crie API Key com "Sending Access" restrita ao domínio
+       4. Substitua o valor de _HW_EMAIL_CONFIG.apiKey abaixo
+
+     Enquanto a apiKey estiver vazia, o sistema funciona em modo
+     de simulação: loga no console, persiste prefs, mas não envia.
+═══════════════════════════════════════════════════════════════ -->
+<script>
+/* ── Configuração global ──────────────────────────────────────────── */
+var _HW_EMAIL_CONFIG = {
+  apiKey:  '',    /* ← Cole aqui: re_xxxxxxxxxx  (Resend API key) */
+  from:    'HereWork <contato@herework.com.br>',
+  replyTo: 'contato@herework.com.br',
+  baseUrl: 'https://herework.com.br'
+};
+
+/* ── Preferências padrão ─────────────────────────────────────────── */
+var _hwDefaultPrefs = {
+  email_proposals:  true,
+  email_messages:   true,
+  email_contracts:  true,
+  email_newsletter: true
+};
+var _hwNotifPrefs = Object.assign({}, _hwDefaultPrefs);
+
+/* ── Anti-duplicata (5 min janela) ───────────────────────────────── */
+var _hwEmailSentCache = {};
+setInterval(function() {
+  var now = Date.now();
+  Object.keys(_hwEmailSentCache).forEach(function(k) {
+    if (now - _hwEmailSentCache[k] > 300000) delete _hwEmailSentCache[k];
+  });
+}, 60000);
+
+/* ══════════════════════════════════════════════════════════════════
+   1. PERSISTÊNCIA DE PREFERÊNCIAS
+══════════════════════════════════════════════════════════════════ */
+async function _hwLoadNotifPrefs() {
+  /* Supabase (fonte de verdade) */
+  if (typeof _sbReady === 'function' && _sbReady() && typeof _session !== 'undefined' && _session && _session.uid) {
+    try {
+      var r = await _sb.from('profiles').select('profile_metadata').eq('id', _session.uid).single();
+      if (r.data && r.data.profile_metadata && r.data.profile_metadata.notifications) {
+        _hwNotifPrefs = Object.assign({}, _hwDefaultPrefs, r.data.profile_metadata.notifications);
+      }
+    } catch(e) { console.warn('[HW Notif] Erro ao carregar prefs:', e.message); }
+  }
+  /* Fallback: localStorage */
+  try {
+    var ls = JSON.parse(localStorage.getItem('hw_notif_prefs') || 'null');
+    if (ls) _hwNotifPrefs = Object.assign({}, _hwDefaultPrefs, ls);
+  } catch(e) {}
+  _hwApplyPrefsToUI();
+}
+
+function _hwApplyPrefsToUI() {
+  [['notif-proposals','email_proposals'],['notif-messages','email_messages'],
+   ['notif-contracts','email_contracts'],['notif-newsletter','email_newsletter']]
+  .forEach(function(pair) {
+    var el = document.getElementById(pair[0]);
+    if (el) el.checked = _hwNotifPrefs[pair[1]] !== false;
+  });
+}
+
+async function saveNotifPrefs() {
+  var prefs = {
+    email_proposals:  document.getElementById('notif-proposals')  ? document.getElementById('notif-proposals').checked  : _hwNotifPrefs.email_proposals,
+    email_messages:   document.getElementById('notif-messages')   ? document.getElementById('notif-messages').checked   : _hwNotifPrefs.email_messages,
+    email_contracts:  document.getElementById('notif-contracts')  ? document.getElementById('notif-contracts').checked  : _hwNotifPrefs.email_contracts,
+    email_newsletter: document.getElementById('notif-newsletter') ? document.getElementById('notif-newsletter').checked : _hwNotifPrefs.email_newsletter
+  };
+  _hwNotifPrefs = prefs;
+
+  /* localStorage (imediato, sem depender do Supabase) */
+  try { localStorage.setItem('hw_notif_prefs', JSON.stringify(prefs)); } catch(e) {}
+
+  /* Supabase: merge seguro no profile_metadata */
+  if (typeof _sbReady === 'function' && _sbReady() && typeof _session !== 'undefined' && _session && _session.uid) {
+    var existingMeta = {};
+    try { existingMeta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x) {}
+    existingMeta.notifications = prefs;
+    try { localStorage.setItem('hw_profile_meta', JSON.stringify(existingMeta)); } catch(x) {}
+    _sb.from('profiles').update({ profile_metadata: existingMeta }).eq('id', _session.uid)
+      .then(function(r) {
+        if (r.error) console.warn('[HW Notif] Erro ao salvar prefs no Supabase:', r.error.message);
+      });
+  }
+
+  _hwLog('prefs_changed', { prefs: prefs });
+  if (typeof showToast === 'function') showToast('✅ Preferências salvas', 'success');
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   2. ENVIO VIA RESEND API
+══════════════════════════════════════════════════════════════════ */
+function _hwCheckPref(type) {
+  return _hwNotifPrefs[type] !== false;
+}
+
+async function _hwSendEmail(to, subject, html, text) {
+  if (!_HW_EMAIL_CONFIG.apiKey) {
+    console.info('[HW Email] Simulação — API key não configurada.\n  Para: ' + to + '\n  Assunto: ' + subject);
+    _hwLog('email_simulated', { to: to, subject: subject });
+    return { ok: false, reason: 'api_key_not_configured' };
+  }
+
+  /* Anti-duplicata */
+  var dk = to + '|' + subject;
+  if (_hwEmailSentCache[dk] && Date.now() - _hwEmailSentCache[dk] < 300000) {
+    _hwLog('email_duplicate', { to: to, subject: subject });
+    return { ok: false, reason: 'duplicate' };
+  }
+  _hwEmailSentCache[dk] = Date.now();
+
+  try {
+    var res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + _HW_EMAIL_CONFIG.apiKey
+      },
+      body: JSON.stringify({
+        from: _HW_EMAIL_CONFIG.from,
+        to: [to],
+        reply_to: _HW_EMAIL_CONFIG.replyTo,
+        subject: subject,
+        html: html,
+        text: text || subject
+      })
+    });
+    var data = await res.json();
+    if (data.id) {
+      _hwLog('email_sent', { to: to, subject: subject, resend_id: data.id });
+      return { ok: true, id: data.id };
+    }
+    /* Retry automático em rate-limit */
+    if (res.status === 429) {
+      setTimeout(function() { _hwSendEmail(to, subject, html, text); }, 5000);
+    }
+    _hwLog('email_failed', { to: to, subject: subject, error: data.message, status: res.status });
+    return { ok: false, reason: data.message };
+  } catch(e) {
+    _hwLog('email_error', { to: to, subject: subject, error: e.message });
+    return { ok: false, reason: e.message };
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   3. TEMPLATES HTML
+══════════════════════════════════════════════════════════════════ */
+function _hwEsc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function _hwWrap(title, body) {
+  var b = _HW_EMAIL_CONFIG.baseUrl;
+  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>' + _hwEsc(title) + '</title></head>' +
+    '<body style="margin:0;padding:0;background:#f0f4f8;font-family:Inter,Segoe UI,Arial,sans-serif;">' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f4f8;padding:32px 16px;"><tr><td align="center">' +
+    '<table width="580" cellpadding="0" cellspacing="0" style="max-width:580px;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);">' +
+    /* Header */
+    '<tr><td style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:28px 32px;text-align:center;">' +
+      '<div style="color:#fff;font-size:24px;font-weight:900;letter-spacing:-0.5px;">HereWork</div>' +
+      '<div style="color:rgba(255,255,255,.6);font-size:12px;margin-top:4px;">Plataforma de Talentos</div>' +
+    '</td></tr>' +
+    /* Body */
+    '<tr><td style="padding:32px;">' + body + '</td></tr>' +
+    /* Footer */
+    '<tr><td style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 32px;text-align:center;">' +
+      '<div style="font-size:12px;color:#94a3b8;">© 2025 HereWork · <a href="mailto:contato@herework.com.br" style="color:#94a3b8;">contato@herework.com.br</a></div>' +
+      '<div style="font-size:11px;color:#cbd5e1;margin-top:6px;">Você recebe este e-mail por possuir conta na HereWork. ' +
+        '<a href="' + b + '?unsubscribe=1" style="color:#94a3b8;">Cancelar inscrição</a></div>' +
+    '</td></tr>' +
+    '</table></td></tr></table></body></html>';
+}
+
+function _hwBtn(txt, url) {
+  return '<div style="text-align:center;margin:24px 0;"><a href="' + url + '" style="display:inline-block;background:#22c55e;color:#fff;font-weight:700;font-size:15px;padding:14px 34px;border-radius:8px;text-decoration:none;">' + _hwEsc(txt) + '</a></div>';
+}
+
+function _hwRow(lbl, val) {
+  return '<tr><td style="padding:10px 16px;background:#f8fafc;color:#64748b;font-size:13px;font-weight:600;border-bottom:1px solid #e2e8f0;white-space:nowrap;">' + lbl + '</td>' +
+    '<td style="padding:10px 16px;background:#fff;color:#1e293b;font-size:13px;border-bottom:1px solid #e2e8f0;">' + val + '</td></tr>';
+}
+
+/* ── Template: Nova Proposta ──────────────────────────────────────── */
+function _hwTplProposal(d) {
+  var body = '<h2 style="color:#1e293b;font-size:20px;margin:0 0 6px;">📬 Nova proposta recebida</h2>' +
+    '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Um profissional enviou uma proposta para o seu projeto na HereWork.</p>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:20px;">' +
+    _hwRow('Profissional', '<strong>' + _hwEsc(d.freelancerName || '—') + '</strong>') +
+    _hwRow('Projeto', _hwEsc(d.projectName || '—')) +
+    _hwRow('Valor proposto', '<strong style="color:#22c55e;">R$ ' + (d.value ? parseInt(d.value).toLocaleString('pt-BR') : '—') + '</strong>') +
+    _hwRow('Prazo', (d.deadline || '—') + ' dias') +
+    (d.coverLetter ? _hwRow('Mensagem', '<em style="color:#475569;">"' + _hwEsc(String(d.coverLetter).substring(0,200)) + (d.coverLetter.length > 200 ? '…' : '') + '"</em>') : '') +
+    '</table>' +
+    _hwBtn('Visualizar Proposta', _HW_EMAIL_CONFIG.baseUrl + '?panel=contracts');
+  return {
+    subject: '📬 Nova proposta: ' + _hwEsc(d.projectName || 'seu projeto'),
+    html: _hwWrap('Nova Proposta', body),
+    text: 'Nova proposta de ' + (d.freelancerName || 'Profissional') + ' para "' + (d.projectName || 'seu projeto') + '".\nValor: R$ ' + (d.value || '—') + '\nPrazo: ' + (d.deadline || '—') + ' dias\nAcesse: ' + _HW_EMAIL_CONFIG.baseUrl
+  };
+}
+
+/* ── Template: Nova Mensagem ──────────────────────────────────────── */
+function _hwTplMessage(d) {
+  var body = '<h2 style="color:#1e293b;font-size:20px;margin:0 0 6px;">💬 Nova mensagem</h2>' +
+    '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Você tem uma nova mensagem não lida na HereWork.</p>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:20px;">' +
+    _hwRow('De', '<strong>' + _hwEsc(d.senderName || 'Usuário') + '</strong>') +
+    (d.projectName ? _hwRow('Projeto', _hwEsc(d.projectName)) : '') +
+    (d.preview ? _hwRow('Prévia', '<em style="color:#475569;">"' + _hwEsc(String(d.preview).substring(0,150)) + '"</em>') : '') +
+    '</table>' +
+    _hwBtn('Abrir Conversa', _HW_EMAIL_CONFIG.baseUrl + '?chat=1');
+  return {
+    subject: '💬 Mensagem de ' + _hwEsc(d.senderName || 'um usuário') + (d.projectName ? ' — ' + d.projectName : ''),
+    html: _hwWrap('Nova Mensagem', body),
+    text: 'Mensagem de ' + (d.senderName || 'Usuário') + ': "' + (d.preview || '') + '"\nAcesse: ' + _HW_EMAIL_CONFIG.baseUrl
+  };
+}
+
+/* ── Template: Evento de Contrato ─────────────────────────────────── */
+var _hwEvtLabel = {
+  created:'📝 Contrato criado', sent:'📤 Contrato enviado',
+  signed:'✍️ Contrato assinado', approved:'✅ Contrato aprovado',
+  closed:'🔒 Contrato encerrado', cancelled:'❌ Contrato cancelado',
+  paid:'💰 Pagamento efetuado', received:'🟢 Pagamento recebido',
+  pending:'⏳ Pagamento pendente', refund:'↩️ Reembolso processado',
+  released:'🎉 Saldo liberado'
+};
+function _hwTplContract(d) {
+  var lbl = _hwEvtLabel[d.event] || ('📄 ' + (d.event || 'Atualização'));
+  var body = '<h2 style="color:#1e293b;font-size:20px;margin:0 0 6px;">' + lbl + '</h2>' +
+    '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Há uma atualização no seu contrato na plataforma HereWork.</p>' +
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:20px;">' +
+    _hwRow('Evento', lbl) +
+    (d.projectName ? _hwRow('Projeto', _hwEsc(d.projectName)) : '') +
+    (d.partnerName ? _hwRow('Contraparte', _hwEsc(d.partnerName)) : '') +
+    (d.value       ? _hwRow('Valor', '<strong style="color:#22c55e;">R$ ' + parseInt(d.value).toLocaleString('pt-BR') + '</strong>') : '') +
+    _hwRow('Data', new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' })) +
+    '</table>' +
+    _hwBtn('Ver Contrato', _HW_EMAIL_CONFIG.baseUrl + '?panel=contracts');
+  return {
+    subject: lbl + (d.projectName ? ' — ' + d.projectName : ''),
+    html: _hwWrap('Contrato', body),
+    text: lbl + (d.projectName ? ' para ' + d.projectName : '') + (d.value ? ' — R$ ' + parseInt(d.value).toLocaleString('pt-BR') : '') + '\nAcesse: ' + _HW_EMAIL_CONFIG.baseUrl
+  };
+}
+
+/* ── Template: Newsletter ─────────────────────────────────────────── */
+function _hwTplNewsletter(d) {
+  var body = '<h2 style="color:#1e293b;font-size:22px;margin:0 0 4px;">' + _hwEsc(d.title || 'Novidades HereWork') + '</h2>' +
+    '<div style="color:#94a3b8;font-size:12px;margin-bottom:20px;">' + new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'long', year:'numeric' }) + '</div>' +
+    '<div style="color:#475569;font-size:15px;line-height:1.7;margin-bottom:24px;">' + (d.body || '') + '</div>' +
+    _hwBtn('Acessar a Plataforma', _HW_EMAIL_CONFIG.baseUrl) +
+    '<div style="border-top:1px solid #e2e8f0;padding-top:16px;margin-top:8px;font-size:12px;color:#94a3b8;text-align:center;">' +
+    'Você recebe esta newsletter por ter optado por comunicações da HereWork.<br>' +
+    '<a href="' + _HW_EMAIL_CONFIG.baseUrl + '?unsubscribe=newsletter" style="color:#94a3b8;">Cancelar inscrição da newsletter</a>' +
+    '</div>';
+  return {
+    subject: d.subject || d.title || 'Novidades da HereWork',
+    html: _hwWrap('Newsletter HereWork', body),
+    text: (d.title || 'Novidades da HereWork') + '\n\n' + (d.bodyText || '') + '\nAcesse: ' + _HW_EMAIL_CONFIG.baseUrl
+  };
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   4. FUNÇÕES PÚBLICAS DE TRIGGER
+══════════════════════════════════════════════════════════════════ */
+
+/** Notifica o dono do projeto sobre nova proposta */
+async function hwNotifyProposal(recipientEmail, data) {
+  if (!_hwCheckPref('email_proposals')) return;
+  if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
+  var t = _hwTplProposal(data || {});
+  return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
+}
+
+/** Notifica usuário sobre nova mensagem no chat */
+async function hwNotifyMessage(recipientEmail, data) {
+  if (!_hwCheckPref('email_messages')) return;
+  if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
+  var t = _hwTplMessage(data || {});
+  return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
+}
+
+/** Notifica usuário sobre evento de contrato ou pagamento */
+async function hwNotifyContract(recipientEmail, event, data) {
+  if (!_hwCheckPref('email_contracts')) return;
+  if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
+  var d = Object.assign({}, data || {}, { event: event });
+  var t = _hwTplContract(d);
+  return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
+}
+
+/** Envia newsletter para um destinatário */
+async function hwSendNewsletter(recipientEmail, data) {
+  if (!_hwCheckPref('email_newsletter')) return;
+  if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
+  var t = _hwTplNewsletter(data || {});
+  return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   5. HOOK: trigger de proposta (chamado por submitProposal)
+══════════════════════════════════════════════════════════════════ */
+window._hwTriggerProposalEmail = function(projId, value, days, coverLetter) {
+  if (!_hwCheckPref('email_proposals')) return;
+  if (!(typeof _sbReady === 'function' && _sbReady()) || !projId) return;
+  _sb.from('projects').select('title,user_id').eq('id', projId).single().then(function(r) {
+    if (!r.data) return;
+    var projTitle = r.data.title || 'Projeto';
+    var ownerId   = r.data.user_id;
+    if (!ownerId) return;
+    _sb.from('profiles').select('email').eq('id', ownerId).single().then(function(pr) {
+      if (!pr.data || !pr.data.email) return;
+      /* Não notifica o próprio usuário se for o dono */
+      if (typeof _session !== 'undefined' && _session && pr.data.email === _session.email) return;
+      hwNotifyProposal(pr.data.email, {
+        freelancerName: typeof _session !== 'undefined' && _session ? _session.name : 'Profissional',
+        projectName:    projTitle,
+        value:          value,
+        deadline:       days,
+        coverLetter:    coverLetter
+      });
+    });
+  });
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   6. LOG DE AUDITORIA
+══════════════════════════════════════════════════════════════════ */
+var _hwEmailLogs = [];
+try { _hwEmailLogs = JSON.parse(localStorage.getItem('hw_email_logs') || '[]'); } catch(e) {}
+
+function _hwLog(type, data) {
+  var e = {
+    ts:   new Date().toISOString(),
+    uid:  (typeof _session !== 'undefined' && _session) ? (_session.uid || null) : null,
+    type: type,
+    data: data || {}
+  };
+  _hwEmailLogs.push(e);
+  if (_hwEmailLogs.length > 200) _hwEmailLogs = _hwEmailLogs.slice(-200);
+  try { localStorage.setItem('hw_email_logs', JSON.stringify(_hwEmailLogs)); } catch(x) {}
+}
+
+/** Retorna os últimos N logs (uso: hwGetEmailLogs() no console) */
+function hwGetEmailLogs(n) {
+  return _hwEmailLogs.slice(-(n || 50)).reverse();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   7. INICIALIZAÇÃO: carrega prefs salvas no localStorage
+══════════════════════════════════════════════════════════════════ */
+(function() {
+  try {
+    var ls = JSON.parse(localStorage.getItem('hw_notif_prefs') || 'null');
+    if (ls) _hwNotifPrefs = Object.assign({}, _hwDefaultPrefs, ls);
+  } catch(e) {}
+})();
 </script>
 
 <!-- ═══════════════════════════════════════
