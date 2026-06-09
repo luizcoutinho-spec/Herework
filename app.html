@@ -10309,21 +10309,9 @@ async function _sbUpdateType(uid, newType) {
     } catch(e) {}
   }
 
-  /* Caminho 2: RPC 'update_account_type' — função SECURITY DEFINER que bypassa o trigger.
-     Só tenta se a função já existir no banco (evita 404 em console).
-     Para criar a função, execute no Supabase SQL Editor (ver console.info abaixo). */
-  try {
-    var rpc = await _sb.rpc('update_account_type', { p_type: newType });
-    if (!rpc.error) {
-      console.log('[sbType] tipo atualizado via RPC update_account_type →', newType);
-      return true;
-    }
-    /* 404 = função não existe no banco; qualquer outro erro = falha real */
-    if (rpc.error && rpc.error.code !== 'PGRST202' &&
-        (rpc.error.message || '').indexOf('Could not find') === -1) {
-      console.warn('[sbType] RPC erro:', rpc.error.code, rpc.error.message);
-    }
-  } catch(e) {}
+  /* Caminho 2: RPC 'update_account_type' — desabilitado até a função existir no banco.
+     Chamá-la quando não existe gera 404 no console do Chrome (erro de rede não suprimível).
+     Para habilitar: execute o SQL no console.info abaixo e remova este comentário. */
 
   /* Caminho 3: auth.updateUser — atualiza metadados e aguarda possível sync */
   try {
