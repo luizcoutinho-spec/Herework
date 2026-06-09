@@ -10245,20 +10245,21 @@ async function _sbSaveProfile(data, extMeta) {
   }
 
   /* ── Sem erro mas 0 linhas — JWT expirado/RLS bloqueou silenciosamente.
-     Tenta renovar o token e retentar 1× antes de pedir re-autenticação. ── */
-  console.warn('[sbSave] 0 linhas — tentando renovar token...');
+     Usa getUser() que força validação server-side + auto-refresh interno do SDK.
+     Só pede re-autenticação se getUser() também falhar. ── */
+  console.warn('[sbSave] 0 linhas — forçando validação/refresh do JWT...');
   try {
-    var rrRetry = await _sb.auth.refreshSession();
-    if (rrRetry.data && rrRetry.data.user) {
-      uid = rrRetry.data.user.id;
+    var gurRetry = await _sb.auth.getUser();
+    if (gurRetry.data && gurRetry.data.user) {
+      uid = gurRetry.data.user.id;
       _session.uid = uid;
       payload.id = uid;
       var tRetry = await _doUpsert(payload);
       if (tRetry.ok) return true;
+      console.warn('[sbSave] 0 linhas mesmo após refresh — possível problema de RLS no banco');
     }
-  } catch(e) { console.warn('[sbSave] refresh falhou:', e); }
+  } catch(e) { console.warn('[sbSave] getUser retry falhou:', e); }
 
-  console.warn('[sbSave] RLS bloqueou mesmo após refresh — re-auth necessária');
   return false;
 }
 
@@ -15531,6 +15532,11 @@ function _getViewData() {
 
 function openDashboard() {
   if (!_session) { openModal('login'); return; }
+  /* Refresh proativo do JWT Supabase: se a aba ficou em background e o
+     auto-refresh do SDK não disparou, isto garante token fresco antes do save */
+  if (_sbReady()) {
+    _sb.auth.getUser().catch(function(){});
+  }
   var name  = _session.name  || 'Usuário';
   var email = _session.email || '';
   var type  = _session.type  || 'client';
