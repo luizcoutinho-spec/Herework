@@ -10301,22 +10301,21 @@ async function _sbUpdateType(uid, newType) {
     } catch(e) {}
   }
 
-  /* Caminho 2: RPC com SECURITY DEFINER (bypassa o trigger se existir no banco) */
-  var rpcList = [
-    { fn: 'update_account_type', args: { p_type: newType } },
-    { fn: 'change_account_type', args: { p_type: newType } },
-    { fn: 'update_user_type',    args: { p_type: newType } },
-    { fn: 'set_account_type',    args: { new_type: newType } }
-  ];
-  for (var i = 0; i < rpcList.length; i++) {
-    try {
-      var rpc = await _sb.rpc(rpcList[i].fn, rpcList[i].args);
-      if (!rpc.error) {
-        console.log('[sbType] tipo atualizado via RPC', rpcList[i].fn, '→', newType);
-        return true;
-      }
-    } catch(e) {}
-  }
+  /* Caminho 2: RPC 'update_account_type' — função SECURITY DEFINER que bypassa o trigger.
+     Só tenta se a função já existir no banco (evita 404 em console).
+     Para criar a função, execute no Supabase SQL Editor (ver console.info abaixo). */
+  try {
+    var rpc = await _sb.rpc('update_account_type', { p_type: newType });
+    if (!rpc.error) {
+      console.log('[sbType] tipo atualizado via RPC update_account_type →', newType);
+      return true;
+    }
+    /* 404 = função não existe no banco; qualquer outro erro = falha real */
+    if (rpc.error && rpc.error.code !== 'PGRST202' &&
+        (rpc.error.message || '').indexOf('Could not find') === -1) {
+      console.warn('[sbType] RPC erro:', rpc.error.code, rpc.error.message);
+    }
+  } catch(e) {}
 
   /* Caminho 3: auth.updateUser — atualiza metadados e aguarda possível sync */
   try {
@@ -10333,11 +10332,22 @@ async function _sbUpdateType(uid, newType) {
     }
   } catch(e) {}
 
-  /* Todos os caminhos falharam: trigger P0001 ativo sem bypass disponível */
-  console.warn('[sbType] trigger P0001 bloqueia mudança de tipo.',
-    'Para habilitar, execute no Supabase SQL Editor:\n',
-    'SELECT trigger_name FROM information_schema.triggers WHERE event_object_table=\'profiles\';\n',
-    'DROP TRIGGER IF EXISTS <nome> ON profiles;');
+  /* Trigger P0001 ativo — tipo não pôde ser alterado.
+     Para habilitar mudança de tipo, crie a função abaixo no Supabase SQL Editor: */
+  console.info(
+    '[sbType] Para habilitar mudança de tipo de conta, execute no Supabase → SQL Editor:\n\n' +
+    'CREATE OR REPLACE FUNCTION update_account_type(p_type text)\n' +
+    'RETURNS void LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$\n' +
+    'BEGIN\n' +
+    '  IF p_type NOT IN (\'client\',\'freelancer\',\'both\') THEN\n' +
+    '    RAISE EXCEPTION \'Tipo inválido: %\', p_type;\n' +
+    '  END IF;\n' +
+    '  UPDATE profiles SET type = p_type::text::account_type, updated_at = now()\n' +
+    '  WHERE id = auth.uid();\n' +
+    'END;\n' +
+    '$$;\n' +
+    'GRANT EXECUTE ON FUNCTION update_account_type(text) TO authenticated;'
+  );
   window._sbTypeChangePrevented = true;
   return false;
 }
