@@ -6517,12 +6517,12 @@ section { padding: 64px 0; }
           </div>
           <div class="results-sort">
             <span data-pt="Ordenar por:" data-es="Ordenar por:">Ordenar por:</span>
-            <select name="proj-sort" aria-label="Ordenar projetos por">
-              <option data-pt="Mais recentes" data-es="Más recientes">Mais recentes</option>
-              <option data-pt="Maior orçamento" data-es="Mayor presupuesto">Maior orçamento</option>
-              <option data-pt="Menor orçamento" data-es="Menor presupuesto">Menor orçamento</option>
-              <option data-pt="Prazo mais curto" data-es="Plazo más corto">Prazo mais curto</option>
-              <option data-pt="Mais propostas" data-es="Más propuestas">Mais propostas</option>
+            <select name="proj-sort" aria-label="Ordenar projetos por" onchange="sortCards(this)">
+              <option value="recente" data-pt="Mais recentes" data-es="Más recientes">Mais recentes</option>
+              <option value="maior-orcamento" data-pt="Maior orçamento" data-es="Mayor presupuesto">Maior orçamento</option>
+              <option value="menor-orcamento" data-pt="Menor orçamento" data-es="Menor presupuesto">Menor orçamento</option>
+              <option value="prazo-curto" data-pt="Prazo mais curto" data-es="Plazo más corto">Prazo mais curto</option>
+              <option value="mais-propostas" data-pt="Mais propostas" data-es="Más propuestas">Mais propostas</option>
             </select>
           </div>
         </div>
@@ -6531,7 +6531,7 @@ section { padding: 64px 0; }
 
         <div class="proj-list-grid" id="proj-list-grid">
 
-          <div class="proj-list-card" data-cat="ia-dados" data-budget="4000" data-type="fixo" data-deadline="30">
+          <div class="proj-list-card" data-cat="ia-dados" data-budget="4000" data-type="fixo" data-deadline="30" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6563,7 +6563,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="design" data-budget="1500" data-type="fixo" data-deadline="15">
+          <div class="proj-list-card" data-cat="design" data-budget="1500" data-type="fixo" data-deadline="15" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6595,7 +6595,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="consultoria" data-budget="2000" data-type="recorrente" data-deadline="0">
+          <div class="proj-list-card" data-cat="consultoria" data-budget="2000" data-type="recorrente" data-deadline="0" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6627,7 +6627,7 @@ section { padding: 64px 0; }
             </div>
           </div>
 
-          <div class="proj-list-card" data-cat="ia-dados" data-budget="15000" data-type="fixo" data-deadline="60">
+          <div class="proj-list-card" data-cat="ia-dados" data-budget="15000" data-type="fixo" data-deadline="60" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6659,7 +6659,7 @@ section { padding: 64px 0; }
             </div>
           </div
           <!-- Projeto Financeiro 1 -->
-          <div class="proj-list-card" data-cat="financas" data-budget="3500" data-type="fixo" data-deadline="20">
+          <div class="proj-list-card" data-cat="financas" data-budget="3500" data-type="fixo" data-deadline="20" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6695,7 +6695,7 @@ section { padding: 64px 0; }
           </div>
 
           <!-- Projeto Financeiro 2 -->
-          <div class="proj-list-card" data-cat="financas" data-budget="5000" data-type="recorrente" data-deadline="0">
+          <div class="proj-list-card" data-cat="financas" data-budget="5000" data-type="recorrente" data-deadline="0" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6731,7 +6731,7 @@ section { padding: 64px 0; }
           </div>
 
           <!-- Projeto Financeiro 3 -->
-          <div class="proj-list-card" data-cat="financas" data-budget="8000" data-type="fixo" data-deadline="30">
+          <div class="proj-list-card" data-cat="financas" data-budget="8000" data-type="fixo" data-deadline="30" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -6767,7 +6767,7 @@ section { padding: 64px 0; }
           </div>
 
           <!-- Projeto Financeiro 4 -->
-          <div class="proj-list-card" data-cat="financas" data-budget="4500" data-type="fixo" data-deadline="15">
+          <div class="proj-list-card" data-cat="financas" data-budget="4500" data-type="fixo" data-deadline="15" data-created="0" data-proposals="0">
             <div class="proj-list-header">
               <div class="proj-list-left">
                 <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
@@ -11024,22 +11024,43 @@ function sortCards(selectEl) {
   var isFL = !!layout.closest('#page-freelancers');
   var grid = document.getElementById(isFL ? 'fl-list-grid' : 'proj-list-grid');
   if (!grid) return;
-  var cards   = Array.from(grid.querySelectorAll(isFL ? '.fl-list-card' : '.proj-list-card'));
-  var optText = _norm(selectEl.selectedOptions && selectEl.selectedOptions[0] ? selectEl.selectedOptions[0].textContent : '');
+  var cards = Array.from(grid.querySelectorAll(isFL ? '.fl-list-card' : '.proj-list-card'));
+
+  /* Usa value do option quando disponível, senão normaliza o texto */
+  var optVal  = selectEl.value || '';
+  var optText = _norm(selectEl.selectedOptions && selectEl.selectedOptions[0]
+                      ? selectEl.selectedOptions[0].textContent : '');
 
   cards.sort(function(a, b) {
-    if (optText.indexOf('recente') !== -1 || optText.indexOf('recient') !== -1)
+    /* ── Freelancers ─────────────────────────────────────── */
+    if (isFL) {
+      if (optText.indexOf('recente') !== -1 || optText.indexOf('recient') !== -1)
+        return parseInt(b.getAttribute('data-created')||0) - parseInt(a.getAttribute('data-created')||0);
+      if (optText.indexOf('avalia') !== -1 || optText.indexOf('calific') !== -1)
+        return parseFloat(b.getAttribute('data-rating')||0) - parseFloat(a.getAttribute('data-rating')||0);
+      if (optText.indexOf('menor') !== -1)
+        return parseFloat(a.getAttribute('data-rate')||0) - parseFloat(b.getAttribute('data-rate')||0);
+      if (optText.indexOf('maior') !== -1 || optText.indexOf('mayor') !== -1)
+        return parseFloat(b.getAttribute('data-rate')||0) - parseFloat(a.getAttribute('data-rate')||0);
+      if (optText.indexOf('recomenda') !== -1)
+        return parseInt(b.getAttribute('data-recs')||0) - parseInt(a.getAttribute('data-recs')||0);
+      return 0;
+    }
+
+    /* ── Projetos ────────────────────────────────────────── */
+    if (optVal === 'recente' || optText.indexOf('recente') !== -1 || optText.indexOf('recient') !== -1)
       return parseInt(b.getAttribute('data-created')||0) - parseInt(a.getAttribute('data-created')||0);
-    if (optText.indexOf('avalia') !== -1 || optText.indexOf('calific') !== -1)
-      return parseFloat(b.getAttribute('data-rating')||0) - parseFloat(a.getAttribute('data-rating')||0);
-    if (optText.indexOf('menor') !== -1)
-      return parseFloat(a.getAttribute('data-rate')||0) - parseFloat(b.getAttribute('data-rate')||0);
-    if (optText.indexOf('maior') !== -1 || optText.indexOf('mayor') !== -1)
-      return parseFloat(b.getAttribute('data-rate')||0) - parseFloat(a.getAttribute('data-rate')||0);
-    if (optText.indexOf('recomenda') !== -1 || optText.indexOf('projeto') !== -1 || optText.indexOf('proyecto') !== -1)
-      return parseInt(b.getAttribute('data-recs')||0) - parseInt(a.getAttribute('data-recs')||0);
+    if (optVal === 'maior-orcamento' || (optText.indexOf('maior') !== -1 && optText.indexOf('orc') !== -1))
+      return parseFloat(b.getAttribute('data-budget')||0) - parseFloat(a.getAttribute('data-budget')||0);
+    if (optVal === 'menor-orcamento' || (optText.indexOf('menor') !== -1 && optText.indexOf('orc') !== -1))
+      return parseFloat(a.getAttribute('data-budget')||0) - parseFloat(b.getAttribute('data-budget')||0);
+    if (optVal === 'prazo-curto' || optText.indexOf('prazo') !== -1)
+      return parseInt(a.getAttribute('data-deadline')||999) - parseInt(b.getAttribute('data-deadline')||999);
+    if (optVal === 'mais-propostas' || optText.indexOf('proposta') !== -1 || optText.indexOf('propues') !== -1)
+      return parseInt(b.getAttribute('data-proposals')||0) - parseInt(a.getAttribute('data-proposals')||0);
     return 0;
   });
+
   cards.forEach(function(c){ grid.appendChild(c); });
   showToast(lang()==='pt' ? 'Resultados ordenados!' : 'Resultados ordenados!', 'success');
 }
@@ -14525,8 +14546,11 @@ function _realProjCard(p) {
       '</div>'
     : '';
 
+  /* data-created: timestamp em ms para ordenação "Mais recentes" */
+  var _createdMs = p.created_at ? new Date(p.created_at).getTime() : 0;
   return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-cat="' + _sanitize(catKey) +
     '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) +
+    '" data-proposals="' + props + '" data-created="' + _createdMs +
     '" data-subcat="' + _sanitize(subcatArr.join(',')) + '">' +
     '<div class="proj-list-header">' +
       '<div class="proj-list-left">' +
