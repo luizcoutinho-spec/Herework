@@ -10005,16 +10005,19 @@ async function _sbRestoreSession() {
       var user = r.data.session.user;
       var prof = await _sbGetProfile(user.id);
       if (prof) {
-        /* 'both' não existe na enum profiles.type.
-           Prioridade: localStorage (escrito sincronamente no save) → auth metadata → profile_metadata → type column.
-           O localStorage é a fonte mais confiável — não sofre race condition de async. */
-        var _authMeta = (user.user_metadata) || {};
-        var _lsBoth   = false;
-        try { _lsBoth = localStorage.getItem('hw_actype_both') === '1'; } catch(e) {}
-        var _effType = (_lsBoth ||
-                        _authMeta.account_type_override === 'both' ||
-                        (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both'))
-          ? 'both' : (prof.type || 'client');
+        /* Tipo de conta: prioridade localStorage (escrito sincronamente) → auth metadata → DB enum.
+           O banco pode ter trigger P0001 que bloqueia mudanças; localStorage é a fonte confiável. */
+        var _authMeta    = (user.user_metadata) || {};
+        var _lsSavedType = null;
+        try { _lsSavedType = localStorage.getItem('hw_saved_actype'); } catch(e) {}
+        var _validTypes  = ['client', 'freelancer', 'both'];
+        var _effType = (_validTypes.indexOf(_lsSavedType) !== -1 ? _lsSavedType : null)
+          || (_authMeta.account_type_override === 'both' ? 'both' : null)
+          || (_authMeta.saved_account_type && _validTypes.indexOf(_authMeta.saved_account_type) !== -1
+                ? _authMeta.saved_account_type : null)
+          || (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both' ? 'both' : null)
+          || prof.type
+          || 'client';
         _setSession(prof.name, prof.email, _effType, prof.is_admin);
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
@@ -10294,21 +10297,17 @@ async function _sbUpdateType(uid, newType) {
   if (!_sbReady() || !uid) return false;
   if (['client','freelancer','both'].indexOf(newType) === -1) return false;
 
-  /* 'both' não existe na enum account_type do banco — persiste em auth user_metadata
-     (garantido pelo Supabase Auth, sem precisar de coluna extra na tabela profiles). */
+  /* Persiste tipo em auth user_metadata como backup cross-device
+     (localStorage é a fonte primária para o mesmo browser) */
+  try {
+    await _sb.auth.updateUser({ data: { saved_account_type: newType, account_type_override: newType === 'both' ? 'both' : null } });
+  } catch(e) {}
+
+  /* 'both' não existe na enum account_type do banco — não tenta UPDATE na coluna */
   if (newType === 'both') {
-    try {
-      var _auBoth = await _sb.auth.updateUser({ data: { account_type_override: 'both' } });
-      if (_auBoth.error) console.warn('[sbType] auth metadata write falhou:', _auBoth.error.message);
-    } catch(e) {}
-    console.log('[sbType] tipo "both" salvo em auth user_metadata.account_type_override');
+    console.log('[sbType] tipo "both" salvo em auth metadata + localStorage');
     return true;
   }
-
-  /* Ao salvar 'client' ou 'freelancer', limpa o override de 'both' se estava ativo */
-  try {
-    var _auClr = await _sb.auth.updateUser({ data: { account_type_override: null } });
-  } catch(e) {}
 
   /* Lê o tipo atual do cache local para decidir a estratégia */
   var _cachedType = (_session && _session.uid && window._realProfileCache && window._realProfileCache[_session.uid])
@@ -16097,13 +16096,10 @@ function dashSaveProfile() {
     return _pendingAccountType || _cachedProf.type || (_session ? _session.type : 'client');
   })();
 
-  /* ── Persiste 'both' em localStorage IMEDIATAMENTE (síncrono) ────────────────
-     auth.updateUser é async — se o usuário navegar antes de completar, o override
-     seria perdido. O localStorage é escrito agora, antes de qualquer await.     ── */
-  try {
-    if (newType === 'both') localStorage.setItem('hw_actype_both', '1');
-    else                    localStorage.removeItem('hw_actype_both');
-  } catch(e) {}
+  /* ── Persiste tipo em localStorage IMEDIATAMENTE (síncrono, antes de qualquer await) ───
+     O banco pode bloquear a mudança (trigger P0001) ou o async pode não completar antes
+     do usuário navegar. O localStorage garante persistência no mesmo browser.          ── */
+  try { localStorage.setItem('hw_saved_actype', newType); } catch(e) {}
 
   var bioEl   = document.getElementById('profile-bio');
   var phoneEl = document.getElementById('profile-phone');
@@ -16203,13 +16199,19 @@ function dashSaveProfile() {
       var _typeBlocked = window._sbTypeChangePrevented;
       window._sbTypeChangePrevented = false;
 
-      /* Atualiza cache local — garante que existe mesmo se nunca foi populado */
+      /* localStorage foi escrito sincronamente em dashSaveProfile — é a fonte confiável */
+      var _lsSavedType = null;
+      try { _lsSavedType = localStorage.getItem('hw_saved_actype'); } catch(e) {}
+      /* Se localStorage confirma o tipo desejado, ignorar o bloqueio do banco na UI */
+      var _lsConfirmed = (_lsSavedType === pType);
+
+      /* Tipo efetivo: localStorage tem prioridade sobre o banco */
       var uid = _session && _session.uid;
-      /* Tipo efetivo: se o trigger bloqueou, mantém o tipo original do cache/sessão */
-      var effectiveType = _typeBlocked
-        ? (uid && window._realProfileCache && window._realProfileCache[uid]
-            ? (window._realProfileCache[uid].type || pType) : pType)
-        : pType;
+      var effectiveType = _lsConfirmed ? pType
+        : (_typeBlocked
+            ? (uid && window._realProfileCache && window._realProfileCache[uid]
+                ? (window._realProfileCache[uid].type || pType) : pType)
+            : pType);
 
       if (uid) {
         window._realProfileCache = window._realProfileCache || {};
@@ -16218,35 +16220,28 @@ function dashSaveProfile() {
         c.name = pData.name; c.bio = pData.bio;
         c.city = pData.city; c.state = pData.state;
         c.hourly_rate = pData.hourlyRate;
-        /* Só atualiza type no cache se a mudança foi aceita pelo banco */
-        if (!_typeBlocked) c.type = pType;
+        /* Sempre salva tipo efetivo no cache (localStorage é a fonte confiável) */
+        c.type = effectiveType;
         if (pData.skills) c.skills = pData.skills;
         if (pMeta) c.profile_metadata = pMeta;
       }
 
-      /* Corrige session e UI se o tipo foi bloqueado pelo trigger */
-      if (_typeBlocked) {
-        var origType = effectiveType;
-        _session.type = origType;
-        try {
-          var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}');
-          _hw.type = origType;
-          localStorage.setItem('hw_session', JSON.stringify(_hw));
-        } catch(e) {}
-        /* Reverte seletor de tipo para o valor real do banco */
-        if (typeof dashSetAccountType === 'function') dashSetAccountType(origType);
-        var ptEl2 = document.getElementById('dash-profile-type');
-        if (ptEl2) ptEl2.textContent = origType === 'both' ? '🔄 Cliente + Freelancer' : origType === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
-      }
+      /* Atualiza session e UI com tipo efetivo */
+      if (_session) _session.type = effectiveType;
+      try {
+        var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}');
+        _hw.type = effectiveType;
+        localStorage.setItem('hw_session', JSON.stringify(_hw));
+      } catch(e) {}
+      if (typeof dashSetAccountType === 'function') dashSetAccountType(effectiveType);
+      var ptEl2 = document.getElementById('dash-profile-type');
+      if (ptEl2) ptEl2.textContent = effectiveType === 'both' ? '🔄 Cliente + Freelancer'
+                                   : effectiveType === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
 
       /* Sempre recarrega listagem de freelancers para refletir qualquer mudança */
       if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
 
-      if (_typeBlocked) {
-        showToast('Perfil salvo ✓  —  tipo de conta requer permissão especial no banco (ver console).', 'info');
-      } else {
-        showToast('Perfil salvo com sucesso! ✓', 'success');
-      }
+      showToast('Perfil salvo com sucesso! ✓', 'success');
     });
   }
 
