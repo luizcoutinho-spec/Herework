@@ -10005,10 +10005,14 @@ async function _sbRestoreSession() {
       var user = r.data.session.user;
       var prof = await _sbGetProfile(user.id);
       if (prof) {
-        /* 'both' é armazenado em auth user_metadata (enum profiles.type não tem 'both').
-           Prioridade: auth metadata → profile_metadata → type column */
+        /* 'both' não existe na enum profiles.type.
+           Prioridade: localStorage (escrito sincronamente no save) → auth metadata → profile_metadata → type column.
+           O localStorage é a fonte mais confiável — não sofre race condition de async. */
         var _authMeta = (user.user_metadata) || {};
-        var _effType = (_authMeta.account_type_override === 'both' ||
+        var _lsBoth   = false;
+        try { _lsBoth = localStorage.getItem('hw_actype_both') === '1'; } catch(e) {}
+        var _effType = (_lsBoth ||
+                        _authMeta.account_type_override === 'both' ||
                         (prof.profile_metadata && prof.profile_metadata.account_type_override === 'both'))
           ? 'both' : (prof.type || 'client');
         _setSession(prof.name, prof.email, _effType, prof.is_admin);
@@ -16092,6 +16096,14 @@ function dashSaveProfile() {
     }
     return _pendingAccountType || _cachedProf.type || (_session ? _session.type : 'client');
   })();
+
+  /* ── Persiste 'both' em localStorage IMEDIATAMENTE (síncrono) ────────────────
+     auth.updateUser é async — se o usuário navegar antes de completar, o override
+     seria perdido. O localStorage é escrito agora, antes de qualquer await.     ── */
+  try {
+    if (newType === 'both') localStorage.setItem('hw_actype_both', '1');
+    else                    localStorage.removeItem('hw_actype_both');
+  } catch(e) {}
 
   var bioEl   = document.getElementById('profile-bio');
   var phoneEl = document.getElementById('profile-phone');
