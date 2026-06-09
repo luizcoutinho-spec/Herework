@@ -9953,6 +9953,9 @@ async function _sbRestoreSession() {
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
         _session.avatar_url = prof.avatar_url || null;
+        /* Cache do perfil completo — usado para fallback de tipo/skills no formulário */
+        window._realProfileCache = window._realProfileCache || {};
+        window._realProfileCache[user.id] = prof;
       }
     }
     /* Listener para mudanças de autenticação */
@@ -15558,7 +15561,10 @@ function dashSetAccountType(type) {
 window.dashSetAccountType = dashSetAccountType;
 
 function _initAcTypeUI() {
-  var cur = (_session && _session.type) || 'client';
+  /* Prioriza o tipo do cache Supabase (mais confiável que _session.type, que pode ser stale do localStorage) */
+  var _rp = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
+  var cur = _rp.type || (_session && _session.type) || 'client';
   _pendingAccountType = null; /* reseta o pending ao abrir */
   dashSetAccountType(cur);
 }
@@ -15720,9 +15726,13 @@ function _initProfileExtended() {
   } else {
     _selectedSubareas = [];
   }
-  /* Restaura skills salvas */
-  if (meta.skills && Array.isArray(meta.skills)) {
+  /* Restaura skills — localStorage primeiro, depois cache Supabase como fallback */
+  var _rpc = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
+  if (meta.skills && Array.isArray(meta.skills) && meta.skills.length) {
     _selectedSkills = meta.skills.slice();
+  } else if (_rpc.skills && Array.isArray(_rpc.skills) && _rpc.skills.length) {
+    _selectedSkills = _rpc.skills.slice();
   }
   if (typeof renderProfileAreasAccordion === 'function') renderProfileAreasAccordion();
   if (typeof _renderSelectedSkills === 'function') _renderSelectedSkills();
@@ -15857,14 +15867,14 @@ function dashSaveProfile() {
   /* ── Estado/cidade: DOM quando presente, senão sessão ── */
   var newState = stateEl ? stateEl.value : (_session ? (_session.state || '') : '');
   var newCity  = cityEl  ? cityEl.value  : (_session ? (_session.city  || '') : '');
-  var newType  = _pendingAccountType || (_session ? _session.type : 'client');
+  /* ── Cache de perfil real (Supabase) — usado para fallback de tipo e skills ── */
+  var _cachedProf = (_session && _session.uid && window._realProfileCache)
+    ? (window._realProfileCache[_session.uid] || {}) : {};
+  /* type: explícito pelo usuário > cache Supabase > sessão (localStorage — pode ser stale) */
+  var newType  = _pendingAccountType || _cachedProf.type || (_session ? _session.type : 'client');
 
   var bioEl   = document.getElementById('profile-bio');
   var phoneEl = document.getElementById('profile-phone');
-
-  /* ── Cache de perfil real (Supabase) para fallback de campos removidos ── */
-  var _cachedProf = (_session && _session.uid && window._realProfileCache)
-    ? (window._realProfileCache[_session.uid] || {}) : {};
 
   /* ── Coleta campos extendidos — _gv retorna null quando o campo não existe ── */
   function _gv(id) { var el = document.getElementById(id); return el ? el.value.trim() : null; }
@@ -15910,7 +15920,9 @@ function dashSaveProfile() {
     state:     newState,
     type:      newType,
     hourlyRate: hrRate,
-    skills:    (typeof _selectedSkills !== 'undefined' && _selectedSkills.length ? _selectedSkills.slice() : [])
+    skills:    (typeof _selectedSkills !== 'undefined' && _selectedSkills.length
+                  ? _selectedSkills.slice()
+                  : (_cachedProf.skills && _cachedProf.skills.length ? _cachedProf.skills.slice() : []))
   };
 
   /* ── Atualiza UI local (sempre, independente do Supabase) ── */
@@ -15951,18 +15963,20 @@ function dashSaveProfile() {
         return;
       }
       window._pendingProfileSave = null;
-      /* Atualiza cache local */
+      /* Atualiza cache local — garante que existe mesmo se nunca foi populado */
       var uid = _session && _session.uid;
-      if (uid && window._realProfileCache && window._realProfileCache[uid]) {
+      if (uid) {
+        window._realProfileCache = window._realProfileCache || {};
+        if (!window._realProfileCache[uid]) window._realProfileCache[uid] = {};
         var c = window._realProfileCache[uid];
         c.name = pData.name; c.bio = pData.bio;
         c.city = pData.city; c.state = pData.state;
         c.hourly_rate = pData.hourlyRate; c.type = pType;
+        if (pData.skills) c.skills = pData.skills;
         if (pMeta) c.profile_metadata = pMeta;
       }
-      /* Recarrega listagem de freelancers */
-      var isFL = (pType === 'freelancer' || pType === 'both');
-      if (isFL && typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
+      /* Sempre recarrega listagem de freelancers para refletir qualquer mudança */
+      if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers();
       showToast('Perfil salvo com sucesso! ✓', 'success');
     });
   }
