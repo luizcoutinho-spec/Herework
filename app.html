@@ -10763,15 +10763,29 @@ async function _sbListProjects(filters) {
 /* ── PROPOSTAS: Criar ─────────────────────────────────────────── */
 async function _sbCreateProposal(data) {
   if (!_sbReady() || !_session) return null;
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbCreateProposal: sem sessao Supabase ativa'); return null; }
   var r = await _sb.from('proposals').insert({
     project_id:    data.projectId,
-    freelancer_id: _session.uid,
+    freelancer_id: user.id,
     value:         data.value,
     deadline_days: data.deadline,
     cover_letter:  data.coverLetter,
     status:        'pending'
   }).select().single();
+  if (r.error) {
+    var code = r.error.code || '';
+    var msg  = (r.error.message || '').toLowerCase();
+    if (code === '23505' || msg.indexOf('duplicate') >= 0 || msg.indexOf('unique') >= 0) {
+      throw new Error('Voce ja enviou uma proposta para este projeto.');
+    }
+    if (code === '23503' || msg.indexOf('foreign key') >= 0) {
+      throw new Error('Projeto nao encontrado. Recarregue a pagina e tente novamente.');
+    }
+    throw new Error(r.error.message || 'Erro ao salvar proposta.');
+  }
   return r.data || null;
+}
 }
 
 /* ── CONTRATOS: Listar do usuário ─────────────────────────────── */
