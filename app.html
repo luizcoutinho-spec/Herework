@@ -18265,6 +18265,23 @@ function _deliverySuccess() {
     /* Update dashboard card status */
     _updateDashProjectStatus(_deliveryCtx.id, 'review', 'Aguardando aprovação', 100);
 
+    /* Persistir transição: entrega enviada -> contracts.status = 'review' */
+    if (_sbReady() && _session && _deliveryCtx && _deliveryCtx.id) {
+      _sb.from('contracts')
+         .update({ status: 'review' })
+         .eq('id', _deliveryCtx.id)
+         .select()
+         .then(function(r) {
+           if (r.error) {
+             console.warn('submitDelivery: erro ao gravar review:', r.error.message);
+           } else if (!r.data || !r.data.length) {
+             console.warn('submitDelivery: nenhum contrato atualizado para id', _deliveryCtx.id, '(id errado ou RLS)');
+           } else {
+             console.log('submitDelivery: contrato', _deliveryCtx.id, 'status=review gravado');
+           }
+         });
+    }
+
     showToast('📤 Entrega enviada! ' + (_deliveryCtx.client||'O cliente') + ' será notificado agora.', 'success');
   }, 400);
 }
