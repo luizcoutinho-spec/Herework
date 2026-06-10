@@ -16072,7 +16072,7 @@ function openProposalFor(btn) {
   /* Salvar contexto do projeto para usar após login */
   window._pendingProposal = {
     card:    card,
-    projId:  card ? (card.getAttribute('data-proj-id') || '') : '',
+    projId: card ? (card.getAttribute('data-real-id') || card.getAttribute('data-proj-id') || '') : '',
     title:   card ? ((card.querySelector('.proj-list-title') || {}).textContent || '').trim() : '',
     budget:  card ? ((card.querySelector('.proj-list-budget') || {}).textContent || '').trim() : '',
     deadline: card ? (card.getAttribute('data-deadline') || '0') : '0'
