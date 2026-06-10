@@ -6,7 +6,13 @@
  *
  * Ref: https://docs.stripe.com/payments/pix
  *
- * Body: { amount: number, description: string }
+ * Body: {
+ *   amount:      number  — Valor em R$
+ *   description: string  — Descrição do pagamento
+ *   contractId:  string  — UUID do contrato (quando pagamento é para escrow)
+ *   userId:      string  — UUID do usuário pagador
+ *   planId:      string  — ID do plano (ex: 'pro', 'enterprise'; quando pagamento é de assinatura)
+ * }
  */
 
 const { getStripe, respond, handleCors, toCents } = require('./_helpers');
@@ -17,7 +23,10 @@ module.exports = async function handler(req, res) {
 
   const {
     amount,
-    description = 'HereWork — Pagamento PIX'
+    description  = 'HereWork — Pagamento PIX',
+    contractId   = '',
+    userId       = '',
+    planId       = ''
   } = req.body || {};
 
   if (!amount || isNaN(amount) || amount < 1) {
@@ -42,7 +51,13 @@ module.exports = async function handler(req, res) {
           amount_includes_iof:    'never'   /* IOF cobrado do cliente */
         }
       },
-      metadata: { platform: 'HereWork', method: 'pix' }
+      metadata: {
+        platform:    'HereWork',
+        method:      'pix',
+        contract_id: contractId,
+        user_id:     userId,
+        plan_id:     planId
+      }
     });
 
     /* 2. Confirma para gerar o QR Code */
