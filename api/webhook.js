@@ -94,7 +94,7 @@ module.exports = async function handler(req, res) {
       /* 1. Marcar contrato como ativo + escrow liberado */
       if (contractId) {
         await sbAdmin('PATCH',
-          `/rest/v1/contracts?id=eq.${contractId}`,
+          `/rest/v1/contracts?id=eq.${encodeURIComponent(contractId)}`,
           {
             escrow_released: true,
             paid_at:         new Date().toISOString(),
@@ -110,7 +110,7 @@ module.exports = async function handler(req, res) {
         const allowedPlans = ['free', 'pro', 'enterprise'];
         if (allowedPlans.includes(planId)) {
           await sbAdmin('PATCH',
-            `/rest/v1/profiles?id=eq.${userId}`,
+            `/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`,
             { plan: planId }
           );
           console.log(`[HereWork] Usuário ${userId} atualizado para plano ${planId}.`);
@@ -125,10 +125,13 @@ module.exports = async function handler(req, res) {
       const cid = pi.metadata && pi.metadata.contract_id;
       console.warn(`[HereWork] ❌ Pagamento falhou: ${pi.id} — ${err && err.message}`);
 
-      /* Marcar contrato como disputado se estava aguardando pagamento */
+      /* Marcar contrato como disputado independentemente do status atual.
+         O filtro &status=eq.active foi removido: ele silenciava o update
+         quando o contrato não estava exatamente em 'active' (ex: 'pending',
+         'review'), impedindo o registro do status 'disputed'. */
       if (cid) {
         await sbAdmin('PATCH',
-          `/rest/v1/contracts?id=eq.${cid}&status=eq.active`,
+          `/rest/v1/contracts?id=eq.${encodeURIComponent(cid)}`,
           { status: 'disputed' }
         );
       }
@@ -141,7 +144,7 @@ module.exports = async function handler(req, res) {
       console.warn(`[HereWork] ⚠️ Pagamento cancelado: ${pi.id}`);
       if (cid) {
         await sbAdmin('PATCH',
-          `/rest/v1/contracts?id=eq.${cid}`,
+          `/rest/v1/contracts?id=eq.${encodeURIComponent(cid)}`,
           { status: 'cancelled' }
         );
       }
