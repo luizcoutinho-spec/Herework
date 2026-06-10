@@ -22261,6 +22261,41 @@ async function openStripePayment(opts) {
     var data = await res.json();
     if (data.error) throw new Error(data.error);
 
+    // Tratamento de 3D Secure / SCA: o backend já confirmou o PaymentIntent
+    // server-side e retorna requiresAction:true quando o banco do portador
+    // exige autenticação adicional. Nesse caso NÃO montamos Payment Elements —
+    // chamamos handleCardAction() diretamente para exibir o modal 3DS do Stripe.
+    if (data.requiresAction) {
+      var stripe3ds = initStripe();
+      if (!stripe3ds) throw new Error('Stripe não carregado. Recarregue a página.');
+      document.getElementById('sp-loading').style.display = 'none';
+      document.getElementById('sp-element-container').style.display = 'block';
+      showToast('🔐 Autenticação adicional necessária. Aguarde…', 'info');
+      var actionResult = await stripe3ds.handleCardAction(data.clientSecret);
+      if (actionResult.error) throw new Error(actionResult.error.message);
+      // 3DS concluído com sucesso — mostrar bloco de sucesso
+      document.getElementById('sp-element-container').style.display = 'none';
+      document.getElementById('sp-success').style.display           = 'block';
+      if (_spContractId) {
+        showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
+        if (typeof hwNotifyContract === 'function' && typeof _session !== 'undefined' && _session) {
+          var _cCtx3ds = (typeof _contractCtx !== 'undefined') ? _contractCtx : {};
+          if (_cCtx3ds.email) {
+            hwNotifyContract(_cCtx3ds.email, 'paid', { projectName: _cCtx3ds.project || '', partnerName: _session.name || '', value: _cCtx3ds.value || 0 });
+          }
+          if (_session.email) {
+            hwNotifyContract(_session.email, 'paid', { projectName: _cCtx3ds.project || '', partnerName: _cCtx3ds.name || '', value: _cCtx3ds.value || 0 });
+          }
+        }
+        setTimeout(function() { closeStripePayment(); if (typeof _goContractStep === 'function') _goContractStep(3); }, 2500);
+      } else {
+        if (window._payCtx && window._payCtx.plan) _activatePlan(window._payCtx.plan);
+        showToast('🎉 Plano ativado com sucesso! Aproveite todos os benefícios.', 'success');
+        setTimeout(function() { closeStripePayment(); }, 2500);
+      }
+      return; // encerra: não monta Payment Elements abaixo
+    }
+
     // Montar Stripe Payment Element
     var stripe = initStripe();
     if (!stripe) throw new Error('Stripe não carregado');
