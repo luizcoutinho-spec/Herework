@@ -10656,7 +10656,9 @@ async function _sbGetMyProjects() {
   if (!_sbReady() || !_session) return [];
   /* Exclui projetos marcados como 'cancelled' — usados como soft-delete
      quando a policy RLS "projects_delete" ainda não foi aplicada. */
-  var r = await _sb.from('projects').select('*, proposals(count)').eq('client_id', _session.uid).neq('status', 'cancelled').order('created_at', { ascending: false });
+  /* proposals(id) em vez de proposals(count): PostgREST retorna count como string
+     causando typeof===number sempre false. Contar via .length é garantido. */
+  var r = await _sb.from('projects').select('*, proposals(id)').eq('client_id', _session.uid).neq('status', 'cancelled').order('created_at', { ascending: false });
   return r.data || [];
 }
 
@@ -10779,6 +10781,42 @@ function _sbListenMessages(contractId, callback) {
     .subscribe();
 }
 
+/* ── REALTIME: Escutar novas propostas nos projetos do cliente ── */
+var _sbProposalChannel = null;
+function _sbListenProposals() {
+  if (!_sbReady() || !_session) return;
+  /* Desconectar canal anterior se existir */
+  if (_sbProposalChannel) {
+    try { _sb.removeChannel(_sbProposalChannel); } catch(x) {}
+    _sbProposalChannel = null;
+  }
+  _sbProposalChannel = _sb.channel('proposals:client:' + _session.uid)
+    .on('postgres_changes', {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'proposals'
+    }, function(payload) {
+      /* Verifica se a proposta é para um projeto deste cliente */
+      if (!payload.new || !payload.new.project_id) return;
+      _sb.from('projects').select('client_id').eq('id', payload.new.project_id).single()
+        .then(function(r) {
+          if (!r.data || r.data.client_id !== _session.uid) return;
+          /* Atualiza o painel de projetos em tempo real */
+          if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+          /* Toast de aviso */
+          showToast('📩 Nova proposta recebida para um dos seus projetos!', 'success');
+        });
+    })
+    .subscribe();
+}
+/* Parar a escuta quando o usuário sair do dashboard */
+function _sbStopListenProposals() {
+  if (_sbProposalChannel) {
+    try { _sb.removeChannel(_sbProposalChannel); } catch(x) {}
+    _sbProposalChannel = null;
+  }
+}
+
 
 /* ═══════════════════════════════════════════
    SPA ROUTING
@@ -10798,6 +10836,10 @@ function showPage(name) {
   /* Quando abre a página de freelancers, injeta perfis reais do Supabase */
   if (name === 'freelancers' && _sbReady()) {
     setTimeout(function(){ if (typeof _renderRealFreelancers === 'function') _renderRealFreelancers(); }, 100);
+  }
+  /* Ao navegar para fora do dashboard, encerra a subscription de propostas */
+  if (name !== 'dashboard' && typeof _sbStopListenProposals === 'function') {
+    _sbStopListenProposals();
   }
 }
 
@@ -15029,7 +15071,8 @@ async function _refreshMyPublishedProjects() {
     window._projectCtxMap = window._projectCtxMap || {};
     el.innerHTML = list.map(function(p) {
       var budget    = p.budget_max ? ('R$ ' + Math.round(p.budget_max).toLocaleString('pt-BR')) : 'A combinar';
-      var proposals = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
+      /* proposals é agora um array de IDs — basta contar */
+      var proposals = (p.proposals && Array.isArray(p.proposals)) ? p.proposals.length : 0;
       /* Armazenar contexto do projeto para acesso seguro via _openProjectProposalsById e openEditProject */
       window._projectCtxMap[p.id] = {
         title:        p.title        || '',
@@ -16231,6 +16274,8 @@ function openDashboard() {
 
   switchDashPanel('profile');
   showPage('dashboard');
+  /* Inicia escuta Realtime de novas propostas para este cliente */
+  if (typeof _sbListenProposals === 'function') _sbListenProposals();
 }
 
 function openDashboardContracts() {
@@ -22075,9 +22120,12 @@ function _hwTplNewsletter(d) {
    4. FUNÇÕES PÚBLICAS DE TRIGGER
 ══════════════════════════════════════════════════════════════════ */
 
-/** Notifica o dono do projeto sobre nova proposta */
-async function hwNotifyProposal(recipientEmail, data) {
-  if (!_hwCheckPref('email_proposals')) return;
+/** Notifica o dono do projeto sobre nova proposta.
+ *  skipPrefCheck=true quando chamado pelo trigger de envio de proposta —
+ *  nesse contexto o usuário logado é o FREELANCER, não o dono do projeto,
+ *  então checar as preferências locais do freelancer seria errado. */
+async function hwNotifyProposal(recipientEmail, data, skipPrefCheck) {
+  if (!skipPrefCheck && !_hwCheckPref('email_proposals')) return;
   if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
   var t = _hwTplProposal(data || {});
   return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
@@ -22112,24 +22160,28 @@ async function hwSendNewsletter(recipientEmail, data) {
    5. HOOK: trigger de proposta (chamado por submitProposal)
 ══════════════════════════════════════════════════════════════════ */
 window._hwTriggerProposalEmail = function(projId, value, days, coverLetter) {
-  if (!_hwCheckPref('email_proposals')) return;
+  /* NÃO checar _hwCheckPref aqui: o usuário logado é o FREELANCER que enviou
+     a proposta, não o dono do projeto. Preferências do cliente (destinatário)
+     estão no localStorage DELE, inacessível deste contexto. Sempre tentar
+     notificar — o e-mail só falha se a API cair ou o endereço for inválido. */
   if (!(typeof _sbReady === 'function' && _sbReady()) || !projId) return;
   _sb.from('projects').select('title,client_id').eq('id', projId).single().then(function(r) {
-    if (!r.data) return;
+    if (!r.data) { console.warn('_hwTriggerProposalEmail: projeto não encontrado', projId); return; }
     var projTitle = r.data.title || 'Projeto';
     var ownerId   = r.data.client_id;
-    if (!ownerId) return;
+    if (!ownerId) { console.warn('_hwTriggerProposalEmail: client_id ausente'); return; }
     _sb.from('profiles').select('email').eq('id', ownerId).single().then(function(pr) {
-      if (!pr.data || !pr.data.email) return;
-      /* Não notifica o próprio usuário se for o dono */
+      if (!pr.data || !pr.data.email) { console.warn('_hwTriggerProposalEmail: email do dono não encontrado', ownerId); return; }
+      /* Não notifica se o freelancer E o cliente forem a mesma conta */
       if (typeof _session !== 'undefined' && _session && pr.data.email === _session.email) return;
+      /* skipPrefCheck=true — as prefs do destinatário não estão disponíveis aqui */
       hwNotifyProposal(pr.data.email, {
         freelancerName: typeof _session !== 'undefined' && _session ? _session.name : 'Profissional',
         projectName:    projTitle,
         value:          value,
         deadline:       days,
         coverLetter:    coverLetter
-      });
+      }, true /* skipPrefCheck */);
     });
   });
 };
