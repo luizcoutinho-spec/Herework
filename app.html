@@ -13193,8 +13193,13 @@ function submitProposal() {
     }).catch(function(err) {
       onError(err && err.message ? err.message : 'Erro desconhecido');
     });
+  } else if (_session && !projId) {
+    /* Usuário logado clicou em card de DEMO (sem data-real-id).
+       Não grave nada; exiba mensagem informativa em vez de falso sucesso. */
+    if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+    showToast('Este é um projeto de exemplo. Explore os projetos reais publicados para enviar uma proposta.', 'info');
   } else {
-    /* Demo mode ou sem projeto ID */
+    /* Demo mode sem sessão ativa ou Supabase não inicializado */
     setTimeout(function() { onSuccess(); }, 800);
   }
 }
