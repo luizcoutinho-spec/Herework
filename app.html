@@ -14882,7 +14882,10 @@ async function simulatePixPayment() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount:      _payCtx.amount,
-        description: 'HereWork — ' + (_payCtx.desc || 'Plano')
+        description: 'HereWork — ' + (_payCtx.desc || 'Plano'),
+        contractId:  _spContractId || '',
+        userId:      (_session && _session.uid) ? _session.uid : '',
+        planId:      (_payCtx && _payCtx.plan)  ? _payCtx.plan : ''
       })
     });
 
