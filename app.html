@@ -4249,6 +4249,7 @@ section { padding: 64px 0; }
   <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
 </head>
 <body>
 
@@ -5496,6 +5497,14 @@ section { padding: 64px 0; }
       </div>
 
       <div id="dcontracts-fl" style="display:none;">
+        <div id="dash-fl-connect-stripe" style="display:none;">
+          <div class="dash-section" style="border:1px solid #f0c14b;background:#fff8e6;border-radius:8px;padding:16px;margin-bottom:16px;">
+            <div style="font-weight:600;margin-bottom:8px;">💳 Conecte sua conta para receber pagamentos</div>
+            <div style="font-size:14px;color:#555;margin-bottom:12px;">Para receber pelos seus trabalhos, conecte uma conta bancária de forma segura via Stripe.</div>
+            <button class="btn btn-primary btn-sm" id="btn-connect-stripe" onclick="startStripeOnboarding()">Conectar conta</button>
+            <div id="stripe-onboarding-container" style="margin-top:16px;"></div>
+          </div>
+        </div>
         <div class="dash-section">
           <div class="dash-section-title"><span>&#9889;</span> Em Desenvolvimento</div>
           <div id="dash-fl-active"></div>
