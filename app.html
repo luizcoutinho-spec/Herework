@@ -10752,7 +10752,8 @@ async function _sbUpdateProject(id, data) {
 /* ── PROJETOS: Listar públicos ────────────────────────────────── */
 async function _sbListProjects(filters) {
   if (!_sbReady()) return [];
-  var q = _sb.from('projects').select('*, profiles(name, rating, avatar_url)').eq('status','open').order('created_at', { ascending: false });
+  /* proposals(id): traz o array de IDs; _realProjCard usa .length para contar */
+  var q = _sb.from('projects').select('*, profiles(name, rating, avatar_url), proposals(id)').eq('status','open').order('created_at', { ascending: false });
   if (filters && filters.category) q = q.eq('category', filters.category);
   if (filters && filters.budgetMax) q = q.lte('budget_max', filters.budgetMax);
   var r = await q.limit(50);
@@ -11195,8 +11196,9 @@ async function _sbUpdateProposalStatus(proposalId, newStatus) {
 async function _sbGetProposalsReceived(statusFilter) {
   if (!_sbReady() || !_session) return [];
   await _sbEnsureSession();
-  /* Busca projetos do cliente, depois propostas de cada projeto */
-  var projR = await _sb.from('projects').select('id').eq('client_id', _session.uid).eq('status','open');
+  /* Busca projetos do cliente (todos exceto cancelados) para não perder propostas
+     de projetos que já saíram do status 'open' (ex: in_progress, review) */
+  var projR = await _sb.from('projects').select('id').eq('client_id', _session.uid).neq('status','cancelled');
   if (projR.error || !projR.data || !projR.data.length) return [];
   var ids = projR.data.map(function(p){ return p.id; });
   var q = _sb.from('proposals')
@@ -13142,6 +13144,16 @@ function submitProposal() {
     if (v) v.value=''; if (d) d.value=''; if (cv) cv.value='';
     showToast('🎉 Proposta enviada com sucesso!', 'success');
     window._pendingProposal = null;
+    /* Incrementa o contador de propostas no card imediatamente, sem reload */
+    try {
+      var _card = document.querySelector('.proj-list-card[data-real-id="' + projId + '"]');
+      if (_card) {
+        var _cur = parseInt(_card.getAttribute('data-proposals') || '0', 10);
+        _card.setAttribute('data-proposals', _cur + 1);
+        var _span = _card.querySelector('.proj-proposals');
+        if (_span) _span.firstChild.textContent = (_cur + 1) + ' ';
+      }
+    } catch(_e) {}
     /* Contabiliza o consumo da cota do plano (controle de uso em tempo real) */
     _registerPlanUsage('proposals_month');
     /* Notificação por e-mail para o dono do projeto */
@@ -15422,7 +15434,7 @@ function _realProjCard(p) {
   var tagCls   = p.type === 'recorrente' ? 'tag-blue' : 'tag-green';
   var dlStr    = p.type === 'recorrente' ? 'Por mês' : (p.deadline_days ? ('Prazo: ' + p.deadline_days + ' dias') : '');
   var profile  = p.profiles || null;
-  var props    = (p.proposals && p.proposals[0] && typeof p.proposals[0].count === 'number') ? p.proposals[0].count : 0;
+  var props    = Array.isArray(p.proposals) ? p.proposals.length : 0;
 
   /* Especialidades: subcat pode ser string CSV (legado) ou JSON array */
   var subcatArr = [];
