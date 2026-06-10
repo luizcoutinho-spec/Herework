@@ -9,7 +9,9 @@
  *   amount:          number   — Valor em R$ (ex: 149.00)
  *   currency:        string   — "brl" (padrão)
  *   description:     string   — Descrição do pagamento
- *   planId:          string   — ID do plano (opcional)
+ *   planId:          string   — ID do plano (opcional, ex: 'pro', 'enterprise')
+ *   contractId:      string   — UUID do contrato (quando pagamento é para escrow)
+ *   userId:          string   — UUID do usuário pagador
  *   installments:    number   — Parcelas (1–12)
  * }
  *
@@ -22,7 +24,7 @@ const { getStripe, respond, handleCors, toCents } = require('./_helpers');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
-  if (req.method !== 'POST') return respond(res, 405, { error: 'Método não permitido.' });
+  if (req.method !== 'POST') return respond(res, 405, { error: 'Método não permitido.' }, req);
 
   const {
     paymentMethodId,
@@ -30,12 +32,14 @@ module.exports = async function handler(req, res) {
     currency     = 'brl',
     description  = 'HereWork — Pagamento',
     planId       = '',
+    contractId   = '',
+    userId       = '',
     installments = 1
   } = req.body || {};
 
   /* Validações básicas */
-  if (!paymentMethodId) return respond(res, 400, { error: 'paymentMethodId é obrigatório.' });
-  if (!amount || isNaN(amount) || amount < 1) return respond(res, 400, { error: 'Valor inválido.' });
+  if (!paymentMethodId) return respond(res, 400, { error: 'paymentMethodId é obrigatório.' }, req);
+  if (!amount || isNaN(amount) || amount < 1) return respond(res, 400, { error: 'Valor inválido.' }, req);
 
   try {
     const stripe = getStripe();
@@ -53,7 +57,9 @@ module.exports = async function handler(req, res) {
       automatic_payment_methods: { enabled: false },
       payment_method_types: ['card'],
       metadata: {
-        planId:       planId,
+        plan_id:      planId,
+        contract_id:  contractId,
+        user_id:      userId,
         installments: String(installments),
         platform:     'HereWork'
       }
@@ -69,7 +75,7 @@ module.exports = async function handler(req, res) {
         last4:           card?.last4 || '',
         brand:           card?.brand || '',
         amount:          amount
-      });
+      }, req);
     }
 
     /* 3D Secure necessário */
@@ -78,7 +84,7 @@ module.exports = async function handler(req, res) {
         requiresAction: true,
         clientSecret:   paymentIntent.client_secret,
         paymentIntentId: paymentIntent.id
-      });
+      }, req);
     }
 
     /* Outros status */
@@ -86,16 +92,16 @@ module.exports = async function handler(req, res) {
       success:         false,
       status:          paymentIntent.status,
       paymentIntentId: paymentIntent.id
-    });
+    }, req);
 
   } catch (err) {
     console.error('[HereWork] Stripe error:', err);
 
     /* Erros de cartão (fundos insuficientes, cartão recusado, etc.) */
     if (err.type === 'StripeCardError') {
-      return respond(res, 402, { error: err.message, code: err.code });
+      return respond(res, 402, { error: err.message, code: err.code }, req);
     }
 
-    return respond(res, 500, { error: 'Erro ao processar pagamento. Tente novamente.' });
+    return respond(res, 500, { error: 'Erro ao processar pagamento. Tente novamente.' }, req);
   }
 };

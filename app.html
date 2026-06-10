@@ -5941,6 +5941,28 @@ section { padding: 64px 0; }
           &#9878;&#65039; Suas prefer&ecirc;ncias s&atilde;o salvas automaticamente e respeitam a LGPD.
         </div>
       </div>
+      <!-- Direitos do Titular (LGPD Art. 18 / GDPR Art. 15-20) -->
+      <div class="profile-card" style="margin-top:16px;border-color:#bfdbfe;">
+        <div class="dash-section-title" style="margin-bottom:4px;color:#1e40af;"><span>&#128272;</span> Seus Direitos de Privacidade (LGPD / GDPR)</div>
+        <div style="font-size:12px;color:var(--text-4);margin-bottom:12px;">Em conformidade com a Lei 13.709/2018 (LGPD) e o GDPR (UE 2016/679).</div>
+        <div class="settings-section">
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128196; Exportar meus dados</div>
+              <div class="desc">Baixe uma c&oacute;pia de todos os seus dados cadastrados (portabilidade)</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="_sbExportMyData()" id="btn-export-data">&#11015; Exportar JSON</button>
+          </div>
+          <div class="settings-item">
+            <div class="settings-item-info">
+              <div class="label">&#128221; Solicitar retifica&ccedil;&atilde;o</div>
+              <div class="desc">Corrija dados incorretos — prazo de resposta: 5 dias &uacute;teis</div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="_sbRequestDataAction('rectify')">Solicitar</button>
+          </div>
+        </div>
+      </div>
+
       <div class="profile-card" style="margin-top:16px;border-color:#fca5a5;">
         <div class="dash-section-title" style="margin-bottom:4px;color:#dc2626;"><span>&#9888;&#65039;</span> Zona de Perigo</div>
         <div class="settings-section">
@@ -5954,7 +5976,7 @@ section { padding: 64px 0; }
           <div class="settings-item">
             <div class="settings-item-info">
               <div class="label" style="color:#dc2626;">Excluir conta</div>
-              <div class="desc">Remove permanentemente sua conta e todos os dados</div>
+              <div class="desc">Remove permanentemente sua conta e todos os dados (LGPD Art. 18-VI)</div>
             </div>
             <button class="btn btn-outline btn-sm" onclick="dashDeleteAccount()" style="color:#dc2626;border-color:#fca5a5;">Excluir Conta</button>
           </div>
@@ -13182,20 +13204,21 @@ function closeMobileMenu() {
 /* ═══════════════════════════════════════════
    TOAST
 ═══════════════════════════════════════════ */
-function showToast(msg, type) {
+function showToast(msg, type, duration) {
   type = type || 'success';
+  duration = (typeof duration === 'number') ? duration : 3500;
   var container = document.getElementById('toast-container');
   if (!container) return;
   var toast = document.createElement('div');
   toast.className = 'toast toast-' + type;
-  var icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  var icons = { success: '✅', error: '❌', info: 'ℹ️', warn: '⚠️' };
   toast.innerHTML = '<span class="toast-icon">' + (icons[type]||'') + '</span><span>' + msg + '</span>';
   container.appendChild(toast);
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ toast.classList.add('show'); }); });
   setTimeout(function(){
     toast.classList.remove('show');
     setTimeout(function(){ if (toast.parentNode) toast.remove(); }, 420);
-  }, 3500);
+  }, duration);
 }
 
 /* ═══════════════════════════════════════════
@@ -17624,11 +17647,56 @@ function bankLoad() {
 window.bankLoad = bankLoad;
 
 function dashDeleteAccount() {
-  if(confirm('Tem certeza que deseja excluir sua conta? Esta ação é irreversível.')) {
+  if (!_session) { showToast('Faça login para continuar.','warn'); return; }
+  /* Confirmação com digitação para prevenção de exclusão acidental */
+  var confirmText = prompt('Esta ação é IRREVERSÍVEL. Para confirmar, digite EXCLUIR CONTA:');
+  if (!confirmText || confirmText.trim().toUpperCase() !== 'EXCLUIR CONTA') {
+    showToast('Exclusão cancelada.', 'info');
+    return;
+  }
+  var btn = document.querySelector('[onclick="dashDeleteAccount()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
+
+  /* Envia solicitação formal de exclusão (LGPD Art. 18-VI / GDPR Art. 17) */
+  fetch('/api/data-request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      type:      'delete',
+      userId:    _session.uid  || '',
+      userEmail: _session.email || '',
+      notes:     'Solicitação iniciada pelo próprio titular via dashboard'
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    /* Anonimiza dados locais imediatamente */
+    if (_sbReady() && _session && _session.uid) {
+      _sb.from('profiles').update({
+        name:             'Usuário Excluído',
+        bio:              '',
+        city:             '',
+        state:            '',
+        phone:            '',
+        avatar_url:       null,
+        profile_metadata: {}
+      }).eq('id', _session.uid).then(function(){});
+    }
+    /* Sign-out */
+    if (_sbReady()) { try { _sb.auth.signOut(); } catch(e){} }
+    _clearSession();
+    try { localStorage.removeItem('hw_profile_meta'); localStorage.removeItem('hw_notif_prefs'); } catch(e){}
+    showPage('home');
+    var proto = data && data.protocol ? ' (Protocolo: ' + data.protocol + ')' : '';
+    showToast('Solicitação de exclusão registrada' + proto + '. Você receberá confirmação por e-mail em até 15 dias úteis.', 'success', 8000);
+  })
+  .catch(function(e) {
+    /* Mesmo com falha no endpoint, faz sign-out e limpa dados locais */
+    if (_sbReady()) { try { _sb.auth.signOut(); } catch(ex){} }
     _clearSession();
     showPage('home');
-    showToast('Conta excluída. Até mais!', 'info');
-  }
+    showToast('Sua conta foi desconectada. Envie um e-mail para privacidade@herework.com.br para confirmar a exclusão.', 'info', 7000);
+  });
 }
 
 
@@ -23956,6 +24024,399 @@ window._goToProposalsPanel = function(view) {
   switchDashPanel('proposals');
   setTimeout(function() { _switchProposalView(view || 'received'); }, 100);
 };
+
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MÓDULO: CONTRATOS REAIS (Supabase) + CHAT SUPABASE
+             EXPORTAÇÃO DE DADOS (LGPD) + SOLICITAÇÕES DE PRIVACIDADE
+═══════════════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+/* ──────────────────────────────────────────────────────────────
+   1. CARREGAMENTO REAL DE CONTRATOS SUPABASE
+   ────────────────────────────────────────────────────────────── */
+var _realContractsLoaded = false;
+var _contractChatMap = {}; /* projectId → contractId */
+
+async function _loadRealContracts() {
+  if (!_sbReady() || !_session) return;
+  try {
+    var data = await _sbGetMyContracts();
+    if (!data) return;
+
+    var now = new Date();
+    function _deadlineLabel(days, createdAt) {
+      if (!days) return 'Prazo não definido';
+      var end = new Date(new Date(createdAt || now).getTime() + days * 86400000);
+      var diff = Math.ceil((end - now) / 86400000);
+      return diff > 0 ? diff + ' dias restantes' : 'Prazo encerrado';
+    }
+
+    /* ── Contratos cliente ── */
+    var clientActive = [], clientDone = [];
+    (data.client || []).forEach(function(c) {
+      var fl = (c.freelancer) || {};
+      _dashProj[c.id] = {
+        id:            c.id,
+        contractId:    c.id,
+        projectId:     c.project_id,
+        title:         c.title || c.description || 'Contrato',
+        value:         parseFloat(c.value) || 0,
+        deadline:      _deadlineLabel(c.deadline_days, c.started_at || c.created_at),
+        status:        c.status || 'active',
+        statusLabel:   { active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status,
+        progress:      c.status === 'completed' ? 100 : c.status === 'review' ? 90 : 50,
+        desc:          c.description || '',
+        freelancer:    fl.name || 'Freelancer',
+        freelancerRole:'Profissional',
+        client:        (_session && _session.name) || 'Você',
+        myRole:        'client'
+      };
+      /* mapa para abrir chat com contractId correto */
+      if (c.project_id) _contractChatMap[c.project_id] = c.id;
+      if (c.status === 'completed' || c.status === 'cancelled') {
+        clientDone.push(_dashProj[c.id]);
+      } else {
+        clientActive.push(_dashProj[c.id]);
+      }
+    });
+
+    /* ── Contratos freelancer ── */
+    var flActive = [], flDone = [];
+    (data.freelancer || []).forEach(function(c) {
+      var cl = (c.client) || {};
+      _dashProj[c.id] = {
+        id:            c.id,
+        contractId:    c.id,
+        projectId:     c.project_id,
+        title:         c.title || c.description || 'Contrato',
+        value:         parseFloat(c.value) || 0,
+        deadline:      _deadlineLabel(c.deadline_days, c.started_at || c.created_at),
+        status:        c.status || 'active',
+        statusLabel:   { active:'Em andamento', review:'Aguardando aprovação', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão solicitada' }[c.status] || c.status,
+        progress:      c.status === 'completed' ? 100 : c.status === 'review' ? 90 : 55,
+        desc:          c.description || '',
+        client:        cl.name || 'Cliente',
+        freelancer:    (_session && _session.name) || 'Você',
+        freelancerRole:'Profissional',
+        myRole:        'freelancer'
+      };
+      if (c.project_id) _contractChatMap[c.project_id] = c.id;
+      if (c.status === 'completed' || c.status === 'cancelled') {
+        flDone.push(_dashProj[c.id]);
+      } else {
+        flActive.push(_dashProj[c.id]);
+      }
+    });
+
+    /* Renderiza no DOM — preserva seção "waiting" (projetos publicados) */
+    var vd = {
+      client:     { active: clientActive, waiting: [], done: clientDone },
+      freelancer: { active: flActive, proposals: [], done: flDone }
+    };
+    _renderDashClientActive(vd);
+    _renderDashClientDone(vd);
+    _renderDashFLActive(vd);
+    _renderDashFLDone(vd);
+
+    /* Atualiza badges */
+    var totalActive = clientActive.length + flActive.length;
+    var totalDone   = clientDone.length + flDone.length;
+    var el;
+    el = document.getElementById('ds-active'); if(el) el.textContent = totalActive;
+    el = document.getElementById('ds-done');   if(el) el.textContent = totalDone;
+    el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
+    el = document.getElementById('dct-fl-count');     if(el) el.textContent = flActive.length + flDone.length;
+
+    /* Valor em garantia */
+    var escrow = clientActive.filter(function(c){ return c.status === 'active'; })
+                             .reduce(function(s,c){ return s + c.value; }, 0);
+    el = document.getElementById('ds-escrow');
+    if (el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR', {minimumFractionDigits:2});
+
+    _realContractsLoaded = true;
+  } catch(e) {
+    console.warn('[HW] _loadRealContracts error:', e.message || e);
+  }
+}
+
+/* Injeta _loadRealContracts no openDashboard */
+(function() {
+  var _orig = window.openDashboard;
+  window.openDashboard = function() {
+    if (typeof _orig === 'function') _orig.apply(this, arguments);
+    /* Carrega contratos reais após render */
+    setTimeout(function() {
+      if (_sbReady() && _session && _session.uid) _loadRealContracts();
+    }, 600);
+  };
+})();
+
+/* ──────────────────────────────────────────────────────────────
+   2. CHAT WIRED TO SUPABASE
+   ────────────────────────────────────────────────────────────── */
+var _activeChatContractId = null;
+var _activeChatChannel    = null;
+
+/* Patch openChatModal para usar Supabase quando contractId disponível */
+(function() {
+  var _origOpen = window.openChatModal;
+  window.openChatModal = function(opts) {
+    opts = opts || {};
+    /* Resolve contractId em ordem de confiabilidade:
+       1. Passado diretamente em contractId
+       2. projectId é um real project_id → busca no mapa
+       3. projectId é um contract_id → busca em _dashProj
+       4. projectId tratado diretamente como contractId (fallback)        */
+    var pid = opts.projectId;
+    var cid = opts.contractId
+           || (pid && _contractChatMap[pid])
+           || (pid && _dashProj[pid] && _dashProj[pid].contractId)
+           || null;
+
+    _activeChatContractId = cid;
+
+    /* Fecha canal anterior se existia */
+    if (_activeChatChannel) {
+      try { _sb.removeChannel(_activeChatChannel); } catch(x) {}
+      _activeChatChannel = null;
+    }
+
+    if (_origOpen) _origOpen.apply(this, arguments);
+
+    if (cid && _sbReady()) {
+      /* Carrega histórico real do Supabase */
+      _loadSbChatHistory(cid, opts.projectId || cid);
+      /* Escuta mensagens novas em tempo real */
+      _activeChatChannel = _sbListenMessages(cid, function(newMsg) {
+        if (newMsg.sender_id === (_session && _session.uid)) return; /* ignora próprias */
+        var projId = opts.projectId || cid;
+        if (!_chatHistory[projId]) _chatHistory[projId] = [];
+        var time = new Date(newMsg.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+        _chatHistory[projId].push({ from:'other', text: newMsg.content || '', time: time, read: true });
+        _chatRender(projId);
+      });
+    }
+  };
+})();
+
+async function _loadSbChatHistory(contractId, projId) {
+  if (!_sbReady() || !contractId) return;
+  try {
+    var msgs = await _sbGetMessages(contractId);
+    if (!msgs || !msgs.length) return;
+    var uid = _session && _session.uid;
+    _chatHistory[projId] = msgs.map(function(m) {
+      var isMine = m.sender_id === uid;
+      var time   = new Date(m.created_at).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      return { from: isMine ? 'me' : 'other', text: m.content || '', time: time, read: !!m.read_at };
+    });
+    _chatRender(projId);
+  } catch(e) { console.warn('[HW Chat] Erro ao carregar mensagens:', e.message || e); }
+}
+
+/* Patch chatSendMessage para persistir no Supabase */
+(function() {
+  var _origSend = window.chatSendMessage;
+  window.chatSendMessage = function() {
+    /* Antes de chamar o original, captura texto */
+    var inp = document.getElementById('chat-input');
+    var text = inp ? inp.value.trim() : '';
+
+    /* Chama o original (renderiza localmente e limpa input) */
+    if (_origSend) _origSend.apply(this, arguments);
+
+    /* Persiste no Supabase se tiver contractId */
+    if (text && _activeChatContractId && _sbReady() && _session) {
+      _sbSendMessage(_activeChatContractId, text, 'text')
+        .then(function(r) {
+          if (r && r.error) console.warn('[HW Chat] Erro ao enviar msg:', r.error.message || r.error);
+        })
+        .catch(function(e) { console.warn('[HW Chat] send exception:', e.message || e); });
+    }
+  };
+})();
+
+/* ──────────────────────────────────────────────────────────────
+   3. EXPORTAÇÃO DE DADOS PESSOAIS (LGPD / GDPR)
+   ────────────────────────────────────────────────────────────── */
+async function _sbExportMyData() {
+  if (!_session) { showToast('Faça login para exportar seus dados.', 'warn'); return; }
+  var btn = document.getElementById('btn-export-data');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Gerando...'; }
+
+  try {
+    var uid = _session.uid;
+    var results = {};
+
+    if (_sbReady() && uid) {
+      var [profR, projR, proposalR, contractR, msgR] = await Promise.all([
+        _sb.from('profiles').select('*').eq('id', uid).single(),
+        _sb.from('projects').select('*').eq('client_id', uid).order('created_at', {ascending:false}),
+        _sb.from('proposals').select('*').eq('freelancer_id', uid).order('created_at', {ascending:false}),
+        _sb.from('contracts').select('*').or('client_id.eq.' + uid + ',freelancer_id.eq.' + uid).order('created_at',{ascending:false}),
+        _sb.from('messages').select('id,content,type,created_at').eq('sender_id', uid).order('created_at',{ascending:false}).limit(500)
+      ]);
+
+      /* Remove campos sensíveis antes de exportar */
+      var profile = Object.assign({}, profR.data || {});
+      delete profile.id;          /* não expor UUID interno */
+      delete profile.avatar_url;  /* URL temporária */
+
+      results = {
+        exportedAt:    new Date().toISOString(),
+        exportVersion: '1.0',
+        legalBasis:    'LGPD Art. 18-V / GDPR Art. 20',
+        email:         _session.email || '',
+        profile:       profile,
+        projects:      (projR.data  || []).map(function(p){ return { id:p.id, title:p.title, status:p.status, created_at:p.created_at }; }),
+        proposals:     (proposalR.data || []).map(function(p){ return { project_id:p.project_id, value:p.value, status:p.status, created_at:p.created_at }; }),
+        contracts:     (contractR.data || []).map(function(c){ return { id:c.id, title:c.title, value:c.value, status:c.status, created_at:c.created_at }; }),
+        messages:      (msgR.data || []).map(function(m){ return { content:m.content, type:m.type, created_at:m.created_at }; })
+      };
+    } else {
+      /* Fallback: somente dados locais */
+      var localMeta = {};
+      try { localMeta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x){}
+      results = {
+        exportedAt: new Date().toISOString(),
+        note:       'Dados locais apenas — faça login para exportar dados completos do servidor.',
+        email:      _session.email || '',
+        localProfile: localMeta
+      };
+    }
+
+    /* Gera download do JSON */
+    var blob = new Blob([JSON.stringify(results, null, 2)], { type: 'application/json' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'herework-meus-dados-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    showToast('✅ Dados exportados com sucesso!', 'success');
+
+    /* Registra também via API para auditoria */
+    if (_session && _session.email) {
+      fetch('/api/data-request', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type:'export', userId: _session.uid||'', userEmail: _session.email, notes:'Auto-exportação pelo dashboard' })
+      }).catch(function(){});
+    }
+  } catch(e) {
+    showToast('Erro ao exportar dados: ' + (e.message || 'tente novamente'), 'error');
+    console.error('[HW Export] erro:', e);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ Exportar JSON'; }
+  }
+}
+
+async function _sbRequestDataAction(type) {
+  if (!_session) { showToast('Faça login para continuar.', 'warn'); return; }
+  var labels = { export:'portabilidade de dados', delete:'exclusão de conta', rectify:'retificação de dados' };
+  var conf = confirm('Confirma solicitação de ' + (labels[type] || type) + '?\n\nVocê receberá e-mail de confirmação em até 15 dias úteis.');
+  if (!conf) return;
+  try {
+    var r = await fetch('/api/data-request', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ type: type, userId: _session.uid||'', userEmail: _session.email||'', notes:'Solicitação via dashboard' })
+    });
+    var data = await r.json();
+    if (data.ok) {
+      showToast('Solicitação registrada! Protocolo: ' + (data.protocol||'') + '. E-mail de confirmação enviado.', 'success', 7000);
+    } else {
+      showToast('Erro ao registrar solicitação. Tente novamente ou envie e-mail para privacidade@herework.com.br', 'error', 6000);
+    }
+  } catch(e) {
+    showToast('Verifique sua conexão e tente novamente.', 'error');
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────
+   4. SUPABASE WEBHOOK: ATUALIZA CONTRATOS QUANDO STATUS MUDA
+   ────────────────────────────────────────────────────────────── */
+function _sbListenContractUpdates() {
+  if (!_sbReady() || !_session) return;
+  var uid = _session.uid;
+  _sb.channel('contracts:user:' + uid)
+    .on('postgres_changes', { event:'UPDATE', schema:'public', table:'contracts' },
+      function(payload) {
+        var c = payload.new;
+        if (!c || (c.client_id !== uid && c.freelancer_id !== uid)) return;
+        /* Atualiza o card local sem recarregar tudo */
+        if (_dashProj[c.id]) {
+          var statusLabel = { active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status;
+          _dashProj[c.id].status = c.status;
+          _dashProj[c.id].statusLabel = statusLabel;
+        }
+        /* Recarrega os contratos para refletir o novo status */
+        _loadRealContracts();
+        /* Toast informativo */
+        var msgs = { completed:'🎉 Contrato concluído!', review:'🔍 Entrega recebida — aguarda sua aprovação', cancelled:'⚠️ Contrato cancelado' };
+        if (msgs[c.status]) showToast(msgs[c.status], 'info');
+      })
+    .subscribe();
+}
+
+/* Wire ao abrir dashboard */
+(function() {
+  var _origOD = window.openDashboard;
+  window.openDashboard = function() {
+    if (typeof _origOD === 'function') _origOD.apply(this, arguments);
+    setTimeout(function() {
+      if (_sbReady() && _session && _session.uid) _sbListenContractUpdates();
+    }, 800);
+  };
+})();
+
+/* ──────────────────────────────────────────────────────────────
+   5. switchDashPanel — recarrega contratos ao entrar na aba
+   ────────────────────────────────────────────────────────────── */
+(function() {
+  var _origSwitch = window.switchDashPanel;
+  window.switchDashPanel = function(panel) {
+    if (typeof _origSwitch === 'function') _origSwitch.apply(this, arguments);
+    if (panel === 'contracts' && _sbReady() && _session) {
+      setTimeout(_loadRealContracts, 200);
+    }
+    if (panel === 'settings') {
+      /* Garante que prefs de notif estejam sincronizadas */
+      if (typeof _hwLoadNotifPrefs === 'function') _hwLoadNotifPrefs();
+    }
+  };
+})();
+
+/* ──────────────────────────────────────────────────────────────
+   6. saveCommunicationPrefs — persiste também no Supabase
+   ────────────────────────────────────────────────────────────── */
+(function() {
+  var _origSaveComm = window.saveCommunicationPrefs;
+  window.saveCommunicationPrefs = function() {
+    if (typeof _origSaveComm === 'function') _origSaveComm.apply(this, arguments);
+    /* Sincroniza com Supabase */
+    if (_sbReady() && _session && _session.uid) {
+      var prefs = {};
+      var ids   = ['perm-blog-newsletter','perm-new-projects','perm-proposals','perm-promotions','perm-report'];
+      var keys  = ['blogNewsletter','newProjects','proposals','promotions','report'];
+      ids.forEach(function(id, i) {
+        var el = document.getElementById(id);
+        if (el) prefs[keys[i]] = el.checked;
+      });
+      var existingMeta = {};
+      try { existingMeta = JSON.parse(localStorage.getItem('hw_profile_meta') || '{}'); } catch(x){}
+      existingMeta.communication_prefs = prefs;
+      try { localStorage.setItem('hw_profile_meta', JSON.stringify(existingMeta)); } catch(x){}
+      _sb.from('profiles').update({ profile_metadata: existingMeta }).eq('id', _session.uid)
+        .then(function(r){ if(r.error) console.warn('[HW CommPrefs] Supabase sync error:', r.error.message); });
+    }
+  };
+})();
 
 </script>
 

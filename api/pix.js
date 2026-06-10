@@ -13,7 +13,7 @@ const { getStripe, respond, handleCors, toCents } = require('./_helpers');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
-  if (req.method !== 'POST') return respond(res, 405, { error: 'Método não permitido.' });
+  if (req.method !== 'POST') return respond(res, 405, { error: 'Método não permitido.' }, req);
 
   const {
     amount,
@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
   } = req.body || {};
 
   if (!amount || isNaN(amount) || amount < 1) {
-    return respond(res, 400, { error: 'Valor inválido.' });
+    return respond(res, 400, { error: 'Valor inválido.' }, req);
   }
 
   try {
@@ -60,7 +60,7 @@ module.exports = async function handler(req, res) {
       pixQrCodeImage:  pixData?.image_url_png           || '',
       pixHostedPage:   pixData?.hosted_instructions_url || '',
       expiresAt:       expiresAt
-    });
+    }, req);
 
   } catch (err) {
     console.error('[HereWork] Stripe PIX error:', err.message);
@@ -70,11 +70,11 @@ module.exports = async function handler(req, res) {
                          err.message.toLowerCase().includes('unactivated')))) {
       return respond(res, 402, {
         error: 'PIX não está ativado na conta Stripe. Ative em: Dashboard → Settings → Payment Methods → PIX (modo live).'
-      });
+      }, req);
     }
 
     return respond(res, 500, {
       error: 'Erro ao criar pagamento PIX: ' + err.message
-    });
+    }, req);
   }
 };

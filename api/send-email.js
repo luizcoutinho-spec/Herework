@@ -30,12 +30,12 @@ function getTransporter() {
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
-  if (req.method !== 'POST') return respond(res, 405, { ok: false, error: 'Método não permitido.' });
+  if (req.method !== 'POST') return respond(res, 405, { ok: false, error: 'Método não permitido.' }, req);
 
   const { to, subject, html, text } = req.body || {};
-  if (!to || !subject) return respond(res, 400, { ok: false, error: 'Campos obrigatórios: to, subject.' });
+  if (!to || !subject) return respond(res, 400, { ok: false, error: 'Campos obrigatórios: to, subject.' }, req);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(to))) {
-    return respond(res, 400, { ok: false, error: 'E-mail destinatário inválido.' });
+    return respond(res, 400, { ok: false, error: 'E-mail destinatário inválido.' }, req);
   }
 
   try {
@@ -51,8 +51,8 @@ module.exports = async function handler(req, res) {
       text:    text || subject
     });
 
-    return respond(res, 200, { ok: true, id: info.messageId });
+    return respond(res, 200, { ok: true, id: info.messageId }, req);
   } catch (e) {
-    return respond(res, 500, { ok: false, error: e.message || 'Erro ao enviar e-mail.' });
+    return respond(res, 500, { ok: false, error: e.message || 'Erro ao enviar e-mail.' }, req);
   }
 };

@@ -18,11 +18,11 @@ const { getStripe, respond, handleCors } = require('./_helpers');
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
-  if (req.method !== 'GET') return respond(res, 405, { error: 'Método não permitido.' });
+  if (req.method !== 'GET') return respond(res, 405, { error: 'Método não permitido.' }, req);
 
   const { id } = req.query;
   if (!id || !id.startsWith('pi_')) {
-    return respond(res, 400, { error: 'Payment Intent ID inválido.' });
+    return respond(res, 400, { error: 'Payment Intent ID inválido.' }, req);
   }
 
   try {
@@ -36,10 +36,10 @@ module.exports = async function handler(req, res) {
       amount:    pi.amount / 100,
       currency:  pi.currency,
       metadata:  pi.metadata || {}
-    });
+    }, req);
 
   } catch (err) {
     console.error('[HereWork] Status error:', err);
-    return respond(res, 500, { error: 'Erro ao consultar pagamento.' });
+    return respond(res, 500, { error: 'Erro ao consultar pagamento.' }, req);
   }
 };
