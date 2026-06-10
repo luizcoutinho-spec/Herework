@@ -10597,7 +10597,11 @@ async function _sbGoogleLogin(context) {
     ['login-google-btn','reg-google-btn'].forEach(function(id){
       var b = document.getElementById(id); if (b) b.disabled = false;
     });
-    showToast(result.error.message || 'Erro ao iniciar login com Google.', 'error');
+    var _gErr = result.error.message || '';
+    var _gMsg = (_gErr.toLowerCase().includes('not enabled') || _gErr.toLowerCase().includes('unsupported provider'))
+      ? 'Login com Google não está disponível no momento. Use seu e-mail e senha.'
+      : (_gErr || 'Erro ao iniciar login com Google.');
+    showToast(_gMsg, 'error');
   }
   /* Se não houve erro, o browser redireciona — não chega ao próximo passo */
 }
