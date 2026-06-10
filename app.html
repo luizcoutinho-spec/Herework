@@ -16553,13 +16553,7 @@ function contractRate(n) {
 }
 
 function contractApprove() {
-  /* Se tiver contrato real no Supabase, liberar pagamento */
-  if (_sbReady() && _session && window._activeContractId) {
-    _stripeReleasePayment(window._activeContractId).then(function(res) {
-      if (res.error) { showToast('Erro ao liberar pagamento: ' + res.error, 'error'); return; }
-      showToast('✅ Pagamento de R$ ' + (window._activeContractValue || '0').toLocaleString('pt-BR') + ' liberado para o freelancer!', 'success');
-    });
-  }
+  /* 1) Validar rating antes de qualquer ação */
   var errEl = document.getElementById('err-contract-stars');
   if(_contractCtx.rating === 0) {
     if(errEl){ errEl.textContent='Por favor, avalie o trabalho antes de liberar o pagamento.'; errEl.classList.add('show'); }
@@ -16569,6 +16563,15 @@ function contractApprove() {
 
   var btn = document.getElementById('c-approve-btn');
   _setBtnLoading(btn, true);
+
+  /* 2) Só após validação: liberar pagamento ao freelancer */
+  if (_sbReady() && _session && window._activeContractId) {
+    _stripeReleasePayment(window._activeContractId).then(function(res) {
+      if (res.error) { showToast('Erro ao liberar pagamento: ' + res.error, 'error'); return; }
+      showToast('✅ Pagamento de R$ ' + (window._activeContractValue || '0').toLocaleString('pt-BR') + ' liberado para o freelancer!', 'success');
+    });
+  }
+
   setTimeout(function(){
     _setBtnLoading(btn, false);
     closeModal('contract');
