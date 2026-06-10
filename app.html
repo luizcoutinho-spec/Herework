@@ -23924,15 +23924,19 @@ async function _acceptProposal(proposalId) {
     .eq('id', proposalId).single();
 
   if (!r.error && r.data) {
-    var contract = await _sbCreateContractFromProposal(r.data);
-    if (contract) {
-      showToast('🎉 Proposta aceita! Contrato criado com sucesso.', 'success');
-      /* 3) Rejeitar outras propostas para o mesmo projeto */
-      _sbRejectOtherProposals(r.data.project_id, proposalId);
-      /* 4) Enviar e-mail de aceite ao freelancer */
-      _hwTriggerProposalAcceptedEmail(r.data);
-    } else {
-      showToast('✅ Proposta aceita! (Não foi possível criar contrato automaticamente.)', 'info');
+    try {
+      var contract = await _sbCreateContractFromProposal(r.data);
+      if (contract) {
+        showToast('🎉 Proposta aceita! Contrato criado com sucesso.', 'success');
+        /* 3) Rejeitar outras propostas para o mesmo projeto */
+        _sbRejectOtherProposals(r.data.project_id, proposalId);
+        /* 4) Enviar e-mail de aceite ao freelancer */
+        _hwTriggerProposalAcceptedEmail(r.data);
+      } else {
+        showToast('✅ Proposta aceita! (Não foi possível criar contrato automaticamente.)', 'info');
+      }
+    } catch (e) {
+      showToast('✅ Proposta aceita, mas erro ao criar contrato: ' + (e.message || 'Erro desconhecido.'), 'error');
     }
   } else {
     showToast('✅ Proposta aceita!', 'success');
