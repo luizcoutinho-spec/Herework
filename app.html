@@ -1951,6 +1951,44 @@ section { padding: 64px 0; }
   font-size:13px; color:#b91c1c; display:none; margin-bottom:14px; }
 
 /* ═══════════════════════════════════════════
+   PROPOSALS MODULE
+═══════════════════════════════════════════ */
+.prop-status-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.3px; }
+.prop-status-badge.pending    { background:#fef3c7; color:#92400e; }
+.prop-status-badge.viewed     { background:#dbeafe; color:#1e40af; }
+.prop-status-badge.shortlisted{ background:#ede9fe; color:#5b21b6; }
+.prop-status-badge.accepted   { background:#dcfce7; color:#166534; }
+.prop-status-badge.rejected   { background:#fee2e2; color:#991b1b; }
+.prop-status-badge.withdrawn  { background:#f3f4f6; color:#6b7280; }
+.prop-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:16px; margin-bottom:12px; transition:border-color .2s; }
+.prop-card:hover { border-color:var(--green); }
+.prop-card-header { display:flex; align-items:flex-start; gap:12px; margin-bottom:10px; }
+.prop-card-avatar { width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; color:#fff; flex-shrink:0; }
+.prop-card-name { font-weight:700; font-size:14px; color:var(--text); }
+.prop-card-meta { font-size:12px; color:var(--text-3); margin-top:2px; }
+.prop-card-value { font-size:18px; font-weight:900; color:var(--green); }
+.prop-card-body { font-size:13px; color:var(--text-2); line-height:1.5; margin-bottom:12px; }
+.prop-card-actions { display:flex; gap:8px; flex-wrap:wrap; }
+.prop-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.prop-stat-card { background:var(--card); border:1.5px solid var(--border); border-radius:var(--radius-lg); padding:16px; text-align:center; }
+.prop-stat-val { font-size:24px; font-weight:900; color:var(--text); }
+.prop-stat-lbl { font-size:11px; color:var(--text-4); margin-top:4px; text-transform:uppercase; letter-spacing:.4px; }
+.prop-view-tabs { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.prop-view-tab { padding:8px 16px; border-radius:var(--radius); border:1.5px solid var(--border); background:transparent; cursor:pointer; font-size:13px; font-weight:600; color:var(--text-3); transition:.2s; }
+.prop-view-tab.active { background:var(--green); color:#fff; border-color:var(--green); }
+.prop-filter-row { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+.prop-filter-select { padding:6px 10px; border:1.5px solid var(--border); border-radius:var(--radius); background:var(--card); color:var(--text); font-size:12px; }
+.prop-empty { text-align:center; padding:56px 24px; color:var(--text-3); }
+.prop-empty-icon { font-size:48px; margin-bottom:14px; }
+.prop-empty-title { font-size:16px; font-weight:700; color:var(--text); margin-bottom:6px; }
+@media(max-width:640px){
+  .prop-stats-grid { grid-template-columns:repeat(2,1fr); }
+}
+@media(max-width:400px){
+  .prop-stats-grid { grid-template-columns:1fr 1fr; }
+}
+
+/* ═══════════════════════════════════════════
    TOAST NOTIFICATIONS
 ═══════════════════════════════════════════ */
 #toast-container {
@@ -5006,6 +5044,9 @@ section { padding: 64px 0; }
       <button class="dash-nav-tab" id="dnt-settings" onclick="switchDashPanel('settings')">
         <span class="tab-icon">&#9881;&#65039;</span> Configura&ccedil;&otilde;es
       </button>
+      <button class="dash-nav-tab" id="dnt-proposals" onclick="switchDashPanel('proposals')">
+        <span class="tab-icon">&#128233;</span> Propostas <span id="dnt-proposals-badge" style="display:none;background:#ef4444;color:#fff;border-radius:20px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;"></span>
+      </button>
     </div>
 
     <!-- ─── PAINEL: MEU PERFIL ─── -->
@@ -5921,6 +5962,80 @@ section { padding: 64px 0; }
       </div>
 
     </div><!-- /settings panel -->
+
+    <!-- ─── PAINEL: PROPOSTAS ─── -->
+    <div id="dpanel-proposals" style="display:none;">
+
+      <!-- Stats cards -->
+      <div class="prop-stats-grid" id="prop-stats-row">
+        <div class="prop-stat-card">
+          <div class="prop-stat-val" id="pstat-total">0</div>
+          <div class="prop-stat-lbl">Total</div>
+        </div>
+        <div class="prop-stat-card">
+          <div class="prop-stat-val" id="pstat-pending" style="color:#f59e0b;">0</div>
+          <div class="prop-stat-lbl">Pendentes</div>
+        </div>
+        <div class="prop-stat-card">
+          <div class="prop-stat-val" id="pstat-accepted" style="color:#22c55e;">0</div>
+          <div class="prop-stat-lbl">Aceitas</div>
+        </div>
+        <div class="prop-stat-card">
+          <div class="prop-stat-val" id="pstat-rejected" style="color:#ef4444;">0</div>
+          <div class="prop-stat-lbl">Recusadas</div>
+        </div>
+      </div>
+
+      <!-- View toggle: client / freelancer -->
+      <div class="prop-view-tabs">
+        <button class="prop-view-tab active" id="pvt-received" onclick="_switchProposalView('received')">&#127968; Propostas Recebidas</button>
+        <button class="prop-view-tab" id="pvt-sent"     onclick="_switchProposalView('sent')">&#129489;&#8205;&#128187; Minhas Propostas</button>
+      </div>
+
+      <!-- RECEBIDAS (cliente) -->
+      <div id="pview-received">
+        <div class="prop-filter-row">
+          <select class="prop-filter-select" id="pfilter-status-received" onchange="_loadProposalsReceived()">
+            <option value="">Todos os status</option>
+            <option value="pending">⏳ Pendentes</option>
+            <option value="viewed">👁 Visualizadas</option>
+            <option value="shortlisted">⭐ Selecionadas</option>
+            <option value="accepted">✅ Aceitas</option>
+            <option value="rejected">❌ Recusadas</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="_loadProposalsReceived()" style="margin-left:auto;">&#128260; Atualizar</button>
+        </div>
+        <div id="plist-received">
+          <div class="prop-empty">
+            <div class="prop-empty-icon">&#128233;</div>
+            <div class="prop-empty-title">Carregando propostas&hellip;</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ENVIADAS (freelancer) -->
+      <div id="pview-sent" style="display:none;">
+        <div class="prop-filter-row">
+          <select class="prop-filter-select" id="pfilter-status-sent" onchange="_loadMyProposals()">
+            <option value="">Todos os status</option>
+            <option value="pending">⏳ Aguardando</option>
+            <option value="viewed">👁 Visualizada</option>
+            <option value="shortlisted">⭐ Selecionada</option>
+            <option value="accepted">✅ Aceita</option>
+            <option value="rejected">❌ Recusada</option>
+            <option value="withdrawn">↩️ Retirada</option>
+          </select>
+          <button class="btn btn-outline btn-sm" onclick="showPage('projects')" style="margin-left:auto;">&#128269; Buscar projetos</button>
+        </div>
+        <div id="plist-sent">
+          <div class="prop-empty">
+            <div class="prop-empty-icon">&#128203;</div>
+            <div class="prop-empty-title">Carregando propostas&hellip;</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /proposals panel -->
 
   </div>
 </div><!-- /page-dashboard -->
@@ -10626,7 +10741,8 @@ async function _sbCreateProposal(data) {
     freelancer_id: _session.uid,
     value:         data.value,
     deadline_days: data.deadline,
-    cover_letter:  data.coverLetter
+    cover_letter:  data.coverLetter,
+    status:        'pending'
   }).select().single();
   return r.data || null;
 }
@@ -11026,6 +11142,67 @@ async function _sbGetProjectProposals(projectId) {
   return r.data || [];
 }
 
+/* ── PROPOSTAS: Listar enviadas pelo freelancer ───────────────── */
+async function _sbGetMyProposals(statusFilter) {
+  if (!_sbReady() || !_session) return [];
+  await _sbEnsureSession();
+  var q = _sb.from('proposals')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id,status,client:profiles!client_id(name,avatar_url))')
+    .eq('freelancer_id', _session.uid)
+    .order('created_at', { ascending: false });
+  if (statusFilter) q = q.eq('status', statusFilter);
+  var r = await q;
+  if (r.error) { console.warn('_sbGetMyProposals:', r.error.message); return []; }
+  return r.data || [];
+}
+
+/* ── PROPOSTAS: Atualizar status ──────────────────────────────── */
+async function _sbUpdateProposalStatus(proposalId, newStatus) {
+  if (!_sbReady() || !_session) return false;
+  var r = await _sb.from('proposals').update({ status: newStatus, updated_at: new Date().toISOString() })
+    .eq('id', proposalId).select().single();
+  if (r.error) { console.warn('_sbUpdateProposalStatus:', r.error.message); return false; }
+  return r.data || true;
+}
+
+/* ── PROPOSTAS: Obter propostas recebidas por cliente ─────────── */
+async function _sbGetProposalsReceived(statusFilter) {
+  if (!_sbReady() || !_session) return [];
+  await _sbEnsureSession();
+  /* Busca projetos do cliente, depois propostas de cada projeto */
+  var projR = await _sb.from('projects').select('id').eq('client_id', _session.uid).eq('status','open');
+  if (projR.error || !projR.data || !projR.data.length) return [];
+  var ids = projR.data.map(function(p){ return p.id; });
+  var q = _sb.from('proposals')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days), freelancer:profiles!freelancer_id(id,name,avatar_url,rating,completed_jobs,bio,skills,city,state)')
+    .in('project_id', ids)
+    .order('created_at', { ascending: false });
+  if (statusFilter) q = q.eq('status', statusFilter);
+  var r = await q;
+  if (r.error) { console.warn('_sbGetProposalsReceived:', r.error.message); return []; }
+  return r.data || [];
+}
+
+/* ── CONTRATOS: Criar a partir de proposta aceita ─────────────── */
+async function _sbCreateContractFromProposal(proposal) {
+  if (!_sbReady() || !_session) return null;
+  var proj = proposal.project || {};
+  var fl   = proposal.freelancer || {};
+  var payload = {
+    project_id:    proposal.project_id || (proj.id || ''),
+    client_id:     _session.uid,
+    freelancer_id: proposal.freelancer_id || (fl.id || ''),
+    value:         proposal.value,
+    deadline_days: proposal.deadline_days,
+    status:        'active',
+    description:   (proj.title || 'Contrato') + ' — Proposta aceita',
+    started_at:    new Date().toISOString()
+  };
+  var r = await _sb.from('contracts').insert(payload).select().single();
+  if (r.error) { console.warn('_sbCreateContractFromProposal:', r.error.message); return null; }
+  return r.data;
+}
+
 /* ── REALTIME: Escutar mensagens novas ────────────────────────── */
 function _sbListenMessages(contractId, callback) {
   if (!_sbReady()) return null;
@@ -11072,6 +11249,43 @@ function _sbStopListenProposals() {
   if (_sbProposalChannel) {
     try { _sb.removeChannel(_sbProposalChannel); } catch(x) {}
     _sbProposalChannel = null;
+  }
+}
+
+/* ── REALTIME: Escutar mudanças de status das propostas enviadas ── */
+var _sbMyProposalChannel = null;
+function _sbListenMyProposalUpdates() {
+  if (!_sbReady() || !_session) return;
+  if (_sbMyProposalChannel) {
+    try { _sb.removeChannel(_sbMyProposalChannel); } catch(x) {}
+    _sbMyProposalChannel = null;
+  }
+  _sbMyProposalChannel = _sb.channel('proposals:fl:' + _session.uid)
+    .on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'proposals',
+      filter: 'freelancer_id=eq.' + _session.uid
+    }, function(payload) {
+      var np = payload.new || {};
+      var stMap = { viewed:'👁 Sua proposta foi visualizada!', shortlisted:'⭐ Proposta selecionada para análise!',
+                    accepted:'🎉 Sua proposta foi aceita!', rejected:'Proposta não selecionada desta vez.' };
+      var msg = stMap[np.status];
+      if (msg) showToast(msg, np.status === 'rejected' ? 'error' : 'success');
+      /* Atualiza painel se aberto */
+      if (document.getElementById('dpanel-proposals') && document.getElementById('dpanel-proposals').style.display !== 'none') {
+        if (document.getElementById('pview-sent') && document.getElementById('pview-sent').style.display !== 'none') {
+          _loadMyProposals();
+        }
+      }
+      _updateProposalBadge();
+    })
+    .subscribe();
+}
+function _sbStopListenMyProposals() {
+  if (_sbMyProposalChannel) {
+    try { _sb.removeChannel(_sbMyProposalChannel); } catch(x) {}
+    _sbMyProposalChannel = null;
   }
 }
 
@@ -16578,12 +16792,15 @@ function openDashboardContracts() {
 }
 
 function switchDashPanel(panel) {
-  ['profile','plan','contracts','payments','settings'].forEach(function(p) {
+  ['profile','plan','contracts','payments','settings','proposals'].forEach(function(p) {
     var btn = document.getElementById('dnt-' + p);
     var pnl = document.getElementById('dpanel-' + p);
     if(btn) btn.classList.toggle('active', p === panel);
     if(pnl) pnl.style.display = p === panel ? 'block' : 'none';
   });
+  if(panel === 'proposals') {
+    _loadProposalsPanel();
+  }
   if(panel === 'payments' && typeof _updatePaymentSummary === 'function') _updatePaymentSummary();
   /* Preenche painel "Meu Plano" com dados atuais */
   if(panel === 'plan' && typeof _getPlanLabel === 'function') {
@@ -23283,6 +23500,462 @@ window._hwExportReport = _hwExportReport;
    HOOK: sobrescreve _renderAiPanel para disparar a análise por IA
    ══════════════════════════════════════════════════════════════════ */
 window._renderAiPanel = function() { _hwAnalyzeProposals(false); };
+
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     HEREWORK — Módulo Completo de Propostas  (v1.0)
+     Painel "Propostas" no dashboard: recebidas + enviadas
+     Status: PENDING / VIEWED / SHORTLISTED / ACCEPTED / REJECTED / WITHDRAWN
+     Auto-criação de contrato ao aceitar proposta
+     Realtime updates + email para cada mudança de status
+════════════════════════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════════════════════
+   1. HELPERS VISUAIS
+════════════════════════════════════════════════════════════════ */
+var _PROP_STATUS_MAP = {
+  pending:    { icon:'⏳', label:'Aguardando',  cls:'pending'    },
+  viewed:     { icon:'👁',  label:'Visualizada', cls:'viewed'     },
+  shortlisted:{ icon:'⭐', label:'Selecionada', cls:'shortlisted' },
+  accepted:   { icon:'✅', label:'Aceita',       cls:'accepted'   },
+  rejected:   { icon:'❌', label:'Recusada',     cls:'rejected'   },
+  withdrawn:  { icon:'↩️', label:'Retirada',     cls:'withdrawn'  }
+};
+
+function _propStatusBadge(status) {
+  var s = _PROP_STATUS_MAP[status] || { icon:'?', label: status, cls:'pending' };
+  return '<span class="prop-status-badge ' + s.cls + '">' + s.icon + ' ' + s.label + '</span>';
+}
+
+function _propAvatarColors() {
+  return ['#10b981','#3b82f6','#8b5cf6','#f59e0b','#ef4444','#14b8a6','#f97316','#ec4899'];
+}
+
+function _updateProposalBadge() {
+  /* Mostra número de propostas pendentes de ação na tab */
+  var badge = document.getElementById('dnt-proposals-badge');
+  if (!badge) return;
+  if (!_sbReady() || !_session) { badge.style.display = 'none'; return; }
+  Promise.all([
+    _sbGetProposalsReceived('pending'),
+    _sbGetProposalsReceived('viewed'),
+    _sbGetMyProposals('accepted')
+  ]).then(function(r) {
+    var n = (r[0]||[]).length + (r[1]||[]).length + (r[2]||[]).length;
+    if (n > 0) { badge.style.display='inline'; badge.textContent = n > 9 ? '9+' : String(n); }
+    else { badge.style.display='none'; }
+  }).catch(function(){});
+}
+
+/* ════════════════════════════════════════════════════════════════
+   2. CARREGAMENTO DO PAINEL
+════════════════════════════════════════════════════════════════ */
+var _propPanelView = 'received'; /* 'received' | 'sent' */
+
+function _loadProposalsPanel() {
+  if (!_session) return;
+  /* Determina qual view mostrar baseado no tipo de conta */
+  var showReceived = (typeof _isCL === 'function') ? _isCL() : true;
+  var showSent     = (typeof _isFL === 'function') ? _isFL() : true;
+
+  var btnR = document.getElementById('pvt-received');
+  var btnS = document.getElementById('pvt-sent');
+  if (btnR) btnR.style.display = showReceived ? '' : 'none';
+  if (btnS) btnS.style.display = showSent     ? '' : 'none';
+
+  /* Carrega a view adequada */
+  if (_propPanelView === 'received' && showReceived) {
+    _switchProposalView('received');
+  } else if (showSent) {
+    _switchProposalView('sent');
+  } else if (showReceived) {
+    _switchProposalView('received');
+  }
+  _updateProposalBadge();
+  /* Start realtime listeners */
+  _sbListenMyProposalUpdates();
+}
+
+function _switchProposalView(view) {
+  _propPanelView = view;
+  var rEl = document.getElementById('pview-received');
+  var sEl = document.getElementById('pview-sent');
+  var bR  = document.getElementById('pvt-received');
+  var bS  = document.getElementById('pvt-sent');
+  if (rEl) rEl.style.display = view === 'received' ? 'block' : 'none';
+  if (sEl) sEl.style.display = view === 'sent'     ? 'block' : 'none';
+  if (bR)  bR.classList.toggle('active', view === 'received');
+  if (bS)  bS.classList.toggle('active', view === 'sent');
+  if (view === 'received') _loadProposalsReceived();
+  else                     _loadMyProposals();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   3. PROPOSTAS RECEBIDAS (visão do cliente)
+════════════════════════════════════════════════════════════════ */
+async function _loadProposalsReceived() {
+  var listEl = document.getElementById('plist-received');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="prop-empty"><div class="prop-empty-icon">⏳</div><div class="prop-empty-title">Buscando propostas&hellip;</div></div>';
+
+  var sel = document.getElementById('pfilter-status-received');
+  var statusFilter = sel ? sel.value : '';
+
+  var proposals = await _sbGetProposalsReceived(statusFilter || null);
+
+  /* Atualiza stats */
+  _renderProposalStats(proposals, 'received');
+
+  if (!proposals.length) {
+    listEl.innerHTML = [
+      '<div class="prop-empty">',
+        '<div class="prop-empty-icon">&#128203;</div>',
+        '<div class="prop-empty-title">Nenhuma proposta encontrada</div>',
+        '<p style="font-size:13px;color:var(--text-3);margin-top:4px;">Publique projetos para começar a receber propostas de freelancers.</p>',
+        '<button class="btn btn-primary btn-sm" onclick="_guardedPublishModal()" style="margin-top:12px;">+ Publicar projeto</button>',
+      '</div>'
+    ].join('');
+    return;
+  }
+
+  /* Marcar como "viewed" as proposals que ainda estão "pending" */
+  proposals.forEach(function(p) {
+    if (p.status === 'pending') {
+      _sbUpdateProposalStatus(p.id, 'viewed');
+    }
+  });
+
+  listEl.innerHTML = proposals.map(function(p, i) {
+    return _renderReceivedProposalCard(p, i);
+  }).join('');
+}
+
+function _renderReceivedProposalCard(p, idx) {
+  var fl       = p.freelancer || {};
+  var proj     = p.project    || {};
+  var flName   = _sanitize(fl.name || 'Freelancer');
+  var initial  = (fl.name || 'F').charAt(0).toUpperCase();
+  var colors   = _propAvatarColors();
+  var color    = colors[idx % colors.length];
+  var value    = parseFloat(p.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  var days     = parseInt(p.deadline_days || 0, 10);
+  var when     = (typeof _timeAgo === 'function') ? _timeAgo(p.created_at) : '';
+  var letter   = _sanitize(p.cover_letter || '');
+  var letterShort = letter.length > 280 ? letter.substring(0, 280) + '…' : letter;
+  var rating   = parseFloat(fl.rating || 0);
+  var jobs     = parseInt(fl.completed_jobs || 0, 10);
+  var projTitle = _sanitize(proj.title || 'Projeto');
+  var canAct   = p.status !== 'accepted' && p.status !== 'rejected' && p.status !== 'withdrawn';
+  var avatarHtml = fl.avatar_url
+    ? '<img src="' + _sanitize(fl.avatar_url) + '" alt="' + flName + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">'
+    : '<div class="prop-card-avatar" style="background:' + color + ';">' + initial + '</div>';
+
+  var stars = '';
+  for (var i=1;i<=5;i++) stars += '<span style="color:' + (i<=Math.round(rating)?'#f59e0b':'#d1d5db') + ';font-size:12px;">★</span>';
+
+  var actionsHtml = '';
+  if (canAct) {
+    actionsHtml = [
+      '<button class="btn btn-primary btn-sm" onclick="_acceptProposal(\'' + p.id + '\')" style="font-size:12px;">✅ Aceitar</button>',
+      p.status !== 'shortlisted'
+        ? '<button class="btn btn-outline btn-sm" onclick="_shortlistProposal(\'' + p.id + '\')" style="font-size:12px;color:#7c3aed;border-color:#ddd6fe;">⭐ Selecionar</button>'
+        : '<button class="btn btn-outline btn-sm" onclick="_unshortlistProposal(\'' + p.id + '\')" style="font-size:12px;color:#7c3aed;border-color:#ddd6fe;">⭐ Selecionada</button>',
+      '<button class="btn btn-outline btn-sm" onclick="_rejectProposal(\'' + p.id + '\')" style="font-size:12px;color:#dc2626;border-color:#fca5a5;">❌ Recusar</button>'
+    ].join('');
+  }
+
+  return [
+    '<div class="prop-card" id="pcard-' + p.id + '">',
+      '<div class="prop-card-header">',
+        avatarHtml,
+        '<div style="flex:1;min-width:0;">',
+          '<div class="prop-card-name">' + flName + '</div>',
+          '<div class="prop-card-meta">',
+            stars + ' ' + rating.toFixed(1),
+            jobs ? ' · ' + jobs + ' projeto' + (jobs!==1?'s':'') + ' concluído' + (jobs!==1?'s':'') : '',
+            fl.city ? ' · ' + _sanitize(fl.city) : '',
+          '</div>',
+          '<div style="font-size:11px;color:var(--text-4);margin-top:2px;">Projeto: <strong>' + projTitle + '</strong></div>',
+        '</div>',
+        '<div style="text-align:right;flex-shrink:0;">',
+          '<div class="prop-card-value">R$ ' + value + '</div>',
+          '<div style="font-size:11px;color:var(--text-4);">' + days + ' dias · ' + when + '</div>',
+          '<div style="margin-top:4px;">' + _propStatusBadge(p.status) + '</div>',
+        '</div>',
+      '</div>',
+      letterShort ? '<div class="prop-card-body">"' + letterShort + '"</div>' : '',
+      actionsHtml ? '<div class="prop-card-actions">' + actionsHtml + '</div>' : '',
+    '</div>'
+  ].join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   4. PROPOSTAS ENVIADAS (visão do freelancer)
+════════════════════════════════════════════════════════════════ */
+async function _loadMyProposals() {
+  var listEl = document.getElementById('plist-sent');
+  if (!listEl) return;
+  listEl.innerHTML = '<div class="prop-empty"><div class="prop-empty-icon">⏳</div><div class="prop-empty-title">Buscando propostas&hellip;</div></div>';
+
+  var sel = document.getElementById('pfilter-status-sent');
+  var statusFilter = sel ? sel.value : '';
+
+  var proposals = await _sbGetMyProposals(statusFilter || null);
+
+  /* Atualiza stats */
+  _renderProposalStats(proposals, 'sent');
+
+  if (!proposals.length) {
+    listEl.innerHTML = [
+      '<div class="prop-empty">',
+        '<div class="prop-empty-icon">&#128233;</div>',
+        '<div class="prop-empty-title">Nenhuma proposta encontrada</div>',
+        '<p style="font-size:13px;color:var(--text-3);margin-top:4px;">Encontre projetos que combinam com seu perfil e envie sua primeira proposta.</p>',
+        '<button class="btn btn-primary btn-sm" onclick="showPage(\'projects\')" style="margin-top:12px;">🔍 Buscar projetos</button>',
+      '</div>'
+    ].join('');
+    return;
+  }
+
+  listEl.innerHTML = proposals.map(function(p, i) {
+    return _renderSentProposalCard(p, i);
+  }).join('');
+}
+
+function _renderSentProposalCard(p, idx) {
+  var proj     = p.project || {};
+  var client   = proj.client || {};
+  var projTitle = _sanitize(proj.title || 'Projeto');
+  var clientName = _sanitize(client.name || 'Cliente');
+  var value    = parseFloat(p.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+  var days     = parseInt(p.deadline_days || 0, 10);
+  var when     = (typeof _timeAgo === 'function') ? _timeAgo(p.created_at) : '';
+  var letter   = _sanitize(p.cover_letter || '');
+  var letterShort = letter.length > 220 ? letter.substring(0, 220) + '…' : letter;
+  var colors   = _propAvatarColors();
+  var color    = colors[idx % colors.length];
+  var initial  = (client.name || 'C').charAt(0).toUpperCase();
+  var canWithdraw = p.status === 'pending' || p.status === 'viewed';
+  var isAccepted  = p.status === 'accepted';
+
+  var avatarHtml = client.avatar_url
+    ? '<img src="' + _sanitize(client.avatar_url) + '" alt="' + clientName + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">'
+    : '<div class="prop-card-avatar" style="background:' + color + ';">' + initial + '</div>';
+
+  var actionsHtml = '';
+  if (canWithdraw) {
+    actionsHtml = '<button class="btn btn-outline btn-sm" onclick="_withdrawProposal(\'' + p.id + '\')" style="font-size:12px;color:#6b7280;border-color:#d1d5db;">↩️ Retirar proposta</button>';
+  }
+  if (isAccepted) {
+    actionsHtml = '<button class="btn btn-primary btn-sm" onclick="switchDashPanel(\'contracts\');switchContractView(\'freelancer\')" style="font-size:12px;">📋 Ver contrato</button>';
+  }
+
+  return [
+    '<div class="prop-card" id="pcard-' + p.id + '">',
+      '<div class="prop-card-header">',
+        avatarHtml,
+        '<div style="flex:1;min-width:0;">',
+          '<div class="prop-card-name">' + projTitle + '</div>',
+          '<div class="prop-card-meta">Cliente: <strong>' + clientName + '</strong>' + (proj.deadline_days ? ' · ' + proj.deadline_days + ' dias de projeto' : '') + '</div>',
+          '<div style="font-size:11px;color:var(--text-4);margin-top:2px;">Enviada ' + when + '</div>',
+        '</div>',
+        '<div style="text-align:right;flex-shrink:0;">',
+          '<div class="prop-card-value">R$ ' + value + '</div>',
+          '<div style="font-size:11px;color:var(--text-4);">' + days + ' dias</div>',
+          '<div style="margin-top:4px;">' + _propStatusBadge(p.status) + '</div>',
+        '</div>',
+      '</div>',
+      letterShort ? '<div class="prop-card-body">"' + letterShort + '"</div>' : '',
+      actionsHtml ? '<div class="prop-card-actions">' + actionsHtml + '</div>' : '',
+    '</div>'
+  ].join('');
+}
+
+/* ════════════════════════════════════════════════════════════════
+   5. STATS
+════════════════════════════════════════════════════════════════ */
+function _renderProposalStats(proposals, viewType) {
+  var counts = { total:0, pending:0, viewed:0, shortlisted:0, accepted:0, rejected:0, withdrawn:0 };
+  proposals.forEach(function(p) {
+    counts.total++;
+    if (counts[p.status] !== undefined) counts[p.status]++;
+  });
+
+  var setEl = function(id, v) { var el = document.getElementById(id); if(el) el.textContent = v; };
+  setEl('pstat-total',    counts.total);
+  if (viewType === 'received') {
+    setEl('pstat-pending',  counts.pending + counts.viewed);
+    setEl('pstat-accepted', counts.accepted);
+    setEl('pstat-rejected', counts.rejected);
+    var lbl = document.querySelector('#pstat-pending + .prop-stat-lbl');
+    /* update via id instead */
+    var pendEl = document.getElementById('pstat-pending');
+    if (pendEl) { var pl = pendEl.nextElementSibling; if(pl) pl.textContent='Aguardando'; }
+  } else {
+    setEl('pstat-pending',  counts.pending + counts.viewed + counts.shortlisted);
+    setEl('pstat-accepted', counts.accepted);
+    setEl('pstat-rejected', counts.rejected);
+    var pendEl2 = document.getElementById('pstat-pending');
+    if (pendEl2) { var pl2 = pendEl2.nextElementSibling; if(pl2) pl2.textContent='Em análise'; }
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   6. AÇÕES DO CLIENTE
+════════════════════════════════════════════════════════════════ */
+async function _acceptProposal(proposalId) {
+  if (!confirm('Aceitar esta proposta e criar um contrato automaticamente?')) return;
+  var btn = document.querySelector('#pcard-' + proposalId + ' .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando…'; }
+
+  /* 1) Atualizar status da proposta */
+  var updated = await _sbUpdateProposalStatus(proposalId, 'accepted');
+  if (!updated) {
+    showToast('Erro ao aceitar proposta. Tente novamente.', 'error');
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Aceitar'; }
+    return;
+  }
+
+  /* 2) Buscar dados completos da proposta para criar contrato */
+  var r = await _sb.from('proposals')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id), freelancer:profiles!freelancer_id(id,name,email,avatar_url)')
+    .eq('id', proposalId).single();
+
+  if (!r.error && r.data) {
+    var contract = await _sbCreateContractFromProposal(r.data);
+    if (contract) {
+      showToast('🎉 Proposta aceita! Contrato criado com sucesso.', 'success');
+      /* 3) Rejeitar outras propostas para o mesmo projeto */
+      _sbRejectOtherProposals(r.data.project_id, proposalId);
+      /* 4) Enviar e-mail de aceite ao freelancer */
+      _hwTriggerProposalAcceptedEmail(r.data);
+    } else {
+      showToast('✅ Proposta aceita! (Não foi possível criar contrato automaticamente.)', 'info');
+    }
+  } else {
+    showToast('✅ Proposta aceita!', 'success');
+  }
+  _loadProposalsReceived();
+  _updateProposalBadge();
+}
+
+async function _rejectProposal(proposalId) {
+  if (!confirm('Recusar esta proposta?')) return;
+  var ok = await _sbUpdateProposalStatus(proposalId, 'rejected');
+  if (!ok) { showToast('Erro ao recusar proposta.', 'error'); return; }
+  showToast('Proposta recusada.', 'info');
+
+  /* Enviar e-mail de rejeição ao freelancer */
+  var r = await _sb.from('proposals')
+    .select('*, project:projects!project_id(title), freelancer:profiles!freelancer_id(name,email)')
+    .eq('id', proposalId).single();
+  if (!r.error && r.data) _hwTriggerProposalRejectedEmail(r.data);
+
+  _loadProposalsReceived();
+  _updateProposalBadge();
+}
+
+async function _shortlistProposal(proposalId) {
+  var ok = await _sbUpdateProposalStatus(proposalId, 'shortlisted');
+  if (!ok) { showToast('Erro ao selecionar proposta.', 'error'); return; }
+  showToast('⭐ Proposta marcada para análise.', 'success');
+  _loadProposalsReceived();
+}
+
+async function _unshortlistProposal(proposalId) {
+  var ok = await _sbUpdateProposalStatus(proposalId, 'viewed');
+  if (!ok) { showToast('Erro.', 'error'); return; }
+  _loadProposalsReceived();
+}
+
+async function _sbRejectOtherProposals(projectId, acceptedId) {
+  if (!_sbReady() || !projectId) return;
+  /* Rejeita todas as proposals do mesmo projeto que não a aceita */
+  await _sb.from('proposals')
+    .update({ status: 'rejected', updated_at: new Date().toISOString() })
+    .eq('project_id', projectId)
+    .neq('id', acceptedId)
+    .in('status', ['pending','viewed','shortlisted']);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   7. AÇÕES DO FREELANCER
+════════════════════════════════════════════════════════════════ */
+async function _withdrawProposal(proposalId) {
+  if (!confirm('Tem certeza que deseja retirar esta proposta?')) return;
+  var ok = await _sbUpdateProposalStatus(proposalId, 'withdrawn');
+  if (!ok) { showToast('Erro ao retirar proposta.', 'error'); return; }
+  showToast('↩️ Proposta retirada.', 'info');
+  _loadMyProposals();
+  _updateProposalBadge();
+}
+
+/* ════════════════════════════════════════════════════════════════
+   8. TEMPLATES DE E-MAIL (aceite / rejeição)
+════════════════════════════════════════════════════════════════ */
+function _hwTriggerProposalAcceptedEmail(proposal) {
+  if (typeof _hwCheckPref !== 'function' || !_hwCheckPref('email_contracts')) return;
+  if (typeof _hwSendEmail !== 'function') return;
+  var fl   = proposal.freelancer || {};
+  var proj = proposal.project    || {};
+  if (!fl.email) return;
+  var value = parseFloat(proposal.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+  var body  = [
+    '<h2 style="color:#166534;font-size:20px;margin:0 0 6px;">🎉 Sua proposta foi aceita!</h2>',
+    '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Parabéns! O cliente aceitou sua proposta para o projeto <strong>' + _hwEsc(proj.title||'') + '</strong>.</p>',
+    '<table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;margin-bottom:20px;">',
+      _hwRow('Projeto', _hwEsc(proj.title||'—')),
+      _hwRow('Valor acordado', '<strong style="color:#22c55e;">R$ ' + _hwEsc(value) + '</strong>'),
+      _hwRow('Prazo', (proposal.deadline_days||'—') + ' dias'),
+    '</table>',
+    '<p style="color:#475569;font-size:13px;margin:0 0 20px;">Acesse o painel de contratos para acompanhar o projeto e combinar os próximos passos com o cliente.</p>',
+    _hwBtn('Ver Contrato', (_HW_EMAIL_CONFIG && _HW_EMAIL_CONFIG.baseUrl ? _HW_EMAIL_CONFIG.baseUrl : '') + '?panel=contracts')
+  ].join('');
+  var html = (typeof _hwWrap === 'function') ? _hwWrap('Proposta Aceita — HereWork', body) : body;
+  _hwSendEmail(fl.email, '🎉 Sua proposta foi aceita — ' + _hwEsc(proj.title||'HereWork'), html);
+}
+
+function _hwTriggerProposalRejectedEmail(proposal) {
+  if (typeof _hwCheckPref !== 'function' || !_hwCheckPref('email_proposals')) return;
+  if (typeof _hwSendEmail !== 'function') return;
+  var fl   = proposal.freelancer || {};
+  var proj = proposal.project    || {};
+  if (!fl.email) return;
+  var body  = [
+    '<h2 style="color:#1e293b;font-size:20px;margin:0 0 6px;">📋 Atualização sobre sua proposta</h2>',
+    '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Obrigado por se candidatar ao projeto <strong>' + _hwEsc(proj.title||'') + '</strong>. Desta vez, o cliente optou por outro profissional.</p>',
+    '<p style="color:#475569;font-size:13px;margin:0 0 20px;">Não desanime! Há muitos outros projetos disponíveis na plataforma. Mantenha seu perfil atualizado e continue enviando propostas.</p>',
+    _hwBtn('Buscar novos projetos', (_HW_EMAIL_CONFIG && _HW_EMAIL_CONFIG.baseUrl ? _HW_EMAIL_CONFIG.baseUrl : '') + '?page=projects')
+  ].join('');
+  var html = (typeof _hwWrap === 'function') ? _hwWrap('Proposta não selecionada — HereWork', body) : body;
+  _hwSendEmail(fl.email, 'Atualização sobre sua proposta — ' + _hwEsc(proj.title||'HereWork'), html);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   9. INTEGRAÇÃO COM ABERTURA DO DASHBOARD
+   Inicia realtime + badge quando o dashboard abre
+════════════════════════════════════════════════════════════════ */
+(function() {
+  var _origOpenDashboard = window.openDashboard;
+  window.openDashboard = function() {
+    if (typeof _origOpenDashboard === 'function') _origOpenDashboard.apply(this, arguments);
+    /* Atualiza badge de propostas pendentes */
+    setTimeout(function() {
+      if (typeof _updateProposalBadge === 'function') _updateProposalBadge();
+      if (typeof _sbListenMyProposalUpdates === 'function') _sbListenMyProposalUpdates();
+    }, 400);
+  };
+})();
+
+/* ════════════════════════════════════════════════════════════════
+   10. ACESSO RÁPIDO: link "Propostas Recebidas" no painel Contratos
+    Adiciona botão "Ver no painel Propostas" no texto das secções
+════════════════════════════════════════════════════════════════ */
+window._goToProposalsPanel = function(view) {
+  switchDashPanel('proposals');
+  setTimeout(function() { _switchProposalView(view || 'received'); }, 100);
+};
 
 </script>
 
