@@ -10771,6 +10771,19 @@ async function _sbCreateProposal(data) {
     cover_letter:  data.coverLetter,
     status:        'pending'
   }).select().single();
+  if (r.error) {
+    var code = r.error.code || '';
+    var msg  = (r.error.message || '').toLowerCase();
+    /* UNIQUE(project_id, freelancer_id) — proposta duplicada */
+    if (code === '23505' || msg.includes('unique') || msg.includes('duplicate')) {
+      throw new Error('Você já enviou uma proposta para este projeto.');
+    }
+    /* FK violada — project_id inválido (card de demo escapou) */
+    if (code === '23503' || msg.includes('foreign key')) {
+      throw new Error('Projeto não encontrado. Recarregue a página e tente novamente.');
+    }
+    throw new Error(r.error.message || 'Erro ao salvar proposta.');
+  }
   return r.data || null;
 }
 
