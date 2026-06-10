@@ -11227,20 +11227,24 @@ async function _sbGetProposalsReceived(statusFilter) {
 /* ── CONTRATOS: Criar a partir de proposta aceita ─────────────── */
 async function _sbCreateContractFromProposal(proposal) {
   if (!_sbReady() || !_session) return null;
+  var user = await _sbEnsureSession();
+  if (!user) { console.warn('_sbCreateContractFromProposal: sem sessao Supabase ativa'); return null; }
   var proj = proposal.project || {};
   var fl   = proposal.freelancer || {};
-  var payload = {
+  var r = await _sb.from('contracts').insert({
+    proposal_id:   proposal.id,
     project_id:    proposal.project_id || (proj.id || ''),
-    client_id:     _session.uid,
+    client_id:     user.id,
     freelancer_id: proposal.freelancer_id || (fl.id || ''),
+    title:         proj.title || 'Contrato',
     value:         proposal.value,
     deadline_days: proposal.deadline_days,
     status:        'active',
-    description:   (proj.title || 'Contrato') + ' — Proposta aceita',
     started_at:    new Date().toISOString()
-  };
-  var r = await _sb.from('contracts').insert(payload).select().single();
-  if (r.error) { console.warn('_sbCreateContractFromProposal:', r.error.message); return null; }
+  }).select().single();
+  if (r.error) {
+    throw new Error(r.error.message || 'Erro ao criar contrato.');
+  }
   return r.data;
 }
 
