@@ -16856,6 +16856,51 @@ function openDashboardContracts() {
   }, 100);
 }
 
+// === Stripe Connect onboarding (Fase 1) ===
+var _STRIPE_PK_TEST = 'pk_test_51RGy77HXgU6QiY3XrTlKeE1SfjecManQVldbPCX33ATgNpdAGWITIBhnNdPNnJCIo2kjYr8dZ66AReZqcr228Eqf00JqF3j7Lr';
+var _stripeConnectInstance = null;
+
+async function startStripeOnboarding() {
+  var btn = document.getElementById('btn-connect-stripe');
+  var container = document.getElementById('stripe-onboarding-container');
+  if (!container) return;
+  try {
+    if (btn) { btn.disabled = true; btn.textContent = 'Carregando...'; }
+    if (!_session || !_session.uid) { alert('Você precisa estar logado.'); return; }
+
+    var res = await fetch('/api/create-connect-account', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: _session.uid })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) { throw new Error(data.error || ('Erro ' + res.status)); }
+
+    var clientSecret = data.client_secret;
+
+    _stripeConnectInstance = await StripeConnect.init({
+      publishableKey: _STRIPE_PK_TEST,
+      fetchClientSecret: function() { return Promise.resolve(clientSecret); }
+    });
+
+    container.innerHTML = '';
+    var onboarding = _stripeConnectInstance.create('account-onboarding');
+    container.appendChild(onboarding);
+    if (btn) { btn.style.display = 'none'; }
+  } catch (err) {
+    console.error('startStripeOnboarding error:', err);
+    alert('Erro ao iniciar conexão: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Conectar conta'; }
+  }
+}
+
+// Mostra o banner de conexão quando o freelancer ainda não tem conta conectada
+function _refreshStripeConnectBanner(stripeAccountId) {
+  var el = document.getElementById('dash-fl-connect-stripe');
+  if (!el) return;
+  el.style.display = (_isFL() && !stripeAccountId) ? 'block' : 'none';
+}
+
 function switchDashPanel(panel) {
   ['profile','plan','contracts','payments','settings','proposals'].forEach(function(p) {
     var btn = document.getElementById('dnt-' + p);
