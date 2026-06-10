@@ -1938,6 +1938,17 @@ section { padding: 64px 0; }
   color: var(--text-2); transition: all var(--transition);
 }
 .social-login-btn:hover { border-color: var(--border-2); background: var(--surface); }
+.social-login-btn:disabled { opacity:.55; cursor:not-allowed; }
+/* Força da senha */
+.pwd-strength-wrap { margin-top:6px; }
+.pwd-strength-track { height:4px; background:var(--border); border-radius:2px; overflow:hidden; }
+.pwd-strength-fill  { height:100%; width:0; transition:width .3s,background .3s; border-radius:2px; }
+.pwd-strength-lbl   { font-size:11px; font-weight:600; display:inline-block; margin-top:3px; min-height:14px; }
+/* Modal verificação de e-mail */
+.email-verify-icon  { font-size:52px; margin-bottom:16px; }
+/* Alerta de conta bloqueada */
+.login-lock-banner  { background:#fef2f2; border:1px solid #fca5a5; border-radius:var(--radius); padding:10px 14px;
+  font-size:13px; color:#b91c1c; display:none; margin-bottom:14px; }
 
 /* ═══════════════════════════════════════════
    TOAST NOTIFICATIONS
@@ -8159,8 +8170,9 @@ section { padding: 64px 0; }
       <button class="modal-close" onclick="closeModal('login')">✕</button>
     </div>
     <div class="modal-body">
+      <div id="login-lock-banner" class="login-lock-banner"></div>
       <div class="social-login">
-        <button class="social-login-btn" onclick="showToast('🔗 Login com Google em breve!','info')">
+        <button id="login-google-btn" class="social-login-btn" onclick="_sbGoogleLogin('login')">
           <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
           <span data-pt="Continuar com Google" data-es="Continuar con Google">Continuar com Google</span>
         </button>
@@ -8203,7 +8215,7 @@ section { padding: 64px 0; }
     </div>
     <div class="modal-body">
       <!-- Sele&ccedil;&atilde;o de tipo de conta -->
-      <div style="margin-bottom:18px;">
+      <div style="margin-bottom:14px;">
         <div style="font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:8px;">Como voc&ecirc; quer usar a plataforma?</div>
         <div class="actype-grid" id="reg-type-grid">
           <div class="actype-card active" id="reg-type-client" onclick="setRegType('client')">
@@ -8223,6 +8235,14 @@ section { padding: 64px 0; }
           </div>
         </div>
       </div>
+      <!-- Google OAuth -->
+      <div class="social-login" style="margin-bottom:0;">
+        <button id="reg-google-btn" class="social-login-btn" onclick="_sbGoogleLogin('register')">
+          <svg width="17" height="17" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          <span>Continuar com Google</span>
+        </button>
+      </div>
+      <div class="form-divider" style="margin:16px 0;">ou cadastre-se com e-mail</div>
       <div class="form-group">
         <label for="reg-name" class="form-label" data-pt="Nome completo" data-es="Nombre completo">Nome completo</label>
         <input class="form-input" id="reg-name" type="text" data-placeholder-pt="Seu nome completo" data-placeholder-es="Tu nombre completo" placeholder="Seu nome completo">
@@ -8236,16 +8256,78 @@ section { padding: 64px 0; }
       <div class="form-group">
         <label for="reg-pass" class="form-label" data-pt="Senha" data-es="Contraseña">Senha</label>
         <div style="position:relative;">
-          <input class="form-input" id="reg-pass" type="password" data-placeholder-pt="Crie uma senha segura" data-placeholder-es="Crea una contraseña segura" placeholder="Crie uma senha segura" style="padding-right:44px;">
+          <input class="form-input" id="reg-pass" type="password" data-placeholder-pt="Crie uma senha segura" data-placeholder-es="Crea una contraseña segura" placeholder="Crie uma senha segura" style="padding-right:44px;"
+            oninput="_updatePwdStrength(this.value,'reg-strength-bar','reg-strength-lbl')">
           <button type="button" onclick="togglePwd(this,'reg-pass')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;padding:4px;" title="Mostrar">👁</button>
         </div>
         <div class="form-error" id="err-reg-pass"></div>
+        <div class="pwd-strength-wrap">
+          <div class="pwd-strength-track"><div id="reg-strength-bar" class="pwd-strength-fill"></div></div>
+          <span id="reg-strength-lbl" class="pwd-strength-lbl"></span>
+        </div>
       </div>
       <div style="font-size:12px;color:var(--text-3);margin-bottom:18px;" data-pt="Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade." data-es="Al crear cuenta aceptas nuestros Términos de Uso y Política de Privacidad.">Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade.</div>
       <button id="reg-submit-btn" class="btn btn-green btn-block btn-lg" onclick="submitRegister()" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</button>
       <div class="modal-switch-link">
         <span data-pt="Já tem conta?" data-es="¿Ya tienes cuenta?">Já tem conta?</span>
         <a onclick="switchModal('register','login')" data-pt=" Entrar" data-es=" Iniciar sesión"> Entrar</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: REDEFINIR SENHA (callback do link de recuperação) -->
+<div class="overlay" id="overlay-reset-password">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Redefinir Senha</div>
+        <div class="modal-subtitle">Crie uma nova senha segura para sua conta</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('reset-password')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="reset-pass-new" class="form-label">Nova senha</label>
+        <div style="position:relative;">
+          <input class="form-input" id="reset-pass-new" type="password" placeholder="M&iacute;nimo 8 caracteres" style="padding-right:44px;"
+            oninput="_updatePwdStrength(this.value,'reset-strength-bar','reset-strength-lbl')">
+          <button type="button" onclick="togglePwd(this,'reset-pass-new')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;padding:4px;">&#128065;</button>
+        </div>
+        <div class="pwd-strength-wrap">
+          <div class="pwd-strength-track"><div id="reset-strength-bar" class="pwd-strength-fill"></div></div>
+          <span id="reset-strength-lbl" class="pwd-strength-lbl"></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="reset-pass-confirm" class="form-label">Confirmar nova senha</label>
+        <div style="position:relative;">
+          <input class="form-input" id="reset-pass-confirm" type="password" placeholder="Repita a nova senha" style="padding-right:44px;">
+          <button type="button" onclick="togglePwd(this,'reset-pass-confirm')" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-3);font-size:17px;padding:4px;">&#128065;</button>
+        </div>
+        <div class="form-error" id="err-reset-pass"></div>
+      </div>
+      <button id="reset-pass-btn" class="btn btn-green btn-block btn-lg" onclick="submitNewPassword()">Salvar nova senha</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: VERIFICAR E-MAIL (após cadastro com confirmação obrigatória) -->
+<div class="overlay" id="overlay-email-verify">
+  <div class="modal" style="max-width:420px;text-align:center;">
+    <div class="modal-header" style="justify-content:flex-end;border-bottom:none;padding-bottom:0;">
+      <button class="modal-close" onclick="closeModal('email-verify')">&#x2715;</button>
+    </div>
+    <div class="modal-body" style="padding-top:8px;">
+      <div class="email-verify-icon">&#128231;</div>
+      <div class="modal-title" style="font-size:20px;margin-bottom:8px;">Verifique seu e-mail</div>
+      <p style="color:var(--text-2);margin-bottom:6px;">Enviamos um link de confirma&ccedil;&atilde;o para:</p>
+      <p style="font-weight:700;color:var(--text-1);margin-bottom:18px;word-break:break-all;" id="email-verify-addr"></p>
+      <p style="font-size:13px;color:var(--text-3);margin-bottom:24px;">Clique no link para ativar sua conta. O link expira em 24&nbsp;horas. Verifique a pasta de spam caso n&atilde;o encontre.</p>
+      <button class="btn btn-green btn-block" onclick="closeModal('email-verify')">Entendido</button>
+      <div style="margin-top:14px;font-size:13px;color:var(--text-3);">
+        N&atilde;o recebeu?
+        <a style="color:var(--green);cursor:pointer;font-weight:600;" onclick="_resendVerificationEmail()">Reenviar e-mail</a>
       </div>
     </div>
   </div>
@@ -10239,8 +10321,61 @@ async function _sbRestoreSession() {
       }
     }
     /* Listener para mudanças de autenticação */
-    _sb.auth.onAuthStateChange(function(event, session) {
-      if (event === 'SIGNED_OUT') { _clearSession(); }
+    _sb.auth.onAuthStateChange(async function(event, session) {
+      /* ── Logout ─────────────────────────────────────────────── */
+      if (event === 'SIGNED_OUT') { _clearSession(); return; }
+
+      /* ── Recuperação de senha via link de e-mail ────────────── */
+      if (event === 'PASSWORD_RECOVERY') {
+        setTimeout(function(){ openModal('reset-password'); }, 400);
+        return;
+      }
+
+      /* ── Novo login via OAuth (Google, etc.) ────────────────── */
+      if (event === 'SIGNED_IN' && session && session.user) {
+        var user     = session.user;
+        var meta     = user.user_metadata || {};
+        var provider = (user.app_metadata && user.app_metadata.provider) || 'email';
+        /* Login por e-mail já é tratado em submitLogin — ignorar aqui */
+        if (provider === 'email') return;
+        /* Verificar se sessão já está estabelecida (evitar loop) */
+        if (_session && _session.uid === user.id) return;
+
+        /* Busca/cria perfil no banco */
+        var prof = await _sbGetProfile(user.id);
+        var oauthType = null;
+        try { oauthType = localStorage.getItem('hw_oauth_type'); localStorage.removeItem('hw_oauth_type'); } catch(xe) {}
+        var validTypes = ['client','freelancer','both'];
+        var acType  = (prof && prof.type) || (validTypes.indexOf(oauthType) !== -1 ? oauthType : 'client');
+        var uName   = (prof && prof.name) || meta.full_name || meta.name || user.email.split('@')[0];
+        var uAvatar = (prof && prof.avatar_url) || meta.avatar_url || meta.picture || null;
+
+        if (!prof) {
+          /* Primeiro login OAuth — criar perfil */
+          try {
+            await _sb.from('profiles').upsert({
+              id:         user.id,
+              name:       uName,
+              email:      user.email,
+              type:       acType,
+              avatar_url: uAvatar
+            }, { onConflict: 'id', ignoreDuplicates: true });
+          } catch(xe) { console.warn('OAuth profile upsert:', xe); }
+        }
+
+        _setSession(uName, user.email, acType);
+        _session.uid        = user.id;
+        _session.avatar_url = uAvatar;
+
+        /* Fecha modais abertos (login/register) */
+        ['login','register'].forEach(function(m){ closeModal(m); });
+
+        var ctx = null;
+        try { ctx = localStorage.getItem('hw_oauth_ctx'); localStorage.removeItem('hw_oauth_ctx'); } catch(xe) {}
+        showToast((ctx === 'register' ? '🎉 Conta criada! Bem-vindo(a), ' : '👋 Bem-vindo(a) de volta, ')
+          + uName.split(' ')[0] + '!', 'success');
+        setTimeout(function(){ openDashboard(); }, 500);
+      }
     });
   } catch(e) { console.warn('sbRestoreSession:', e); }
 }
@@ -10283,7 +10418,7 @@ async function _sbRegister(name, email, pass, type) {
       }, { onConflict: 'id', ignoreDuplicates: true });
     } catch(profileErr) { /* trigger já criou ou erro ignorado */ }
   }
-  return { user: r.data.user };
+  return { user: r.data.user, session: r.data.session };
 }
 
 /* ── AUTH: Logout ─────────────────────────────────────────────── */
@@ -10299,6 +10434,129 @@ async function _sbForgotPassword(email) {
     redirectTo: window.location.origin
   });
   return r.error ? { error: r.error.message } : { ok: true };
+}
+
+/* ── AUTH: Login com Google (OAuth) ──────────────────────────── */
+async function _sbGoogleLogin(context) {
+  if (!_sbReady()) {
+    showToast('Configure o Supabase para habilitar o Google OAuth.', 'warn');
+    return;
+  }
+  /* Persiste tipo de conta selecionado para usar no callback */
+  var acType = (typeof regType !== 'undefined' ? regType : null) || 'client';
+  try { localStorage.setItem('hw_oauth_type', acType); localStorage.setItem('hw_oauth_ctx', context || 'login'); } catch(xe) {}
+  /* Desabilita botões para evitar duplo clique */
+  ['login-google-btn','reg-google-btn'].forEach(function(id){
+    var b = document.getElementById(id); if (b) b.disabled = true;
+  });
+  var result = await _sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin + window.location.pathname,
+      queryParams: { access_type: 'offline', prompt: 'select_account' }
+    }
+  });
+  if (result.error) {
+    ['login-google-btn','reg-google-btn'].forEach(function(id){
+      var b = document.getElementById(id); if (b) b.disabled = false;
+    });
+    showToast(result.error.message || 'Erro ao iniciar login com Google.', 'error');
+  }
+  /* Se não houve erro, o browser redireciona — não chega ao próximo passo */
+}
+window._sbGoogleLogin = _sbGoogleLogin;
+
+/* ── AUTH: Reenviar e-mail de verificação ─────────────────────── */
+async function _resendVerificationEmail() {
+  var addrEl = document.getElementById('email-verify-addr');
+  var email  = addrEl ? addrEl.textContent.trim() : '';
+  if (!email || !_sbReady()) { showToast('E-mail não encontrado.','warn'); return; }
+  var r = await _sb.auth.resend({ type: 'signup', email: email });
+  if (r.error) { showToast(r.error.message || 'Erro ao reenviar.', 'error'); return; }
+  showToast('✅ E-mail reenviado para ' + email + '!', 'success');
+}
+window._resendVerificationEmail = _resendVerificationEmail;
+
+/* ── AUTH: Redefinição de senha (callback do link) ────────────── */
+async function submitNewPassword() {
+  if (!_sbReady()) { showToast('Serviço indisponível.','error'); return; }
+  var p1   = document.getElementById('reset-pass-new');
+  var p2   = document.getElementById('reset-pass-confirm');
+  var btn  = document.getElementById('reset-pass-btn');
+  var errEl = document.getElementById('err-reset-pass');
+  if (errEl) { errEl.textContent = ''; errEl.classList.remove('show'); }
+  var pass = p1 ? p1.value : '';
+  if (pass.length < 8) {
+    if (errEl) { errEl.textContent = 'A senha deve ter no mínimo 8 caracteres.'; errEl.classList.add('show'); } return;
+  }
+  if (p2 && p2.value !== pass) {
+    if (errEl) { errEl.textContent = 'As senhas não coincidem.'; errEl.classList.add('show'); } return;
+  }
+  _setBtnLoading(btn, true);
+  var r = await _sb.auth.updateUser({ password: pass });
+  _setBtnLoading(btn, false);
+  if (r.error) {
+    if (errEl) { errEl.textContent = r.error.message; errEl.classList.add('show'); } return;
+  }
+  if (p1) p1.value = ''; if (p2) p2.value = '';
+  closeModal('reset-password');
+  showToast('✅ Senha redefinida com sucesso! Faça login.', 'success');
+  setTimeout(function(){ openModal('login'); }, 600);
+}
+window.submitNewPassword = submitNewPassword;
+
+/* ── AUTH: Indicador de força de senha ───────────────────────── */
+function _updatePwdStrength(val, barId, lblId) {
+  var bar = document.getElementById(barId);
+  var lbl = document.getElementById(lblId);
+  if (!bar || !lbl) return;
+  if (!val) { bar.style.width = '0'; lbl.textContent = ''; return; }
+  var score = 0;
+  if (val.length >= 8)              score++;
+  if (/[A-Z]/.test(val))            score++;
+  if (/[0-9]/.test(val))            score++;
+  if (/[^A-Za-z0-9]/.test(val))    score++;
+  var lvls = [
+    { w:'0%',   color:'transparent', label:'' },
+    { w:'25%',  color:'#ef4444',     label:'Fraca' },
+    { w:'50%',  color:'#f59e0b',     label:'Razoável' },
+    { w:'75%',  color:'#3b82f6',     label:'Boa' },
+    { w:'100%', color:'#22c55e',     label:'Forte' }
+  ];
+  var lvl = Math.min(score + 1, 4);
+  bar.style.width      = lvls[lvl].w;
+  bar.style.background = lvls[lvl].color;
+  lbl.textContent      = lvls[lvl].label;
+  lbl.style.color      = lvls[lvl].color;
+}
+window._updatePwdStrength = _updatePwdStrength;
+
+/* ── AUTH: Proteção contra força bruta ───────────────────────── */
+function _isLoginLocked(email) {
+  try {
+    var d = JSON.parse(localStorage.getItem('hw_lk_' + btoa(email)) || 'null');
+    if (!d) return false;
+    if (Date.now() > d.until) { localStorage.removeItem('hw_lk_' + btoa(email)); return false; }
+    return { until: d.until, left: Math.max(1, Math.ceil((d.until - Date.now()) / 60000)) };
+  } catch(e) { return false; }
+}
+function _recordLoginFail(email) {
+  try {
+    var key  = 'hw_at_' + btoa(email);
+    var lkKey = 'hw_lk_' + btoa(email);
+    var count = parseInt(localStorage.getItem(key) || '0', 10) + 1;
+    localStorage.setItem(key, String(count));
+    if (count >= 5) {
+      localStorage.setItem(lkKey, JSON.stringify({ until: Date.now() + 5 * 60 * 1000 }));
+      localStorage.removeItem(key);
+    }
+  } catch(e) {}
+}
+function _resetLoginFail(email) {
+  try {
+    localStorage.removeItem('hw_at_' + btoa(email));
+    localStorage.removeItem('hw_lk_' + btoa(email));
+  } catch(e) {}
 }
 
 /* ── PROJETOS: Criar ──────────────────────────────────────────── */
@@ -11735,15 +11993,43 @@ function submitLogin() {
   if (!ok) return;
   _setBtnLoading(btn, true);
 
+  /* Proteção contra força bruta */
+  var _emailVal = e ? e.value.trim() : '';
+  if (typeof _isLoginLocked === 'function') {
+    var _lockInfo = _isLoginLocked(_emailVal);
+    if (_lockInfo) {
+      _setBtnLoading(btn, false);
+      var _lkBanner = document.getElementById('login-lock-banner');
+      if (_lkBanner) {
+        _lkBanner.textContent = '🔒 Muitas tentativas incorretas. Aguarde ' + _lockInfo.left + ' min antes de tentar novamente.';
+        _lkBanner.style.display = 'block';
+      }
+      return;
+    }
+  }
+  var _lkBanner2 = document.getElementById('login-lock-banner');
+  if (_lkBanner2) _lkBanner2.style.display = 'none';
+
   /* Tentar Supabase primeiro, fallback para modo demo */
   if (_sbReady()) {
     _sbLogin(e.value.trim(), p.value).then(function(res) {
       _setBtnLoading(btn, false);
       if (res.error) {
+        if (typeof _recordLoginFail === 'function') _recordLoginFail(_emailVal);
         var errEl = document.getElementById('err-login-pass');
         if (errEl) { errEl.textContent = lang()==='pt' ? 'E-mail ou senha inválidos.' : 'E-mail o contraseña inválidos.'; errEl.classList.add('show'); }
+        /* Mostrar aviso de tentativas restantes */
+        try {
+          var _atKey = 'hw_at_' + btoa(_emailVal);
+          var _atCount = parseInt(localStorage.getItem(_atKey) || '0', 10);
+          if (_atCount >= 3) {
+            var _rem = 5 - _atCount;
+            if (_rem > 0) { var _eEl = document.getElementById('err-login-pass'); if (_eEl) _eEl.textContent += ' (' + _rem + ' tentativa' + (_rem===1?'':'s') + ' restante' + (_rem===1?'':'s') + ')'; }
+          }
+        } catch(xe) {}
         return;
       }
+      if (typeof _resetLoginFail === 'function') _resetLoginFail(_emailVal);
       var prof = res.profile;
       /* Guard: perfil pode ser null se trigger falhou */
       if (!prof) {
@@ -12396,17 +12682,20 @@ function submitRegister() {
         if (errEl) { errEl.textContent = res.error; errEl.classList.add('show'); }
         return;
       }
-      /* Supabase pode exigir confirmação de email — tratar os dois casos */
-      if (res.user && res.user.confirmed_at) {
-        /* Email já confirmado (confirmação desabilitada no Supabase) */
-        _setSession(name, email, type);
-        _session.uid = res.user.id;
-      } else {
-        /* Criar sessão local temporária */
-        _setSession(name, email, type);
-        if (res.user) _session.uid = res.user.id;
-      }
       if (n) n.value = ''; if (e) e.value = ''; if (p) p.value = '';
+
+      /* Se session == null → Supabase exige confirmação de e-mail */
+      if (!res.session) {
+        closeModal('register');
+        var evEl = document.getElementById('email-verify-addr');
+        if (evEl) evEl.textContent = email;
+        setTimeout(function(){ openModal('email-verify'); }, 300);
+        return;
+      }
+
+      /* Confirmação desabilitada → logar diretamente */
+      _setSession(name, email, type);
+      if (res.user) _session.uid = res.user.id;
       closeModal('register');
       showToast('🎉 ' + (lang()==='pt' ? 'Bem-vindo(a), ' : '¡Bienvenido/a, ') + name.split(' ')[0] + '! ' + (lang()==='pt' ? 'Conta criada com sucesso.' : 'Cuenta creada con éxito.'), 'success');
       setTimeout(function(){ openDashboard(); }, 400);
