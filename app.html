@@ -10799,7 +10799,17 @@ async function _sbCreateProposal(data) {
 /* ── CONTRATOS: Listar do usuário ─────────────────────────────── */
 async function _sbGetMyContracts() {
   if (!_sbReady() || !_session) return { client: [], freelancer: [] };
-  var uid = _session.uid;
+  var uid = (_session && _session.uid) ? _session.uid : null;
+  if (!uid) {
+    try {
+      var _ss = await _sb.auth.getSession();
+      uid = _ss && _ss.data && _ss.data.session && _ss.data.session.user
+            ? _ss.data.session.user.id : null;
+      if (uid && _session) _session.uid = uid;
+    } catch (e) { console.warn('_sbGetMyContracts: getSession falhou', e); }
+  }
+  if (!uid) { console.warn('_sbGetMyContracts: sem uid, abortando');
+              return { client: [], freelancer: [] }; }
   var [asClient, asFL] = await Promise.all([
     _sb.from('contracts').select('*, freelancer:profiles!freelancer_id(name,avatar_url,rating)').eq('client_id', uid).order('created_at', { ascending: false }),
     _sb.from('contracts').select('*, client:profiles!client_id(name,avatar_url)').eq('freelancer_id', uid).order('created_at', { ascending: false })
