@@ -22256,7 +22256,7 @@ async function openStripePayment(opts) {
     var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name })
+      body: JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name, userId: (_session && _session.uid) ? _session.uid : '' })
     });
     var data = await res.json();
     if (data.error) throw new Error(data.error);
