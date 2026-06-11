@@ -16365,6 +16365,7 @@ function openContractModal(opts) {
   })) return;
   opts = opts || {};
   _contractCtx = {
+    id:       opts.id       || null,
     name:     opts.name     || 'Freelancer',
     role:     opts.role     || 'Profissional',
     value:    opts.value    || 2000,
@@ -17875,7 +17876,7 @@ function dashAction(action, id) {
   } else if (action === 'chat-client') {
     openChatModal({ projectId: p.id, projectTitle: p.title, withName: p.freelancer, myRole: 'client' });
   } else if (action === 'approve') {
-    openContractModal({ name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline });
+    openContractModal({ id: p.id, name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline });
     setTimeout(function(){ contractStep4(); }, 100);
   }
 }
