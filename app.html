@@ -11114,7 +11114,7 @@ async function _sbGetFreelancers() {
   if (!_sbReady()) return [];
   try {
     var r = await _sb.from('profiles')
-      .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,plan,created_at,profile_metadata')
+      .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,created_at,profile_metadata')
       .in('type', ['freelancer','both'])
       .order('rating', { ascending: false })
       .limit(20);
