@@ -29,6 +29,11 @@ function json(body: unknown, status = 200, cors: Record<string, string> = {}) {
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const STRIPE_TEST  = (Deno.env.get("STRIPE_SECRET_KEY_TEST") || "").trim();
+console.log('[KEYDBG] len=' + STRIPE_TEST.length
+  + ' hasWS=' + /\s/.test(STRIPE_TEST)
+  + ' newline=' + /[\r\n]/.test(STRIPE_TEST)
+  + ' start=' + STRIPE_TEST.slice(0,8)
+  + ' fmtOK=' + /^sk_test_[A-Za-z0-9]+$/.test(STRIPE_TEST));
 
 const stripe = new Stripe(STRIPE_TEST, { apiVersion: "2024-06-20" });
 
