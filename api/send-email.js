@@ -14,6 +14,9 @@
 const nodemailer = require('nodemailer');
 const { respond, handleCors } = require('./_helpers');
 
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+const ANON_KEY     = process.env.SUPABASE_ANON_KEY;
+
 let _transporter = null;
 
 function getTransporter() {
@@ -31,6 +34,15 @@ function getTransporter() {
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
   if (req.method !== 'POST') return respond(res, 405, { ok: false, error: 'Método não permitido.' }, req);
+
+  /* ── Validar JWT do Supabase ── */
+  const authHeader = (req.headers['authorization'] || '');
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  if (!token) return respond(res, 401, { ok: false, error: 'Token de autenticação ausente.' }, req);
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + token }
+  });
+  if (!userRes.ok) return respond(res, 401, { ok: false, error: 'Token inválido.' }, req);
 
   const { to, subject, html, text } = req.body || {};
   if (!to || !subject) return respond(res, 400, { ok: false, error: 'Campos obrigatórios: to, subject.' }, req);
