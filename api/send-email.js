@@ -1,35 +1,21 @@
 /**
  * POST /api/send-email
  *
- * Relay seguro via Gmail SMTP (Nodemailer).
+ * Relay seguro via Resend (https://resend.com).
  * Variáveis de ambiente necessárias no Vercel:
- *   GMAIL_USER         — ex: luiz.coutinho@brandvakt.com
- *   GMAIL_APP_PASSWORD — Senha de app do Google (16 caracteres)
+ *   RESEND_API_KEY — chave de envio do Resend
+ *   RESEND_FROM    — remetente (opcional; default: HereWork <onboarding@resend.dev>)
+ *   SUPABASE_URL, SUPABASE_ANON_KEY — para validação de JWT
  *
  * Body: { to, subject, html, text }
- * Resposta sucesso: { ok: true, id: "<messageId>" }
+ * Resposta sucesso: { ok: true, id: "<resend message id>" }
  * Resposta erro:    { ok: false, error: string }
  */
 
-const nodemailer = require('nodemailer');
 const { respond, handleCors } = require('./_helpers');
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const ANON_KEY     = process.env.SUPABASE_ANON_KEY;
-
-let _transporter = null;
-
-function getTransporter() {
-  if (_transporter) return _transporter;
-  const user = process.env.GMAIL_USER;
-  const pass = process.env.GMAIL_APP_PASSWORD;
-  if (!user || !pass) throw new Error('GMAIL_USER ou GMAIL_APP_PASSWORD não configurados.');
-  _transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user, pass }
-  });
-  return _transporter;
-}
 
 module.exports = async function handler(req, res) {
   if (handleCors(req, res)) return;
@@ -44,26 +30,39 @@ module.exports = async function handler(req, res) {
   });
   if (!userRes.ok) return respond(res, 401, { ok: false, error: 'Token inválido.' }, req);
 
+  /* ── Validar body ── */
   const { to, subject, html, text } = req.body || {};
   if (!to || !subject) return respond(res, 400, { ok: false, error: 'Campos obrigatórios: to, subject.' }, req);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(to))) {
     return respond(res, 400, { ok: false, error: 'E-mail destinatário inválido.' }, req);
   }
 
-  try {
-    const transporter = getTransporter();
-    const from = '"HereWork" <' + process.env.GMAIL_USER + '>';
+  /* ── Enviar via Resend ── */
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return respond(res, 500, { ok: false, error: 'RESEND_API_KEY não configurada.' }, req);
 
-    const info = await transporter.sendMail({
-      from,
-      to,
-      replyTo: from,
-      subject,
-      html:    html || '<p>' + subject + '</p>',
-      text:    text || subject
+  try {
+    const resendRes = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + apiKey,
+        'Content-Type':  'application/json'
+      },
+      body: JSON.stringify({
+        from:     process.env.RESEND_FROM || 'HereWork <onboarding@resend.dev>',
+        to:       to,
+        subject:  subject,
+        html:     html || ('<p>' + subject + '</p>'),
+        text:     text || subject,
+        reply_to: 'contato@herework.com.br'
+      })
     });
 
-    return respond(res, 200, { ok: true, id: info.messageId }, req);
+    const data = await resendRes.json();
+    if (!resendRes.ok) {
+      return respond(res, 500, { ok: false, error: (data && data.message) || 'Erro ao enviar e-mail via Resend.' }, req);
+    }
+    return respond(res, 200, { ok: true, id: data.id }, req);
   } catch (e) {
     return respond(res, 500, { ok: false, error: e.message || 'Erro ao enviar e-mail.' }, req);
   }
