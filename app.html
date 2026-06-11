@@ -13523,6 +13523,22 @@ function _contractFromProposal(idx) {
 }
 window._contractFromProposal = _contractFromProposal;
 
+/* ── Contratar a partir do card de Propostas Recebidas (lookup por id) ── */
+window._contractFromCard = function(proposalId) {
+  var p = (window._recvProposals || {})[proposalId];
+  if (!p) { console.warn('_contractFromCard: proposta não encontrada no lookup:', proposalId); return; }
+  var fl   = p.freelancer || {};
+  var proj = p.project    || {};
+  openContractModal({
+    proposalId: p.id,
+    name:       fl.name       || 'Freelancer',
+    role:       'Freelancer',
+    value:      parseFloat(p.value || 0),
+    project:    proj.title    || 'Projeto',
+    deadline:   (p.deadline_days || 30) + ' dias'
+  });
+};
+
 /* ═══════════════════════════════════════════════════════════════
    ANÁLISE COM IA — Motor de scoring e ranking de propostas
    Algoritmo local ponderado: Preço · Prazo · Qualidade · Comercial.
@@ -23331,7 +23347,9 @@ function _renderReceivedProposalCard(p, idx) {
   var rating   = parseFloat(fl.rating || 0);
   var jobs     = parseInt(fl.completed_jobs || 0, 10);
   var projTitle = _sanitize(proj.title || 'Projeto');
-  var canAct   = p.status !== 'accepted' && p.status !== 'rejected' && p.status !== 'withdrawn';
+  window._recvProposals = window._recvProposals || {};
+  window._recvProposals[p.id] = p;
+  var canContract = (p.status === 'pending' || p.status === 'viewed' || p.status === 'shortlisted');
   var avatarHtml = fl.avatar_url
     ? '<img src="' + _sanitize(fl.avatar_url) + '" alt="' + flName + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">'
     : '<div class="prop-card-avatar" style="background:' + color + ';">' + initial + '</div>';
@@ -23340,9 +23358,9 @@ function _renderReceivedProposalCard(p, idx) {
   for (var i=1;i<=5;i++) stars += '<span style="color:' + (i<=Math.round(rating)?'#f59e0b':'#d1d5db') + ';font-size:12px;">★</span>';
 
   var actionsHtml = '';
-  if (canAct) {
+  if (canContract) {
     actionsHtml = [
-      '<button class="btn btn-primary btn-sm" onclick="_acceptProposal(\'' + p.id + '\')" style="font-size:12px;">✅ Aceitar</button>',
+      '<button class="btn btn-primary btn-sm" onclick="_contractFromCard(\'' + p.id + '\')" style="font-size:12px;">🤝 Contratar</button>',
       p.status !== 'shortlisted'
         ? '<button class="btn btn-outline btn-sm" onclick="_shortlistProposal(\'' + p.id + '\')" style="font-size:12px;color:#7c3aed;border-color:#ddd6fe;">⭐ Selecionar</button>'
         : '<button class="btn btn-outline btn-sm" onclick="_unshortlistProposal(\'' + p.id + '\')" style="font-size:12px;color:#7c3aed;border-color:#ddd6fe;">⭐ Selecionada</button>',
