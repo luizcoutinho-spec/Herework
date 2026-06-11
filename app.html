@@ -8879,93 +8879,6 @@ section { padding: 64px 0; }
         </button>
       </div>
 
-      <!-- ── ETAPA 2: PAGAMENTO GARANTIA ── -->
-      <div class="contract-panel" id="cpanel-2">
-        <div class="escrow-banner">
-          <div class="escrow-banner-icon">&#128274;</div>
-          <div class="escrow-banner-text">
-            <div class="title">Pagamento Protegido por Garantia</div>
-            <div class="sub">Seu dinheiro fica retido com seguran&ccedil;a. S&oacute; &eacute; liberado ao freelancer quando voc&ecirc; aprovar a entrega.</div>
-          </div>
-        </div>
-        <div class="escrow-badge-row">
-          <div class="escrow-badge">&#9989; 100% Seguro</div>
-          <div class="escrow-badge">&#128274; Criptografia SSL</div>
-          <div class="escrow-badge">&#9878;&#65039; Mediação em disputas</div>
-          <div class="escrow-badge">&#9889; PIX instantâneo</div>
-        </div>
-
-        <!-- Mini tabs PIX / Cartão -->
-        <div class="pay-tabs" style="margin-bottom:0;">
-          <button class="pay-tab" id="ctab-pix" onclick="switchContractPayTab('pix')">
-            <span>&#9889;</span> PIX
-          </button>
-          <button class="pay-tab active" id="ctab-card" onclick="switchContractPayTab('card')">
-            <span>&#128179;</span> Cart&atilde;o de Cr&eacute;dito
-          </button>
-        </div>
-
-        <div id="cpay-body" style="padding:18px 0 0;">
-          <!-- PIX -->
-          <div id="cpay-pix" style="display:none;">
-            <div style="text-align:center;margin-bottom:14px;">
-              <div style="font-size:13px;color:var(--text-3);margin-bottom:8px;">Escaneie o QR Code ou copie o c&oacute;digo PIX</div>
-              <div style="display:inline-flex;background:#fff;border:2px solid var(--border);border-radius:10px;padding:10px;">
-                <svg width="140" height="140" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="10" y="10" width="50" height="50" rx="4" fill="#000"/><rect x="16" y="16" width="38" height="38" rx="2" fill="#fff"/><rect x="22" y="22" width="26" height="26" rx="1" fill="#000"/>
-                  <rect x="120" y="10" width="50" height="50" rx="4" fill="#000"/><rect x="126" y="16" width="38" height="38" rx="2" fill="#fff"/><rect x="132" y="22" width="26" height="26" rx="1" fill="#000"/>
-                  <rect x="10" y="120" width="50" height="50" rx="4" fill="#000"/><rect x="16" y="126" width="38" height="38" rx="2" fill="#fff"/><rect x="22" y="132" width="26" height="26" rx="1" fill="#000"/>
-                  <rect x="70" y="10" width="6" height="6" fill="#000"/><rect x="82" y="10" width="6" height="6" fill="#000"/>
-                  <rect x="70" y="22" width="6" height="6" fill="#000"/><rect x="82" y="28" width="6" height="6" fill="#000"/>
-                  <rect x="94" y="22" width="6" height="6" fill="#000"/><rect x="70" y="40" width="6" height="6" fill="#000"/>
-                  <rect x="94" y="40" width="6" height="6" fill="#000"/><rect x="76" y="52" width="6" height="6" fill="#000"/>
-                  <rect x="88" y="58" width="6" height="6" fill="#000"/><rect x="70" y="64" width="6" height="6" fill="#000"/>
-                  <rect x="82" y="82" width="6" height="6" fill="#000"/><rect x="100" y="88" width="6" height="6" fill="#000"/>
-                  <rect x="70" y="94" width="6" height="6" fill="#000"/><rect x="88" y="94" width="6" height="6" fill="#000"/>
-                  <rect x="118" y="70" width="6" height="6" fill="#000"/><rect x="130" y="76" width="6" height="6" fill="#000"/>
-                  <rect x="118" y="100" width="6" height="6" fill="#000"/><rect x="130" y="106" width="6" height="6" fill="#000"/>
-                  <rect x="118" y="118" width="6" height="6" fill="#000"/><rect x="136" y="142" width="6" height="6" fill="#000"/>
-                  <rect x="76" y="76" width="28" height="28" rx="4" fill="#32BCAD"/>
-                  <text x="90" y="96" font-family="Arial" font-weight="bold" font-size="14" fill="white" text-anchor="middle">PIX</text>
-                </svg>
-              </div>
-              <div style="margin-top:10px;display:flex;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);overflow:hidden;">
-                <div style="flex:1;padding:9px 12px;font-size:11px;font-family:monospace;color:var(--text-3);word-break:break-all;">
-                  00020126580014BR.GOV.BCB.PIX0136escrow@herework.com.br5204000053039865406<span id="c-pix-amount">0</span>5802BR5910HereWork6304B3C1
-                </div>
-                <button onclick="contractCopyPix()" style="flex-shrink:0;padding:9px 14px;background:var(--green);color:#fff;border:none;font-size:12px;font-weight:600;cursor:pointer;">Copiar</button>
-              </div>
-            </div>
-            <button class="btn btn-green btn-block" id="c-pix-sim-btn" onclick="contractSimulatePix()">
-              &#9889; Gerar QR Code PIX
-            </button>
-          </div>
-
-          <!-- Cartão -->
-          <div id="cpay-card" style="display:block;">
-            <div class="form-group">
-              <label class="form-label" for="c-stripe-name">Nome no cart&atilde;o</label>
-              <input class="form-input" id="c-stripe-name" type="text" maxlength="60"
-                placeholder="Como aparece no cart&atilde;o" autocomplete="cc-name" spellcheck="false">
-              <div class="form-error" id="err-c-stripe-name"></div>
-            </div>
-            <div class="form-group">
-              <div class="form-label">Dados do cart&atilde;o</div>
-              <div class="stripe-element-wrap" id="c-stripe-card-wrap">
-                <div id="c-stripe-card-element"></div>
-              </div>
-              <div class="form-error" id="err-c-stripe-card"></div>
-            </div>
-            <button class="btn btn-primary btn-block" style="margin-top:16px;" id="c-card-btn" onclick="contractPayCard()">
-              &#128274; Depositar R$ <span id="c-card-total">0</span> em Garantia
-            </button>
-            <div class="stripe-powered" style="justify-content:center;margin-top:8px;">
-              &#128274; Processado por <strong style="color:#635bff;">stripe</strong> &mdash; PCI DSS Level 1
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- ── ETAPA 3: CONTRATO ATIVO ── -->
       <div class="contract-panel" id="cpanel-3">
         <div class="contract-active-header">
@@ -16218,8 +16131,6 @@ function openContractModal(opts) {
   el = document.getElementById('c-fee-label');     if(el) el.textContent = '💵 Taxa da plataforma (' + _commPct + '%)';
   el = document.getElementById('c-fee');           if(el) el.textContent = 'R$ ' + fmt(fee);
   el = document.getElementById('c-total');         if(el) el.textContent = 'R$ ' + fmt(total);
-  el = document.getElementById('c-pix-amount');    if(el) el.textContent = total;
-  el = document.getElementById('c-card-total');    if(el) el.textContent = fmt(total);
   el = document.getElementById('c-escrow-display');if(el) el.textContent = fmt(_contractCtx.value);
   el = document.getElementById('c-deadline-display');if(el) el.textContent = _contractCtx.deadline;
   el = document.getElementById('c-release-amount');if(el) el.textContent = fmt(_contractCtx.value);
@@ -16233,7 +16144,6 @@ function openContractModal(opts) {
   var err = document.getElementById('err-contract-agree');
   if(err) { err.textContent=''; err.classList.remove('show'); }
   contractRate(0);
-  switchContractPayTab('pix');
   _goContractStep(1);
   openModal('contract');
 }
@@ -16305,71 +16215,6 @@ window.contractStep2 = function contractStep2() {
 }
 
 function contractStep4() { _goContractStep(4); }
-
-function switchContractPayTab(tab) {
-  ['pix','card'].forEach(function(t) {
-    var btn = document.getElementById('ctab-' + t);
-    var pnl = document.getElementById('cpay-' + t);
-    if(btn) btn.className = 'pay-tab' + (t === tab ? ' active' : '');
-    if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
-  });
-}
-
-function contractCopyPix() {
-  var el = document.querySelector('#cpay-pix [style*="monospace"]');
-  if(!el) return;
-  var txt = el.textContent || el.innerText;
-  if(navigator.clipboard) {
-    navigator.clipboard.writeText(txt).then(function(){ showToast('⚡ Código PIX copiado!','success'); });
-  } else { showToast('⚡ Código PIX copiado!','success'); }
-}
-
-function contractSimulatePix() {
-  var btn = document.getElementById('c-pix-sim-btn');
-  if(btn){ btn.disabled=true; btn.textContent='⏳ Confirmando...'; }
-  setTimeout(function(){
-    if(btn){ btn.disabled=false; btn.textContent='⚡ Simular Pagamento PIX (Demo)'; }
-    _goContractStep(3);
-    showToast('⚡ PIX confirmado! Pagamento em Garantia. Projeto iniciado!','success');
-  }, 1800);
-}
-
-function contractPayCard() {
-  var numEl  = document.getElementById('c-card-num');
-  var nameEl = document.getElementById('c-card-name');
-  var expEl  = document.getElementById('c-card-exp');
-  var cvvEl  = document.getElementById('c-card-cvv');
-  var btn    = document.getElementById('c-card-btn');
-
-  ['err-c-card-num','err-c-card-name','err-c-card-exp','err-c-card-cvv'].forEach(function(id){
-    var e = document.getElementById(id); if(e){ e.textContent=''; e.classList.remove('show'); }
-  });
-  var ok = true;
-  var num = numEl ? numEl.value.replace(/\s/g,'') : '';
-  if(!num || num.length < 15) {
-    var e=document.getElementById('err-c-card-num'); if(e){e.textContent='Número inválido.';e.classList.add('show');} ok=false;
-  } else if(!_luhn(num)) {
-    var e=document.getElementById('err-c-card-num'); if(e){e.textContent='Número de cartão inválido.';e.classList.add('show');} ok=false;
-  }
-  if(!nameEl || nameEl.value.trim().split(' ').length < 2) {
-    var e=document.getElementById('err-c-card-name'); if(e){e.textContent='Nome completo obrigatório.';e.classList.add('show');} ok=false;
-  }
-  var exp = expEl ? expEl.value : '';
-  if(!/^\d{2}\/\d{2}$/.test(exp)) {
-    var e=document.getElementById('err-c-card-exp'); if(e){e.textContent='Validade inválida.';e.classList.add('show');} ok=false;
-  }
-  if(!cvvEl || cvvEl.value.length < 3) {
-    var e=document.getElementById('err-c-card-cvv'); if(e){e.textContent='CVV inválido.';e.classList.add('show');} ok=false;
-  }
-  if(!ok) return;
-
-  _setBtnLoading(btn, true);
-  setTimeout(function(){
-    _setBtnLoading(btn, false);
-    _goContractStep(3);
-    showToast('💳 Pagamento aprovado! Valor em garantia. Projeto iniciado!','success');
-  }, 2000);
-}
 
 function contractRate(n) {
   _contractCtx.rating = n;
@@ -19255,7 +19100,6 @@ var _stripeElements = null;
 var _stripeCardNum  = null;
 var _stripeCardExp  = null;
 var _stripeCardCvc  = null;
-var _stripeCardEl   = null; /* unified element for contract modal */
 var _stripeReady    = false;
 
 /* Stripe style matching HereWork theme */
@@ -19330,26 +19174,6 @@ function _mountStripePaymentModal() {
   });
 }
 
-/* Mount Stripe Elements into the contract modal */
-function _mountStripeContractModal() {
-  if (!_stripeReady || !_stripe) { _initStripe(); setTimeout(_mountStripeContractModal, 600); return; }
-  if (_stripeCardEl) return;
-
-  _stripeCardEl = _stripeElements.create('card', {
-    style: _stripeStyle,
-    hidePostalCode: true,
-    iconStyle: 'solid'
-  });
-  var el = document.getElementById('c-stripe-card-element');
-  if (el) _stripeCardEl.mount('#c-stripe-card-element');
-
-  _stripeCardEl.on('change', function(ev) {
-    _updateStripeWrap('c-stripe-card-wrap', ev);
-    var err = document.getElementById('err-c-stripe-card');
-    if (err) err.textContent = ev.error ? ev.error.message : '';
-  });
-}
-
 function _updateStripeWrap(wrapId, ev) {
   var wrap = document.getElementById(wrapId);
   if (!wrap) return;
@@ -19372,56 +19196,6 @@ window.submitCardPayment = async function() {
 };
 
 
-/* ── Override contractPayCard to use Stripe ── */
-var _origContractPayCard = window.contractPayCard;
-window.contractPayCard = async function() {
-  if (!_stripeReady || !_stripeCardEl) {
-    showToast('Stripe ainda carregando. Aguarde um momento.', 'info');
-    _mountStripeContractModal();
-    return;
-  }
-
-  var nameEl = document.getElementById('c-stripe-name');
-  var errN   = document.getElementById('err-c-stripe-name');
-  var errC   = document.getElementById('err-c-stripe-card');
-  var btn    = document.getElementById('c-card-btn');
-
-  if (errN) errN.textContent = '';
-  if (errC) errC.textContent = '';
-
-  if (!nameEl || nameEl.value.trim().length < 3) {
-    if (errN) errN.textContent = 'Informe o nome no cartão.';
-    return;
-  }
-
-  _setBtnLoading(btn, true);
-
-  try {
-    var result = await _stripe.createPaymentMethod({
-      type: 'card',
-      card: _stripeCardEl,
-      billing_details: { name: nameEl.value.trim() }
-    });
-
-    _setBtnLoading(btn, false);
-
-    if (result.error) {
-      if (errC) errC.textContent = result.error.message;
-      return;
-    }
-
-    var pm = result.paymentMethod;
-    _secLog('STRIPE_ESCROW_PM', 'Escrow PaymentMethod: ' + pm.id + ' | ' + pm.card.brand + ' ****' + pm.card.last4);
-    _goContractStep(3);
-    showToast('💳 Cartão validado pelo Stripe! Valor em garantia. Projeto iniciado!', 'success');
-    console.log('[HereWork] Garantia PM criado:', pm.id, '| Backend: POST /api/create-payment-intent com garantia flag');
-
-  } catch(e) {
-    _setBtnLoading(btn, false);
-    if (errC) errC.textContent = 'Erro ao processar. Tente novamente.';
-  }
-};
-
 
 
 /* ── Override switchPayTab to mount on tab switch ── */
@@ -19429,12 +19203,6 @@ var _origSwitchPayTab = window.switchPayTab;
 window.switchPayTab = function(tab) {
   _origSwitchPayTab(tab);
   if (tab === 'card') setTimeout(_mountStripePaymentModal, 150);
-};
-
-var _origSwitchContractPayTab = window.switchContractPayTab;
-window.switchContractPayTab = function(tab) {
-  _origSwitchContractPayTab(tab);
-  if (tab === 'card') setTimeout(_mountStripeContractModal, 150);
 };
 
 /* ── Auto-init ── */
