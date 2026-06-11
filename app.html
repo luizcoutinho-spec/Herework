@@ -10146,7 +10146,10 @@ async function _sbEnsureSession() {
     var r = await _sb.auth.getSession();
     var user = r && r.data && r.data.session && r.data.session.user;
     if (user) {
-      if (_session) _session.uid = user.id;
+      if (_session) {
+        _session.uid = user.id;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
+      }
       return user;
     }
   } catch(e) { console.warn('_sbEnsureSession:', e); }
@@ -10178,6 +10181,7 @@ async function _sbRestoreSession() {
         _setSession(prof.name, prof.email, _effType, prof.is_admin);
         /* Guardar id e foto de perfil do Supabase na sessão */
         _session.uid = user.id;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
         _session.avatar_url = prof.avatar_url || null;
         /* Plano do usuário: DB → auth metadata → localStorage → 'free' */
         var _planRaw = prof.plan
@@ -10241,6 +10245,7 @@ async function _sbRestoreSession() {
 
         _setSession(uName, user.email, acType);
         _session.uid        = user.id;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
         _session.avatar_url = uAvatar;
 
         /* Fecha modais abertos (login/register) */
@@ -10535,7 +10540,10 @@ async function _sbGetMyContracts() {
       var _ss = await _sb.auth.getSession();
       uid = _ss && _ss.data && _ss.data.session && _ss.data.session.user
             ? _ss.data.session.user.id : null;
-      if (uid && _session) _session.uid = uid;
+      if (uid && _session) {
+        _session.uid = uid;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
+      }
     } catch (e) { console.warn('_sbGetMyContracts: getSession falhou', e); }
   }
   if (!uid) { console.warn('_sbGetMyContracts: sem uid, abortando');
@@ -10590,6 +10598,7 @@ async function _sbSaveProfile(data, extMeta) {
     if (sessRes.data && sessRes.data.session && sessRes.data.session.user) {
       uid = sessRes.data.session.user.id;
       _session.uid = uid;
+      try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
     }
   } catch(e) { console.warn('[sbSave] getSession error:', e); }
 
@@ -10597,7 +10606,10 @@ async function _sbSaveProfile(data, extMeta) {
   if (!uid) {
     try {
       var rr0 = await _sb.auth.refreshSession();
-      if (rr0.data && rr0.data.user) { uid = rr0.data.user.id; _session.uid = uid; }
+      if (rr0.data && rr0.data.user) {
+        uid = rr0.data.user.id; _session.uid = uid;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
+      }
     } catch(e) {}
   }
   if (!uid) { console.warn('[sbSave] uid desconhecido — abortando'); return false; }
@@ -10675,6 +10687,7 @@ async function _sbSaveProfile(data, extMeta) {
     if (gurRetry.data && gurRetry.data.user) {
       uid = gurRetry.data.user.id;
       _session.uid = uid;
+      try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
       payload.id = uid;
       var tRetry = await _doUpsert(payload);
       if (tRetry.ok) {
@@ -12046,6 +12059,7 @@ function submitLogin() {
       }
       _setSession(prof.name, prof.email, prof.type, prof.is_admin);
       _session.uid = res.user.id;
+      try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
       _session.avatar_url = prof.avatar_url || null;
       if (e) e.value = ''; if (p) p.value = '';
       closeModal('login');
@@ -12705,7 +12719,10 @@ function submitRegister() {
 
       /* Confirmação desabilitada → logar diretamente */
       _setSession(name, email, type);
-      if (res.user) _session.uid = res.user.id;
+      if (res.user) {
+        _session.uid = res.user.id;
+        try { var _hw = JSON.parse(localStorage.getItem('hw_session') || '{}'); _hw.uid = _session.uid; localStorage.setItem('hw_session', JSON.stringify(_hw)); } catch(e) {}
+      }
       closeModal('register');
       showToast('🎉 ' + (lang()==='pt' ? 'Bem-vindo(a), ' : '¡Bienvenido/a, ') + name.split(' ')[0] + '! ' + (lang()==='pt' ? 'Conta criada com sucesso.' : 'Cuenta creada con éxito.'), 'success');
       setTimeout(function(){ openDashboard(); }, 400);
