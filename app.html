@@ -23298,7 +23298,7 @@ async function _loadProposalsReceived() {
 function _renderReceivedProposalCard(p, idx) {
   var fl       = p.freelancer || {};
   var proj     = p.project    || {};
-  var flName   = _sanitize(fl.name || 'Freelancer');
+  var flName   = _sanitize(_displayName(fl.name || 'Freelancer'));
   var initial  = (fl.name || 'F').charAt(0).toUpperCase();
   var colors   = _propAvatarColors();
   var color    = colors[idx % colors.length];
@@ -23391,7 +23391,7 @@ function _renderSentProposalCard(p, idx) {
   var proj     = p.project || {};
   var client   = proj.client || {};
   var projTitle = _sanitize(proj.title || 'Projeto');
-  var clientName = _sanitize(client.name || 'Cliente');
+  var clientName = _sanitize(_displayName(client.name || 'Cliente'));
   var value    = parseFloat(p.value || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
   var days     = parseInt(p.deadline_days || 0, 10);
   var when     = (typeof _timeAgo === 'function') ? _timeAgo(p.created_at) : '';
