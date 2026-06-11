@@ -12118,6 +12118,7 @@ function _setSession(name, email, type, isAdmin) {
     localStorage.setItem('hw_session', JSON.stringify({
       name: name, email: email, type: type, isAdmin: !!isAdmin,
       plan: (_session && _session.plan) || null,
+      uid:  _prevUid || null,
       ts: Date.now()
     }));
   } catch(e) {}
@@ -12628,7 +12629,8 @@ function _restoreSession() {
     }
 
     /* Restaura silenciosamente — sem redirect para dashboard */
-    _session = { name: data.name, email: data.email, type: data.type || 'client' };
+    _session = { name: data.name, email: data.email, type: data.type || 'client',
+                 uid: data.uid || null };
     /* Plano: hw_session.plan → hw_plan → 'free' */
     var _rsPlan = data.plan || null;
     try { _rsPlan = _rsPlan || localStorage.getItem('hw_plan'); } catch(x) {}
