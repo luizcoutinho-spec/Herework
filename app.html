@@ -21853,9 +21853,15 @@ async function openStripePayment(opts) {
     if (data.error) throw new Error(data.error);
 
     // Montar Stripe Payment Element
-    var stripe = _isTestMode
-      ? (typeof _STRIPE_PK_TEST !== 'undefined' ? Stripe(_STRIPE_PK_TEST) : initStripe())
-      : initStripe();
+    var stripe;
+    if (_isTestMode) {
+      if (typeof _STRIPE_PK_TEST === 'undefined' || !_STRIPE_PK_TEST) {
+        throw new Error('Modo teste: chave de teste do Stripe ausente. Pagamento abortado.');
+      }
+      stripe = Stripe(_STRIPE_PK_TEST);
+    } else {
+      stripe = initStripe();  // produção: pk_live (inalterado)
+    }
     if (!stripe) throw new Error('Stripe não carregado');
 
     _stripeElements = stripe.elements({
