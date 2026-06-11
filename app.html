@@ -13513,11 +13513,12 @@ function _contractFromProposal(idx) {
   var fl  = p.freelancer || {};
   var ctx = window._pmodCtx || {};
   openContractModal({
-    name:     fl.name     || 'Freelancer',
-    role:     'Freelancer',
-    value:    parseFloat(p.value || 0),
-    project:  ctx.projTitle || 'Projeto',
-    deadline: (p.deadline_days || 30) + ' dias'
+    name:       fl.name     || 'Freelancer',
+    role:       'Freelancer',
+    value:      parseFloat(p.value || 0),
+    project:    ctx.projTitle || 'Projeto',
+    deadline:   (p.deadline_days || 30) + ' dias',
+    proposalId: p.id || null
   });
 }
 window._contractFromProposal = _contractFromProposal;
@@ -16103,13 +16104,14 @@ function openContractModal(opts) {
   })) return;
   opts = opts || {};
   _contractCtx = {
-    id:       opts.id       || null,
-    name:     opts.name     || 'Freelancer',
-    role:     opts.role     || 'Profissional',
-    value:    opts.value    || 2000,
-    project:  opts.project  || 'Meu Projeto',
-    deadline: opts.deadline || '30 dias',
-    rating:   0
+    id:         opts.id         || null,
+    proposalId: opts.proposalId || null,
+    name:       opts.name       || 'Freelancer',
+    role:       opts.role       || 'Profissional',
+    value:      opts.value      || 2000,
+    project:    opts.project    || 'Meu Projeto',
+    deadline:   opts.deadline   || '30 dias',
+    rating:     0
   };
 
   var _comm    = (typeof _getPlanCommission === 'function') ? _getPlanCommission() : 0.20;
@@ -16202,6 +16204,7 @@ window.contractStep2 = function contractStep2() {
       openStripePayment({
         amount:      amount,
         contractId:  window._activeContractId || '',
+        proposalId:  _contractCtx.proposalId || '',
         description: 'HereWork — ' + proj,
         title:       'Pagamento em Garantia',
         subtitle:    flName + ' · ' + proj
@@ -21778,6 +21781,7 @@ var _stripeElements  = null;
 var _stripePaymentEl = null;
 var _spContractId    = '';
 var _spAmount        = 0;
+var _spProposalId    = '';
 
 function initStripe() {
   if (!_stripeInstance && typeof Stripe !== 'undefined') {
@@ -21790,6 +21794,9 @@ async function openStripePayment(opts) {
   opts = opts || {};
   _spAmount     = opts.amount     || 0;
   _spContractId = opts.contractId || '';
+  _spProposalId = opts.proposalId || '';
+  var _TEST_UIDS  = ['f94df698-24b2-4e6b-9190-805e0ca0c5cd','1a366c84-62b9-440c-83fa-03d13abcb070'];
+  var _isTestMode = !!(_session && _session.uid && _TEST_UIDS.indexOf(_session.uid) !== -1 && _spProposalId);
   var description = opts.description || 'HereWork — Contrato';
   var email = _session ? _session.email : '';
   var name  = _session ? _session.name  : '';
@@ -21831,16 +21838,24 @@ async function openStripePayment(opts) {
         token = session.data.session ? session.data.session.access_token : '';
       }
     } catch(e) {}
-    var res = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent', {
+    var _edgeUrl  = _isTestMode
+      ? 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-payment-intent'
+      : 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent';
+    var _edgeBody = _isTestMode
+      ? JSON.stringify({ proposalId: _spProposalId })
+      : JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name });
+    var res = await fetch(_edgeUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name })
+      body: _edgeBody
     });
     var data = await res.json();
     if (data.error) throw new Error(data.error);
 
     // Montar Stripe Payment Element
-    var stripe = initStripe();
+    var stripe = _isTestMode
+      ? (typeof _STRIPE_PK_TEST !== 'undefined' ? Stripe(_STRIPE_PK_TEST) : initStripe())
+      : initStripe();
     if (!stripe) throw new Error('Stripe não carregado');
 
     _stripeElements = stripe.elements({
