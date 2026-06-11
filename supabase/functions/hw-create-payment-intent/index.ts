@@ -28,7 +28,7 @@ function json(body: unknown, status = 200, cors: Record<string, string> = {}) {
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-const STRIPE_TEST  = Deno.env.get("STRIPE_SECRET_KEY_TEST")!;
+const STRIPE_TEST  = (Deno.env.get("STRIPE_SECRET_KEY_TEST") || "").trim();
 
 const stripe = new Stripe(STRIPE_TEST, { apiVersion: "2024-06-20" });
 
