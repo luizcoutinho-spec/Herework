@@ -21865,8 +21865,10 @@ async function openStripePayment(opts) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: _edgeBody
     });
+    if (!res.ok) throw new Error('Falha ao criar pagamento (HTTP ' + res.status + ').');
     var data = await res.json();
     if (data.error) throw new Error(data.error);
+    if (!data.clientSecret) throw new Error('Pagamento não retornou clientSecret. Tente novamente.');
 
     // Montar Stripe Payment Element
     var stripe;
@@ -21875,6 +21877,7 @@ async function openStripePayment(opts) {
         throw new Error('Modo teste: chave de teste do Stripe ausente. Pagamento abortado.');
       }
       stripe = Stripe(_STRIPE_PK_TEST);
+      _stripeInstance = stripe;   // mesma instância pk_test para elements e confirmPayment
     } else {
       stripe = initStripe();  // produção: pk_live (inalterado)
     }
