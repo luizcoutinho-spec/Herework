@@ -22135,9 +22135,9 @@ function _hwCheckPref(type) {
   return _hwNotifPrefs[type] !== false;
 }
 
-async function _hwSendEmail(to, subject, html, text) {
+async function _hwSendEmail(to, subject, html, text, userId) {
   /* Anti-duplicata (5 min) */
-  var dk = to + '|' + subject;
+  var dk = (userId || to) + '|' + subject;
   if (_hwEmailSentCache[dk] && Date.now() - _hwEmailSentCache[dk] < 300000) {
     _hwLog('email_duplicate', { to: to, subject: subject });
     return { ok: false, reason: 'duplicate' };
@@ -22151,7 +22151,7 @@ async function _hwSendEmail(to, subject, html, text) {
     var res = await fetch('/api/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-      body: JSON.stringify({ to: to, subject: subject, html: html, text: text || subject })
+      body: JSON.stringify({ userId: userId || undefined, to: to || undefined, subject: subject, html: html, text: text || subject })
     });
     var data = await res.json();
     if (data.ok) {
@@ -23570,7 +23570,8 @@ function _hwTriggerProposalAcceptedEmail(proposal) {
   if (typeof _hwSendEmail !== 'function') return;
   var fl   = proposal.freelancer || {};
   var proj = proposal.project    || {};
-  if (!fl.email) return;
+  var _flId = proposal.freelancer_id || (proposal.freelancer && proposal.freelancer.id);
+  if (!_flId) return;
   var value = parseFloat(proposal.value||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
   var body  = [
     '<h2 style="color:#166534;font-size:20px;margin:0 0 6px;">🎉 Sua proposta foi aceita!</h2>',
@@ -23584,7 +23585,7 @@ function _hwTriggerProposalAcceptedEmail(proposal) {
     _hwBtn('Ver Contrato', (_HW_EMAIL_CONFIG && _HW_EMAIL_CONFIG.baseUrl ? _HW_EMAIL_CONFIG.baseUrl : '') + '?panel=contracts')
   ].join('');
   var html = (typeof _hwWrap === 'function') ? _hwWrap('Proposta Aceita — HereWork', body) : body;
-  _hwSendEmail(fl.email, '🎉 Sua proposta foi aceita — ' + _hwEsc(proj.title||'HereWork'), html);
+  _hwSendEmail(null, '🎉 Sua proposta foi aceita — ' + _hwEsc(proj.title||'HereWork'), html, null, _flId);
 }
 
 function _hwTriggerProposalRejectedEmail(proposal) {
@@ -23592,7 +23593,8 @@ function _hwTriggerProposalRejectedEmail(proposal) {
   if (typeof _hwSendEmail !== 'function') return;
   var fl   = proposal.freelancer || {};
   var proj = proposal.project    || {};
-  if (!fl.email) return;
+  var _flId = proposal.freelancer_id || (proposal.freelancer && proposal.freelancer.id);
+  if (!_flId) return;
   var body  = [
     '<h2 style="color:#1e293b;font-size:20px;margin:0 0 6px;">📋 Atualização sobre sua proposta</h2>',
     '<p style="color:#64748b;font-size:14px;margin:0 0 20px;">Obrigado por se candidatar ao projeto <strong>' + _hwEsc(proj.title||'') + '</strong>. Desta vez, o cliente optou por outro profissional.</p>',
@@ -23600,7 +23602,7 @@ function _hwTriggerProposalRejectedEmail(proposal) {
     _hwBtn('Buscar novos projetos', (_HW_EMAIL_CONFIG && _HW_EMAIL_CONFIG.baseUrl ? _HW_EMAIL_CONFIG.baseUrl : '') + '?page=projects')
   ].join('');
   var html = (typeof _hwWrap === 'function') ? _hwWrap('Proposta não selecionada — HereWork', body) : body;
-  _hwSendEmail(fl.email, 'Atualização sobre sua proposta — ' + _hwEsc(proj.title||'HereWork'), html);
+  _hwSendEmail(null, 'Atualização sobre sua proposta — ' + _hwEsc(proj.title||'HereWork'), html, null, _flId);
 }
 
 /* ════════════════════════════════════════════════════════════════
