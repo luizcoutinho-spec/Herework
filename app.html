@@ -11113,7 +11113,7 @@ function showPage(name) {
 async function _sbGetFreelancers() {
   if (!_sbReady()) return [];
   try {
-    var r = await _sb.from('profiles')
+    var r = await _sb.from('public_profiles')
       .select('id,name,bio,city,state,skills,hourly_rate,rating,rating_count,completed_jobs,avatar_url,type,created_at,profile_metadata')
       .in('type', ['freelancer','both'])
       .order('rating', { ascending: false })
