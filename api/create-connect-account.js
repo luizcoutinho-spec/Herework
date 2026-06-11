@@ -1,7 +1,8 @@
 const Stripe = require('stripe');
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_TEST);
-const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 async function sbGetProfile(userId) {
   const res = await fetch(
@@ -33,10 +34,21 @@ async function sbSaveStripeAccountId(userId, accountId) {
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
+
+  /* ── Validar JWT: user_id vem sempre do token, nunca do body ── */
+  const authHeader = (req.headers['authorization'] || '');
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  if (!token) return res.status(401).json({ error: 'Token de autenticação ausente.' });
+
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+    headers: { 'apikey': ANON_KEY, 'Authorization': 'Bearer ' + token }
+  });
+  if (!userRes.ok) return res.status(401).json({ error: 'Token inválido' });
+  const user = await userRes.json();
+  const callerId = user.id;
+
   try {
-    const { user_id } = req.body || {};
-    if (!user_id) return res.status(400).json({ error: 'user_id é obrigatório.' });
-    const profile = await sbGetProfile(user_id);
+    const profile = await sbGetProfile(callerId);
     if (!profile) return res.status(404).json({ error: 'Profile não encontrado.' });
     let accountId = profile.stripe_account_id;
     if (!accountId) {
@@ -48,7 +60,7 @@ module.exports = async function handler(req, res) {
         business_type: 'individual',
       });
       accountId = account.id;
-      await sbSaveStripeAccountId(user_id, accountId);
+      await sbSaveStripeAccountId(callerId, accountId);
     }
     const accountSession = await stripe.accountSessions.create({
       account: accountId,

@@ -16912,10 +16912,15 @@ async function startStripeOnboarding() {
     if (btn) { btn.disabled = true; btn.textContent = 'Carregando...'; }
     if (!_session || !_session.uid) { alert('Você precisa estar logado.'); return; }
 
+    var s = await _sb.auth.getSession();
+    var token = s.data.session ? s.data.session.access_token : '';
     var res = await fetch('/api/create-connect-account', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: _session.uid })
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({})
     });
     var data = await res.json();
     if (!res.ok || data.error) { throw new Error(data.error || ('Erro ' + res.status)); }
