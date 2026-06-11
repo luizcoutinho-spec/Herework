@@ -98,7 +98,6 @@ module.exports = async function handler(req, res) {
           {
             escrow_released: true,
             paid_at:         new Date().toISOString(),
-            started_at:      new Date().toISOString(),
             status:          'active'
           }
         );
