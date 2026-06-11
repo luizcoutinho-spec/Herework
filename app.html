@@ -16552,7 +16552,7 @@ function contractRate(n) {
   });
 }
 
-function contractApprove() {
+async function contractApprove() {
   /* 1) Validar rating antes de qualquer ação */
   var errEl = document.getElementById('err-contract-stars');
   if(_contractCtx.rating === 0) {
@@ -16564,12 +16564,25 @@ function contractApprove() {
   var btn = document.getElementById('c-approve-btn');
   _setBtnLoading(btn, true);
 
-  /* 2) Só após validação: liberar pagamento ao freelancer */
-  if (_sbReady() && _session && window._activeContractId) {
-    _stripeReleasePayment(window._activeContractId).then(function(res) {
-      if (res.error) { showToast('Erro ao liberar pagamento: ' + res.error, 'error'); return; }
-      showToast('✅ Pagamento de R$ ' + (window._activeContractValue || '0').toLocaleString('pt-BR') + ' liberado para o freelancer!', 'success');
+  /* 2) Persistir aprovação via API server-side */
+  try {
+    var s = await _sb.auth.getSession();
+    var token = s.data.session ? s.data.session.access_token : '';
+    var approveRes = await fetch('/api/approve-contract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contractId: _contractCtx.id })
     });
+    var approveData = await approveRes.json();
+    if (!approveRes.ok) {
+      _setBtnLoading(btn, false);
+      showToast('Erro ao aprovar entrega: ' + (approveData.error || 'Erro desconhecido'), 'error');
+      return;
+    }
+  } catch (err) {
+    _setBtnLoading(btn, false);
+    showToast('Erro ao aprovar entrega: ' + (err.message || 'Erro de rede'), 'error');
+    return;
   }
 
   setTimeout(function(){
