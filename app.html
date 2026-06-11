@@ -21924,10 +21924,12 @@ async function openStripePayment(opts) {
     window._spPaymentId    = data.paymentIntentId;
 
   } catch(err) {
-    document.getElementById('sp-loading').style.display = 'none';
-    document.getElementById('sp-error').style.display   = 'block';
-    document.getElementById('sp-error').textContent     = '❌ ' + err.message;
-    document.getElementById('sp-element-container').style.display = 'block';
+    _stripeElements = null;
+    _stripeInstance = null;
+    document.getElementById('sp-loading').style.display           = 'none';
+    document.getElementById('sp-error').style.display             = 'block';
+    document.getElementById('sp-error').textContent               = '❌ ' + err.message;
+    document.getElementById('sp-element-container').style.display = 'none';
   }
 }
 
@@ -21937,6 +21939,12 @@ async function confirmStripePayment() {
 
   var errEl = document.getElementById('sp-error');
   if (errEl) { errEl.style.display = 'none'; }
+
+  if (!_stripeElements || !_stripeInstance) {
+    if (errEl) { errEl.style.display = 'block'; errEl.textContent = '❌ Pagamento não iniciado corretamente. Recarregue e tente novamente.'; }
+    if (btn) { btn.disabled = false; btn.textContent = '🔒 Pagar com segurança'; }
+    return;
+  }
 
   try {
     /* Usar mesma instância que criou os elements */
