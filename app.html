@@ -18292,21 +18292,21 @@ function _deliverySuccess() {
     /* Update dashboard card status */
     _updateDashProjectStatus(_deliveryCtx.id, 'review', 'Aguardando aprovação', 100);
 
-    /* Persistir transição: entrega enviada -> contracts.status = 'review' */
+    /* Persistir transição via servidor: entrega -> status='review' */
     if (_sbReady() && _session && _deliveryCtx && _deliveryCtx.id) {
-      _sb.from('contracts')
-         .update({ status: 'review' })
-         .eq('id', _deliveryCtx.id)
-         .select()
-         .then(function(r) {
-           if (r.error) {
-             console.warn('submitDelivery: erro ao gravar review:', r.error.message);
-           } else if (!r.data || !r.data.length) {
-             console.warn('submitDelivery: nenhum contrato atualizado para id', _deliveryCtx.id, '(id errado ou RLS)');
-           } else {
-             console.log('submitDelivery: contrato', _deliveryCtx.id, 'status=review gravado');
-           }
-         });
+      _sb.auth.getSession().then(function(s){
+        var token = s.data.session ? s.data.session.access_token : '';
+        return fetch('/api/submit-delivery', {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+          body: JSON.stringify({ contractId: _deliveryCtx.id })
+        });
+      }).then(function(res){ return res.json().then(function(d){ return {ok:res.ok, d:d}; }); })
+        .then(function(r){
+          if (!r.ok) { console.warn('submitDelivery: endpoint recusou:', r.d && r.d.error); }
+          else { console.log('submitDelivery: contrato', _deliveryCtx.id, 'status=review (via servidor)'); }
+        })
+        .catch(function(e){ console.warn('submitDelivery: erro de rede:', e); });
     }
 
     showToast('📤 Entrega enviada! ' + (_deliveryCtx.client||'O cliente') + ' será notificado agora.', 'success');
