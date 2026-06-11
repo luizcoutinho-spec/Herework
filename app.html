@@ -22146,9 +22146,11 @@ async function _hwSendEmail(to, subject, html, text) {
 
   try {
     /* Chama o relay seguro no Vercel — API key fica server-side */
+    var token = ((await _sb.auth.getSession()).data || {});
+    token = (token.session && token.session.access_token) || '';
     var res = await fetch('/api/send-email', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
       body: JSON.stringify({ to: to, subject: subject, html: html, text: text || subject })
     });
     var data = await res.json();
