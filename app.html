@@ -10603,10 +10603,10 @@ async function _sbCreateProposal(data) {
     var code = r.error.code || '';
     var msg  = (r.error.message || '').toLowerCase();
     if (code === '23505' || msg.indexOf('duplicate') >= 0 || msg.indexOf('unique') >= 0) {
-      throw new Error('Voce ja enviou uma proposta para este projeto.');
+      throw new Error('Você já enviou uma proposta para este projeto.');
     }
     if (code === '23503' || msg.indexOf('foreign key') >= 0) {
-      throw new Error('Projeto nao encontrado. Recarregue a pagina e tente novamente.');
+      throw new Error('Projeto não encontrado. Recarregue a página e tente novamente.');
     }
     throw new Error(r.error.message || 'Erro ao salvar proposta.');
   }
