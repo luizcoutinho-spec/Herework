@@ -58,7 +58,8 @@ Deno.serve(async (req) => {
     `proposals?id=eq.${proposalId}&select=id,value,project_id,freelancer_id,status`
   );
   if (!proposal) return json({ error: "Proposta não encontrada." }, 404);
-  if (proposal.status !== "pending")
+  const CONTRACTABLE = ["pending", "viewed", "shortlisted"];
+  if (!CONTRACTABLE.includes(proposal.status))
     return json({ error: "Proposta não está disponível para pagamento." }, 409);
 
   // 4. busca o projeto (para validar o cliente)
