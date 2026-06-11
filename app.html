@@ -22297,11 +22297,11 @@ function _hwTplNewsletter(d) {
  *  skipPrefCheck=true quando chamado pelo trigger de envio de proposta —
  *  nesse contexto o usuário logado é o FREELANCER, não o dono do projeto,
  *  então checar as preferências locais do freelancer seria errado. */
-async function hwNotifyProposal(recipientEmail, data, skipPrefCheck) {
+async function hwNotifyProposal(recipientEmail, data, skipPrefCheck, userId) {
   if (!skipPrefCheck && !_hwCheckPref('email_proposals')) return;
-  if (!recipientEmail || String(recipientEmail).indexOf('@') === -1) return;
+  if (!recipientEmail && !userId) return;
   var t = _hwTplProposal(data || {});
-  return _hwSendEmail(recipientEmail, t.subject, t.html, t.text);
+  return _hwSendEmail(recipientEmail || null, t.subject, t.html, t.text, userId || undefined);
 }
 
 /** Notifica usuário sobre nova mensagem no chat */
@@ -22343,19 +22343,16 @@ window._hwTriggerProposalEmail = function(projId, value, days, coverLetter) {
     var projTitle = r.data.title || 'Projeto';
     var ownerId   = r.data.client_id;
     if (!ownerId) { console.warn('_hwTriggerProposalEmail: client_id ausente'); return; }
-    _sb.from('profiles').select('email').eq('id', ownerId).single().then(function(pr) {
-      if (!pr.data || !pr.data.email) { console.warn('_hwTriggerProposalEmail: email do dono não encontrado', ownerId); return; }
-      /* Não notifica se o freelancer E o cliente forem a mesma conta */
-      if (typeof _session !== 'undefined' && _session && pr.data.email === _session.email) return;
-      /* skipPrefCheck=true — as prefs do destinatário não estão disponíveis aqui */
-      hwNotifyProposal(pr.data.email, {
-        freelancerName: typeof _session !== 'undefined' && _session ? _session.name : 'Profissional',
-        projectName:    projTitle,
-        value:          value,
-        deadline:       days,
-        coverLetter:    coverLetter
-      }, true /* skipPrefCheck */);
-    });
+    /* Não notifica se o freelancer E o cliente forem a mesma conta */
+    if (typeof _session !== 'undefined' && _session && _session.uid === ownerId) return;
+    /* skipPrefCheck=true — as prefs do destinatário não estão disponíveis aqui */
+    hwNotifyProposal(null, {
+      freelancerName: typeof _session !== 'undefined' && _session ? _session.name : 'Profissional',
+      projectName:    projTitle,
+      value:          value,
+      deadline:       days,
+      coverLetter:    coverLetter
+    }, true /* skipPrefCheck */, ownerId);
   });
 };
 
