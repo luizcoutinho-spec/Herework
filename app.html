@@ -16565,10 +16565,11 @@ async function contractApprove() {
   var btn = document.getElementById('c-approve-btn');
   _setBtnLoading(btn, true);
 
-  /* 2) Persistir aprovação via API server-side */
   try {
     var s = await _sb.auth.getSession();
     var token = s.data.session ? s.data.session.access_token : '';
+
+    /* 2a) Aprovar entrega → status='completed' */
     var approveRes = await fetch('/api/approve-contract', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
@@ -16580,21 +16581,37 @@ async function contractApprove() {
       showToast('Erro ao aprovar entrega: ' + (approveData.error || 'Erro desconhecido'), 'error');
       return;
     }
-  } catch (err) {
-    _setBtnLoading(btn, false);
-    showToast('Erro ao aprovar entrega: ' + (err.message || 'Erro de rede'), 'error');
-    return;
-  }
 
-  setTimeout(function(){
+    /* 2b) Liberar pagamento ao freelancer via Stripe Transfer */
+    var releaseRes = await fetch('/api/release-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contractId: _contractCtx.id })
+    });
+    var releaseData = await releaseRes.json();
+    if (!releaseRes.ok) {
+      /* Contrato já aprovado — avisar sobre falha no repasse */
+      _setBtnLoading(btn, false);
+      showToast(
+        'Entrega aprovada, mas falha ao liberar pagamento: ' + (releaseData.error || 'Erro desconhecido') + '. Contate o suporte.',
+        'error'
+      );
+      return;
+    }
+
+    /* 3) Sucesso */
     _setBtnLoading(btn, false);
     closeModal('contract');
-    var amt = _contractCtx.value.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    var amt = (releaseData.amount || _contractCtx.value).toLocaleString('pt-BR', {minimumFractionDigits:2});
     showToast(
       '🎉 Entrega aprovada! R$ ' + amt + ' liberados para ' + _contractCtx.name + '. Obrigado pela avaliação!',
       'success'
     );
-  }, 1200);
+
+  } catch (err) {
+    _setBtnLoading(btn, false);
+    showToast('Erro ao processar aprovação: ' + (err.message || 'Erro de rede'), 'error');
+  }
 }
 
 function contractRevision() {
