@@ -5502,7 +5502,7 @@ section { padding: 64px 0; }
             <div style="font-weight:600;margin-bottom:8px;">💳 Conecte sua conta para receber pagamentos</div>
             <div style="font-size:14px;color:#555;margin-bottom:12px;">Para receber pelos seus trabalhos, conecte uma conta bancária de forma segura via Stripe.</div>
             <button class="btn btn-primary btn-sm" id="btn-connect-stripe" onclick="startStripeOnboarding()">Conectar conta</button>
-            <div id="stripe-onboarding-container" style="margin-top:16px;"></div>
+            <div id="stripe-onboarding-container-old" style="margin-top:16px;"></div>
           </div>
         </div>
         <div class="dash-section">
@@ -5657,191 +5657,16 @@ section { padding: 64px 0; }
           </div>
           <div id="dash-my-received" style="padding:0 18px;"></div>
         </div>
-        <!-- ════ DADOS BANCÁRIOS CARD ════ -->
-        <div class="profile-card" style="margin-top:16px;" id="bank-account-card">
-
-          <!-- Cabeçalho -->
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <span style="font-size:20px;">&#127968;</span>
-              <div>
-                <div style="font-size:14px;font-weight:700;color:var(--text);">Conta Banc&aacute;ria para Recebimento</div>
-                <div style="font-size:11px;color:var(--text-4);">Necess&aacute;rio para liberar pagamentos dos seus projetos</div>
-              </div>
-            </div>
-            <!-- Badge de status -->
-            <span id="bank-status-badge" style="display:none;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">
-              &#10003; Conta verificada
-            </span>
-          </div>
-
-          <!-- Alerta de segurança -->
-          <div style="display:flex;align-items:flex-start;gap:8px;padding:10px 12px;background:#fffbeb;border:1px solid #fde68a;border-radius:var(--radius);margin-bottom:18px;font-size:12px;color:#92400e;">
-            <span style="font-size:14px;flex-shrink:0;">&#128274;</span>
-            <span>Seus dados banc&aacute;rios s&atilde;o criptografados e usados <strong>exclusivamente</strong> para transfer&ecirc;ncias dos pagamentos aprovados na plataforma.</span>
-          </div>
-
-          <!-- Tipo de Pessoa -->
-          <div class="form-group">
-            <div class="form-label" style="margin-bottom:8px;">Tipo de Titular <span style="color:#ef4444;">*</span></div>
-            <div style="display:flex;gap:8px;">
-              <button class="profile-chip active" type="button" id="bank-pf-btn" onclick="bankTogglePersonType('pf')" data-val="pf"
-                style="flex:1;justify-content:center;padding:10px 8px;font-size:13px;">
-                &#128100; Pessoa F&iacute;sica (CPF)
-              </button>
-              <button class="profile-chip" type="button" id="bank-pj-btn" onclick="bankTogglePersonType('pj')" data-val="pj"
-                style="flex:1;justify-content:center;padding:10px 8px;font-size:13px;">
-                &#127970; Pessoa Jur&iacute;dica (CNPJ)
-              </button>
-            </div>
-            <input type="hidden" id="bank-person-type" value="pf">
-          </div>
-
-          <!-- Campos PF -->
-          <div id="bank-pf-fields">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-holder-name">Nome completo do Titular <span style="color:#ef4444;">*</span></label>
-                <input class="form-input" id="bank-holder-name" type="text" maxlength="120"
-                  placeholder="Exatamente como no documento">
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-cpf">CPF <span style="color:#ef4444;">*</span></label>
-                <input class="form-input" id="bank-cpf" type="text" maxlength="14"
-                  placeholder="000.000.000-00" oninput="bankMaskCPF(this)">
-              </div>
+        <!-- ════ RECEBIMENTOS — STATUS STRIPE CONNECT ════ -->
+        <div class="profile-card" id="connect-status-card" style="padding:20px;margin-top:16px;">
+          <div id="connect-status-content">
+            <div style="text-align:center;color:var(--text-3);font-size:13px;padding:20px;">
+              Carregando status de recebimentos&hellip;
             </div>
           </div>
-
-          <!-- Campos PJ -->
-          <div id="bank-pj-fields" style="display:none;">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-razao-social">Raz&atilde;o Social <span style="color:#ef4444;">*</span></label>
-                <input class="form-input" id="bank-razao-social" type="text" maxlength="120"
-                  placeholder="Nome da empresa conforme CNPJ">
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-cnpj">CNPJ <span style="color:#ef4444;">*</span></label>
-                <input class="form-input" id="bank-cnpj" type="text" maxlength="18"
-                  placeholder="00.000.000/0000-00" oninput="bankMaskCNPJ(this)">
-              </div>
-            </div>
-          </div>
-
-          <!-- Banco -->
-          <div class="form-group">
-            <label class="form-label" for="bank-bank">Banco <span style="color:#ef4444;">*</span></label>
-            <select class="form-select" id="bank-bank">
-              <option value="">Selecione um banco...</option>
-              <option value="001">001 &mdash; Banco do Brasil</option>
-              <option value="033">033 &mdash; Santander</option>
-              <option value="104">104 &mdash; Caixa Econ&ocirc;mica Federal</option>
-              <option value="237">237 &mdash; Bradesco</option>
-              <option value="341">341 &mdash; Ita&uacute; Unibanco</option>
-              <option value="756">756 &mdash; Sicoob</option>
-              <option value="748">748 &mdash; Sicredi</option>
-              <option value="077">077 &mdash; Banco Inter</option>
-              <option value="260">260 &mdash; Nu Pagamentos (Nubank)</option>
-              <option value="290">290 &mdash; PagBank (PagSeguro)</option>
-              <option value="380">380 &mdash; PicPay</option>
-              <option value="323">323 &mdash; Mercado Pago</option>
-              <option value="336">336 &mdash; C6 Bank</option>
-              <option value="212">212 &mdash; Banco Original</option>
-              <option value="422">422 &mdash; Banco Safra</option>
-              <option value="070">070 &mdash; BRB</option>
-              <option value="041">041 &mdash; Banrisul</option>
-              <option value="389">389 &mdash; Banco Mercantil</option>
-              <option value="136">136 &mdash; Unicred</option>
-              <option value="iti">Iti (Ita&uacute;)</option>
-              <option value="next">Next (Bradesco)</option>
-              <option value="will">Will Bank</option>
-              <option value="outro">Outro banco</option>
-            </select>
-          </div>
-
-          <!-- Tipo de Conta + Agência + Conta -->
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;">
-            <div class="form-group" style="margin-bottom:0;">
-              <div class="form-label">Tipo de Conta <span style="color:#ef4444;">*</span></div>
-              <div style="display:flex;gap:6px;margin-top:2px;">
-                <button class="profile-chip active" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="corrente" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Corrente</button>
-                <button class="profile-chip" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="poupanca" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Poupan&ccedil;a</button>
-                <button class="profile-chip" type="button" onclick="bankSelectChip(this,'acc-type')" data-val="pagamento" style="flex:1;justify-content:center;font-size:11px;padding:7px 4px;">Pagamento</button>
-              </div>
-              <input type="hidden" id="bank-acc-type" value="corrente">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label" for="bank-agency">Ag&ecirc;ncia <span style="color:#ef4444;">*</span>
-                <span style="font-size:10px;font-weight:400;color:var(--text-4);">(sem d&iacute;gito)</span>
-              </label>
-              <input class="form-input" id="bank-agency" type="text" maxlength="6"
-                placeholder="0000" oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)">
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <div class="form-label">Conta <span style="color:#ef4444;">*</span></div>
-              <div style="display:flex;gap:4px;align-items:flex-end;">
-                <input class="form-input" id="bank-account" type="text" maxlength="12"
-                  placeholder="00000000" style="flex:1;"
-                  aria-label="Número da conta"
-                  oninput="this.value=this.value.replace(/\D/g,'').slice(0,12)">
-                <div style="display:flex;flex-direction:column;gap:2px;">
-                  <span style="font-size:10px;color:var(--text-4);text-align:center;white-space:nowrap;">D&iacute;gito</span>
-                  <input class="form-input" id="bank-account-digit" type="text" maxlength="1"
-                    placeholder="0" style="width:40px;text-align:center;padding:8px 4px;"
-                    aria-label="Dígito verificador da conta"
-                    oninput="this.value=this.value.replace(/[^0-9xX]/g,'').slice(0,1).toUpperCase()">
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Seção Pix (destaque especial) -->
-          <div style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac;border-radius:var(--radius);padding:14px;margin-bottom:16px;">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-              <span style="font-size:18px;">&#9889;</span>
-              <span style="font-size:13px;font-weight:700;color:#15803d;">Chave Pix</span>
-              <span style="font-size:10px;color:#16a34a;background:#bbf7d0;padding:2px 7px;border-radius:10px;font-weight:600;">RECOMENDADO</span>
-            </div>
-            <div style="display:grid;grid-template-columns:180px 1fr;gap:12px;align-items:start;">
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-pix-type" style="font-size:11px;">Tipo de chave</label>
-                <select class="form-select" id="bank-pix-type" onchange="bankUpdatePixPlaceholder()" style="font-size:12px;">
-                  <option value="">Nenhuma</option>
-                  <option value="cpf">CPF</option>
-                  <option value="cnpj">CNPJ</option>
-                  <option value="email">E-mail</option>
-                  <option value="telefone">Telefone</option>
-                  <option value="aleatoria">Chave Aleat&oacute;ria</option>
-                </select>
-              </div>
-              <div class="form-group" style="margin-bottom:0;">
-                <label class="form-label" for="bank-pix-key" style="font-size:11px;">Chave Pix</label>
-                <input class="form-input" id="bank-pix-key" type="text"
-                  placeholder="Selecione o tipo primeiro" style="font-size:13px;">
-              </div>
-            </div>
-            <div style="font-size:11px;color:#16a34a;margin-top:8px;">
-              &#9989; Recebimentos via Pix s&atilde;o instant&acirc;neos ap&oacute;s aprova&ccedil;&atilde;o do cliente
-            </div>
-          </div>
-
-          <!-- Botões -->
-          <div style="display:flex;gap:10px;justify-content:flex-end;align-items:center;flex-wrap:wrap;">
-            <span id="bank-saved-hint" style="font-size:11px;color:var(--text-4);display:none;">&#128260; Dados carregados do &uacute;ltimo salvamento</span>
-            <button class="btn btn-outline" type="button" onclick="bankClear()">Limpar</button>
-            <button class="btn btn-primary" type="button" id="bank-save-btn" onclick="bankSave()">
-              &#10003; Salvar Dados Banc&aacute;rios
-            </button>
-          </div>
-          <div class="form-error" id="err-bank" style="margin-top:8px;text-align:right;"></div>
-
-          <!-- Rodapé segurança -->
-          <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border-2);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-            <span style="font-size:11px;color:var(--text-4);">&#128274; Dados criptografados &nbsp;&middot;&nbsp; &#9889; Pagamentos via Pix em at&eacute; 1 dia &uacute;til &nbsp;&middot;&nbsp; &#128202; Hist&oacute;rico de pagamentos rastreado</span>
-          </div>
-
-        </div><!-- /bank-account-card -->
+          <!-- container do Stripe Embedded Onboarding -->
+          <div id="stripe-onboarding-container" style="margin-top:16px;"></div>
+        </div>
       </div>
 
     </div><!-- /payments panel -->
@@ -19838,6 +19663,76 @@ if (document.readyState === 'loading') {
 }
 
 
+/* ─── Stripe Connect Status (aba Meus Recebimentos) ─── */
+async function loadConnectStatus() {
+  var box = document.getElementById('connect-status-content');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;color:var(--text-3);font-size:13px;padding:20px;">Carregando status de recebimentos…</div>';
+  try {
+    var s = await _sb.auth.getSession();
+    var token = s.data.session ? s.data.session.access_token : '';
+    if (!token) { box.innerHTML = _connectCardHTML('error', 'Faça login para ver seus recebimentos.'); return; }
+    var res = await fetch('/api/connect-account-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
+    });
+    var data = await res.json();
+    if (!res.ok) { box.innerHTML = _connectCardHTML('error', (data && data.error) || 'Erro ao carregar status.'); return; }
+    if (!data.hasAccount) {
+      box.innerHTML = _connectCardHTML('setup');
+    } else if (data.transfersActive) {
+      box.innerHTML = _connectCardHTML('active');
+    } else {
+      box.innerHTML = _connectCardHTML('pending', null, data.requirementsDue || []);
+    }
+  } catch (e) {
+    console.warn('loadConnectStatus error:', e);
+    box.innerHTML = _connectCardHTML('error', 'Erro de conexão ao carregar status.');
+  }
+}
+
+function _connectCardHTML(state, msg, reqs) {
+  if (state === 'setup') {
+    return ''
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +   '<span style="font-size:20px;">💳</span>'
+      +   '<span style="font-weight:700;color:var(--text);font-size:15px;">Configure seus Recebimentos</span>'
+      + '</div>'
+      + '<div style="font-size:13px;color:var(--text-3);margin-bottom:16px;line-height:1.5;">'
+      +   'Para receber os pagamentos dos seus projetos aprovados, conecte sua conta de recebimento de forma segura através do nosso parceiro de pagamentos.'
+      + '</div>'
+      + '<button class="btn btn-primary btn-sm" id="btn-connect-stripe" onclick="startStripeOnboarding()">Configurar conta de recebimento →</button>';
+  }
+  if (state === 'pending') {
+    var reqList = (reqs && reqs.length)
+      ? '<div style="font-size:12px;color:var(--text-3);margin-top:10px;">Pendências: ' + reqs.length + ' item(s) de verificação.</div>'
+      : '';
+    return ''
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +   '<span style="font-size:20px;">⏳</span>'
+      +   '<span style="font-weight:700;color:#92400e;font-size:15px;">Verificação Pendente</span>'
+      +   '<span style="margin-left:auto;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#fff8e6;color:#92400e;">Pendente</span>'
+      + '</div>'
+      + '<div style="font-size:13px;color:var(--text-3);margin-bottom:16px;line-height:1.5;">'
+      +   'Sua conta foi criada, mas ainda precisa completar a verificação para liberar os recebimentos. Conclua os dados pendentes abaixo.'
+      + '</div>'
+      + reqList
+      + '<button class="btn btn-primary btn-sm" id="btn-connect-stripe" style="margin-top:12px;" onclick="startStripeOnboarding()">Concluir verificação →</button>';
+  }
+  if (state === 'active') {
+    return ''
+      + '<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">'
+      +   '<span style="font-size:20px;">✅</span>'
+      +   '<span style="font-weight:700;color:#16a34a;font-size:15px;">Recebimentos Ativos</span>'
+      +   '<span style="margin-left:auto;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;background:#f0fdf4;color:#16a34a;">Ativo</span>'
+      + '</div>'
+      + '<div style="font-size:13px;color:var(--text-3);line-height:1.5;">'
+      +   'Sua conta está pronta para receber pagamentos. Os valores dos projetos aprovados são transferidos automaticamente para você.'
+      + '</div>';
+  }
+  return '<div style="font-size:13px;color:#b91c1c;padding:8px 0;">' + (msg || 'Erro ao carregar status.') + '</div>';
+}
+
 /* ─── Payment History Tab Switch ─── */
 function openReports() { openAdvancedReports(); }
 function switchPayHistory(tab) {
@@ -19847,8 +19742,7 @@ function switchPayHistory(tab) {
     if(btn) btn.classList.toggle('active', t === tab);
     if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
   });
-  /* Carrega dados bancários ao abrir aba de recebimentos */
-  if (tab === 'in' && typeof bankLoad === 'function') bankLoad();
+  if (tab === 'in' && typeof loadConnectStatus === 'function') loadConnectStatus();
 }
 
 /* ─── Update payment summary cards ─── */
