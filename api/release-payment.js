@@ -64,7 +64,7 @@ module.exports = async function handler(req, res) {
 
     /* ── 4. Ler contrato via service role ── */
     const contractRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contractId)}&select=id,client_id,freelancer_id,status,value,escrow_released`,
+      `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contractId)}&select=id,client_id,freelancer_id,status,value,escrow_released,stripe_payment_intent_id`,
       {
         headers: {
           'apikey':        SERVICE_ROLE_KEY,
@@ -146,14 +146,25 @@ module.exports = async function handler(req, res) {
       return respond(res, 422, { error: 'Valor de repasse inválido' }, req);
     }
 
-    /* ── 11. Stripe Transfer (idempotência via idempotencyKey) ── */
+    /* ── 11. Obter charge original (BR exige source_transaction no transfer) ── */
+    if (!contrato.stripe_payment_intent_id) {
+      return respond(res, 400, { error: 'Contrato sem pagamento associado (sem payment_intent).' }, req);
+    }
+    const pi   = await stripe.paymentIntents.retrieve(contrato.stripe_payment_intent_id);
+    const chId = pi && pi.latest_charge ? pi.latest_charge : null;
+    if (!chId) {
+      return respond(res, 400, { error: 'Não foi possível localizar a cobrança original (charge) do pagamento.' }, req);
+    }
+
+    /* ── 12. Stripe Transfer (idempotência via idempotencyKey) ── */
     let transfer;
     try {
       transfer = await stripe.transfers.create(
         {
-          amount:      amountCents,
-          currency:    'brl',
-          destination: profile.stripe_account_id,
+          amount:             amountCents,
+          currency:           'brl',
+          destination:        profile.stripe_account_id,
+          source_transaction: chId,
           metadata: {
             contract_id:     contrato.id,
             freelancer_id:   contrato.freelancer_id,
@@ -170,7 +181,7 @@ module.exports = async function handler(req, res) {
       return respond(res, 502, { error: 'Falha ao processar repasse', stripe: stripeErr.message }, req);
     }
 
-    /* ── 12. Gravar escrow_released + stripe_transfer_id (service role) ── */
+    /* ── 13. Gravar escrow_released + stripe_transfer_id (service role) ── */
     const patchRes = await fetch(
       `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contrato.id)}`,
       {
@@ -192,7 +203,7 @@ module.exports = async function handler(req, res) {
       return respond(res, 500, { error: 'Repasse processado mas falha ao gravar no banco — contate suporte.' }, req);
     }
 
-    /* ── 13. Sucesso ── */
+    /* ── 14. Sucesso ── */
     return respond(res, 200, {
       success:          true,
       transferId:       transfer.id,
