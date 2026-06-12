@@ -157,7 +157,7 @@ module.exports = async function handler(req, res) {
                 title:                    title,
                 value:                    prop.value,
                 deadline_days:            prop.deadline_days,
-                status:                   'active',
+                status:                   'pending_acceptance',
                 escrow_released:          false,
                 stripe_payment_intent_id: pi.id,
                 paid_at:                  nowIso,
@@ -173,18 +173,6 @@ module.exports = async function handler(req, res) {
           const created = await insertRes.json();
           const newContractId = Array.isArray(created) && created[0] ? created[0].id : '(id?)';
           console.log(`[HereWork] Contrato ${newContractId} criado (escrow retido) para pi ${pi.id}.`);
-
-          /* A.5 SECUNDÁRIO (best-effort, não bloqueia o dinheiro): proposta + projeto */
-          try {
-            await fetch(`${SUPABASE_URL}/rest/v1/proposals?id=eq.${encodeURIComponent(prop.id)}`,
-              { method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-                body: JSON.stringify({ status: 'accepted' }) });
-          } catch (e) { console.warn('[HereWork] PATCH proposta falhou (cosmético):', e.message); }
-          try {
-            await fetch(`${SUPABASE_URL}/rest/v1/projects?id=eq.${encodeURIComponent(prop.project_id)}`,
-              { method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
-                body: JSON.stringify({ status: 'in_progress' }) });
-          } catch (e) { console.warn('[HereWork] PATCH projeto falhou (cosmético):', e.message); }
 
         } catch (err) {
           console.error(`[HereWork] CRÍTICO: erro inesperado ao processar contratação do pi ${pi.id}:`, err.message);
