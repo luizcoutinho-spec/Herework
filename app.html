@@ -23775,7 +23775,7 @@ async function _loadRealContracts() {
         value:         parseFloat(c.value) || 0,
         deadline:      _deadlineLabel(c.deadline_days, c.started_at || c.created_at),
         status:        c.status || 'active',
-        statusLabel:   { active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status,
+        statusLabel:   { pending_acceptance:'Aguardando confirmação do freelancer', active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status,
         progress:      c.status === 'completed' ? 100 : c.status === 'review' ? 90 : 50,
         desc:          c.description || '',
         freelancer:    fl.name || 'Freelancer',
@@ -23804,7 +23804,7 @@ async function _loadRealContracts() {
         value:         parseFloat(c.value) || 0,
         deadline:      _deadlineLabel(c.deadline_days, c.started_at || c.created_at),
         status:        c.status || 'active',
-        statusLabel:   { active:'Em andamento', review:'Aguardando aprovação', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão solicitada' }[c.status] || c.status,
+        statusLabel:   { pending_acceptance:'Aguardando sua confirmação', active:'Em andamento', review:'Aguardando aprovação', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão solicitada' }[c.status] || c.status,
         progress:      c.status === 'completed' ? 100 : c.status === 'review' ? 90 : 55,
         desc:          c.description || '',
         client:        cl.name || 'Cliente',
@@ -24061,7 +24061,7 @@ function _sbListenContractUpdates() {
         if (!c || (c.client_id !== uid && c.freelancer_id !== uid)) return;
         /* Atualiza o card local sem recarregar tudo */
         if (_dashProj[c.id]) {
-          var statusLabel = { active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status;
+          var statusLabel = { pending_acceptance:'Aguardando confirmação do freelancer', active:'Em andamento', review:'Em revisão', completed:'Concluído', cancelled:'Cancelado', disputed:'Em disputa', revision:'Revisão' }[c.status] || c.status;
           _dashProj[c.id].status = c.status;
           _dashProj[c.id].statusLabel = statusLabel;
         }
