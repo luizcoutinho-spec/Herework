@@ -15466,12 +15466,13 @@ async function _refreshMyPublishedProjects() {
         '<div class="dash-proj-footer">' +
           '<div>' + _skillTags(p.skills_needed || []) + '</div>' +
           '<div class="dash-proj-actions">' +
-            '<button class="btn btn-primary btn-sm" onclick="_openProjectProposalsById(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
+            '<button class="btn btn-primary btn-sm" onclick="_toggleProjectProposals(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
             '<button class="btn btn-outline btn-sm" onclick="openEditProject(\'' + _sanitize(p.id) + '\')">✏️ Editar</button>' +
             /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
             '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +
           '</div>' +
         '</div>' +
+        '<div id="proposals-inline-' + _sanitize(p.id) + '" class="proposals-inline" style="display:none;margin-top:12px;"></div>' +
       '</div>';
     }).join('');
     /* Atualizar badge de contagem do painel "Como Cliente" */
@@ -15482,6 +15483,48 @@ async function _refreshMyPublishedProjects() {
     }
   } catch(e) { console.warn('_refreshMyPublishedProjects:', e); }
 }
+
+async function _toggleProjectProposals(projectId) {
+  var box = document.getElementById('proposals-inline-' + projectId);
+  if (!box) return;
+  if (box.style.display !== 'none') { box.style.display = 'none'; box.innerHTML = ''; return; }
+  box.innerHTML = '<div style="padding:8px;color:var(--text-3)">Carregando…</div>';
+  box.style.display = 'block';
+  var proposals = await _sbGetProjectProposals(projectId);
+  window._recvProposals = window._recvProposals || {};
+  var ctx = (window._projectCtxMap || {})[projectId] || {};
+  proposals.forEach(function(pr) {
+    pr.project = { id: projectId, title: ctx.title || 'Projeto' };
+    window._recvProposals[pr.id] = pr;
+  });
+  if (!proposals.length) {
+    box.innerHTML = '<div style="padding:8px;color:var(--text-3)">Nenhuma proposta ainda.</div>';
+    return;
+  }
+  box.innerHTML = proposals.map(function(pr) {
+    var fl = pr.freelancer || {};
+    var aberta = ['pending', 'viewed', 'shortlisted'].includes(pr.status);
+    var acoes = aberta
+      ? '<button class="btn btn-green btn-sm" onclick="_contractFromCard(\'' + pr.id + '\')">✅ Contratar</button>' +
+        '<button class="btn btn-outline btn-sm" style="border-color:#dc2626;color:#dc2626;" onclick="_rejectProposalInline(\'' + pr.id + '\',\'' + projectId + '\')">❌ Recusar</button>'
+      : '<span style="color:#dc2626;font-size:12px;">Recusada</span>';
+    return '<div class="prop-inline-row" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;' + (aberta ? '' : 'opacity:.55;') + '">' +
+             '<div style="font-weight:600;">' + _sanitize(fl.name || 'Freelancer') + '</div>' +
+             '<div style="font-size:13px;color:var(--text-3);">R$ ' + _sanitize(String(pr.value || 0)) + ' · ' + _sanitize(String(pr.deadline_days || 0)) + ' dias</div>' +
+             '<div style="font-size:13px;margin:6px 0;">' + _sanitize(pr.cover_letter || '') + '</div>' +
+             '<div style="display:flex;gap:6px;">' + acoes + '</div>' +
+           '</div>';
+  }).join('');
+}
+window._toggleProjectProposals = _toggleProjectProposals;
+
+async function _rejectProposalInline(proposalId, projectId) {
+  await _rejectProposal(proposalId);
+  var box = document.getElementById('proposals-inline-' + projectId);
+  if (box) { box.style.display = 'none'; }
+  await _toggleProjectProposals(projectId);
+}
+window._rejectProposalInline = _rejectProposalInline;
 
 /* ── Inserir no DOM ── */
 function _buildDemo() {
