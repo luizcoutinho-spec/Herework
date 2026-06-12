@@ -23656,8 +23656,18 @@ async function _acceptProposal(proposalId) {
 
 async function _rejectProposal(proposalId) {
   if (!confirm('Recusar esta proposta?')) return;
-  var ok = await _sbUpdateProposalStatus(proposalId, 'rejected');
-  if (!ok) { showToast('Erro ao recusar proposta.', 'error'); return; }
+  try {
+    var rr = await _sb.rpc('reject_single_proposal', { p_proposal_id: proposalId });
+    if (rr.error) {
+      console.error('[reject_single_proposal] RPC falhou:', rr.error.message || rr.error);
+      showToast('Erro ao recusar proposta.', 'error');
+      return;
+    }
+  } catch (e) {
+    console.error('[reject_single_proposal] exceção:', e && (e.message || e));
+    showToast('Erro ao recusar proposta.', 'error');
+    return;
+  }
   showToast('Proposta recusada.', 'info');
 
   /* Enviar e-mail de rejeição ao freelancer */
