@@ -13432,6 +13432,9 @@ function _renderProposalCard(p, idx) {
         (['pending','viewed','shortlisted'].includes(st)
           ? '<button class="btn btn-green btn-sm" onclick="_contractFromProposal('+idx+')">✅ Contratar</button>'
           : ''),
+        (['pending','viewed','shortlisted'].includes(st)
+          ? '<button class="btn btn-outline btn-sm" style="border-color:#dc2626;color:#dc2626;" onclick="_rejectFromModal(\'' + p.id + '\')">❌ Recusar</button>'
+          : ''),
         '<button class="btn btn-outline btn-sm" onclick="showToast(\'Chat com freelancer disponível em breve!\',\'info\')">💬 Mensagem</button>',
       '</div>',
     '</div>'
@@ -13527,6 +13530,15 @@ function _contractFromProposal(idx) {
   });
 }
 window._contractFromProposal = _contractFromProposal;
+
+async function _rejectFromModal(proposalId) {
+  await _rejectProposal(proposalId);
+  var c = window._pmodCtx;
+  if (c && typeof _openProjectProposals === 'function') {
+    _openProjectProposals(c.projectId, c.projTitle, c.budgetMin, c.budgetMax, c.deadlineDays);
+  }
+}
+window._rejectFromModal = _rejectFromModal;
 
 /* ── Contratar a partir do card de Propostas Recebidas (lookup por id) ── */
 window._contractFromCard = function(proposalId) {
