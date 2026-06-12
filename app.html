@@ -13383,7 +13383,7 @@ function _renderProposalCard(p, idx) {
   var letter   = _sanitize(p.cover_letter || '');
   var letterShort = letter.length > 320 ? letter.substring(0, 320) + '…' : letter;
 
-  var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada' };
+  var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada', viewed:'👁️ Vista', shortlisted:'⭐ Destaque' };
   var stBg  = { pending:'background:#fef3c7;color:#92400e', accepted:'background:#dcfce7;color:#166534',
                 rejected:'background:#fee2e2;color:#991b1b', withdrawn:'background:#f3f4f6;color:#6b7280' };
   var st = p.status || 'pending';
@@ -13429,7 +13429,7 @@ function _renderProposalCard(p, idx) {
       _renderAttachments(p),
       /* ── Ações ── */
       '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px;">',
-        (st === 'pending'
+        (['pending','viewed','shortlisted'].includes(st)
           ? '<button class="btn btn-green btn-sm" onclick="_contractFromProposal('+idx+')">✅ Contratar</button>'
           : ''),
         '<button class="btn btn-outline btn-sm" onclick="showToast(\'Chat com freelancer disponível em breve!\',\'info\')">💬 Mensagem</button>',
