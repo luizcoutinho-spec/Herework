@@ -23626,7 +23626,7 @@ async function _acceptProposal(proposalId) {
       if (contract) {
         showToast('🎉 Proposta aceita! Contrato criado com sucesso.', 'success');
         /* 3) Rejeitar outras propostas para o mesmo projeto */
-        _sbRejectOtherProposals(r.data.project_id, proposalId);
+        await _sbRejectOtherProposals(r.data.project_id, proposalId);
         /* 4) Enviar e-mail de aceite ao freelancer */
         _hwTriggerProposalAcceptedEmail(r.data);
       } else {
@@ -23672,13 +23672,21 @@ async function _unshortlistProposal(proposalId) {
 }
 
 async function _sbRejectOtherProposals(projectId, acceptedId) {
-  if (!_sbReady() || !projectId) return;
-  /* Rejeita todas as proposals do mesmo projeto que não a aceita */
-  await _sb.from('proposals')
-    .update({ status: 'rejected', updated_at: new Date().toISOString() })
-    .eq('project_id', projectId)
-    .neq('id', acceptedId)
-    .in('status', ['pending','viewed','shortlisted']);
+  if (!_sbReady() || !projectId) return 0;
+  try {
+    var r = await _sb.rpc('reject_other_proposals', {
+      p_project_id:  projectId,
+      p_accepted_id: acceptedId
+    });
+    if (r.error) {
+      console.error('[reject_other_proposals] RPC falhou:', r.error.message || r.error);
+      return 0;
+    }
+    return (typeof r.data === 'number') ? r.data : 0;
+  } catch (e) {
+    console.error('[reject_other_proposals] exceção:', e && (e.message || e));
+    return 0;
+  }
 }
 
 /* ════════════════════════════════════════════════════════════════
