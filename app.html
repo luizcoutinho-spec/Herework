@@ -17486,6 +17486,25 @@ function _renderDashFLActive(data) {
   if (!d.length) { el.innerHTML = _emptyState('⚡','Nenhum contrato ativo','Envie propostas para começar a trabalhar'); return; }
   el.innerHTML = d.map(function(p) {
     _dashProj[p.id] = p;
+    if (p.status === 'pending_acceptance') {
+      return '<div class="dash-proj-card">' +
+        '<div class="dash-proj-card-top">' +
+          '<div class="dash-proj-title">' + p.title + '</div>' +
+          _statusBadge('pending','Aguardando sua confirmação') +
+        '</div>' +
+        '<div class="dash-proj-meta">' +
+          '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' em garantia — o cliente já pagou; confirme para iniciar</span>' +
+          '<span>📅 ' + p.deadline + '</span>' +
+        '</div>' +
+        '<div class="dash-proj-footer">' +
+          _personChip(p.client, 'Cliente') +
+          '<div class="dash-proj-actions">' +
+            '<button class="btn btn-primary btn-sm" onclick="_confirmContract(\'' + p.id + '\')">✅ Confirmar e iniciar trabalho</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="dashAction(\'chat-fl\',\'' + p.id + '\')">💬 Chat</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
         '<div class="dash-proj-title">' + p.title + '</div>' +
@@ -17512,6 +17531,26 @@ function _renderDashFLActive(data) {
     '</div>';
   }).join('');
 }
+async function _confirmContract(contractId) {
+  try {
+    var session = await _sb.auth.getSession();
+    var token = session.data.session ? session.data.session.access_token : '';
+    if (!token) { showToast('Sessão expirada. Faça login novamente.', 'error'); return; }
+    var res = await fetch('/api/confirm-contract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contractId: contractId })
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!res.ok) { showToast(data.error || 'Não foi possível confirmar.', 'error'); return; }
+    showToast('Contrato confirmado! Trabalho iniciado.', 'success');
+    if (typeof _loadRealContracts === 'function') _loadRealContracts();
+  } catch (e) {
+    showToast('Erro de conexão. Tente novamente.', 'error');
+  }
+}
+window._confirmContract = _confirmContract;
+
 function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
   if(!el) return;
