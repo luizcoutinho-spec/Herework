@@ -1,13 +1,13 @@
 /**
  * POST /api/confirm-contract
  *
- * Freelancer confirma o contrato (pending_acceptance → awaiting_release).
+ * Freelancer confirma o contrato (pending_acceptance → active).
  * Valida o JWT do chamador — apenas o freelancer do contrato pode confirmar.
  * Aceita somente status 'pending_acceptance'.
  * NÃO altera escrow_released nem paid_at.
  *
  * Body:  { contractId: string }
- * 200:   { ok: true, status: 'awaiting_release', contractId }
+ * 200:   { ok: true, status: 'active', contractId }
  * 400:   { error: 'contractId obrigatório' }
  * 401:   { error: 'Token inválido' | 'Token de autenticação ausente.' }
  * 403:   { error: 'Apenas o freelancer pode confirmar' }
@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
       return respond(res, 409, { error: 'Confirmação não permitida (status atual: ' + contract.status + ')' }, req);
     }
 
-    /* ── 6. Gravar: status='awaiting_release', started_at=now() ── */
+    /* ── 6. Gravar: status='active', started_at=now() ── */
     const patchRes = await fetch(
       `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contractId)}`,
       {
@@ -89,7 +89,7 @@ module.exports = async function handler(req, res) {
           'Prefer':        'return=representation'
         },
         body: JSON.stringify({
-          status:     'awaiting_release',
+          status:     'active',
           started_at: new Date().toISOString()
         })
       }
@@ -100,7 +100,7 @@ module.exports = async function handler(req, res) {
       return respond(res, 500, { error: 'Falha ao atualizar contrato' }, req);
     }
 
-    return respond(res, 200, { ok: true, status: 'awaiting_release', contractId }, req);
+    return respond(res, 200, { ok: true, status: 'active', contractId }, req);
 
   } catch (err) {
     console.error('[confirm-contract] Erro interno:', err.message);
