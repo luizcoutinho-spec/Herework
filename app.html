@@ -17386,6 +17386,25 @@ function _renderDashClientActive(data) {
   if (!d.length) { el.innerHTML = _emptyState('🔒','Nenhum contrato ativo','Contrate um freelancer para começar'); return; }
   el.innerHTML = d.map(function(p) {
     _dashProj[p.id] = p;
+    if (p.status === 'pending_acceptance') {
+      return '<div class="dash-proj-card">' +
+        '<div class="dash-proj-card-top">' +
+          '<div class="dash-proj-title">' + p.title + '</div>' +
+          _statusBadge('pending', 'Aguardando confirmação do freelancer') +
+        '</div>' +
+        '<div class="dash-proj-meta">' +
+          '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' em garantia</span>' +
+          '<span>📅 ' + p.deadline + '</span>' +
+        '</div>' +
+        '<div class="dash-proj-footer">' +
+          _personChip(p.freelancer, p.freelancerRole) +
+          '<div class="dash-proj-actions">' +
+            '<button class="btn btn-outline btn-sm" style="color:#ef4444;border-color:#ef4444;" onclick="_requestRefund(\'' + p.id + '\')">🔄 Pedir estorno</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="dashAction(\'chat-client\',\'' + p.id + '\')">💬 Chat</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    }
     var isReview = p.status === 'review';
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
@@ -17536,6 +17555,27 @@ async function _confirmContract(contractId) {
   }
 }
 window._confirmContract = _confirmContract;
+
+async function _requestRefund(contractId) {
+  if (!confirm('Pedir estorno deste contrato? O contrato será cancelado e o pagamento estornado. Esta ação não pode ser desfeita.')) return;
+  try {
+    var session = await _sb.auth.getSession();
+    var token = session.data.session ? session.data.session.access_token : '';
+    if (!token) { showToast('Sessão expirada. Faça login novamente.', 'error'); return; }
+    var res = await fetch('/api/cancel-contract', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contractId: contractId })
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if (!res.ok) { showToast(data.error || 'Não foi possível processar o estorno.', 'error'); return; }
+    showToast('Estorno solicitado. O pagamento será devolvido em alguns dias.', 'success');
+    if (typeof _loadRealContracts === 'function') _loadRealContracts();
+  } catch (e) {
+    showToast('Erro de conexão. Tente novamente.', 'error');
+  }
+}
+window._requestRefund = _requestRefund;
 
 function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
