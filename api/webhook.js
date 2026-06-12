@@ -174,6 +174,30 @@ module.exports = async function handler(req, res) {
           const newContractId = Array.isArray(created) && created[0] ? created[0].id : '(id?)';
           console.log(`[HereWork] Contrato ${newContractId} criado (escrow retido) para pi ${pi.id}.`);
 
+          /* A.5 RECUSA EM LOTE: descartar as outras propostas abertas do mesmo projeto */
+          try {
+            const rejectRes = await fetch(
+              `${SUPABASE_URL}/rest/v1/proposals` +
+              `?project_id=eq.${prop.project_id}` +
+              `&id=neq.${proposalId}` +
+              `&status=in.(pending,viewed,shortlisted)`,
+              {
+                method: 'PATCH',
+                headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+                body: JSON.stringify({ status: 'rejected', updated_at: new Date().toISOString() })
+              }
+            );
+            if (!rejectRes.ok) {
+              const errTxt = await rejectRes.text();
+              console.error(`[HereWork] recusa em lote falhou (pi ${pi.id}): ${rejectRes.status} ${errTxt}`);
+            } else {
+              const rejected = await rejectRes.json();
+              console.log(`[HereWork] recusa em lote: ${Array.isArray(rejected) ? rejected.length : 0} proposta(s) recusada(s) no projeto ${prop.project_id}.`);
+            }
+          } catch (e) {
+            console.error(`[HereWork] recusa em lote exceção (pi ${pi.id}):`, e && (e.message || e));
+          }
+
         } catch (err) {
           console.error(`[HereWork] CRÍTICO: erro inesperado ao processar contratação do pi ${pi.id}:`, err.message);
         }
