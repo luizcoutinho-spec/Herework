@@ -85,33 +85,117 @@ module.exports = async function handler(req, res) {
 
     case 'payment_intent.succeeded': {
       const pi         = event.data.object;
-      const contractId = pi.metadata && pi.metadata.contract_id;
-      const planId     = pi.metadata && pi.metadata.plan_id;
-      const userId     = pi.metadata && pi.metadata.user_id;
-      console.log(`[HereWork] ✅ Pagamento confirmado: ${pi.id} — R$ ${pi.amount / 100}` +
-                  (contractId ? ` — contrato ${contractId}` : ''));
+      const md         = pi.metadata || {};
+      const proposalId = md.proposal_id;
+      const planId     = md.plan_id;
+      const userId     = md.user_id;
 
-      /* 1. Marcar contrato como ativo + escrow liberado */
-      if (contractId) {
-        await sbAdmin('PATCH',
-          `/rest/v1/contracts?id=eq.${encodeURIComponent(contractId)}`,
-          {
-            escrow_released: true,
-            paid_at:         new Date().toISOString(),
-            status:          'active'
+      const SUPABASE_URL     = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
+      const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      const sbHeaders = {
+        'apikey':        SERVICE_ROLE_KEY,
+        'Authorization': 'Bearer ' + SERVICE_ROLE_KEY,
+        'Content-Type':  'application/json'
+      };
+
+      console.log(`[HereWork] ✅ Pagamento confirmado: ${pi.id} — R$ ${pi.amount / 100}` +
+                  (proposalId ? ` — proposta ${proposalId}` : ''));
+
+      /* ── A) CONTRATAÇÃO: pagamento de uma proposta cria o contrato (escrow retido) ── */
+      if (proposalId) {
+        try {
+          /* A.1 IDEMPOTÊNCIA: já existe contrato com este payment_intent? Não recria. */
+          const existingRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/contracts?stripe_payment_intent_id=eq.${encodeURIComponent(pi.id)}&select=id&limit=1`,
+            { headers: sbHeaders }
+          );
+          const existing = existingRes.ok ? await existingRes.json() : [];
+          if (Array.isArray(existing) && existing.length > 0) {
+            console.log(`[HereWork] Contrato já existe para ${pi.id} (${existing[0].id}) — idempotente, ignorando.`);
+            break;
           }
-        );
-        console.log(`[HereWork] Contrato ${contractId} atualizado: escrow liberado.`);
+
+          /* A.2 Ler a proposta (fonte da verdade do value e deadline) */
+          const propRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/proposals?id=eq.${encodeURIComponent(proposalId)}&select=id,project_id,freelancer_id,value,deadline_days&limit=1`,
+            { headers: sbHeaders }
+          );
+          const propRows = propRes.ok ? await propRes.json() : [];
+          if (!Array.isArray(propRows) || propRows.length === 0) {
+            console.error(`[HereWork] CRÍTICO: proposta ${proposalId} não encontrada para pi ${pi.id}. Pagamento sem contrato — reconciliar manualmente.`);
+            break;
+          }
+          const prop = propRows[0];
+
+          /* A.3 Título do contrato vem do projeto (fallback se faltar) */
+          let title = 'Contrato ' + prop.id;
+          try {
+            const projRes = await fetch(
+              `${SUPABASE_URL}/rest/v1/projects?id=eq.${encodeURIComponent(prop.project_id)}&select=title&limit=1`,
+              { headers: sbHeaders }
+            );
+            const projRows = projRes.ok ? await projRes.json() : [];
+            if (Array.isArray(projRows) && projRows.length > 0 && projRows[0].title) {
+              title = projRows[0].title;
+            }
+          } catch (e) { console.warn('[HereWork] título do projeto indisponível:', e.message); }
+
+          /* A.4 CRÍTICO: criar o contrato — escrow RETIDO (escrow_released=false) */
+          const clientId     = md.client_id     || null;
+          const freelancerId = md.freelancer_id || prop.freelancer_id;
+          const nowIso = new Date().toISOString();
+          const insertRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/contracts`,
+            {
+              method:  'POST',
+              headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+              body: JSON.stringify({
+                project_id:               prop.project_id,
+                proposal_id:              prop.id,
+                client_id:                clientId,
+                freelancer_id:            freelancerId,
+                title:                    title,
+                value:                    prop.value,
+                deadline_days:            prop.deadline_days,
+                status:                   'active',
+                escrow_released:          false,
+                stripe_payment_intent_id: pi.id,
+                paid_at:                  nowIso,
+                started_at:               nowIso
+              })
+            }
+          );
+          if (!insertRes.ok) {
+            const t = await insertRes.text().catch(() => '');
+            console.error(`[HereWork] CRÍTICO: falha ao criar contrato para pi ${pi.id} — pagamento recebido SEM contrato. Reconciliar. erro:`, insertRes.status, t);
+            break;
+          }
+          const created = await insertRes.json();
+          const newContractId = Array.isArray(created) && created[0] ? created[0].id : '(id?)';
+          console.log(`[HereWork] Contrato ${newContractId} criado (escrow retido) para pi ${pi.id}.`);
+
+          /* A.5 SECUNDÁRIO (best-effort, não bloqueia o dinheiro): proposta + projeto */
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/proposals?id=eq.${encodeURIComponent(prop.id)}`,
+              { method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ status: 'accepted' }) });
+          } catch (e) { console.warn('[HereWork] PATCH proposta falhou (cosmético):', e.message); }
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/projects?id=eq.${encodeURIComponent(prop.project_id)}`,
+              { method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
+                body: JSON.stringify({ status: 'in_progress' }) });
+          } catch (e) { console.warn('[HereWork] PATCH projeto falhou (cosmético):', e.message); }
+
+        } catch (err) {
+          console.error(`[HereWork] CRÍTICO: erro inesperado ao processar contratação do pi ${pi.id}:`, err.message);
+        }
       }
 
-      /* 2. Upgrade de plano (quando payment intent veio da tela de planos) */
+      /* ── B) UPGRADE DE PLANO (preservado: payment intent da tela de planos) ── */
       if (planId && userId) {
         const allowedPlans = ['free', 'pro', 'enterprise'];
         if (allowedPlans.includes(planId)) {
-          await sbAdmin('PATCH',
-            `/rest/v1/profiles?id=eq.${encodeURIComponent(userId)}`,
-            { plan: planId }
-          );
+          await sbAdmin('PATCH', `/rest/v1/profiles?id=eq.${userId}`, { plan: planId });
           console.log(`[HereWork] Usuário ${userId} atualizado para plano ${planId}.`);
         }
       }
