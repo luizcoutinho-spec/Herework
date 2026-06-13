@@ -8226,6 +8226,27 @@ section { padding: 64px 0; }
 </div>
 
 <!-- MODAL: RECUPERAR SENHA (pede o e-mail para enviar o link) -->
+<div class="overlay" id="overlay-complete-profile">
+  <div class="modal" style="max-width:440px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Complete seu perfil</div>
+        <div class="modal-subtitle">Faltam algumas informações para você usar a plataforma</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('complete-profile')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--text-2);margin-bottom:8px;">Para enviar propostas, publicar projetos e ser encontrado, precisamos do básico:</p>
+      <ul style="font-size:13px;color:var(--text-3);margin:0 0 18px 18px;line-height:1.7;">
+        <li>Tipo de conta (Cliente, Freelancer ou Ambos)</li>
+        <li>Sua localização (estado e cidade)</li>
+        <li>Se for Freelancer: ao menos uma especialidade</li>
+      </ul>
+      <button class="btn btn-green btn-block btn-lg" onclick="closeModal('complete-profile')">Completar agora</button>
+    </div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay-forgot-password">
   <div class="modal" style="max-width:420px;">
     <div class="modal-header">
@@ -12127,6 +12148,21 @@ function setRegType(type) {
   });
 }
 window.setRegType = setRegType;
+
+function _isProfileComplete(profile) {
+  if (!profile) return false;
+  var hasBase = !!(profile.name && String(profile.name).trim())
+             && !!(profile.city && String(profile.city).trim())
+             && !!(profile.state && String(profile.state).trim());
+  if (!hasBase) return false;
+  var t = profile.type || 'client';
+  if (t === 'freelancer' || t === 'both') {
+    return Array.isArray(profile.skills) && profile.skills.length >= 1;
+  }
+  return true;
+}
+window._isProfileComplete = _isProfileComplete;
+
 /* ─── Estado de sessão simulado ─── */
 var _session = null; // { name, email, type }
 
@@ -16664,6 +16700,17 @@ function openDashboard() {
   showPage('dashboard');
   /* Inicia escuta Realtime de novas propostas para este cliente */
   if (typeof _sbListenProposals === 'function') _sbListenProposals();
+
+  /* Portão de onboarding: se perfil mínimo incompleto, orienta a completar */
+  var _profCheck = Object.assign({}, _odCache, {
+    name:  name,
+    type:  type,
+    city:  (_session && _session.city)  || _odCache.city  || '',
+    state: (_session && _session.state) || _odCache.state || ''
+  });
+  if (typeof _isProfileComplete === 'function' && !_isProfileComplete(_profCheck)) {
+    setTimeout(function(){ try { openModal('complete-profile'); } catch(e) {} }, 600);
+  }
 }
 
 function openDashboardContracts() {
