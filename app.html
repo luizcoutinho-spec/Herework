@@ -10602,7 +10602,20 @@ async function _sbCreateProposal(data) {
     }
     throw new Error(r.error.message || 'Erro ao salvar proposta.');
   }
-  return r.data || null;
+  var _created = r.data || null;
+  if (_created && _created.id && data.pdfFile) {
+    try {
+      var _path = user.id + '/' + _created.id + '.pdf';
+      var _up = await _sb.storage.from('proposal-attachments').upload(_path, data.pdfFile, { contentType: 'application/pdf', upsert: true });
+      if (!_up.error) {
+        await _sb.from('proposals').update({ attachments: [_path] }).eq('id', _created.id);
+        _created.attachments = [_path];
+      } else {
+        console.warn('[HereWork] upload PDF falhou:', _up.error.message);
+      }
+    } catch (_e) { console.warn('[HereWork] upload PDF exceção:', _e && _e.message); }
+  }
+  return _created;
 }
 
 /* ── CONTRATOS: Listar do usuário ─────────────────────────────── */
@@ -13099,11 +13112,14 @@ function submitProposal() {
 
   /* Salvar no Supabase */
   if (_sbReady() && projId && _session) {
+    var _pdfInput = document.getElementById('prop-pdf-input');
+    var _pdfFile  = (_pdfInput && _pdfInput.files && _pdfInput.files[0]) ? _pdfInput.files[0] : null;
     _sbCreateProposal({
       projectId:   projId,
       value:       value,
       deadline:    days,
-      coverLetter: coverLetter
+      coverLetter: coverLetter,
+      pdfFile:     _pdfFile
     }).then(function(res) {
       if (res) { onSuccess(); }
       else { onError('Proposta não salva. Verifique se está logado.'); }
@@ -23793,9 +23809,12 @@ function _renderReceivedProposalCard(p, idx) {
       '<div style="font-size:11px;color:var(--text-4);margin-bottom:10px;">Projeto: <strong>' + projTitle + '</strong></div>',
       /* Carta de apresentação completa */
       letter ? '<div style="font-size:13px;color:var(--text-2);line-height:1.6;margin-bottom:12px;white-space:pre-wrap;">&ldquo;' + letter + '&rdquo;</div>' : '',
-      /* Placeholder de anexo */
-      '<div style="font-size:12px;color:var(--text-4);margin-bottom:12px;">📎 Anexo: nenhum (em breve)</div>',
+      /* Anexo PDF */
+      ((p.attachments && p.attachments.length)
+        ? '<div style="margin-bottom:12px;"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();_openProposalPdf(\'' + p.id + '\')" style="font-size:12px;">📄 Abrir PDF anexado</button></div>'
+        : '<div style="font-size:12px;color:var(--text-4);margin-bottom:12px;">📎 Sem anexo</div>'),
       /* Ações */
+      '<div style="margin-bottom:10px;"><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();_openFreelancerDetail(\'' + p.id + '\')" style="font-size:12px;">👤 Detalhes do Freelancer</button></div>',
       actionsHtml ? '<div class="prop-card-actions">' + actionsHtml + '</div>' : '',
     '</div>'
   ].join('');
@@ -23819,6 +23838,47 @@ function _toggleProposalDetail(pid) {
   detail.style.display = detail.style.display === 'none' ? 'block' : 'none';
 }
 window._toggleProposalDetail = _toggleProposalDetail;
+
+function _openProposalPdf(pid) {
+  var p = (window._recvProposals || {})[pid];
+  if (!p || !p.attachments || !p.attachments.length) { showToast('Sem anexo nesta proposta.', 'info'); return; }
+  _sb.storage.from('proposal-attachments').createSignedUrl(p.attachments[0], 3600).then(function(r) {
+    if (r && r.data && r.data.signedUrl) { window.open(r.data.signedUrl, '_blank'); }
+    else { showToast('Não foi possível abrir o anexo.', 'error'); }
+  });
+}
+window._openProposalPdf = _openProposalPdf;
+
+async function _openFreelancerDetail(pid) {
+  var p = (window._recvProposals || {})[pid];
+  var fl = (p && p.freelancer) || {};
+  if (!fl.id) { showToast('Freelancer indisponível.', 'info'); return; }
+  var prof = fl;
+  try {
+    var r = await _sb.from('public_profiles')
+      .select('name,bio,skills,hourly_rate,rating,completed_jobs,avatar_url')
+      .eq('id', fl.id).single();
+    if (r && r.data) prof = Object.assign({}, fl, r.data);
+  } catch(e) {}
+  _setText('profile-view-name', _displayName(prof.name || 'Freelancer'));
+  _setText('profile-role', prof.bio || 'Profissional');
+  if (document.getElementById('profile-bio')) _setText('profile-bio', prof.bio || '');
+  _setText('profile-rating', (parseFloat(prof.rating || 0)).toFixed(1));
+  _setText('profile-stars', '★★★★★'.substring(0, Math.round(parseFloat(prof.rating || 0))));
+  _setText('profile-projects', String(prof.completed_jobs || 0));
+  _setText('profile-rate', prof.hourly_rate ? ('R$ ' + prof.hourly_rate + '/h') : '');
+  var avEl = document.getElementById('profile-avatar');
+  if (avEl) { avEl.textContent = (prof.name || 'F').charAt(0).toUpperCase(); }
+  var skEl = document.getElementById('profile-skills');
+  if (skEl) {
+    skEl.innerHTML = '';
+    var sk = Array.isArray(prof.skills) ? prof.skills : [];
+    sk.forEach(function(s){ var sp=document.createElement('span'); sp.className='fl-skill'; sp.textContent=s; skEl.appendChild(sp); });
+  }
+  /* segurança: NUNCA exibir e-mail/telefone — não populamos esses campos */
+  openModal('profile');
+}
+window._openFreelancerDetail = _openFreelancerDetail;
 
 /* ════════════════════════════════════════════════════════════════
    4. PROPOSTAS ENVIADAS (visão do freelancer)
