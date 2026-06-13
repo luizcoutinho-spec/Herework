@@ -12530,6 +12530,12 @@ function _registerPlanUsage(resourceKey, amount) {
 
 /* ── Limite vigente para o usuário atual, conforme tipo + plano ── */
 function _getResourceLimit(resourceKey) {
+  /* Bypass de limite para contas de teste internas — NÃO afeta usuários reais.
+     Mantém o gate de plano intacto para todos os demais e-mails. */
+  var _testEmails = ['contato@herework.com.br', 'luiz.coutinho@brandvakt.com', 'teste.fl@herework-test.com'];
+  if (_session && _session.email && _testEmails.indexOf(String(_session.email).toLowerCase()) !== -1) {
+    return Infinity;
+  }
   var type  = _isFL() ? 'freelancer' : 'client';
   var tier  = _getUserPlan();                                 /* 'free' | 'pro' | 'enterprise' */
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
