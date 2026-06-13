@@ -10109,9 +10109,16 @@ async function _stripeRefund(contractId) {
 function _initSupabase() {
   if (typeof supabase === 'undefined') return;
   if (_SUPA_URL === 'COLE_SUA_SUPABASE_URL_AQUI') return; /* Chaves não configuradas */
+  /* Detecta fluxo de recuperação de senha ANTES do supabase-js consumir o hash */
+  var _recoveryFlow = false;
+  try { _recoveryFlow = (window.location.hash || '').indexOf('type=recovery') !== -1; } catch(e) {}
   try {
     _sb = supabase.createClient(_SUPA_URL, _SUPA_KEY);
     _sbRestoreSession();
+    /* Fallback determinístico — independe do evento PASSWORD_RECOVERY (que pode ser perdido por timing do listener) */
+    if (_recoveryFlow) {
+      setTimeout(function(){ try { openModal('reset-password'); } catch(e) {} }, 800);
+    }
   } catch(e) { console.warn('Supabase init error:', e); }
 }
 
