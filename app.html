@@ -11030,7 +11030,7 @@ async function _sbGetProposalsReceived(statusFilter) {
   if (projR.error || !projR.data || !projR.data.length) return [];
   var ids = projR.data.map(function(p){ return p.id; });
   var q = _sb.from('proposals')
-    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days), freelancer:profiles!freelancer_id(id,name,avatar_url,rating,completed_jobs,bio,skills,city,state)')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days), freelancer:profiles!freelancer_id(id,name,avatar_url,rating,completed_jobs,skills)')
     .in('project_id', ids)
     .order('created_at', { ascending: false });
   if (statusFilter) q = q.eq('status', statusFilter);
