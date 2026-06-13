@@ -16049,8 +16049,27 @@ function openProposalFor(btn) {
 }
 
 /* Abrir o modal de proposta com os dados do projeto */
-function _openProposalModal(ctx) {
+async function _openProposalModal(ctx) {
   ctx = ctx || {};
+  /* Trava incondicional: o dono não abre o modal de proposta no próprio projeto.
+     Resolve o uid pelo JWT ativo (fonte de verdade) e o dono pelo data-owner do card
+     ou, se ausente, pelo client_id no banco. À prova de card sem atributo, re-render
+     ou uid dessincronizado. */
+  try {
+    var _u   = await _sbEnsureSession();
+    var _uid = _u ? _u.id : ((_session && _session.uid) ? _session.uid : null);
+    if (_uid) {
+      var _ownerId = (ctx.card && ctx.card.getAttribute) ? (ctx.card.getAttribute('data-owner') || '') : '';
+      if (!_ownerId && ctx.projId && _sbReady()) {
+        var _oc = await _sb.from('projects').select('client_id').eq('id', ctx.projId).single();
+        if (_oc && _oc.data) _ownerId = _oc.data.client_id || '';
+      }
+      if (_ownerId && _ownerId === _uid) {
+        showToast('Você é o dono deste projeto e não pode enviar uma proposta para ele.', 'error');
+        return;
+      }
+    }
+  } catch (_ownErr) { /* falha ao resolver dono não bloqueia usuários legítimos */ }
   var info   = document.getElementById('proposal-project-info');
   var valInp = document.getElementById('prop-value');
   var daysInp= document.getElementById('prop-days');
