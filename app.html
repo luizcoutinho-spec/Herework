@@ -5495,6 +5495,10 @@ section { padding: 64px 0; }
 
       <div id="dcontracts-fl" style="display:none;">
         <div class="dash-section">
+          <div class="dash-section-title"><span>&#128233;</span> Propostas Enviadas &mdash; Aguardando Resposta</div>
+          <div id="dash-fl-proposals"></div>
+        </div>
+        <div class="dash-section">
           <div class="dash-section-title"><span>&#9889;</span> Em Desenvolvimento</div>
           <div id="dash-fl-active"></div>
         </div>
@@ -17790,25 +17794,28 @@ async function _requestRefund(contractId) {
 }
 window._requestRefund = _requestRefund;
 
-function _renderDashFLProposals(data) {
+async function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
   if(!el) return;
-  var d = (data || _dashData).freelancer.proposals;
-  if(!d.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
-  el.innerHTML = d.map(function(p) {
+  var props = await _sbGetMyProposals();
+  if(!props || !props.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
+  el.innerHTML = props.map(function(p) {
+    var proj = p.project || {};
+    var st = p.status || 'pending';
+    var stLabel = st === 'accepted' ? 'Aceita' : st === 'rejected' ? 'Recusada' : st === 'shortlisted' ? 'Pré-selecionada' : st === 'viewed' ? 'Visualizada' : 'Aguardando resposta';
+    var stKey = st === 'accepted' ? 'done' : st === 'rejected' ? 'cancelled' : 'sent';
+    var valor = (p.value != null) ? Number(p.value).toLocaleString('pt-BR') : '0';
+    var quando = p.created_at ? _timeAgo(p.created_at) : '';
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
-        '<div class="dash-proj-title">' + p.title + '</div>' +
-        _statusBadge('sent','Aguardando resposta') +
+        '<div class="dash-proj-title">' + _sanitize(proj.title || 'Projeto') + '</div>' +
+        _statusBadge(stKey, stLabel) +
       '</div>' +
       '<div class="dash-proj-meta">' +
-        '<span>💰 Proposta: R$ ' + p.value.toLocaleString('pt-BR') + '</span>' +
-        '<span>🕐 ' + p.sentAt + '</span>' +
+        '<span>💰 Proposta: R$ ' + valor + '</span>' +
+        '<span>🕐 ' + _sanitize(quando) + '</span>' +
       '</div>' +
-      '<div class="dash-proj-desc">' + p.desc + '</div>' +
-      '<div class="dash-proj-actions" style="margin-top:8px;">' +
-        '<button class="btn btn-outline btn-sm" onclick="showToast(\'Proposta retirada.\',\'info\')">❌ Retirar proposta</button>' +
-      '</div>' +
+      '<div class="dash-proj-desc">' + _sanitize(p.cover_letter || '') + '</div>' +
     '</div>';
   }).join('');
 }
