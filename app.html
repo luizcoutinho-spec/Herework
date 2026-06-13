@@ -11259,6 +11259,11 @@ function _renderRealFreelancers() {
 
   _sbGetFreelancers().then(function(profiles) {
     if (!profiles || !profiles.length) return;
+    /* Camada 1b: ocultar freelancers com perfil incompleto da listagem */
+    if (typeof _isProfileComplete === 'function') {
+      profiles = profiles.filter(function(p){ return _isProfileComplete(p); });
+    }
+    if (!profiles.length) return;
     /* Cria um fragmento para inserir antes dos cards estáticos */
     var first = grid.querySelector('.fl-list-card');
     profiles.forEach(function(p) {
