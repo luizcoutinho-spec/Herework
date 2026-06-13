@@ -12163,6 +12163,27 @@ function _isProfileComplete(profile) {
 }
 window._isProfileComplete = _isProfileComplete;
 
+function _requireCompleteProfile(message) {
+  var cache = (_session && _session.uid && window._realProfileCache) ? (window._realProfileCache[_session.uid] || {}) : {};
+  var t = 'client';
+  try {
+    var ls = localStorage.getItem('hw_saved_actype');
+    t = (ls && ['client','freelancer','both'].indexOf(ls) !== -1) ? ls : ((_session && _session.type) || cache.type || 'client');
+  } catch(e) { t = (_session && _session.type) || cache.type || 'client'; }
+  var prof = {
+    name:  (_session && _session.name)  || cache.name  || '',
+    type:  t,
+    city:  (_session && _session.city)  || cache.city  || '',
+    state: (_session && _session.state) || cache.state || '',
+    skills: cache.skills || []
+  };
+  if (typeof _isProfileComplete === 'function' && _isProfileComplete(prof)) return true;
+  showToast(message || 'Complete seu perfil para realizar esta ação.', 'warn');
+  setTimeout(function(){ try { openModal('complete-profile'); } catch(e) {} }, 300);
+  return false;
+}
+window._requireCompleteProfile = _requireCompleteProfile;
+
 /* ─── Estado de sessão simulado ─── */
 var _session = null; // { name, email, type }
 
@@ -12790,6 +12811,7 @@ function submitRegister() {
 }
 
 function submitProject() {
+  if (!_requireCompleteProfile('Complete seu perfil antes de publicar um projeto.')) return;
   if (!_session || !_session.name) {
     showToast('Você precisa estar logado para publicar um projeto.','warn');
     closeModal('publish');
@@ -15996,6 +16018,8 @@ function openProposalFor(btn) {
   if (!_requireAuth('Você precisa estar logado para enviar uma proposta.', function() {
     _openProposalModal(window._pendingProposal);
   })) return;
+
+  if (!_requireCompleteProfile('Complete seu perfil antes de enviar uma proposta.')) return;
 
   _openProposalModal(window._pendingProposal);
 }
