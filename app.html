@@ -10548,6 +10548,16 @@ async function _sbCreateProposal(data) {
   if (!_sbReady() || !_session) return null;
   var user = await _sbEnsureSession();
   if (!user) { console.warn('_sbCreateProposal: sem sessao Supabase ativa'); return null; }
+  /* Trava: dono do projeto não pode propor no próprio projeto */
+  try {
+    var ownerChk = await _sb.from('projects').select('client_id').eq('id', data.projectId).single();
+    if (ownerChk && ownerChk.data && ownerChk.data.client_id === user.id) {
+      throw new Error('Você é o dono deste projeto e não pode enviar uma proposta para ele.');
+    }
+  } catch (ownerErr) {
+    if (ownerErr && ownerErr.message && ownerErr.message.indexOf('dono deste projeto') >= 0) throw ownerErr;
+    /* falha ao verificar dono não bloqueia o fluxo normal — segue para o insert */
+  }
   var r = await _sb.from('proposals').insert({
     project_id:    data.projectId,
     freelancer_id: user.id,
