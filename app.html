@@ -5101,6 +5101,27 @@ section { padding: 64px 0; }
           </div>
         </div>
 
+        <!-- ══════ DADOS DE CONTATO ══════ -->
+        <div style="margin:16px 0 0;">
+          <div class="prof-section-divider" style="margin-top:18px;">
+            <span class="prof-section-title">&#128100; Dados de Contato</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="profile-name">Nome completo <span style="color:#ef4444;">*</span></label>
+            <input class="form-input" id="profile-name" type="text" placeholder="Nome e sobrenome" autocomplete="name" oninput="if(typeof profileUpdateCompletion==='function')profileUpdateCompletion()">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="profile-email">E-mail</label>
+              <input class="form-input" id="profile-email" type="email" readonly autocomplete="email" style="background:var(--bg);color:var(--text-3);cursor:not-allowed;">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="profile-phone">Telefone</label>
+              <input class="form-input" id="profile-phone" type="tel" placeholder="(11) 90000-0000" autocomplete="tel">
+            </div>
+          </div>
+        </div>
+
         <!-- ══════ LOCALIZAÇÃO ══════ -->
         <div style="margin:16px 0 0;">
           <div class="prof-section-divider" style="margin-top:18px;">
@@ -8610,7 +8631,7 @@ section { padding: 64px 0; }
         <div id="profile-avatar" style="width:64px;height:64px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff;flex-shrink:0;"></div>
         <div>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-            <div id="profile-name" style="font-size:20px;font-weight:800;color:var(--text);"></div>
+            <div id="profile-view-name" style="font-size:20px;font-weight:800;color:var(--text);"></div>
             <span id="profile-badge-top" class="fl-badge-top" style="display:none;">Top Freelancer</span>
             <span id="profile-badge-ver" class="fl-badge-verified" style="display:none;">&#10003; Verificado</span>
           </div>
@@ -11959,7 +11980,7 @@ function openProfile(card) {
     avEl.style.background = avatarEl && avatarEl.style.background ? avatarEl.style.background : '#2E7D32';
     avEl.textContent = avatarEl ? avatarEl.textContent.trim() : name.substring(0,2).toUpperCase();
   }
-  _setText('profile-name',     name);
+  _setText('profile-view-name',     name);
   _setText('profile-role',     role);
   _setText('profile-bio',      bio);
   _setText('profile-rate',     rate);
@@ -16776,6 +16797,8 @@ function openDashboard() {
   var ctEl = document.getElementById('profile-city');
   if (stEl) stEl.value = (_session && _session.state) || _odCache.state || '';
   if (ctEl) ctEl.value = (_session && _session.city)  || _odCache.city  || '';
+  var phEl = document.getElementById('profile-phone');
+  if (phEl) phEl.value = (_session && _session.phone) || _odCache.phone || '';
 
   el = document.getElementById('dct-client-count'); if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
   el = document.getElementById('dct-fl-count');     if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
