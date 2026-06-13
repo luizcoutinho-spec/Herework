@@ -15368,7 +15368,7 @@ function _realProjCard(p) {
 
   /* data-created: timestamp em ms para ordenação "Mais recentes" */
   var _createdMs = p.created_at ? new Date(p.created_at).getTime() : 0;
-  return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-cat="' + _sanitize(catKey) +
+  return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-owner="' + _sanitize(p.client_id || '') + '" data-cat="' + _sanitize(catKey) +
     '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) +
     '" data-proposals="' + props + '" data-created="' + _createdMs +
     '" data-subcat="' + _sanitize(subcatArr.join(',')) + '">' +
@@ -16023,6 +16023,11 @@ window._admInitMigPanel       = _admInitMigPanel;
 /* ─── Open proposal modal with project context ─── */
 function openProposalFor(btn) {
   var card = btn ? btn.closest('.proj-list-card') : null;
+  /* Trava (UX): dono não pode propor no próprio projeto — para no 1º clique */
+  if (card && _session && _session.uid && card.getAttribute('data-owner') === _session.uid) {
+    showToast('Você é o dono deste projeto e não pode enviar uma proposta para ele.', 'error');
+    return;
+  }
 
   /* Salvar contexto do projeto para usar após login */
   window._pendingProposal = {
