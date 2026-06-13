@@ -12895,8 +12895,14 @@ function submitProject() {
   }
 
   /* Orçamento — obrigatório, exceto A combinar */
-  if (!isTBD && bMax === 0 && bMin === 0) {
-    if (errBEl) errBEl.textContent = 'Informe o orçamento ou marque "A combinar"';
+  if (!isTBD && (bMin < 0 || bMax < 0)) {
+    if (errBEl) errBEl.textContent = 'O orçamento não pode ser negativo';
+    ok = false;
+  } else if (!isTBD && (bMin <= 0 || bMax <= 0)) {
+    if (errBEl) errBEl.textContent = 'Informe o orçamento mínimo e máximo, ou marque "A combinar"';
+    ok = false;
+  } else if (!isTBD && bMax < bMin) {
+    if (errBEl) errBEl.textContent = 'O valor máximo não pode ser menor que o mínimo';
     ok = false;
   } else {
     if (errBEl) errBEl.textContent = '';
@@ -23721,7 +23727,6 @@ function _renderReceivedProposalCard(p, idx) {
           '<div class="prop-card-meta">',
             stars + ' ' + rating.toFixed(1),
             jobs ? ' · ' + jobs + ' projeto' + (jobs!==1?'s':'') + ' concluído' + (jobs!==1?'s':'') : '',
-            fl.city ? ' · ' + _sanitize(fl.city) : '',
           '</div>',
           '<div style="font-size:11px;color:var(--text-4);margin-top:2px;">Projeto: <strong>' + projTitle + '</strong></div>',
         '</div>',
