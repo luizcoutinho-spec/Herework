@@ -12117,10 +12117,9 @@ function submitLogin() {
 var regType = 'client'; /* tipo selecionado no registro: 'client' | 'freelancer' | 'both' */
 function setRegType(type) {
   regType = type;
-  var map = { client:'client', freelancer:'fl', both:'both' };
   ['client','fl','both'].forEach(function(k) {
     var el = document.getElementById('reg-type-' + k);
-    if (el) el.classList.toggle('active', map[k] === undefined ? false :
+    if (el) el.classList.toggle('active',
       (k === 'client' && type === 'client') ||
       (k === 'fl'     && type === 'freelancer') ||
       (k === 'both'   && type === 'both')
