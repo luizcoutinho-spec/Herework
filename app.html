@@ -8141,7 +8141,7 @@ section { padding: 64px 0; }
         <div class="form-error" id="err-login-pass"></div>
       </div>
       <div style="text-align:right;margin-bottom:20px;">
-        <a style="font-size:13px;color:var(--green);cursor:pointer;" onclick="forgotPassword()" data-pt="Esqueci minha senha" data-es="Olvidé mi contraseña">Esqueci minha senha</a>
+        <a style="font-size:13px;color:var(--green);cursor:pointer;" onclick="switchModal('login','forgot-password')" data-pt="Esqueci minha senha" data-es="Olvidé mi contraseña">Esqueci minha senha</a>
       </div>
       <button id="login-submit-btn" class="btn btn-green btn-block btn-lg" onclick="submitLogin()" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
       <div class="modal-switch-link">
@@ -8221,6 +8221,27 @@ section { padding: 64px 0; }
         <span data-pt="Já tem conta?" data-es="¿Ya tienes cuenta?">Já tem conta?</span>
         <a onclick="switchModal('register','login')" data-pt=" Entrar" data-es=" Iniciar sesión"> Entrar</a>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: RECUPERAR SENHA (pede o e-mail para enviar o link) -->
+<div class="overlay" id="overlay-forgot-password">
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Recuperar Senha</div>
+        <div class="modal-subtitle">Informe seu e-mail cadastrado para receber o link de redefinição</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('forgot-password')">&#x2715;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="forgot-email" class="form-label">E-mail</label>
+        <input class="form-input" id="forgot-email" type="email" placeholder="seu@email.com" autocomplete="email">
+        <div class="form-error" id="err-forgot-email"></div>
+      </div>
+      <button id="forgot-send-btn" class="btn btn-green btn-block btn-lg" onclick="forgotPassword()">Enviar link de redefinição</button>
     </div>
   </div>
 </div>
@@ -11984,7 +12005,7 @@ function forgotPassword() {
     _sbForgotPassword(email).then(function(res) {
       if (res.error) { showToast(res.error, 'error'); return; }
       showToast('✅ Link de redefinição enviado para ' + email + '. Verifique sua caixa de entrada.', 'success');
-      closeModal('login');
+      closeModal('forgot-password');
     });
   } else {
     var subj = encodeURIComponent('[HereWork] Redefinição de senha — ' + email);
