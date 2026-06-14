@@ -15595,6 +15595,7 @@ async function _refreshMyPublishedProjects() {
        (mesmo com o projeto publicado e salvo corretamente no banco). */
     await _sbEnsureSession();
     var list = await _sbGetMyProjects();
+    list = list.filter(function(p){ return p.status === 'open'; });
     if (!list.length) return; /* mantém o estado vazio padrão renderizado por _renderDashClientWaiting */
     var who = {
       name:       _session.name || 'Você',
