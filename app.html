@@ -22393,6 +22393,16 @@ async function confirmStripePayment() {
         setTimeout(function() {
           closeStripePayment();
           if (typeof _goContractStep === 'function') _goContractStep(3);
+
+          /* Refresh imediato — tira a tela do estado congelado */
+          if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+          if (typeof _loadRealContracts === 'function') _loadRealContracts();
+
+          /* Refresh de reconciliação — após o webhook processar (~4s) */
+          setTimeout(function() {
+            if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+            if (typeof _loadRealContracts === 'function') _loadRealContracts();
+          }, 4000);
         }, 2500);
       } else {
         /* ── Pagamento de assinatura de plano ── */
