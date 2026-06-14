@@ -5066,6 +5066,7 @@ section { padding: 64px 0; }
             <div class="name" id="dash-profile-name">Usu&aacute;rio</div>
             <div class="role" id="dash-profile-email">email@email.com</div>
             <div class="profile-badge" id="dash-profile-type">&#127968; Cliente</div>
+            <div class="profile-badge" id="dash-plan-badge" style="margin-top:6px;cursor:pointer;" onclick="showPage('pricing')">&#11088; Plano: Gratuito</div>
           </div>
           <div style="margin-left:auto;">
             <div style="font-size:11px;color:var(--text-4);text-align:right;">Membro desde</div>
@@ -16798,6 +16799,11 @@ function openDashboard() {
   var el;
   el = document.getElementById('dash-user-name'); if(el) el.textContent = name.split(' ')[0];
   el = document.getElementById('ds-plan'); if(el){ el.textContent = (typeof _getPlanLabel==='function')?_getPlanLabel():'Gratuito'; if(typeof _isPro==='function'&&_isPro()) el.style.color='var(--green)'; }
+  var pb = document.getElementById('dash-plan-badge');
+  if (pb) {
+    pb.textContent = '⭐ Plano: ' + ((typeof _getPlanLabel==='function') ? _getPlanLabel() : 'Grátis');
+    if (typeof _isPro==='function' && _isPro()) pb.style.color = 'var(--green)';
+  }
 
   var _vd = _getViewData();
   var garantia = _vd.client.active.reduce(function(s,p){return s+p.value;},0);
