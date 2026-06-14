@@ -32,10 +32,10 @@ const STRIPE_TEST  = (Deno.env.get("STRIPE_SECRET_KEY_TEST") || "").trim();
 
 const stripe = new Stripe(STRIPE_TEST, { apiVersion: "2024-06-20" });
 
-const PLAN_MAP: Record<string, { price: string; plan: string }> = {
-  business: { price: "price_1TiFWgHXgU6QiY3Xc6NPW2rP", plan: "pro" },
-  premium:  { price: "price_1TiFZYHXgU6QiY3X4Pw207xn", plan: "pro" },
-  elite:    { price: "price_1TiFaqHXgU6QiY3XispsUjbX", plan: "enterprise" },
+const PLAN_MAP: Record<string, { month: string; year: string; plan: string }> = {
+  business: { month: "price_1TiFWgHXgU6QiY3Xc6NPW2rP", year: "price_1TiIUoHXgU6QiY3X9mInCbKV", plan: "pro" },
+  premium:  { month: "price_1TiFZYHXgU6QiY3X4Pw207xn", year: "price_1TiIVKHXgU6QiY3XgoOPmxS8", plan: "pro" },
+  elite:    { month: "price_1TiFaqHXgU6QiY3XispsUjbX", year: "price_1TiIVkHXgU6QiY3XqbCzApym", plan: "enterprise" },
 };
 
 const ACTIVE_SUB_STATUSES = ["active", "trialing", "past_due", "incomplete"];
@@ -84,8 +84,10 @@ Deno.serve(async (req) => {
   let body: any;
   try { body = await req.json(); } catch { return json({ error: "JSON inválido." }, 400, CORS); }
   const planKey = String(body?.plan || "").toLowerCase();
+  const interval = (String(body?.interval || "month").toLowerCase() === "year") ? "year" : "month";
   const mapped = PLAN_MAP[planKey];
   if (!mapped) return json({ error: "Plano inválido." }, 400, CORS);
+  const priceId = interval === "year" ? mapped.year : mapped.month;
 
   const profile = await sbSelect(
     `profiles?id=eq.${uid}&select=id,email,stripe_customer_id,stripe_subscription_id`
@@ -130,7 +132,7 @@ Deno.serve(async (req) => {
 
     const sub = await stripe.subscriptions.create({
       customer: customerId,
-      items: [{ price: mapped.price }],
+      items: [{ price: priceId }],
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
       expand: ["latest_invoice.payment_intent"],
