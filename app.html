@@ -15629,6 +15629,33 @@ async function _deletePublishedProject(projectId, btnEl) {
   }
 }
 
+async function _featProjectCard(id, isFeatured) {
+  if (isFeatured) return;
+  if (!_isPro()) {
+    var nf = _getNextPlanInfo() || {};
+    showToast('⭐ Destacar projetos é um recurso dos planos pagos. Conheça o ' + (nf.name || 'Business') + ' →', 'warn');
+    setTimeout(function(){ showPage('pricing'); }, 1200);
+    return;
+  }
+  var r = await _sb.from('projects').update({ featured: true }).eq('id', id);
+  if (r.error) {
+    var msg = r.error.message || '';
+    if (msg.indexOf('QUOTA_EXCEEDED') !== -1) {
+      var nx = _getNextPlanInfo() || {};
+      showToast('Você atingiu o limite de destaques deste mês. ' + (nx.name ? 'O plano ' + nx.name + ' oferece destaques ilimitados →' : ''), 'warn');
+      setTimeout(function(){ showPage('pricing'); }, 1500);
+    } else if (msg.indexOf('PLAN_FREE') !== -1) {
+      showToast('⭐ Destacar projetos é um recurso dos planos pagos.', 'warn');
+      setTimeout(function(){ showPage('pricing'); }, 1200);
+    } else {
+      showToast('Erro ao destacar: ' + msg, 'error');
+    }
+    return;
+  }
+  showToast('⭐ Projeto destacado! Vai aparecer no topo das buscas.', 'success');
+  if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+}
+
 /* Carrega e renderiza, em "Meu Perfil → Meus Projetos Publicados", os projetos
    reais do usuário logado (Supabase), com nome/foto/data do publicador implícitos
    (o próprio usuário) e dados persistidos — substitui o estado vazio padrão. */
@@ -15705,6 +15732,7 @@ async function _refreshMyPublishedProjects() {
           '<div class="dash-proj-actions">' +
             '<button class="btn btn-primary btn-sm" onclick="_toggleProjectProposals(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
             '<button class="btn btn-outline btn-sm" onclick="openEditProject(\'' + _sanitize(p.id) + '\')">✏️ Editar</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="_featProjectCard(\'' + _sanitize(p.id) + '\', ' + (p.featured ? 'true' : 'false') + ')"' + (p.featured ? ' disabled style="opacity:.6;cursor:default;"' : '') + '>' + (p.featured ? '⭐ Destacado' : '⭐ Destacar') + '</button>' +
             /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
             '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +
           '</div>' +
