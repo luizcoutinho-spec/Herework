@@ -194,7 +194,7 @@ module.exports = async function handler(req, res) {
           /* fecha o projeto — regra 1:1 (status interno 'contracted') */
           try {
             await fetch(`${SUPABASE_URL}/rest/v1/projects?id=eq.${encodeURIComponent(prop.project_id)}`,
-              { method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ status: 'contracted' }) });
+              { method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ status: 'in_progress' }) });
           } catch (e) { console.error(`[HereWork] falha ao fechar projeto contracted (pi ${pi.id}):`, e && (e.message||e)); }
 
           /* A.5 RECUSA EM LOTE: descartar as outras propostas abertas do mesmo projeto */
