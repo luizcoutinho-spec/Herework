@@ -5505,6 +5505,26 @@ section { padding: 64px 0; }
           <div id="dash-client-waiting"></div>
         </div>
         <div class="dash-section">
+          <div class="dash-section-title"><span>&#128233;</span> Candidaturas Recebidas</div>
+          <div class="prop-filter-row">
+            <select class="prop-filter-select" id="pfilter-status-received" onchange="_loadProposalsReceived()">
+              <option value="">Todos os status</option>
+              <option value="pending">⏳ Pendentes</option>
+              <option value="viewed">👁 Visualizadas</option>
+              <option value="shortlisted">⭐ Selecionadas</option>
+              <option value="accepted">✅ Aceitas</option>
+              <option value="rejected">❌ Recusadas</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="_loadProposalsReceived()" style="margin-left:auto;">&#128260; Atualizar</button>
+          </div>
+          <div id="plist-received">
+            <div class="prop-empty">
+              <div class="prop-empty-icon">&#128233;</div>
+              <div class="prop-empty-title">Carregando propostas&hellip;</div>
+            </div>
+          </div>
+        </div>
+        <div class="dash-section">
           <div class="dash-section-title"><span>&#128274;</span> Contratos Ativos &mdash; Pagamento em Garantia</div>
           <div id="dash-client-active"></div>
         </div>
@@ -5855,24 +5875,12 @@ section { padding: 64px 0; }
         <button class="prop-view-tab" id="pvt-sent"     onclick="_switchProposalView('sent')">&#129489;&#8205;&#128187; Minhas Propostas</button>
       </div>
 
-      <!-- RECEBIDAS (cliente) -->
+      <!-- RECEBIDAS (cliente) → movido para Contratos → Como Cliente -->
       <div id="pview-received">
-        <div class="prop-filter-row">
-          <select class="prop-filter-select" id="pfilter-status-received" onchange="_loadProposalsReceived()">
-            <option value="">Todos os status</option>
-            <option value="pending">⏳ Pendentes</option>
-            <option value="viewed">👁 Visualizadas</option>
-            <option value="shortlisted">⭐ Selecionadas</option>
-            <option value="accepted">✅ Aceitas</option>
-            <option value="rejected">❌ Recusadas</option>
-          </select>
-          <button class="btn btn-outline btn-sm" onclick="_loadProposalsReceived()" style="margin-left:auto;">&#128260; Atualizar</button>
-        </div>
-        <div id="plist-received">
-          <div class="prop-empty">
-            <div class="prop-empty-icon">&#128233;</div>
-            <div class="prop-empty-title">Carregando propostas&hellip;</div>
-          </div>
+        <div class="prop-empty">
+          <div class="prop-empty-icon">📭</div>
+          <div class="prop-empty-title">Você ainda não recebeu convites para trabalhar</div>
+          <p style="font-size:13px;color:var(--text-3);margin-top:4px;">Quando um cliente convidar você para um projeto, aparecerá aqui.</p>
         </div>
       </div>
 
@@ -16859,6 +16867,7 @@ function openDashboardContracts() {
   setTimeout(function() {
     switchDashPanel('contracts');
     switchContractView(_isFL() && !_isBoth() ? 'freelancer' : 'client');
+    _loadProposalsReceived();
   }, 100);
 }
 
@@ -23654,8 +23663,7 @@ function _switchProposalView(view) {
   if (sEl) sEl.style.display = view === 'sent'     ? 'block' : 'none';
   if (bR)  bR.classList.toggle('active', view === 'received');
   if (bS)  bS.classList.toggle('active', view === 'sent');
-  if (view === 'received') _loadProposalsReceived();
-  else                     _loadMyProposals();
+  if (view === 'sent') _loadMyProposals();
 }
 
 /* ════════════════════════════════════════════════════════════════
