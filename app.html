@@ -22367,7 +22367,7 @@ async function confirmStripePayment() {
       document.getElementById('sp-element-container').style.display = 'none';
       document.getElementById('sp-success').style.display           = 'block';
 
-      if (_spContractId) {
+      if (_spProposalId) {
         /* ── Pagamento de garantia de contrato ── */
         showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
         /* Notificação por e-mail de contrato para ambas as partes */
@@ -22394,15 +22394,27 @@ async function confirmStripePayment() {
           closeStripePayment();
           if (typeof _goContractStep === 'function') _goContractStep(3);
 
-          /* Refresh imediato — tira a tela do estado congelado */
-          if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
-          if (typeof _loadRealContracts === 'function') _loadRealContracts();
-
-          /* Refresh de reconciliação — após o webhook processar (~4s) */
-          setTimeout(function() {
-            if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
-            if (typeof _loadRealContracts === 'function') _loadRealContracts();
-          }, 4000);
+          (function pollContract() {
+            var tries = 0, MAX = 8;
+            function refreshUI() {
+              if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+              if (typeof _loadRealContracts === 'function') _loadRealContracts();
+            }
+            refreshUI();
+            var iv = setInterval(async function() {
+              tries++;
+              var done = false;
+              try {
+                if (_sbReady && _sbReady() && _spProposalId) {
+                  var r = await _sb.from('contracts').select('id,status')
+                    .eq('proposal_id', _spProposalId).limit(1);
+                  if (r && !r.error && r.data && r.data.length > 0) done = true;
+                }
+              } catch (e) {}
+              refreshUI();
+              if (done || tries >= MAX) clearInterval(iv);
+            }, 2000);
+          })();
         }, 2500);
       } else {
         /* ── Pagamento de assinatura de plano ── */
