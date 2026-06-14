@@ -10581,7 +10581,7 @@ async function _sbUpdateProject(id, data) {
 async function _sbListProjects(filters) {
   if (!_sbReady()) return [];
   /* proposals(id): traz o array de IDs; _realProjCard usa .length para contar */
-  var q = _sb.from('projects').select('*, profiles(name, rating, avatar_url), proposals(id)').eq('status','open').order('created_at', { ascending: false });
+  var q = _sb.from('projects').select('*, profiles(name, rating, avatar_url, plan), proposals(id)').eq('status','open').order('created_at', { ascending: false });
   if (filters && filters.category) q = q.eq('category', filters.category);
   if (filters && filters.budgetMax) q = q.lte('budget_max', filters.budgetMax);
   var r = await q.limit(50);
@@ -11044,7 +11044,7 @@ async function _sbGetProjectProposals(projectId) {
   if (!_sbReady() || !_session || !projectId) return [];
   await _sbEnsureSession();
   var r = await _sb.from('proposals')
-    .select('*, freelancer:profiles!freelancer_id(name, avatar_url, rating, completed_jobs)')
+    .select('*, freelancer:profiles!freelancer_id(name, avatar_url, rating, completed_jobs, plan)')
     .eq('project_id', projectId)
     .order('created_at', { ascending: false });
   if (r.error) { console.warn('_sbGetProjectProposals:', r.error.message || r.error); return []; }
@@ -12390,6 +12390,19 @@ function _getUserPlan() {
   if (!_session) return 'free';
   return _session.plan || 'free';
 }
+function _planWeight(plan){ return plan==='enterprise'?3:plan==='pro'?2:1; }
+function _sortFeatured(list,ownerKey){
+  return (list||[]).sort(function(a,b){
+    var fa=a.featured?1:0,fb=b.featured?1:0;
+    if(fb!==fa) return fb-fa;
+    var oa=a[ownerKey]||{},ob=b[ownerKey]||{};
+    var pa=_planWeight(oa.plan),pb=_planWeight(ob.plan);
+    if(pb!==pa) return pb-pa;
+    var ra=parseFloat(oa.rating)||0,rb=parseFloat(ob.rating)||0;
+    if(rb!==ra) return rb-ra;
+    return new Date(b.created_at)-new Date(a.created_at);
+  });
+}
 function _isPro()        { var p = _getUserPlan(); return p === 'pro' || p === 'enterprise'; }
 function _isEnterprise() { return _getUserPlan() === 'enterprise'; }
 function _getPlanLabel() {
@@ -13538,6 +13551,7 @@ async function _openProjectProposals(projectId, projTitle, budgetMin, budgetMax,
 
   /* Buscar propostas reais do Supabase */
   var proposals = await _sbGetProjectProposals(projectId);
+  proposals = _sortFeatured(proposals,'freelancer'); // featured->plano->rating
   document.getElementById('pmod-loading').style.display = 'none';
 
   var n = proposals.length;
@@ -15519,6 +15533,7 @@ async function _loadRealProjects() {
   if (!grid) return;
   try {
     var list = await _sbListProjects();
+    list = _sortFeatured(list,'profiles'); // featured->plano->rating
     list.forEach(function(p) {
       if (_realProjectsLoaded[p.id]) return;
       _realProjectsLoaded[p.id] = true;
@@ -15708,6 +15723,7 @@ async function _toggleProjectProposals(projectId) {
   box.innerHTML = '<div style="padding:8px;color:var(--text-3)">Carregando…</div>';
   box.style.display = 'block';
   var proposals = await _sbGetProjectProposals(projectId);
+  proposals = _sortFeatured(proposals,'freelancer'); // featured->plano->rating
   window._recvProposals = window._recvProposals || {};
   var ctx = (window._projectCtxMap || {})[projectId] || {};
   proposals.forEach(function(pr) {
