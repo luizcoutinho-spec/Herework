@@ -7129,7 +7129,7 @@ section { padding: 64px 0; }
     <div class="container">
 
       <!-- Toggle mensal/anual -->
-      <div class="pricing-toggle">
+      <div class="pricing-toggle" style="display:none">
         <span class="pricing-toggle-label" data-pt="Mensal" data-es="Mensual">Mensal</span>
         <div class="toggle-switch annual" id="billing-toggle" onclick="toggleBilling()">
           <div class="toggle-knob"></div>
@@ -7188,7 +7188,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Relatórios de gastos · Suporte prioritário (SLA 24h)" data-es="Reportes de gastos · Soporte prioritario (SLA 24h)">Relatórios de gastos · Suporte prioritário (SLA 24h)</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 5% nova contratação · 3% recorrente" data-es="Comisión: 5% nueva · 3% recurrente">Comissão: 5% nova contratação · 3% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?39.90:49.90,'Plano Business · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'business')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(49.90,'Plano Business · Cobrado mensalmente','business')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
           </div>
 
           <!-- CLIENTES — Enterprise -->
@@ -7412,7 +7412,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Calculadora de preço" data-es="Calculadora de precio">Calculadora de preço</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 12% novo projeto · 8% recorrente" data-es="Comisión: 12% nuevo · 8% recurrente">Comissão: 12% novo projeto · 8% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?31.90:39.90,'Plano Premium · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'premium')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(39.90,'Plano Premium · Cobrado mensalmente','premium')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
           </div>
 
           <div class="pricing-card">
@@ -7431,7 +7431,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 8% novo projeto · 5% recorrente" data-es="Comisión: 8% nuevo · 5% recurrente">Comissão: 8% novo projeto · 5% recorrente</div>
-            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(isAnnual?47.90:59.90,'Plano Elite · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
+            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(59.90,'Plano Elite · Cobrado mensalmente','elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
           </div>
 
         </div>
@@ -7572,7 +7572,6 @@ section { padding: 64px 0; }
   </p>
   <p style="font-size:12px;color:var(--text-3);line-height:1.8;margin:0;">
     &#9432; Preços em BRL. Cobrança mensal, cancelamento a qualquer momento sem fidelidade.
-    Economize ~20% no plano anual.
   </p>
 </div>
 <!-- email-page-pricing -->
