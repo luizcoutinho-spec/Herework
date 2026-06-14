@@ -22436,12 +22436,32 @@ async function confirmStripePayment() {
           })();
         }, 2500);
       } else {
-        /* ── Pagamento de assinatura de plano ── */
-        if (window._payCtx && window._payCtx.plan) _activatePlan(window._payCtx.plan);
-        showToast('🎉 Plano ativado com sucesso! Aproveite todos os benefícios.', 'success');
-        setTimeout(function() {
-          closeStripePayment();
-        }, 2500);
+        /* ── Assinatura: o BANCO é a fonte da verdade (webhook grava profiles.plan). ── */
+        /* Remove _activatePlan (localStorage divergia do banco). Poll relê o banco. */
+        showToast('⏳ Confirmando sua assinatura...', 'info');
+        (function pollPlan() {
+          var tries = 0, MAX = 10;
+          var iv = setInterval(async function() {
+            tries++;
+            try {
+              if (_sbReady && _sbReady() && _session && _session.uid) {
+                var r = await _sb.from('profiles').select('plan').eq('id', _session.uid).single();
+                if (r && !r.error && r.data && r.data.plan && r.data.plan !== 'free') {
+                  if (typeof _sbRestoreSession === 'function') { try { await _sbRestoreSession(); } catch(x) {} }
+                  try { localStorage.setItem('hw_plan', r.data.plan); } catch(x) {}
+                  var pb = document.getElementById('dash-plan-badge');
+                  if (pb) { pb.textContent = '⭐ Plano: ' + _getPlanLabel(); if (typeof _isPro==='function' && _isPro()) pb.style.color = 'var(--green)'; }
+                  var el2 = document.getElementById('ds-plan');
+                  if (el2 && typeof _getPlanLabel === 'function') el2.textContent = _getPlanLabel();
+                  showToast('🎉 Assinatura ativada! Plano atualizado.', 'success');
+                  clearInterval(iv);
+                }
+              }
+            } catch(e) {}
+            if (tries >= MAX) { clearInterval(iv); showToast('Pagamento recebido. Seu plano será atualizado em instantes.', 'info'); }
+          }, 2000);
+        })();
+        setTimeout(function() { closeStripePayment(); }, 3000);
       }
     }
 
