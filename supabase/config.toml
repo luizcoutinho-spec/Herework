@@ -2,3 +2,6 @@ project_id = "melwkopuxuwmetfjfszn"
 
 [functions.hw-create-payment-intent]
 verify_jwt = false
+
+[functions.hw-create-subscription]
+verify_jwt = false
