@@ -282,6 +282,43 @@ module.exports = async function handler(req, res) {
       break;
     }
 
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const sub    = event.data.object;
+        const userId = sub.metadata && sub.metadata.user_id;
+        const plan   = sub.metadata && sub.metadata.plan;
+        const allowed = ['free', 'pro', 'enterprise'];
+        if (userId && allowed.includes(plan) && ['active', 'trialing'].includes(sub.status)) {
+          const periodEnd = sub.current_period_end
+            || (sub.items && sub.items.data && sub.items.data[0] && sub.items.data[0].current_period_end)
+            || null;
+          await sbAdmin('PATCH', `/rest/v1/profiles?id=eq.${userId}`, {
+            plan:                   plan,
+            plan_status:            sub.status,
+            stripe_subscription_id: sub.id,
+            plan_expires_at:        periodEnd ? new Date(periodEnd * 1000).toISOString() : null
+          });
+          console.log(`[HereWork] Assinatura ${sub.status}: user ${userId} -> ${plan}`);
+        } else {
+          console.log(`[HereWork] subscription ${event.type} ignorada (status=${sub.status}, userId=${userId||'?'}, plan=${plan||'?'})`);
+        }
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        const sub    = event.data.object;
+        const userId = sub.metadata && sub.metadata.user_id;
+        if (userId) {
+          await sbAdmin('PATCH', `/rest/v1/profiles?id=eq.${userId}`, {
+            plan: 'free', plan_status: 'canceled'
+          });
+          console.log(`[HereWork] Assinatura cancelada: user ${userId} -> free`);
+        } else {
+          console.log('[HereWork] subscription.deleted sem metadata.user_id — nada alterado.');
+        }
+        break;
+      }
+
     default:
       console.log(`[HereWork] Evento ignorado: ${event.type}`);
   }
