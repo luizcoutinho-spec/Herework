@@ -7129,7 +7129,7 @@ section { padding: 64px 0; }
     <div class="container">
 
       <!-- Toggle mensal/anual -->
-      <div class="pricing-toggle" style="display:none">
+      <div class="pricing-toggle">
         <span class="pricing-toggle-label" data-pt="Mensal" data-es="Mensual">Mensal</span>
         <div class="toggle-switch annual" id="billing-toggle" onclick="toggleBilling()">
           <div class="toggle-knob"></div>
@@ -7174,7 +7174,7 @@ section { padding: 64px 0; }
           <div class="pricing-card featured">
             <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
             <div class="pricing-plan-name" data-pt="Business" data-es="Business">Business</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="49.90" data-annual="39.90">49,90</span></div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="49.90" data-annual="479.04">49,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para empresas que contratam com frequência e precisam de agilidade e controle." data-es="Para empresas que contratan frecuentemente y necesitan agilidad y control.">Para empresas que contratam com frequência e precisam de agilidade e controle.</div>
             <div class="pricing-divider"></div>
@@ -7188,7 +7188,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Relatórios de gastos · Suporte prioritário (SLA 24h)" data-es="Reportes de gastos · Soporte prioritario (SLA 24h)">Relatórios de gastos · Suporte prioritário (SLA 24h)</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 5% nova contratação · 3% recorrente" data-es="Comisión: 5% nueva · 3% recurrente">Comissão: 5% nova contratação · 3% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(49.90,'Plano Business · Cobrado mensalmente','business')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?479.04:49.90,'Plano Business · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'business',isAnnual?'year':'month')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
           </div>
 
           <!-- CLIENTES — Enterprise -->
@@ -7398,7 +7398,7 @@ section { padding: 64px 0; }
           <div class="pricing-card featured">
             <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
             <div class="pricing-plan-name" data-pt="Premium" data-es="Premium">Premium</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="39.90" data-annual="31.90">39,90</span></div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="39.90" data-annual="383.04">39,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para freelancers que querem mais visibilidade, oportunidades e ganhar mais." data-es="Para freelancers que quieren más visibilidad, oportunidades y ganar más.">Para freelancers que querem mais visibilidade, oportunidades e ganhar mais.</div>
             <div class="pricing-divider"></div>
@@ -7412,12 +7412,12 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Calculadora de preço" data-es="Calculadora de precio">Calculadora de preço</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 12% novo projeto · 8% recorrente" data-es="Comisión: 12% nuevo · 8% recurrente">Comissão: 12% novo projeto · 8% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(39.90,'Plano Premium · Cobrado mensalmente','premium')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
+            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?383.04:39.90,'Plano Premium · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'premium',isAnnual?'year':'month')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
           </div>
 
           <div class="pricing-card">
             <div class="pricing-plan-name" data-pt="Elite" data-es="Elite">Elite</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="59.90" data-annual="47.90">59,90</span></div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="59.90" data-annual="575.04">59,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos." data-es="Para los mejores freelancers que buscan máxima visibilidad y los mejores proyectos.">Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos.</div>
             <div class="pricing-divider"></div>
@@ -7431,7 +7431,7 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
             </ul>
             <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 8% novo projeto · 5% recorrente" data-es="Comisión: 8% nuevo · 5% recurrente">Comissão: 8% novo projeto · 5% recorrente</div>
-            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(59.90,'Plano Elite · Cobrado mensalmente','elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
+            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(isAnnual?575.04:59.90,'Plano Elite · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'elite',isAnnual?'year':'month')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
           </div>
 
         </div>
@@ -11852,7 +11852,7 @@ function toggleBilling() {
   });
   document.querySelectorAll('.pricing-plan-period').forEach(function(el) {
     el.textContent = isAnnual
-      ? (lang()==='pt' ? '/mês · cobrado anualmente'  : '/mes · cobrado anualmente')
+      ? (lang()==='pt' ? '/ano · cobrado anualmente'  : '/año · cobrado anualmente')
       : (lang()==='pt' ? '/mês · cobrado mensalmente' : '/mes · cobrado mensualmente');
   });
 }
@@ -14756,8 +14756,8 @@ var _payCtx = { amount: 49.90, desc: 'Plano Business', plan: 'business' };
 var _pixTimerInterval = null;
 var _pixSeconds = 900; // 15 min
 
-function openPaymentModal(amount, desc, plan) {
-  _payCtx = { amount: amount || 149, desc: desc || 'Assinatura HereWork', plan: plan || '' };
+function openPaymentModal(amount, desc, plan, interval) {
+  _payCtx = { amount: amount || 149, desc: desc || 'Assinatura HereWork', plan: plan || '', interval: (interval === 'year' ? 'year' : 'month') };
   var fmt = _payCtx.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
 
   // Update header
@@ -14785,7 +14785,7 @@ function openPaymentModal(amount, desc, plan) {
   _startPixTimer();
 
   /* Usar Stripe Payment Element em vez do modal antigo */
-  openStripePayment({ amount: amount || 49.90, description: desc || 'HereWork — Pagamento', title: desc || 'Pagamento Seguro', plan: plan || '' });
+  openStripePayment({ amount: amount || 49.90, description: desc || 'HereWork — Pagamento', title: desc || 'Pagamento Seguro', plan: plan || '', interval: (interval === 'year' ? 'year' : 'month') });
   /* openModal('payment'); — substituído */
 }
 
@@ -22235,7 +22235,7 @@ async function openStripePayment(opts) {
     var _edgeUrl, _edgeBody;
     if (_isSubscription) {
       _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-subscription';
-      _edgeBody = JSON.stringify({ plan: opts.plan });
+      _edgeBody = JSON.stringify({ plan: opts.plan, interval: (opts.interval === 'year' ? 'year' : 'month') });
     } else if (_isTestMode) {
       _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-payment-intent';
       _edgeBody = JSON.stringify({ proposalId: _spProposalId });
