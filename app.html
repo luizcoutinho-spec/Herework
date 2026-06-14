@@ -13032,6 +13032,13 @@ function submitProject() {
           if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
         } else {
           showToast('🚀 Projeto publicado! Freelancers já podem enviar propostas.','success');
+          // CTA upsell para cliente free
+          if (!_isPro()) {
+            setTimeout(function() {
+              showToast('✨ Projetos de assinantes aparecem em destaque para os melhores freelancers. Conheça o Business →', 'info', 6000);
+              setTimeout(function() { showPage('pricing'); }, 4500);
+            }, 2500);
+          }
           _registerPlanUsage('projects_month');
           if (typeof _addPublishedProjectToUI === 'function') _addPublishedProjectToUI(proj);
         }
@@ -13106,6 +13113,13 @@ function submitProposal() {
     /* Limpar campos */
     if (v) v.value=''; if (d) d.value=''; if (cv) cv.value='';
     showToast('🎉 Proposta enviada com sucesso!', 'success');
+    // CTA upsell para freelancer free
+    if (!_isPro()) {
+      setTimeout(function() {
+        showToast('✨ Propostas de assinantes aparecem primeiro para o cliente. Conheça o Premium →', 'info', 6000);
+        setTimeout(function() { showPage('pricing'); }, 4500);
+      }, 2500);
+    }
     window._pendingProposal = null;
     /* Incrementa o contador de propostas no card imediatamente, sem reload */
     try {
