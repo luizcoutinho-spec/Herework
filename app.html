@@ -5462,6 +5462,8 @@ section { padding: 64px 0; }
         </div>
       </div>
 
+      <div id="plan-quota-block" style="display:none;margin-top:16px;padding:16px 20px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius-lg);"></div>
+
       <!-- Upgrade -->
       <div class="plan-upgrade-card">
         <div style="font-size:28px;margin-bottom:8px;">&#128640;</div>
@@ -17061,6 +17063,35 @@ function switchDashPanel(panel) {
       _pFeatEl.innerHTML = (_pFeatures[_pTier] || _pFeatures.free).map(function(f){
         return '<div class="plan-feature"><span class="plan-feature-check">✓</span> ' + f + '</div>';
       }).join('');
+      // bloco de cota de destaques (só cliente; RPC é a fonte de verdade)
+      (async function(){
+        var qb = document.getElementById('plan-quota-block');
+        if (!qb) return;
+        if (_pIsFL) { qb.style.display = 'none'; return; }
+        try {
+          var qr = await _sb.rpc('get_feature_quota', {});
+          var q = qr && qr.data ? qr.data : null;
+          if (!q || q.applicable === false) { qb.style.display = 'none'; return; }
+          var usado = q.used || 0, limite = q.limit, rest = q.remaining;
+          var linhaCota, barra = '';
+          if (limite === -1) {
+            linhaCota = '⭐ Destaques de projetos: <strong>ilimitados</strong>';
+          } else if (limite === 0) {
+            linhaCota = '⭐ Destaques de projetos: <strong>0</strong> — assine um plano para destacar';
+          } else {
+            linhaCota = '⭐ Destaques de projetos: <strong>' + usado + ' de ' + limite + '</strong> usados este mês · ' + rest + ' restantes';
+            var pct = Math.min(100, Math.round((usado / limite) * 100));
+            barra = '<div style="height:8px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden;">' +
+                    '<div style="height:100%;width:' + pct + '%;background:#16a34a;"></div></div>';
+          }
+          var botoes = '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">' +
+            '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')">⬆️ Fazer upgrade</button>' +
+            '<button class="btn btn-outline btn-sm" onclick="showToast(\'Compra avulsa de destaques em breve!\',\'info\')">➕ Comprar destaque avulso</button>' +
+            '</div>';
+          qb.innerHTML = '<div style="font-size:14px;color:var(--text-2);">' + linhaCota + '</div>' + barra + botoes;
+          qb.style.display = 'block';
+        } catch(e){ console.warn('[quota]', e); qb.style.display = 'none'; }
+      })();
     }
   }
   /* Sincroniza toggles de notificação com preferências salvas */
