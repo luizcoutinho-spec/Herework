@@ -16424,6 +16424,7 @@ function openContractModal(opts) {
   _contractCtx = {
     id:         opts.id         || null,
     proposalId: opts.proposalId || null,
+    freelancerId: opts.freelancerId || null,
     name:       opts.name       || 'Freelancer',
     role:       opts.role       || 'Profissional',
     value:      opts.value      || 2000,
@@ -16588,6 +16589,25 @@ async function contractApprove() {
         'error'
       );
       return;
+    }
+
+    /* 2c) Registrar avaliação no banco (não bloqueia a aprovação; loga se falhar) */
+    try {
+      var _revComment = (document.getElementById('contract-review-text') || {}).value || '';
+      var _revRes = await _sb.rpc('submit_review', {
+        p_contract_id: _contractCtx.id,
+        p_rating:      _contractCtx.rating,
+        p_comment:     _revComment
+      });
+      if (_revRes && _revRes.error) {
+        console.warn('[review] RPC erro:', _revRes.error.message);
+      } else if (_revRes && _revRes.data && _revRes.data.ok === false) {
+        console.warn('[review] não gravou:', _revRes.data.error);
+      } else {
+        console.log('[review] avaliação registrada:', _revRes && _revRes.data);
+      }
+    } catch (_e) {
+      console.warn('[review] exceção ao registrar avaliação:', _e && _e.message);
     }
 
     /* 3) Sucesso */
@@ -17690,7 +17710,7 @@ function dashAction(action, id) {
   } else if (action === 'chat-client') {
     openChatModal({ projectId: p.id, projectTitle: p.title, withName: p.freelancer, myRole: 'client' });
   } else if (action === 'approve') {
-    openContractModal({ id: p.id, name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline });
+    openContractModal({ id: p.id, name: p.freelancer, role: p.freelancerRole, value: p.value, project: p.title, deadline: p.deadline, freelancerId: p.freelancerId });
     setTimeout(function(){ contractStep4(); }, 100);
   }
 }
@@ -24310,6 +24330,7 @@ async function _loadRealContracts() {
         progress:      c.status === 'completed' ? 100 : c.status === 'review' ? 90 : 50,
         desc:          c.description || '',
         freelancer:    fl.name || 'Freelancer',
+        freelancerId:  c.freelancer_id || null,
         freelancerRole:'Profissional',
         client:        (_session && _session.name) || 'Você',
         myRole:        'client'
