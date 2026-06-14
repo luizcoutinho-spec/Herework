@@ -13331,6 +13331,7 @@ document.addEventListener('click', function(e) {
   /* Botoes gerais */
   var btn = e.target.closest('button');
   if (btn) {
+    if (btn.hasAttribute('onclick')) return;
     var txt = btn.textContent.trim();
     var pt  = btn.getAttribute('data-pt') || '';
     if (txt === 'Ver Perfil' || pt === 'Ver Perfil') {
