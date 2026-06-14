@@ -127,6 +127,17 @@ module.exports = async function handler(req, res) {
           }
           const prop = propRows[0];
 
+          /* A.2b REGRA 1:1 — projeto já tem contrato vivo? Não cria 2º. */
+          const liveRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/contracts?project_id=eq.${encodeURIComponent(prop.project_id)}&status=neq.cancelled&select=id&limit=1`,
+            { headers: sbHeaders }
+          );
+          const live = liveRes.ok ? await liveRes.json() : [];
+          if (Array.isArray(live) && live.length > 0) {
+            console.error(`[HereWork] REGRA 1:1: projeto ${prop.project_id} ja tem contrato vivo (${live[0].id}). Pagamento ${pi.id} NAO criou contrato — RECONCILIAR/ESTORNAR manualmente.`);
+            break;
+          }
+
           /* A.3 Título do contrato vem do projeto (fallback se faltar) */
           let title = 'Contrato ' + prop.id;
           try {
@@ -173,6 +184,18 @@ module.exports = async function handler(req, res) {
           const created = await insertRes.json();
           const newContractId = Array.isArray(created) && created[0] ? created[0].id : '(id?)';
           console.log(`[HereWork] Contrato ${newContractId} criado (escrow retido) para pi ${pi.id}.`);
+
+          /* marca a proposta aceita como accepted (some o botao Contratar nela) */
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/proposals?id=eq.${encodeURIComponent(proposalId)}`,
+              { method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ status: 'accepted', updated_at: new Date().toISOString() }) });
+          } catch (e) { console.error(`[HereWork] falha ao marcar proposta accepted (pi ${pi.id}):`, e && (e.message||e)); }
+
+          /* fecha o projeto — regra 1:1 (status interno 'contracted') */
+          try {
+            await fetch(`${SUPABASE_URL}/rest/v1/projects?id=eq.${encodeURIComponent(prop.project_id)}`,
+              { method: 'PATCH', headers: sbHeaders, body: JSON.stringify({ status: 'contracted' }) });
+          } catch (e) { console.error(`[HereWork] falha ao fechar projeto contracted (pi ${pi.id}):`, e && (e.message||e)); }
 
           /* A.5 RECUSA EM LOTE: descartar as outras propostas abertas do mesmo projeto */
           try {
