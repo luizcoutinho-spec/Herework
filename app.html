@@ -11728,6 +11728,9 @@ function sortCards(selectEl) {
     }
 
     /* ── Projetos ────────────────────────────────────────── */
+    /* featured sempre primeiro, independente do criterio escolhido */
+    var _ff = parseInt(b.getAttribute('data-featured')||0) - parseInt(a.getAttribute('data-featured')||0);
+    if (_ff !== 0) return _ff;
     if (optVal === 'recente' || optText.indexOf('recente') !== -1 || optText.indexOf('recient') !== -1)
       return parseInt(b.getAttribute('data-created')||0) - parseInt(a.getAttribute('data-created')||0);
     if (optVal === 'maior-orcamento' || (optText.indexOf('maior') !== -1 && optText.indexOf('orc') !== -1))
@@ -15491,7 +15494,7 @@ function _realProjCard(p) {
   return '<div class="proj-list-card real-card" data-real-id="' + _sanitize(p.id) + '" data-owner="' + _sanitize(p.client_id || '') + '" data-cat="' + _sanitize(catKey) +
     '" data-budget="' + bMax + '" data-type="' + (p.type || 'fixo') + '" data-deadline="' + (p.deadline_days || 30) +
     '" data-proposals="' + props + '" data-created="' + _createdMs +
-    '" data-subcat="' + _sanitize(subcatArr.join(',')) + '">' +
+    '" data-subcat="' + _sanitize(subcatArr.join(',')) + '" data-featured="' + (p.featured ? '1' : '0') + '">' +
     '<div class="proj-list-header">' +
       '<div class="proj-list-left">' +
         '<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">' +
@@ -15534,11 +15537,13 @@ async function _loadRealProjects() {
   try {
     var list = await _sbListProjects();
     list = _sortFeatured(list,'profiles'); // featured->plano->rating
+    var _html = '';
     list.forEach(function(p) {
       if (_realProjectsLoaded[p.id]) return;
       _realProjectsLoaded[p.id] = true;
-      grid.insertAdjacentHTML('afterbegin', _realProjCard(p));
+      _html += _realProjCard(p);
     });
+    if (_html) grid.insertAdjacentHTML('afterbegin', _html);
     if (typeof applyAllFilters === 'function') applyAllFilters('proj');
     var projCount = document.getElementById('proj-count');
     if (projCount) projCount.textContent = grid.querySelectorAll('.proj-list-card').length;
