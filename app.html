@@ -15596,7 +15596,13 @@ async function _refreshMyPublishedProjects() {
     await _sbEnsureSession();
     var list = await _sbGetMyProjects();
     list = list.filter(function(p){ return p.status === 'open'; });
-    if (!list.length) return; /* mantém o estado vazio padrão renderizado por _renderDashClientWaiting */
+    if (!list.length) {
+      /* limpa o container — projeto virou in_progress ou foi excluído */
+      el.innerHTML = typeof _emptyState === 'function'
+        ? _emptyState('📋', 'Nenhum projeto publicado', '<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="openModal(\'publish\')">+ Publicar Projeto</button>')
+        : '';
+      return;
+    }
     var who = {
       name:       _session.name || 'Você',
       avatar_url: _session.avatar_url || null
