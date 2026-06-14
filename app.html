@@ -15732,7 +15732,7 @@ async function _refreshMyPublishedProjects() {
           '<div class="dash-proj-actions">' +
             '<button class="btn btn-primary btn-sm" onclick="_toggleProjectProposals(\'' + _sanitize(p.id) + '\')">' + propLabel + '</button>' +
             '<button class="btn btn-outline btn-sm" onclick="openEditProject(\'' + _sanitize(p.id) + '\')">✏️ Editar</button>' +
-            '<button class="btn btn-outline btn-sm" onclick="_featProjectCard(\'' + _sanitize(p.id) + '\', ' + (p.featured ? 'true' : 'false') + ')"' + (p.featured ? ' disabled style="opacity:.6;cursor:default;"' : '') + '>' + (p.featured ? '⭐ Destacado' : '⭐ Destacar') + '</button>' +
+            '<button ' + (p.featured ? 'class="btn btn-sm" disabled style="background:var(--green);border-color:var(--green);color:#fff;cursor:default;"' : 'class="btn btn-outline btn-sm"') + ' onclick="_featProjectCard(\'' + _sanitize(p.id) + '\', ' + (p.featured ? 'true' : 'false') + ')">' + (p.featured ? '⭐ Destacado' : '⭐ Destacar') + '</button>' +
             /* Botão Excluir — sempre visível nesta área, pois são os projetos do próprio usuário */
             '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#fca5a5;font-size:12px;" title="Excluir esta publicação" onclick="_deletePublishedProject(\'' + _sanitize(p.id) + '\', this)">🗑️ Excluir</button>' +
           '</div>' +
