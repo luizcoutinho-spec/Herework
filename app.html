@@ -12630,10 +12630,16 @@ function _sortFeatured(list,ownerKey){
 function _isPro()        { var p = _getUserPlan(); return p === 'pro' || p === 'enterprise'; }
 function _isEnterprise() { return _getUserPlan() === 'enterprise'; }
 function _getPlanLabel() {
+  var v = _session && _session.plan_variant;
+  if (v) {
+    var labels = { business:'Business', premium:'Premium', elite:'Elite',
+                   enterprise:'Enterprise', pro:'PRO', pro_max:'Pro Max' };
+    if (labels[v]) return labels[v];
+  }
   switch(_getUserPlan()) {
     case 'pro':        return _isFL() ? 'Premium'   : 'Business';
     case 'enterprise': return _isFL() ? 'Elite'     : 'Enterprise';
-    default:           return 'Grátis';   /* mesmo nome para ambos os tipos */
+    default:           return 'Grátis';
   }
 }
 function _getPlanCommission(isRecurrent) {
@@ -15325,27 +15331,34 @@ function _activatePlan(planName) {
     'pro':          'pro'
   };
   var tier = tierMap[planName.toLowerCase()] || 'pro';
+  var _variantMap = {
+    'business':'business','premium':'premium','elite':'elite',
+    'enterprise':'enterprise','pro':'pro','pro_max':'pro_max',
+    'profissional':'premium','professional':'premium'
+  };
+  var variant = _variantMap[planName.toLowerCase()] || null;
 
   /* 1. Atualiza sessão em memória */
-  if (_session) _session.plan = tier;
+  if (_session) { _session.plan = tier; if (variant) _session.plan_variant = variant; }
 
   /* 2. Persiste em localStorage (hw_plan + hw_session) */
   try { localStorage.setItem('hw_plan', tier); } catch(e) {}
   try {
     var _hs = JSON.parse(localStorage.getItem('hw_session') || '{}');
     _hs.plan = tier;
+    if (variant) _hs.plan_variant = variant;
     localStorage.setItem('hw_session', JSON.stringify(_hs));
   } catch(e) {}
 
   /* 3. Persiste no Supabase auth metadata (cross-device) */
   if (_sbReady()) {
-    _sb.auth.updateUser({ data: { plan: tier, plan_name: planName } })
+    _sb.auth.updateUser({ data: { plan: tier, plan_name: planName, plan_variant: variant } })
       .catch(function(e){ console.warn('_activatePlan updateUser:', e); });
   }
 
   /* 4. Tenta gravar na tabela profiles (se coluna existir) */
   if (_sbReady() && _session && _session.uid) {
-    _sb.from('profiles').update({ plan: tier }).eq('id', _session.uid)
+    _sb.from('profiles').update({ plan: tier, plan_variant: variant }).eq('id', _session.uid)
       .catch(function(e){ /* coluna pode não existir — silencioso */ });
   }
 
