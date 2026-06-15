@@ -7146,6 +7146,8 @@ section { padding: 64px 0; }
           data-pt="Sou Cliente" data-es="Soy Cliente">Sou Cliente</button>
         <button class="pricing-tab" onclick="switchPricingTab('freelancers', this)"
           data-pt="Sou Freelancer" data-es="Soy Freelancer">Sou Freelancer</button>
+        <button class="pricing-tab" onclick="switchPricingTab('hybrid', this)"
+          data-pt="Sou Ambos" data-es="Soy Ambos">Sou Ambos</button>
       </div>
 
       <!-- PLANOS EMPRESAS -->
@@ -7573,6 +7575,68 @@ section { padding: 64px 0; }
 
       </div><!-- /pricing-freelancers -->
 
+      <!-- PLANOS HÍBRIDO (vitrine — em breve) -->
+      <div id="pricing-hybrid" style="display:none;">
+        <div class="pricing-grid-cards">
+
+          <!-- HÍBRIDO — Grátis -->
+          <div class="pricing-card">
+            <div class="pricing-plan-name">Grátis</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-period">Gratuito para sempre</div>
+            <div class="pricing-plan-desc">Para quem contrata e presta serviço, começando na plataforma.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>1 projeto ativo · 3 propostas/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>5 convites diretos/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Portfólio 5 itens · 3 áreas</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Pagamento garantido (escrow)</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Envios avulsos disponíveis (R$ 4,90)</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--text-3);font-weight:700;margin-bottom:20px;">Taxa 8% · Comissão 18% novo / 12% recorrente</div>
+            <button class="btn btn-outline btn-block btn-lg" disabled style="opacity:.7;cursor:default;">Plano atual</button>
+          </div>
+
+          <!-- HÍBRIDO — Completo (destaque) -->
+          <div class="pricing-card featured">
+            <div class="pricing-popular-badge" data-pt="Conta completa" data-es="Cuenta completa">Conta completa</div>
+            <div class="pricing-plan-name">Completo</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="74.90" data-annual="719.04">74,90</span></div>
+            <div class="pricing-plan-period">/mês · cobrado mensalmente</div>
+            <div class="pricing-plan-desc">Contrate e trabalhe na mesma conta, com recursos dos dois lados.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>10 projetos ativos · propostas ilimitadas</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>3 projetos + 5 propostas em destaque/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>50 convites diretos/mês</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Portfólio 20 itens · 10 áreas · 5 assentos</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Selo verificado · Matching por IA</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Suporte prioritário · SLA 24h</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;">Taxa 5% · Comissão 12% novo / 8% recorrente</div>
+            <button class="btn btn-outline btn-block btn-lg" disabled style="opacity:.7;cursor:default;" onclick="showToast('Plano Completo Híbrido em breve!','info')">Em breve</button>
+          </div>
+
+          <!-- HÍBRIDO — Completo Max -->
+          <div class="pricing-card">
+            <div class="pricing-plan-name">Completo Max</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="149.90" data-annual="1439.04">149,90</span></div>
+            <div class="pricing-plan-period">/mês · cobrado mensalmente</div>
+            <div class="pricing-plan-desc">Tudo ilimitado, para quem opera nos dois lados em alto volume.</div>
+            <div class="pricing-divider"></div>
+            <ul class="pricing-features-list">
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Projetos, propostas e destaques ilimitados</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Convites e portfólio ilimitados</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Gerador de propostas com IA</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Assentos ilimitados · SLA 4h</span></li>
+              <li class="pricing-feature"><span class="pricing-check">✓</span><span>Gerente dedicado</span></li>
+            </ul>
+            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;">Taxa negociável · Comissão 8% novo / 5% recorrente</div>
+            <button class="btn btn-outline btn-block btn-lg" disabled style="opacity:.7;cursor:default;" onclick="showToast('Plano Completo Max Híbrido em breve!','info')">Em breve</button>
+          </div>
+
+        </div>
+      </div><!-- /pricing-hybrid -->
 
     </div><!-- /container -->
   </section>
@@ -11832,6 +11896,8 @@ function switchPricingTab(tab, btn) {
   var fl = document.getElementById('pricing-freelancers');
   if (co) co.style.display = tab === 'companies' ? '' : 'none';
   if (fl) fl.style.display = tab === 'freelancers' ? '' : 'none';
+  var hy = document.getElementById('pricing-hybrid');
+  if (hy) hy.style.display = tab === 'hybrid' ? '' : 'none';
 }
 
 /* ═══════════════════════════════════════════
