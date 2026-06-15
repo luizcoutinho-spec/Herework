@@ -22607,8 +22607,8 @@ async function openStripePayment(opts) {
   _spAmount     = opts.amount     || 0;
   _spContractId = opts.contractId || '';
   _spProposalId = opts.proposalId || '';
-  var _TEST_UIDS  = ['f94df698-24b2-4e6b-9190-805e0ca0c5cd','1a366c84-62b9-440c-83fa-03d13abcb070'];
-  var _isTestMode = !!(_session && _session.uid && _TEST_UIDS.indexOf(_session.uid) !== -1 && _spProposalId);
+  // TEMP (fase de testes): _isTestMode removido — todos os pagamentos escrow usam hw-create-payment-intent + _STRIPE_PK_TEST.
+  // GO-LIVE: restaurar bifurcação com chaves live e endpoint live.
   var description = opts.description || 'HereWork — Contrato';
   var email = _session ? _session.email : '';
   var name  = _session ? _session.name  : '';
@@ -22655,12 +22655,11 @@ async function openStripePayment(opts) {
     if (_isSubscription) {
       _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-subscription';
       _edgeBody = JSON.stringify({ plan: opts.plan, interval: (opts.interval === 'year' ? 'year' : 'month') });
-    } else if (_isTestMode) {
+    } else {
+      // TEMP (fase de testes): A01 corrigido — sempre hw-create-payment-intent; amount vem do banco via proposalId.
+      // GO-LIVE: avaliar se endpoint live separado é necessário ou manter este com chaves live.
       _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-payment-intent';
       _edgeBody = JSON.stringify({ proposalId: _spProposalId });
-    } else {
-      _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/create-payment-intent';
-      _edgeBody = JSON.stringify({ amount: _spAmount, contractId: _spContractId, description: description, customerEmail: email, customerName: name });
     }
     var res = await fetch(_edgeUrl, {
       method: 'POST',
@@ -22673,16 +22672,13 @@ async function openStripePayment(opts) {
     if (!data.clientSecret) throw new Error('Pagamento não retornou clientSecret. Tente novamente.');
 
     // Montar Stripe Payment Element
-    var stripe;
-    if (_isSubscription || _isTestMode) {
-      if (typeof _STRIPE_PK_TEST === 'undefined' || !_STRIPE_PK_TEST) {
-        throw new Error('Modo teste: chave de teste do Stripe ausente. Pagamento abortado.');
-      }
-      stripe = Stripe(_STRIPE_PK_TEST);
-      _stripeInstance = stripe;
-    } else {
-      stripe = initStripe();  // produção: pk_live (inalterado)
+    // TEMP (fase de testes): todos os pagamentos usam _STRIPE_PK_TEST (clientSecret é sempre test).
+    // GO-LIVE: restaurar bifurcação — subscription/escrow live usam pk_live via initStripe().
+    if (typeof _STRIPE_PK_TEST === 'undefined' || !_STRIPE_PK_TEST) {
+      throw new Error('Chave de teste do Stripe ausente (_STRIPE_PK_TEST). Pagamento abortado.');
     }
+    var stripe = Stripe(_STRIPE_PK_TEST);
+    _stripeInstance = stripe;
     if (!stripe) throw new Error('Stripe não carregado');
 
     _stripeElements = stripe.elements({
