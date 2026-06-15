@@ -17069,7 +17069,10 @@ function switchDashPanel(panel) {
         if (!qb) return;
         if (_pIsFL) { qb.style.display = 'none'; return; }
         try {
+          if (typeof _sbReady === 'function' && !_sbReady()) { qb.style.display = 'none'; return; }
+          if (typeof _sbEnsureSession === 'function') { await _sbEnsureSession(); }
           var qr = await _sb.rpc('get_feature_quota', {});
+          if (qr && qr.error) { console.warn('[quota] RPC erro:', qr.error.message); qb.style.display = 'none'; return; }
           var q = qr && qr.data ? qr.data : null;
           if (!q || q.applicable === false) { qb.style.display = 'none'; return; }
           var usado = q.used || 0, limite = q.limit, rest = q.remaining;
