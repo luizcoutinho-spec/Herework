@@ -36,6 +36,8 @@ const PLAN_MAP: Record<string, { month: string; year: string; plan: string }> = 
   business: { month: "price_1TiFWgHXgU6QiY3Xc6NPW2rP", year: "price_1TiIUoHXgU6QiY3X9mInCbKV", plan: "pro" },
   premium:  { month: "price_1TiFZYHXgU6QiY3X4Pw207xn", year: "price_1TiIVKHXgU6QiY3XgoOPmxS8", plan: "pro" },
   elite:    { month: "price_1TiFaqHXgU6QiY3XispsUjbX", year: "price_1TiIVkHXgU6QiY3XqbCzApym", plan: "enterprise" },
+  pro:      { month: "price_1Tic2IHXgU6QiY3XZoWj0RX8", year: "price_1Tic3zHXgU6QiY3XfhKI21ue", plan: "pro" },
+  pro_max:  { month: "price_1Tic4IHXgU6QiY3XaAE5yQi9", year: "price_1Tic4cHXgU6QiY3Xir4lOJNh", plan: "enterprise" },
 };
 
 const ACTIVE_SUB_STATUSES = ["active", "trialing", "past_due", "incomplete"];
@@ -136,7 +138,7 @@ Deno.serve(async (req) => {
       payment_behavior: "default_incomplete",
       payment_settings: { save_default_payment_method: "on_subscription" },
       expand: ["latest_invoice.payment_intent"],
-      metadata: { user_id: uid, plan: mapped.plan },
+      metadata: { user_id: uid, plan: mapped.plan, plan_variant: planKey },
     });
 
     let clientSecret: string | null = null;
