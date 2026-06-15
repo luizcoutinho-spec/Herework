@@ -14770,16 +14770,17 @@ function adminToggle(feature, el) {
 // Secret trigger: click logo 5x quickly to open admin
 (function() {
   var _clicks = 0, _timer;
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('.logo')) {
-      _clicks++;
-      clearTimeout(_timer);
-      if (_clicks >= 5) {
-        _clicks = 0;
-        showAdminPage();
-      } else {
-        _timer = setTimeout(function() { _clicks = 0; }, 1200);
-      }
+  var _logo = document.querySelector('a.logo');
+  if (!_logo) return;
+  _logo.addEventListener('click', function(e) {
+    e.preventDefault();
+    _clicks++;
+    clearTimeout(_timer);
+    if (_clicks >= 5) {
+      _clicks = 0;
+      showAdminPage();
+    } else {
+      _timer = setTimeout(function() { _clicks = 0; }, 1500);
     }
   });
 })();
