@@ -12636,13 +12636,23 @@ function _getPlanLabel() {
     default:           return 'Grátis';
   }
 }
-function _getPlanCommission(isRecurrent) {
+function _getPlanCommission(isRecurrent, roleOverride) {
   /* Tabela de comissões por tipo + plano (nova contratação / cliente recorrente):
      Freelancer → Grátis:18%/12%  Premium:12%/8%  Elite:8%/5%
-     Cliente    → Grátis:8%/6%    Business:5%/3%  Enterprise:negociável */
+     Cliente    → Grátis:8%/6%    Business:5%/3%  Enterprise:negociável
+     Both → chaves separadas: commission_client* (contratando) / commission_fl* (prestando)
+     roleOverride: 'client'|'freelancer' — permite forçar papel em contextos explícitos */
   var tier  = _getUserPlan();
-  var type  = _isFL() ? 'freelancer' : 'client';
-  var key   = isRecurrent ? 'commission_recurrent' : 'commission';
+  var type;
+  if (roleOverride === 'client' || roleOverride === 'freelancer') { type = roleOverride; }
+  else { type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client'); }
+  var key;
+  if (type === 'both') {
+    var _role = (roleOverride === 'freelancer') ? 'fl' : 'client';
+    key = isRecurrent ? ('commission_' + _role + '_recurrent') : ('commission_' + _role);
+  } else {
+    key = isRecurrent ? 'commission_recurrent' : 'commission';
+  }
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
   var plan  = table[tier] || table.free;
   return (plan && plan[key] != null) ? plan[key] : (isRecurrent ? 0.12 : 0.18);
@@ -12783,6 +12793,15 @@ var _PLAN_LIMITS = {
     free:       { proposals_month: 3,        portfolio_items: 5,        verified_badges: 0,        commission: 0.18, commission_recurrent: 0.12 },
     pro:        { proposals_month: Infinity, portfolio_items: 20,       verified_badges: 1,        commission: 0.12, commission_recurrent: 0.08 },
     enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission: 0.08, commission_recurrent: 0.05 }
+  },
+  /* ── Híbrido (both) ─────────────────────────────────────────────────
+     Reúne chaves de cliente + freelancer com 2 comissões separadas:
+     commission_client/commission_client_recurrent → ação de contratação
+     commission_fl/commission_fl_recurrent         → ação de prestação   */
+  both: {
+    free:       { projects_month: 1,        proposals_month: 3,        direct_invites: 5,        candidates_per_project: 10,       portfolio_items: 5,        verified_badges: 0,        commission_client: 0.08, commission_client_recurrent: 0.06, commission_fl: 0.18, commission_fl_recurrent: 0.12 },
+    pro:        { projects_month: 10,       proposals_month: Infinity, direct_invites: 50,       candidates_per_project: Infinity, portfolio_items: 20,       verified_badges: 1,        commission_client: 0.05, commission_client_recurrent: 0.03, commission_fl: 0.12, commission_fl_recurrent: 0.08 },
+    enterprise: { projects_month: Infinity, proposals_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission_client: 0.03, commission_client_recurrent: 0.02, commission_fl: 0.08, commission_fl_recurrent: 0.05 }
   }
 };
 
@@ -12827,7 +12846,7 @@ function _getResourceLimit(resourceKey) {
   if (_session && _session.email && _testEmails.indexOf(String(_session.email).toLowerCase()) !== -1) {
     return Infinity;
   }
-  var type  = _isFL() ? 'freelancer' : 'client';
+  var type  = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
   var tier  = _getUserPlan();                                 /* 'free' | 'pro' | 'enterprise' */
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
   var plan  = table[tier] || table.free;
@@ -12836,8 +12855,13 @@ function _getResourceLimit(resourceKey) {
 
 /* ── Próximo plano disponível e seus benefícios (jornada de upgrade) ── */
 function _getNextPlanInfo() {
-  var type = _isFL() ? 'freelancer' : 'client';
+  var type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
   var tier = _getUserPlan();
+  if (_isBoth()) {
+    if (tier === 'free') return { key:'pro', name:'PRO', price:'R$ 79,90/mês', variant:'pro' };
+    if (tier === 'pro')  return { key:'enterprise', name:'Pro Max', price:'R$ 149,90/mês', variant:'pro_max' };
+    return null;
+  }
   if (type === 'freelancer') {
     if (tier === 'free') return { key:'pro', name:'Premium', price:'R$ 39,90/mês', benefits:[
       'Propostas ilimitadas por mês', 'Portfólio com até 20 itens', 'Comissão reduzida: 12% (8% p/ recorrente)',
@@ -16748,7 +16772,7 @@ function openContractModal(opts) {
     rating:     0
   };
 
-  var _comm    = (typeof _getPlanCommission === 'function') ? _getPlanCommission() : 0.20;
+  var _comm    = (typeof _getPlanCommission === 'function') ? _getPlanCommission(false, 'client') : 0.20;
   var _commPct = Math.round(_comm * 100);  /* Ex: 0.20 → 20 */
   var fee   = Math.round(_contractCtx.value * _comm);
   var total = _contractCtx.value + fee;
