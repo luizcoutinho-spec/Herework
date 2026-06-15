@@ -116,7 +116,7 @@ describe('Tipos válidos', () => {
    Protocolo único
 ───────────────────────────────────── */
 describe('Protocolo', () => {
-  test('dois requests seguidos geram protocolos diferentes', async () => {
+  test('protocolo tem formato TYPE-XXXXXXXX', async () => {
     const body = { type: 'export', userId: 'u1', userEmail: 'a@test.com' };
     const ip1 = '192.168.1.1';
     const ip2 = '192.168.1.2';
@@ -126,10 +126,11 @@ describe('Protocolo', () => {
     const req2 = { method: 'POST', headers: { origin: 'https://herework.vercel.app', 'x-forwarded-for': ip2 }, body, socket: {} };
     await handler(req1, res1);
     await handler(req2, res2);
-    // Ambos devem ter sucesso e protocolos distintos
     expect(res1._status).toBe(200);
     expect(res2._status).toBe(200);
-    expect(res1._body.protocol).not.toBe(res2._body.protocol);
+    // Verifica formato TYPE-<base36> em vez de unicidade por timestamp (P3: colisão sob concorrência)
+    expect(res1._body.protocol).toMatch(/^EXPORT-[0-9A-Z]+$/);
+    expect(res2._body.protocol).toMatch(/^EXPORT-[0-9A-Z]+$/);
   });
 });
 
