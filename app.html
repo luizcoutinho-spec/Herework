@@ -11038,12 +11038,6 @@ async function _sbUpdateType(uid, newType) {
     await _sb.auth.updateUser({ data: { saved_account_type: newType, account_type_override: newType === 'both' ? 'both' : null } });
   } catch(e) {}
 
-  /* 'both' não existe na enum account_type do banco — não tenta UPDATE na coluna */
-  if (newType === 'both') {
-    console.log('[sbType] tipo "both" salvo em auth metadata + localStorage');
-    return true;
-  }
-
   /* Lê o tipo atual do cache local para decidir a estratégia */
   var _cachedType = (_session && _session.uid && window._realProfileCache && window._realProfileCache[_session.uid])
     ? (window._realProfileCache[_session.uid].type || null) : null;
@@ -11054,9 +11048,9 @@ async function _sbUpdateType(uid, newType) {
   if (_cachedType && _cachedType === newType) return true;
 
   /* Caminho 1: UPDATE direto.
-     Só tenta quando NÃO sabemos o tipo atual (sem cache) — se sabemos que o tipo
-     está mudando, o trigger P0001 vai bloquear e gera um 400 desnecessário. */
-  if (!_cachedType) {
+     Tenta quando não sabemos o tipo atual (sem cache) ou quando newType==='both'
+     (coluna TEXT aceita 'both' sem risco de P0001; não depende do trigger). */
+  if (!_cachedType || newType === 'both') {
     try {
       var r1 = await _sb.from('profiles')
         .update({ type: newType, updated_at: new Date().toISOString() })
