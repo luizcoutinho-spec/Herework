@@ -14922,43 +14922,37 @@ function showAdminPage() {
   }
 }
 
-function adminDoLogin() {
-  var u = document.getElementById('admin-login-user');
-  var p = document.getElementById('admin-login-pass');
+async function adminDoLogin() {
   var btn = document.querySelector('#overlay-admin-login .btn-primary');
-  if(!u || !p) return;
-  var user = u.value.trim();
-  var pass = p.value;
-  if(!user || !pass) {
-    showToast('Preencha usuário e senha.','warn'); return;
+  if (!_sbReady() || !_session || !_session.uid) {
+    showToast('Faça login na sua conta antes de acessar o painel admin.', 'warn');
+    return;
   }
   _setBtnLoading(btn, true);
-  setTimeout(function() {
+  try {
+    var result = await _sb.from('profiles').select('is_admin').eq('id', _session.uid).maybeSingle();
     _setBtnLoading(btn, false);
-    /* Credenciais admin — ofuscadas */
-    /* Credenciais via hash seguro — não reversível */
-    var _adminHash = 'e49fb27d3c5273fb5f8ff46216f1a222494e5773d85e5915b5298e2358d9368e';
-    var inputHash  = (function(s){ var h=0; for(var i=0;i<s.length;i++){h=(Math.imul(31,h)+s.charCodeAt(i))|0;} return Math.abs(h).toString(16); })('e49fb27d'+user+'|'+pass);
-    /* Fallback SHA-256 simulado para demo */
-    var _au = atob('YWRtaW4='); var _ap = atob('aGVyZXdvcmtAMjAyNSE=');
-    if(user === _au && pass === _ap) {
+    if (result.data && result.data.is_admin === true) {
       _adminAuth = true;
       _adminTries = 0;
       document.getElementById('overlay-admin-login').classList.remove('open');
       document.body.style.overflow = '';
       showAdminPage();
-      showToast('✅ Acesso admin concedido.','success');
+      showToast('✅ Acesso admin concedido.', 'success');
     } else {
-      _adminTries = (_adminTries||0) + 1;
-      if(_adminTries >= 5) {
-        showToast('❌ Muitas tentativas. Aguarde 30 segundos.','error');
-        if(btn) btn.disabled = true;
-        setTimeout(function(){ if(btn) btn.disabled=false; _adminTries=0; }, 30000);
+      _adminTries = (_adminTries || 0) + 1;
+      if (_adminTries >= 5) {
+        showToast('❌ Muitas tentativas. Aguarde 30 segundos.', 'error');
+        if (btn) btn.disabled = true;
+        setTimeout(function() { if (btn) btn.disabled = false; _adminTries = 0; }, 30000);
       } else {
-        showToast('❌ Credenciais inválidas. (' + _adminTries + '/5)','error');
+        showToast('❌ Acesso negado. (' + _adminTries + '/5)', 'error');
       }
     }
-  }, 600);
+  } catch (err) {
+    _setBtnLoading(btn, false);
+    showToast('❌ Erro ao verificar permissão: ' + (err.message || 'tente novamente.'), 'error');
+  }
 }
 
 function _startLockoutCountdown(errEl) {
