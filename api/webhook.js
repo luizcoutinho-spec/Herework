@@ -62,10 +62,12 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return respond(res, 405, { error: 'Método não permitido.' }, req);
 
   const sig    = req.headers['stripe-signature'];
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  // TEMP (fase de testes): usa STRIPE_WEBHOOK_SECRET_TEST.
+  // GO-LIVE: trocar para STRIPE_WEBHOOK_SECRET (whsec_ live) e validar no boot.
+  const secret = process.env.STRIPE_WEBHOOK_SECRET_TEST;
 
   if (!sig)    return respond(res, 400, { error: 'Stripe-Signature ausente.' }, req);
-  if (!secret) return respond(res, 500, { error: 'STRIPE_WEBHOOK_SECRET não configurado.' }, req);
+  if (!secret) return respond(res, 500, { error: 'STRIPE_WEBHOOK_SECRET_TEST não configurado.' }, req);
 
   let event;
 

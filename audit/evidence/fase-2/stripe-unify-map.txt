@@ -1,0 +1,56 @@
+## Fase 2 — Mapa de Unificação Stripe (fix/stripe-unify-test) — 2026-06-15
+
+### Estado ANTES
+
+Backend:
+  api/_helpers.js:12      getStripe()    → process.env.STRIPE_SECRET_KEY          (live)
+  api/webhook.js:65       secret         → process.env.STRIPE_WEBHOOK_SECRET       (live)
+  api/pix.js              via getStripe() → STRIPE_SECRET_KEY                      (live)
+  api/status.js           via getStripe() → STRIPE_SECRET_KEY                      (live)
+  api/release-payment.js:28              → process.env.STRIPE_SECRET_KEY_TEST      (test ✓)
+  api/cancel-contract.js:27             → process.env.STRIPE_SECRET_KEY_TEST      (test ✓)
+  api/create-connect-account.js:2       → process.env.STRIPE_SECRET_KEY_TEST      (test ✓)
+  api/connect-account-status.js:20      → process.env.STRIPE_SECRET_KEY_TEST      (test ✓)
+
+Supabase Edges (sem alteração — já corretos):
+  hw-create-payment-intent/index.ts:31  → STRIPE_SECRET_KEY_TEST                  (test ✓)
+  hw-create-subscription/index.ts       → STRIPE_SECRET_KEY_TEST                  (test ✓)
+
+Frontend (app.html):
+  L22610-22611  _TEST_UIDS + _isTestMode bifurcation (apenas 2 UIDs hardcoded usavam hw-*)
+  L22658-22663  else if (_isTestMode) → hw-create-payment-intent (ok)
+                else → create-payment-intent (SEM hw- → 404 = A01)
+  L22677-22684  if (_isSubscription || _isTestMode) → _STRIPE_PK_TEST
+                else → initStripe() → pk_live_...
+
+### Estado DEPOIS
+
+Backend:
+  api/_helpers.js:12      getStripe()    → process.env.STRIPE_SECRET_KEY_TEST     (test ✓)
+  api/webhook.js:65       secret         → process.env.STRIPE_WEBHOOK_SECRET_TEST  (test ✓)
+  api/pix.js              via getStripe() → STRIPE_SECRET_KEY_TEST                 (test ✓)
+  api/status.js           via getStripe() → STRIPE_SECRET_KEY_TEST                 (test ✓)
+  api/release-payment.js  → STRIPE_SECRET_KEY_TEST                                 (test ✓)
+  api/cancel-contract.js  → STRIPE_SECRET_KEY_TEST                                 (test ✓)
+
+Frontend (app.html):
+  _TEST_UIDS / _isTestMode REMOVIDOS
+  URL escrow: sempre hw-create-payment-intent (A01 fechado)
+  Payload escrow: { proposalId } (amount vem do banco via Edge)
+  Stripe.js: sempre _STRIPE_PK_TEST (pk_test_...)
+  Singletons: _stripeInstance = Stripe(_STRIPE_PK_TEST) (debt D8: unificar com _stripe/_initStripe)
+
+### Call sites openStripePayment após a mudança
+
+  L15082  subscription  → plan: '...'   → _isSubscription=true → hw-create-subscription + _STRIPE_PK_TEST ✓
+  L15333  legacy escrow → sem proposalId → hw-create-payment-intent → Edge retorna 400 "proposalId obrigatório"
+           (era 404 antes; ainda broken, mesma causa raiz — deve ser atualizado para passar proposalId)
+  L16862  main escrow   → proposalId: _contractCtx.proposalId → hw-create-payment-intent ✓ (caminho principal)
+
+### Gap PASSO 0
+
+  Stripe CLI não instalado — não foi possível confirmar endpoint de webhook test.
+  STRIPE_WEBHOOK_SECRET_TEST existe no Vercel (confirmed via vercel env ls).
+  Usuário deve confirmar no Stripe Dashboard (test mode) que:
+    - Endpoint https://herework.vercel.app/api/webhook existe em test
+    - whsec_ do endpoint = valor de STRIPE_WEBHOOK_SECRET_TEST no Vercel

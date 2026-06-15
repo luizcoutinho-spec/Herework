@@ -7,10 +7,12 @@ const Stripe = require('stripe');
 
 /**
  * Retorna instância do Stripe configurada com a secret key do ambiente
+ * TEMP (fase de testes): usa STRIPE_SECRET_KEY_TEST.
+ * GO-LIVE: trocar para STRIPE_SECRET_KEY (sk_live_) e validar prefixo no boot.
  */
 function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY não configurada nas variáveis de ambiente do Vercel.');
+  const key = process.env.STRIPE_SECRET_KEY_TEST;
+  if (!key) throw new Error('STRIPE_SECRET_KEY_TEST não configurada nas variáveis de ambiente do Vercel.');
   return Stripe(key);
 }
 
