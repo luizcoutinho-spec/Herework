@@ -22781,12 +22781,40 @@ async function confirmStripePayment() {
 
     } else {
       // Cartão, Apple Pay, Google Pay, Link
-      var confirmRes = await stripe.confirmPayment({
-        elements:      _stripeElements,
-        clientSecret:  window._spClientSecret,
-        confirmParams: { return_url: window.location.href },
-        redirect:      'if_required'
-      });
+      var TIMEOUT_MS = 45000;
+      var confirmRes = await Promise.race([
+        stripe.confirmPayment({
+          elements:      _stripeElements,
+          clientSecret:  window._spClientSecret,
+          confirmParams: { return_url: window.location.href },
+          redirect:      'if_required'
+        }),
+        new Promise(function(resolve) {
+          setTimeout(function() { resolve({ __timeout: true }); }, TIMEOUT_MS);
+        })
+      ]);
+
+      // Timeout: confirm não resolveu em 45s — ler o estado REAL do PaymentIntent.
+      if (confirmRes && confirmRes.__timeout) {
+        var info = '';
+        try {
+          var r  = await stripe.retrievePaymentIntent(window._spClientSecret);
+          var pi = r && r.paymentIntent ? r.paymentIntent : null;
+          var st = pi ? pi.status : 'desconhecido';
+          var le = pi && pi.last_payment_error ? pi.last_payment_error.message : '';
+          console.error('[HW] confirm timeout — PaymentIntent.status =', st, '| last_payment_error =', le, pi);
+          if (st === 'requires_action')          info = 'Autenticação 3D Secure não foi concluída.';
+          else if (st === 'requires_payment_method') info = 'Pagamento recusado. ' + le;
+          else if (st === 'processing')          info = 'Pagamento em processamento.';
+          else if (st === 'succeeded')           info = 'Pagamento aprovado — atualizando…';
+          info = 'Status: ' + st + (info ? ' — ' + info : '');
+        } catch (e) {
+          info = 'Não foi possível ler o status do pagamento (' + (e && e.message ? e.message : 'erro') + ').';
+        }
+        if (errEl) { errEl.style.display = 'block'; errEl.textContent = '⚠️ ' + info; }
+        if (btn)   { btn.disabled = false; btn.textContent = '🔒 Pagar com segurança'; }
+        return;
+      }
 
       if (confirmRes.error) throw new Error(confirmRes.error.message);
 
