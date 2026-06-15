@@ -30,7 +30,8 @@ function makeReq(query = {}, method = 'GET') {
 }
 
 beforeAll(() => {
-  process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+  process.env.STRIPE_SECRET_KEY      = 'sk_test_fake';
+  process.env.STRIPE_SECRET_KEY_TEST = 'sk_test_fake';
 });
 
 afterEach(() => mockRetrieve.mockClear());

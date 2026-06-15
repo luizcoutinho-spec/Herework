@@ -60,4 +60,22 @@ Do `vercel env ls`:
 
 ---
 
+## PASSO 2 — Correção de testes obsoletos (fix/payment-confirm-diagnose, 2026-06-15)
+
+| # | Finding | Arquivo(s) | Status | Diagnóstico |
+|---|---------|-----------|--------|-------------|
+| T01 | `send-email.test.js` mockava nodemailer; `api/send-email.js` usa Resend via fetch; código exige JWT antes de validar campos | `tests/send-email.test.js` | **CORRIGIDO** — reescrito com `global.fetch` mock, `Authorization: Bearer faketoken` em todas as requisições |
+| T02 | `webhook.test.js` esperava `PATCH contracts?id=eq.uuid-contract` em `payment_intent.succeeded`; handler atual lê `metadata.proposal_id` e cria contrato via POST | `tests/webhook.test.js` | **CORRIGIDO** — teste atualizado para `metadata.proposal_id`, mock de fetch sequencial para o fluxo proposta→contrato, asserção `POST /rest/v1/contracts` |
+| T03 | `data-request.test.js` asseverava `protocol1 !== protocol2` dependendo de granularidade de 1ms de `Date.now()` | `tests/data-request.test.js` | **CORRIGIDO** — substituído por verificação de formato `/^EXPORT-[0-9A-Z]+$/` |
+
+### P3 — Colisão de protocolo em data-request sob concorrência
+
+**Arquivo:** `api/data-request.js:68`
+
+O protocolo é gerado como `TYPE + '-' + Date.now().toString(36).toUpperCase().slice(-8)`, com granularidade de 1 ms. Dois requests simultâneos no mesmo milissegundo produziriam protocolos idênticos, quebrando a propriedade de unicidade necessária para rastreabilidade LGPD.
+
+**Recomendação:** adicionar entropia ao protocolo, ex.: `TYPE-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,6).toUpperCase()}`.
+
+---
+
 *E2E de validação pendente — aguarda PASSO 0 resolvido pelo usuário.*

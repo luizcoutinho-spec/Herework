@@ -43,9 +43,11 @@ function makeReq(sig = 'sig_valid', body = 'raw', method = 'POST') {
 }
 
 beforeAll(() => {
-  process.env.STRIPE_SECRET_KEY      = 'sk_test_fake';
-  process.env.STRIPE_WEBHOOK_SECRET  = 'whsec_test';
-  process.env.SUPABASE_URL           = 'https://fake.supabase.co';
+  process.env.STRIPE_SECRET_KEY       = 'sk_test_fake';
+  process.env.STRIPE_SECRET_KEY_TEST  = 'sk_test_fake';
+  process.env.STRIPE_WEBHOOK_SECRET   = 'whsec_test';
+  process.env.STRIPE_WEBHOOK_SECRET_TEST = 'whsec_test';
+  process.env.SUPABASE_URL            = 'https://fake.supabase.co';
   process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-role-key-fake';
 });
 
@@ -98,20 +100,35 @@ describe('Assinatura inválida', () => {
    payment_intent.succeeded
 ───────────────────────────────────── */
 describe('payment_intent.succeeded', () => {
-  test('com contract_id → chama Supabase PATCH contracts', async () => {
+  test('com proposal_id → cria contrato via POST /rest/v1/contracts', async () => {
+    const ok = (data) => Promise.resolve({ ok: true, json: async () => data, text: async () => '' });
+    global.fetch
+      .mockImplementationOnce(() => ok([]))                           // A.1: idempotência → sem contrato existente
+      .mockImplementationOnce(() => ok([{                             // A.2: lê proposta
+          id: 'uuid-prop', project_id: 'proj-1',
+          freelancer_id: 'free-1', value: 300, deadline_days: 7
+      }]))
+      .mockImplementationOnce(() => ok([]))                           // A.2b: regra 1:1 → sem contrato vivo
+      .mockImplementationOnce(() => ok([{ title: 'Projeto Teste' }])) // A.3: título do projeto
+      .mockImplementationOnce(() => ok([{ id: 'contract-new' }]));    // A.4: POST cria contrato
+    // PATCHes subsequentes (proposals aceita, projects in_progress, bulk reject)
+    // usam o mockResolvedValue padrão { ok: true, text: async () => '' }
+
     mockConstructEvent.mockReturnValue({
       type: 'payment_intent.succeeded',
       id: 'evt_001',
-      data: { object: { id: 'pi_001', amount: 30000, metadata: { contract_id: 'uuid-contract', user_id: 'uuid-user' } } }
+      data: { object: {
+        id: 'pi_001', amount: 30000,
+        metadata: { proposal_id: 'uuid-prop', client_id: 'uuid-client' }
+      }}
     });
     const res = mockRes();
     await handler(makeReq(), res);
     expect(res._status).toBe(200);
     expect(res._body.received).toBe(true);
-    // fetch deve ter sido chamado para PATCH contracts
     expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining('/rest/v1/contracts?id=eq.uuid-contract'),
-      expect.objectContaining({ method: 'PATCH' })
+      expect.stringContaining('/rest/v1/contracts'),
+      expect.objectContaining({ method: 'POST' })
     );
   });
 

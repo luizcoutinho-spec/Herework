@@ -31,7 +31,8 @@ function makeReq(body, method = 'POST') {
 }
 
 beforeAll(() => {
-  process.env.STRIPE_SECRET_KEY = 'sk_test_fake';
+  process.env.STRIPE_SECRET_KEY      = 'sk_test_fake';
+  process.env.STRIPE_SECRET_KEY_TEST = 'sk_test_fake';
 });
 
 afterEach(() => {
