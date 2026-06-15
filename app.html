@@ -15658,6 +15658,34 @@ async function _featProjectCard(id, isFeatured) {
   if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
 }
 
+async function _featProposalCard(id, isFeatured) {
+  if (isFeatured) return;
+  if (!_isPro()) {
+    var nf = _getNextPlanInfo() || {};
+    showToast('⭐ Destacar propostas é um recurso dos planos pagos. Conheça o ' + (nf.name || 'Premium') + ' →', 'warn');
+    setTimeout(function(){ showPage('pricing'); }, 1200);
+    return;
+  }
+  var r = await _sb.from('proposals').update({ featured: true }).eq('id', id);
+  if (r.error) {
+    var msg = r.error.message || '';
+    if (msg.indexOf('QUOTA_EXCEEDED') !== -1) {
+      var nx = _getNextPlanInfo() || {};
+      showToast('Você atingiu o limite de propostas em destaque deste mês. ' + (nx.name ? 'O plano ' + nx.name + ' oferece destaques ilimitados →' : ''), 'warn');
+      setTimeout(function(){ showPage('pricing'); }, 1500);
+    } else if (msg.indexOf('PLAN_FREE') !== -1) {
+      showToast('⭐ Destacar propostas é um recurso dos planos pagos.', 'warn');
+      setTimeout(function(){ showPage('pricing'); }, 1200);
+    } else {
+      showToast('Erro ao destacar: ' + msg, 'error');
+    }
+    return;
+  }
+  showToast('⭐ Proposta destacada! Vai aparecer primeiro para o cliente.', 'success');
+  if (typeof _renderDashFLProposals === 'function') _renderDashFLProposals();
+  if (typeof _loadMyProposals === 'function') _loadMyProposals();
+}
+
 /* Carrega e renderiza, em "Meu Perfil → Meus Projetos Publicados", os projetos
    reais do usuário logado (Supabase), com nome/foto/data do publicador implícitos
    (o próprio usuário) e dados persistidos — substitui o estado vazio padrão. */
@@ -15871,6 +15899,7 @@ window._refreshMyPublishedProjects = _refreshMyPublishedProjects;
    que resolvem identificadores pelo objeto window (escopo global). */
 window._deletePublishedProject     = _deletePublishedProject;
 window._featProjectCard            = _featProjectCard;
+window._featProposalCard           = _featProposalCard;
 window._canDeleteProject           = _canDeleteProject;
 
 /* ══════════════════════════════════════════════════════════════════
@@ -17067,7 +17096,6 @@ function switchDashPanel(panel) {
       (async function(){
         var qb = document.getElementById('plan-quota-block');
         if (!qb) return;
-        if (_pIsFL) { qb.style.display = 'none'; return; }
         try {
           if (typeof _sbReady === 'function' && !_sbReady()) { qb.style.display = 'none'; return; }
           if (typeof _sbEnsureSession === 'function') { await _sbEnsureSession(); }
@@ -18019,6 +18047,9 @@ async function _renderDashFLProposals(data) {
         '<span>🕐 ' + _sanitize(quando) + '</span>' +
       '</div>' +
       '<div class="dash-proj-desc">' + _sanitize(p.cover_letter || '') + '</div>' +
+      '<div class="dash-proj-footer"><div class="dash-proj-actions">' +
+        '<button class="btn btn-sm" ' + (p.featured ? 'disabled style="background:#16a34a;border-color:#16a34a;color:#fff;cursor:default;"' : 'class="btn btn-outline btn-sm"') + ' onclick="_featProposalCard(\'' + _sanitize(p.id) + '\', ' + (p.featured ? 'true' : 'false') + ')">' + (p.featured ? '⭐ Destacada' : '⭐ Destacar') + '</button>' +
+      '</div></div>' +
     '</div>';
   }).join('');
 }
@@ -24139,6 +24170,7 @@ function _renderSentProposalCard(p, idx) {
   if (isAccepted) {
     actionsHtml = '<button class="btn btn-primary btn-sm" onclick="switchDashPanel(\'contracts\');switchContractView(\'freelancer\')" style="font-size:12px;">📋 Ver contrato</button>';
   }
+  actionsHtml += '<button class="btn btn-sm" ' + (p.featured ? 'disabled style="background:#16a34a;border-color:#16a34a;color:#fff;cursor:default;"' : 'class="btn btn-outline btn-sm"') + ' onclick="_featProposalCard(\'' + _sanitize(p.id) + '\', ' + (p.featured ? 'true' : 'false') + ')">' + (p.featured ? '⭐ Destacada' : '⭐ Destacar') + '</button>';
 
   return [
     '<div class="prop-card" id="pcard-' + p.id + '">',
