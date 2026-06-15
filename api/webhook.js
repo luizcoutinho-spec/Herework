@@ -87,6 +87,8 @@ module.exports = async function handler(req, res) {
       const pi         = event.data.object;
       const md         = pi.metadata || {};
       const proposalId = md.proposal_id;
+      // NOTA: este path (plan_id) é legado de PaymentIntent avulso. Assinaturas ativam via
+      // Bloco B (customer.subscription.created, que lê metadata.plan). Não usar para subscriptions.
       const planId     = md.plan_id;
       const userId     = md.user_id;
 
@@ -286,7 +288,8 @@ module.exports = async function handler(req, res) {
       case 'customer.subscription.updated': {
         const sub    = event.data.object;
         const userId = sub.metadata && sub.metadata.user_id;
-        const plan   = sub.metadata && sub.metadata.plan;
+        const plan        = sub.metadata && sub.metadata.plan;
+        const planVariant = sub.metadata && sub.metadata.plan_variant;
         const allowed = ['free', 'pro', 'enterprise'];
         if (userId && allowed.includes(plan) && ['active', 'trialing'].includes(sub.status)) {
           const periodEnd = sub.current_period_end
@@ -296,7 +299,8 @@ module.exports = async function handler(req, res) {
             plan:                   plan,
             plan_status:            sub.status,
             stripe_subscription_id: sub.id,
-            plan_expires_at:        periodEnd ? new Date(periodEnd * 1000).toISOString() : null
+            plan_expires_at:        periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+            plan_variant:           planVariant || null
           });
           console.log(`[HereWork] Assinatura ${sub.status}: user ${userId} -> ${plan}`);
         } else {
