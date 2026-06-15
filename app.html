@@ -14658,6 +14658,11 @@ function _quickHash(s) {
   return h.toString(16).padStart(8,'0') + (h ^ 0xdeadbeef).toString(16).padStart(8,'0');
 }
 
+var _adminAuth = false;
+var _adminTries = 0;
+var _adminLockout = 0;
+var _adminLockSecs;
+
 function showAdminPage() {
   if (_adminAuth) {
     showPage('admin');
