@@ -14675,8 +14675,8 @@ function showAdminPage() {
 }
 
 function adminDoLogin() {
-  var u = document.getElementById('admin-user');
-  var p = document.getElementById('admin-pass');
+  var u = document.getElementById('admin-login-user');
+  var p = document.getElementById('admin-login-pass');
   var btn = document.querySelector('#overlay-admin-login .btn-primary');
   if(!u || !p) return;
   var user = u.value.trim();
@@ -15901,6 +15901,8 @@ window._deletePublishedProject     = _deletePublishedProject;
 window._featProjectCard            = _featProjectCard;
 window._featProposalCard           = _featProposalCard;
 window._canDeleteProject           = _canDeleteProject;
+window.adminDoLogin                = adminDoLogin;
+window.showAdminPage               = showAdminPage;
 
 /* ══════════════════════════════════════════════════════════════════
    ADMIN: MIGRATION MANAGER
