@@ -11613,7 +11613,7 @@ function _renderRealFreelancers() {
         '</div>',
         '<div class="fl-list-right">',
           '<div class="fl-list-rate">' + rate + rateSmall + '</div>',
-          _isOwnCard ? '' : '<button class="btn btn-green btn-sm" onclick="openContractModal({name:\'' + p.name.replace(/'/g,"\\'") + '\',role:\'Freelancer\',value:0,project:\'Meu Projeto\',deadline:\'30 dias\'})">Contratar</button>',
+          _isOwnCard ? '' : '<button class="btn btn-green btn-sm" onclick="openInviteModal(\'' + (p.id||'') + '\',\'' + p.name.replace(/'/g,"\\'") + '\')">Convidar</button>',
           '<button class="btn btn-outline btn-sm" onclick="openFreelancerProfile(\'' + (p.id||'') + '\')">Ver Perfil</button>',
           _ownBtns,
         '</div>'
@@ -22093,7 +22093,7 @@ function _openRealUserProfile(prof) {
       hb.style.display = '';
       hb.onclick = function() {
         closeModal('fl-profile');
-        openContractModal({name:name, role:title, value:rate*40, project:'Meu Projeto', deadline:'30 dias'});
+        openInviteModal(prof.id, name);
       };
     } else {
       hb.style.display = 'none';
