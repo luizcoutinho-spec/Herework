@@ -22823,7 +22823,7 @@ async function confirmStripePayment() {
       var bState     = document.getElementById('sp-boleto-state').value.trim();
       if (!bName || !bEmail || !bTaxId) throw new Error('Preencha nome, e-mail e CPF/CNPJ para emitir o boleto');
       if (!bLine1)  throw new Error('Preencha o endereço (rua e número) para emitir o boleto');
-      if (!bCep || !bCity || !bState) throw new Error('Preencha o CEP para que cidade e estado sejam preenchidos automaticamente');
+      if (!bCep || !bCity || !bState) throw new Error('Preencha CEP, cidade e estado para emitir o boleto');
 
       var session = await _sb.auth.getSession();
       var token   = session.data.session ? session.data.session.access_token : '';
@@ -23414,8 +23414,8 @@ function hwGetEmailLogs(n) {
           <input id="sp-boleto-line1" class="form-input" placeholder="Rua e número (ex: Av. Paulista, 1234)" aria-label="Endereço para boleto" style="margin-bottom:8px;" />
           <div style="display:flex;gap:8px;">
             <input id="sp-boleto-cep" class="form-input" placeholder="CEP (ex: 01310-100)" aria-label="CEP para boleto" style="flex:1;" oninput="_boletoCepLookup(this.value)" />
-            <input id="sp-boleto-city" class="form-input" placeholder="Cidade" aria-label="Cidade para boleto" style="flex:2;" readonly />
-            <input id="sp-boleto-state" class="form-input" placeholder="UF" aria-label="Estado para boleto" style="flex:0 0 52px;" readonly />
+            <input id="sp-boleto-city" class="form-input" placeholder="Cidade" aria-label="Cidade para boleto" style="flex:2;" />
+            <input id="sp-boleto-state" class="form-input" placeholder="UF" aria-label="Estado para boleto" style="flex:0 0 52px;" />
           </div>
           <div style="font-size:11px;color:var(--text-3);margin-top:6px;">&#9888;&#65039; Boleto expira em 3 dias úteis</div>
         </div>
