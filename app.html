@@ -16169,13 +16169,17 @@ async function _toggleProjectProposals(projectId) {
   }
   box.innerHTML = proposals.map(function(pr) {
     var fl = pr.freelancer || {};
+    var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada', viewed:'👁️ Vista', shortlisted:'⭐ Destaque', invited:'✉️ Convite' };
     var aberta = ['pending', 'viewed', 'shortlisted'].includes(pr.status);
     var acoes = aberta
       ? '<button class="btn btn-green btn-sm" onclick="_contractFromCard(\'' + pr.id + '\')">✅ Contratar</button>' +
         '<button class="btn btn-outline btn-sm" style="border-color:#dc2626;color:#dc2626;" onclick="_rejectProposalInline(\'' + pr.id + '\',\'' + projectId + '\')">❌ Recusar</button>'
-      : '<span style="color:#dc2626;font-size:12px;">Recusada</span>';
+      : '<span style="font-size:12px;font-weight:600;">' + (stMap[pr.status] || pr.status) + '</span>';
     return '<div class="prop-inline-row" style="border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;' + (aberta ? '' : 'opacity:.55;') + '">' +
-             '<div style="font-weight:600;">' + _sanitize(fl.name || 'Freelancer') + '</div>' +
+             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+               '<div style="font-weight:600;">' + _sanitize(fl.name || 'Freelancer') + '</div>' +
+               '<span style="font-size:11px;font-weight:600;">' + (stMap[pr.status] || pr.status) + '</span>' +
+             '</div>' +
              '<div style="font-size:13px;color:var(--text-3);">R$ ' + _sanitize(String(pr.value || 0)) + ' · ' + _sanitize(String(pr.deadline_days || 0)) + ' dias</div>' +
              '<div style="font-size:13px;margin:6px 0;">' + _sanitize(pr.cover_letter || '') + '</div>' +
              '<div style="display:flex;gap:6px;">' + acoes + '</div>' +
