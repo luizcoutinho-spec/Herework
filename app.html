@@ -11303,6 +11303,15 @@ async function _sbUpdateProposalStatus(proposalId, newStatus) {
   return r.data || true;
 }
 
+async function _sbAcceptInvite(proposalId, value, deadlineDays) {
+  if (!_sbReady() || !_session) return false;
+  var r = await _sb.from('proposals')
+    .update({ status: 'pending', value: value, deadline_days: deadlineDays, updated_at: new Date().toISOString() })
+    .eq('id', proposalId).select().single();
+  if (r.error) { console.warn('_sbAcceptInvite:', r.error.message); return false; }
+  return r.data || true;
+}
+
 /* ── PROPOSTAS: Obter propostas recebidas por cliente ─────────── */
 async function _sbGetProposalsReceived(statusFilter) {
   if (!_sbReady() || !_session) return [];
@@ -13965,7 +13974,7 @@ function _renderProposalCard(p, idx) {
   var letter   = _sanitize(p.cover_letter || '');
   var letterShort = letter.length > 320 ? letter.substring(0, 320) + '…' : letter;
 
-  var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada', viewed:'👁️ Vista', shortlisted:'⭐ Destaque' };
+  var stMap = { pending:'⏳ Pendente', accepted:'✅ Aceita', rejected:'❌ Recusada', withdrawn:'↩️ Retirada', viewed:'👁️ Vista', shortlisted:'⭐ Destaque', invited:'✉️ Convite' };
   var stBg  = { pending:'background:#fef3c7;color:#92400e', accepted:'background:#dcfce7;color:#166534',
                 rejected:'background:#fee2e2;color:#991b1b', withdrawn:'background:#f3f4f6;color:#6b7280' };
   var st = p.status || 'pending';
@@ -18464,12 +18473,44 @@ async function _renderDashFLInvites() {
         '<span style="color:var(--text-3);font-size:12px;">💰 Aguardando você definir preço</span>' +
       '</div>' +
       (p.cover_letter ? '<div class="dash-proj-desc">' + _sanitize(p.cover_letter) + '</div>' : '') +
-      '<div class="dash-proj-footer"><div class="dash-proj-actions">' +
-        '<span style="font-size:12px;color:var(--text-3);">Em breve: aceitar e definir preço</span>' +
-      '</div></div>' +
+      '<div class="dash-proj-footer">' +
+        '<div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;">' +
+          '<input id="inv-val-' + _sanitize(p.id) + '" type="number" min="1" step="1" placeholder="Seu preço (R$)" style="flex:1;min-width:120px;padding:6px 10px;border:1px solid var(--border-2);border-radius:6px;font-size:13px;">' +
+          '<input id="inv-days-' + _sanitize(p.id) + '" type="number" min="1" step="1" placeholder="Prazo (dias)" style="flex:1;min-width:100px;padding:6px 10px;border:1px solid var(--border-2);border-radius:6px;font-size:13px;">' +
+        '</div>' +
+        '<div class="dash-proj-actions">' +
+          '<button class="btn btn-green btn-sm" onclick="acceptInviteUI(\'' + _sanitize(p.id) + '\')">Aceitar e enviar</button>' +
+          '<button class="btn btn-outline btn-sm" style="color:#dc2626;border-color:#dc2626;" onclick="rejectInviteUI(\'' + _sanitize(p.id) + '\')">Recusar</button>' +
+        '</div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
+
+window.acceptInviteUI = async function(proposalId) {
+  var v = parseFloat((document.getElementById('inv-val-' + proposalId) || {}).value || '0') || 0;
+  var d = parseInt((document.getElementById('inv-days-' + proposalId) || {}).value || '0', 10) || 0;
+  if (v <= 0) { showToast('Informe um preço maior que zero.', 'warn'); return; }
+  if (d <= 0) { showToast('Informe um prazo em dias.', 'warn'); return; }
+  var ok = await _sbAcceptInvite(proposalId, v, d);
+  if (ok) {
+    showToast('Convite aceito! Sua proposta foi enviada ao cliente para confirmação.', 'success');
+    _renderDashFLInvites();
+    if (typeof _renderDashFLProposals === 'function') _renderDashFLProposals();
+  } else {
+    showToast('Não foi possível aceitar o convite. Tente novamente.', 'error');
+  }
+};
+
+window.rejectInviteUI = async function(proposalId) {
+  var ok = await _sbUpdateProposalStatus(proposalId, 'rejected');
+  if (ok) {
+    showToast('Convite recusado.', 'info');
+    _renderDashFLInvites();
+  } else {
+    showToast('Não foi possível recusar. Tente novamente.', 'error');
+  }
+};
 
 async function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
