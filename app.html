@@ -23110,6 +23110,7 @@ async function confirmStripePayment() {
             function refreshUI() {
               if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
               if (typeof _loadRealContracts === 'function') _loadRealContracts();
+              if (typeof _loadProposalsReceived === 'function') _loadProposalsReceived();
             }
             refreshUI();
             var iv = setInterval(async function() {
