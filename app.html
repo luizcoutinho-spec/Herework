@@ -23107,9 +23107,29 @@ async function confirmStripePayment() {
           (function pollContract() {
             var tries = 0, MAX = 8;
             function refreshUI() {
-              if (typeof _refreshMyPublishedProjects === 'function') _refreshMyPublishedProjects();
+              var openInlines = [];
+              try {
+                document.querySelectorAll('.proposals-inline').forEach(function(box) {
+                  if (box.style.display !== 'none' && box.id.indexOf('proposals-inline-') === 0) {
+                    openInlines.push(box.id.replace('proposals-inline-', ''));
+                  }
+                });
+              } catch(e) {}
+
               if (typeof _loadRealContracts === 'function') _loadRealContracts();
               if (typeof _loadProposalsReceived === 'function') _loadProposalsReceived();
+
+              if (typeof _refreshMyPublishedProjects === 'function') {
+                var pr = _refreshMyPublishedProjects();
+                Promise.resolve(pr).then(function() {
+                  openInlines.forEach(function(pid) {
+                    var box = document.getElementById('proposals-inline-' + pid);
+                    if (box && box.style.display === 'none' && typeof _toggleProjectProposals === 'function') {
+                      _toggleProjectProposals(pid);
+                    }
+                  });
+                });
+              }
             }
             refreshUI();
             var iv = setInterval(async function() {
