@@ -18339,8 +18339,8 @@ function _renderDashClientDone(data) {
       '</div>' +
       '<div class="dash-proj-meta">' +
         '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + '</span>' +
-        '<span>📅 ' + p.completedAt + '</span>' +
-        '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + p.rating + '.0</span>' +
+        (p.completedAt ? '<span>📅 ' + p.completedAt + '</span>' : '') +
+        (p.rating != null && !isNaN(p.rating) ? '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + Number(p.rating).toFixed(1) + '</span>' : '') +
       '</div>' +
       '<div class="dash-proj-desc">' + p.desc + '</div>' +
       '<div class="dash-proj-footer">' +
@@ -18553,8 +18553,8 @@ function _renderDashFLDone(data) {
       '</div>' +
       '<div class="dash-proj-meta">' +
         '<span>💰 R$ ' + p.value.toLocaleString('pt-BR') + ' recebido</span>' +
-        '<span>📅 ' + p.completedAt + '</span>' +
-        '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + p.rating + '.0</span>' +
+        (p.completedAt ? '<span>📅 ' + p.completedAt + '</span>' : '') +
+        (p.rating != null && !isNaN(p.rating) ? '<span style="color:#f59e0b;">' + _stars(p.rating) + ' ' + Number(p.rating).toFixed(1) + '</span>' : '') +
       '</div>' +
       '<div class="dash-proj-desc">' + p.desc + '</div>' +
       '<div class="dash-proj-footer">' +
