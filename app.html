@@ -19726,7 +19726,7 @@ window.pubRemoveSkill = pubRemoveSkill;
    espalhados pelos botões; centraliza a validação e a mensagem correta. */
 function _guardedPublishModal() {
   if (!_requireAuth('Você precisa estar logado para publicar um projeto.')) return;
-  if (_session && _session.type === 'freelancer') {
+  if (_session && _session.type === 'freelancer' && !_isBoth()) {
     showToast('Apenas clientes podem publicar projetos. Altere o tipo de conta em Perfil para "Cliente" ou "Cliente + Freelancer".', 'info');
     return;
   }
