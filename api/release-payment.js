@@ -188,7 +188,7 @@ module.exports = async function handler(req, res) {
             value:           String(valueNum)
           }
         },
-        { idempotencyKey: 'release_' + contrato.id }
+        { idempotencyKey: 'release_' + contrato.id + '_' + amountCents }
       );
     } catch (stripeErr) {
       // Reverter lock — Transfer NÃO ocorreu; contrato não pode ficar travado
