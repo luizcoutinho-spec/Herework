@@ -5539,7 +5539,11 @@ section { padding: 64px 0; }
 
       <div id="dcontracts-fl" style="display:none;">
         <div class="dash-section">
-          <div class="dash-section-title"><span>&#128233;</span> Propostas Enviadas &mdash; Aguardando Resposta</div>
+          <div class="dash-section-title"><span>&#9993;</span> Convites Recebidos</div>
+          <div id="dash-fl-invites"></div>
+        </div>
+        <div class="dash-section">
+          <div class="dash-section-title"><span>&#128233;</span> Minhas Candidaturas</div>
           <div id="dash-fl-proposals"></div>
         </div>
         <div class="dash-section">
@@ -11270,10 +11274,23 @@ async function _sbGetMyProposals(statusFilter) {
   var q = _sb.from('proposals')
     .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id,status,client:profiles!client_id(name,avatar_url))')
     .eq('freelancer_id', _session.uid)
+    .neq('status', 'invited')
     .order('created_at', { ascending: false });
   if (statusFilter) q = q.eq('status', statusFilter);
   var r = await q;
   if (r.error) { console.warn('_sbGetMyProposals:', r.error.message); return []; }
+  return r.data || [];
+}
+
+async function _sbGetMyInvites() {
+  if (!_sbReady() || !_session) return [];
+  await _sbEnsureSession();
+  var r = await _sb.from('proposals')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id,status,client:profiles!client_id(name,avatar_url))')
+    .eq('freelancer_id', _session.uid)
+    .eq('status', 'invited')
+    .order('created_at', { ascending: false });
+  if (r.error) { console.warn('_sbGetMyInvites:', r.error.message); return []; }
   return r.data || [];
 }
 
@@ -16025,6 +16042,7 @@ async function _featProposalCard(id, isFeatured) {
     return;
   }
   showToast('⭐ Proposta destacada! Vai aparecer primeiro para o cliente.', 'success');
+  if (typeof _renderDashFLInvites  === 'function') _renderDashFLInvites();
   if (typeof _renderDashFLProposals === 'function') _renderDashFLProposals();
   if (typeof _loadMyProposals === 'function') _loadMyProposals();
 }
@@ -17363,6 +17381,7 @@ function openDashboard() {
   _renderDashClientWaiting(_vd);
   _renderDashClientDone(_vd);
   _renderDashFLActive(_vd);
+  _renderDashFLInvites();
   _renderDashFLProposals(_vd);
   _renderDashFLDone(_vd);
   /* Sobrescreve "Meus Projetos Publicados" com os projetos reais do usuário (Supabase),
@@ -18419,6 +18438,38 @@ async function _requestRefund(contractId) {
   }
 }
 window._requestRefund = _requestRefund;
+
+async function _renderDashFLInvites() {
+  var el = document.getElementById('dash-fl-invites');
+  if (!el) return;
+  var invites = await _sbGetMyInvites();
+  if (!invites || !invites.length) {
+    el.innerHTML = _emptyState('✉️', 'Você não tem convites no momento', 'Clientes podem convidar você diretamente para projetos');
+    return;
+  }
+  el.innerHTML = invites.map(function(p) {
+    var proj    = p.project || {};
+    var client  = (proj.client && proj.client.name) ? proj.client.name : 'Cliente';
+    var quando  = p.created_at ? _timeAgo(p.created_at) : '';
+    return '<div class="dash-proj-card">' +
+      '<div class="dash-proj-card-top">' +
+        '<div class="dash-proj-title">' + _sanitize(proj.title || 'Projeto') + '</div>' +
+        _statusBadge('sent', '✉️ Convite') +
+      '</div>' +
+      '<div class="dash-proj-meta">' +
+        '<span>👤 ' + _sanitize(client) + ' convidou você</span>' +
+        '<span>🕐 ' + _sanitize(quando) + '</span>' +
+      '</div>' +
+      '<div class="dash-proj-meta" style="margin-top:4px;">' +
+        '<span style="color:var(--text-3);font-size:12px;">💰 Aguardando você definir preço</span>' +
+      '</div>' +
+      (p.cover_letter ? '<div class="dash-proj-desc">' + _sanitize(p.cover_letter) + '</div>' : '') +
+      '<div class="dash-proj-footer"><div class="dash-proj-actions">' +
+        '<span style="font-size:12px;color:var(--text-3);">Em breve: aceitar e definir preço</span>' +
+      '</div></div>' +
+    '</div>';
+  }).join('');
+}
 
 async function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
