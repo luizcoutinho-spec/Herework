@@ -16962,16 +16962,13 @@ window.contractStep2 = function contractStep2() {
       return;
     }
 
-    /* 2. Pegar valor do DOM — c-total já mostra o total */
-    var amount = 0;
-    var totalEl = document.getElementById('c-total');
-    if (totalEl) {
-      amount = parseInt((totalEl.textContent || '').replace(/\D/g, ''), 10) || 0;
+    /* 2. Valor vem de _contractCtx.total — calculado com a comissão real do plano em openContractModal */
+    var amount = (_contractCtx && _contractCtx.total > 0) ? _contractCtx.total : 0;
+    if (!amount) {
+      closeModal('contract');
+      showToast('Não foi possível calcular o valor da contratação. Reabra a proposta e tente novamente.', 'error');
+      return;
     }
-    if (!amount && _contractCtx && _contractCtx.value > 0) {
-      amount = Math.round(_contractCtx.value * 1.08);
-    }
-    if (!amount) amount = 2160;
 
     var proj   = (_contractCtx && _contractCtx.project) ? _contractCtx.project : 'Contrato';
     var flName = (_contractCtx && _contractCtx.name)    ? _displayName(_contractCtx.name) : 'Freelancer';
