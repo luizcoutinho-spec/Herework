@@ -16915,12 +16915,16 @@ async function contractApprove() {
     });
     var releaseData = await releaseRes.json();
     if (!releaseRes.ok) {
-      /* Contrato já aprovado — avisar sobre falha no repasse */
+      /* Contrato já aprovado — avisar sobre falha no repasse + oferecer retry */
       _setBtnLoading(btn, false);
       showToast(
-        'Entrega aprovada, mas falha ao liberar pagamento: ' + (releaseData.error || 'Erro desconhecido') + '. Contate o suporte.',
+        'Entrega aprovada, mas falha ao liberar pagamento: ' + (releaseData.error || 'Erro desconhecido'),
         'error'
       );
+      if (btn) {
+        btn.textContent = '🔁 Tentar liberar pagamento novamente';
+        btn.onclick = function() { contractRetryRelease(_contractCtx.id); };
+      }
       return;
     }
 
@@ -16955,6 +16959,41 @@ async function contractApprove() {
   } catch (err) {
     _setBtnLoading(btn, false);
     showToast('Erro ao processar aprovação: ' + (err.message || 'Erro de rede'), 'error');
+  }
+}
+
+async function contractRetryRelease(contractId) {
+  var btn = document.getElementById('c-approve-btn');
+  _setBtnLoading(btn, true);
+  try {
+    var s = await _sb.auth.getSession();
+    var token = s.data.session ? s.data.session.access_token : '';
+    var res = await fetch('/api/release-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({ contractId: contractId })
+    });
+    var d = await res.json();
+    _setBtnLoading(btn, false);
+    if (!res.ok) {
+      showToast(d.error || 'Falha ao liberar pagamento. Tente novamente.', 'error');
+      if (btn) {
+        btn.textContent = '🔁 Tentar liberar pagamento novamente';
+        btn.onclick = function() { contractRetryRelease(contractId); };
+      }
+      return;
+    }
+    var amt = (d.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+    showToast('🎉 Pagamento de R$ ' + amt + ' liberado com sucesso!', 'success');
+    closeModal('contract');
+    if (typeof _loadRealContracts === 'function') _loadRealContracts();
+  } catch (err) {
+    _setBtnLoading(btn, false);
+    showToast('Erro ao processar pagamento: ' + (err.message || 'Erro de rede'), 'error');
+    if (btn) {
+      btn.textContent = '🔁 Tentar liberar pagamento novamente';
+      btn.onclick = function() { contractRetryRelease(contractId); };
+    }
   }
 }
 
@@ -18178,7 +18217,10 @@ function _renderDashClientDone(data) {
       '<div class="dash-proj-desc">' + p.desc + '</div>' +
       '<div class="dash-proj-footer">' +
         _personChip(p.freelancer, 'Freelancer') +
-        '<button class="btn btn-outline btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\'Profissional\',value:'+p.value+',project:\'Novo Projeto\',deadline:\'30 dias\'})">🔄 Contratar novamente</button>' +
+        '<div class="dash-proj-actions">' +
+          (p.escrow_released === false ? '<button class="btn btn-primary btn-sm" onclick="contractRetryRelease(\'' + p.id + '\')">🔁 Liberar pagamento</button>' : '') +
+          '<button class="btn btn-outline btn-sm" onclick="openContractModal({name:\''+p.freelancer+'\',role:\'Profissional\',value:'+p.value+',project:\'Novo Projeto\',deadline:\'30 dias\'})">🔄 Contratar novamente</button>' +
+        '</div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -24725,7 +24767,8 @@ async function _loadRealContracts() {
         freelancerId:  c.freelancer_id || null,
         freelancerRole:'Profissional',
         client:        (_session && _session.name) || 'Você',
-        myRole:        'client'
+        myRole:        'client',
+        escrow_released: c.escrow_released
       };
       /* mapa para abrir chat com contractId correto */
       if (c.project_id) _contractChatMap[c.project_id] = c.id;
