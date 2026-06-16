@@ -24601,7 +24601,7 @@ async function _rejectProposal(proposalId) {
 
   /* Enviar e-mail de rejeição ao freelancer */
   var r = await _sb.from('proposals')
-    .select('*, project:projects!project_id(title), freelancer:profiles!freelancer_id(name,email)')
+    .select('*, project:projects!project_id(title), freelancer:profiles!freelancer_id(name)')
     .eq('id', proposalId).single();
   if (!r.error && r.data) _hwTriggerProposalRejectedEmail(r.data);
 
