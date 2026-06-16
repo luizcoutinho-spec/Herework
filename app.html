@@ -10568,7 +10568,7 @@ async function _sbRestoreSession() {
 async function _sbGetProfile(uid) {
   if (!_sbReady()) return null;
   try {
-    var r = await _sb.from('profiles').select('*').eq('id', uid).single();
+    var r = await _sb.from('my_profile').select('*').single();
     return r.data || null;
   } catch(e) { return null; }
 }
@@ -24558,7 +24558,7 @@ async function _acceptProposal(proposalId) {
 
   /* 2) Buscar dados completos da proposta para criar contrato */
   var r = await _sb.from('proposals')
-    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id), freelancer:profiles!freelancer_id(id,name,email,avatar_url)')
+    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id), freelancer:profiles!freelancer_id(id,name,avatar_url)')
     .eq('id', proposalId).single();
 
   if (!r.error && r.data) {
@@ -24949,7 +24949,7 @@ async function _sbExportMyData() {
 
     if (_sbReady() && uid) {
       var [profR, projR, proposalR, contractR, msgR] = await Promise.all([
-        _sb.from('profiles').select('*').eq('id', uid).single(),
+        _sb.from('my_profile').select('*').single(),
         _sb.from('projects').select('*').eq('client_id', uid).order('created_at', {ascending:false}),
         _sb.from('proposals').select('*').eq('freelancer_id', uid).order('created_at', {ascending:false}),
         _sb.from('contracts').select('*').or('client_id.eq.' + uid + ',freelancer_id.eq.' + uid).order('created_at',{ascending:false}),
