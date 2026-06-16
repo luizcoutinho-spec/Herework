@@ -108,6 +108,7 @@ describe('payment_intent.succeeded', () => {
           id: 'uuid-prop', project_id: 'proj-1',
           freelancer_id: 'free-1', value: 300, deadline_days: 7
       }]))
+      .mockImplementationOnce(() => ok([]))                           // A.2a: sem contrato por proposal_id
       .mockImplementationOnce(() => ok([]))                           // A.2b: regra 1:1 → sem contrato vivo
       .mockImplementationOnce(() => ok([{ title: 'Projeto Teste' }])) // A.3: título do projeto
       .mockImplementationOnce(() => ok([{ id: 'contract-new' }]));    // A.4: POST cria contrato
@@ -130,6 +131,32 @@ describe('payment_intent.succeeded', () => {
       expect.stringContaining('/rest/v1/contracts'),
       expect.objectContaining({ method: 'POST' })
     );
+  });
+
+  test('com proposal_id mas proposta JÁ TEM contrato vivo → NÃO cria 2º contrato', async () => {
+    const ok = (data) => Promise.resolve({ ok: true, json: async () => data, text: async () => '' });
+    global.fetch
+      .mockImplementationOnce(() => ok([]))                                                           // A.1: sem contrato por PI
+      .mockImplementationOnce(() => ok([{ id: 'uuid-prop', project_id: 'uuid-proj', freelancer_id: 'uuid-fl', value: 6000, deadline_days: 5 }])) // A.2: lê proposta
+      .mockImplementationOnce(() => ok([{ id: 'contrato-existente', status: 'completed' }]));         // A.2a: JÁ EXISTE contrato vivo
+
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockConstructEvent.mockReturnValue({
+      type: 'payment_intent.succeeded',
+      id: 'evt_a2a',
+      data: { object: {
+        id: 'pi_a2a', amount: 600000,
+        metadata: { proposal_id: 'uuid-prop', client_id: 'uuid-client' }
+      }}
+    });
+    const res = mockRes();
+    await handler(makeReq(), res);
+    expect(res._status).toBe(200);
+    expect(res._body.received).toBe(true);
+    const postCall = global.fetch.mock.calls.find(c => c[1] && c[1].method === 'POST' && c[0].includes('/rest/v1/contracts'));
+    expect(postCall).toBeUndefined();
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('DUPLICIDADE'));
+    errorSpy.mockRestore();
   });
 
   test('sem contract_id → NÃO chama Supabase', async () => {

@@ -131,6 +131,18 @@ module.exports = async function handler(req, res) {
           }
           const prop = propRows[0];
 
+          /* A.2a IDEMPOTÊNCIA POR PROPOSTA: uma proposta só gera UM contrato (vivo ou concluído).
+             Barra 2º pagamento da mesma proposta (PaymentIntents diferentes). */
+          const dupRes = await fetch(
+            `${SUPABASE_URL}/rest/v1/contracts?proposal_id=eq.${encodeURIComponent(prop.id)}&status=in.(pending_acceptance,active,review,revision,completed)&select=id,status&limit=1`,
+            { headers: sbHeaders }
+          );
+          const dup = dupRes.ok ? await dupRes.json() : [];
+          if (Array.isArray(dup) && dup.length > 0) {
+            console.error(`[HereWork] DUPLICIDADE: proposta ${prop.id} ja tem contrato ${dup[0].id} (status ${dup[0].status}). Pagamento ${pi.id} NAO criou 2o contrato — RECONCILIAR/ESTORNAR pi ${pi.id} manualmente.`);
+            break;
+          }
+
           /* A.2b REGRA 1:1 — projeto já tem contrato vivo? Não cria 2º. */
           const liveRes = await fetch(
             `${SUPABASE_URL}/rest/v1/contracts?project_id=eq.${encodeURIComponent(prop.project_id)}&status=neq.cancelled&select=id&limit=1`,
