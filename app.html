@@ -22767,6 +22767,21 @@ async function openStripePayment(opts) {
   }
 }
 
+async function _boletoCepLookup(cep) {
+  var digits = cep.replace(/\D/g, '');
+  if (digits.length !== 8) return;
+  try {
+    var r = await fetch('https://viacep.com.br/ws/' + digits + '/json/');
+    if (!r.ok) return;
+    var d = await r.json();
+    if (d.erro) return;
+    var cityEl  = document.getElementById('sp-boleto-city');
+    var stateEl = document.getElementById('sp-boleto-state');
+    if (cityEl)  cityEl.value  = d.localidade || '';
+    if (stateEl) stateEl.value = d.uf || '';
+  } catch(e) {}
+}
+
 async function confirmStripePayment() {
   var btn = document.getElementById('sp-pay-btn');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando...'; }
@@ -22799,17 +22814,23 @@ async function confirmStripePayment() {
 
     if (isBoleto) {
       // Boleto: confirmar via Edge Function com dados do CPF
-      var bName  = document.getElementById('sp-boleto-name').value.trim();
-      var bEmail = document.getElementById('sp-boleto-email').value.trim();
-      var bTaxId = document.getElementById('sp-boleto-taxid').value.trim();
-      if (!bName || !bEmail || !bTaxId) throw new Error('Preencha nome, email e CPF/CNPJ para emitir o boleto');
+      var bName      = document.getElementById('sp-boleto-name').value.trim();
+      var bEmail     = document.getElementById('sp-boleto-email').value.trim();
+      var bTaxId     = document.getElementById('sp-boleto-taxid').value.trim();
+      var bLine1     = document.getElementById('sp-boleto-line1').value.trim();
+      var bCep       = document.getElementById('sp-boleto-cep').value.trim();
+      var bCity      = document.getElementById('sp-boleto-city').value.trim();
+      var bState     = document.getElementById('sp-boleto-state').value.trim();
+      if (!bName || !bEmail || !bTaxId) throw new Error('Preencha nome, e-mail e CPF/CNPJ para emitir o boleto');
+      if (!bLine1)  throw new Error('Preencha o endereço (rua e número) para emitir o boleto');
+      if (!bCep || !bCity || !bState) throw new Error('Preencha o CEP para que cidade e estado sejam preenchidos automaticamente');
 
       var session = await _sb.auth.getSession();
       var token   = session.data.session ? session.data.session.access_token : '';
       var bRes = await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/confirm-boleto', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
-        body: JSON.stringify({ paymentIntentId: window._spPaymentId, name: bName, email: bEmail, taxId: bTaxId })
+        body: JSON.stringify({ paymentIntentId: window._spPaymentId, name: bName, email: bEmail, taxId: bTaxId, line1: bLine1, postalCode: bCep, city: bCity, state: bState })
       });
       var bData = await bRes.json();
       if (bData.error) throw new Error(bData.error);
@@ -23389,8 +23410,13 @@ function hwGetEmailLogs(n) {
           <div style="font-size:12px;color:var(--text-3);margin-bottom:10px;">&#128203; Dados para emissão do Boleto:</div>
           <input id="sp-boleto-name"  class="form-input" placeholder="Nome completo" aria-label="Nome completo para boleto" style="margin-bottom:8px;" />
           <input id="sp-boleto-email" class="form-input" placeholder="E-mail" aria-label="E-mail para boleto" style="margin-bottom:8px;" />
-          <input id="sp-boleto-taxid" class="form-input" placeholder="CPF ou CNPJ" aria-label="CPF ou CNPJ para boleto" />
-          <input id="sp-boleto-cep" class="form-input" placeholder="CEP (ex: 01310-100)" aria-label="CEP para boleto" style="margin-top:8px;" />
+          <input id="sp-boleto-taxid" class="form-input" placeholder="CPF ou CNPJ" aria-label="CPF ou CNPJ para boleto" style="margin-bottom:8px;" />
+          <input id="sp-boleto-line1" class="form-input" placeholder="Rua e número (ex: Av. Paulista, 1234)" aria-label="Endereço para boleto" style="margin-bottom:8px;" />
+          <div style="display:flex;gap:8px;">
+            <input id="sp-boleto-cep" class="form-input" placeholder="CEP (ex: 01310-100)" aria-label="CEP para boleto" style="flex:1;" oninput="_boletoCepLookup(this.value)" />
+            <input id="sp-boleto-city" class="form-input" placeholder="Cidade" aria-label="Cidade para boleto" style="flex:2;" readonly />
+            <input id="sp-boleto-state" class="form-input" placeholder="UF" aria-label="Estado para boleto" style="flex:0 0 52px;" readonly />
+          </div>
           <div style="font-size:11px;color:var(--text-3);margin-top:6px;">&#9888;&#65039; Boleto expira em 3 dias úteis</div>
         </div>
 
