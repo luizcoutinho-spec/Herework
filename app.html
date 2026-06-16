@@ -5045,9 +5045,6 @@ section { padding: 64px 0; }
       <button class="dash-nav-tab" id="dnt-settings" onclick="switchDashPanel('settings')">
         <span class="tab-icon">&#9881;&#65039;</span> Configura&ccedil;&otilde;es
       </button>
-      <button class="dash-nav-tab" id="dnt-proposals" onclick="switchDashPanel('proposals')">
-        <span class="tab-icon">&#128233;</span> Propostas <span id="dnt-proposals-badge" style="display:none;background:#ef4444;color:#fff;border-radius:20px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;"></span>
-      </button>
     </div>
 
     <!-- ─── PAINEL: MEU PERFIL ─── -->
@@ -17476,6 +17473,7 @@ async function startStripeOnboarding() {
 }
 
 function switchDashPanel(panel) {
+  if (panel === 'proposals') panel = 'contracts';
   ['profile','plan','contracts','payments','settings','proposals'].forEach(function(p) {
     var btn = document.getElementById('dnt-' + p);
     var pnl = document.getElementById('dpanel-' + p);
