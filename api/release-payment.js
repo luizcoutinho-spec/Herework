@@ -93,9 +93,23 @@ module.exports = async function handler(req, res) {
       return respond(res, 409, { error: 'Contrato não está aprovado (status: ' + contrato.status + ')' }, req);
     }
 
-    /* ── 7. Idempotência (banco) ── */
-    if (contrato.escrow_released === true) {
-      return respond(res, 409, { error: 'Pagamento já liberado' }, req);
+    /* ── 7. LOCK atômico: PATCH condicional escrow_released=eq.false → só 1 req passa ── */
+    const lockRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contrato.id)}&escrow_released=eq.false`,
+      {
+        method: 'PATCH',
+        headers: {
+          'apikey':        SERVICE_ROLE_KEY,
+          'Authorization': 'Bearer ' + SERVICE_ROLE_KEY,
+          'Content-Type':  'application/json',
+          'Prefer':        'return=representation'
+        },
+        body: JSON.stringify({ escrow_released: true })
+      }
+    );
+    const lockedRows = lockRes.ok ? await lockRes.json() : [];
+    if (!lockedRows || lockedRows.length === 0) {
+      return respond(res, 409, { error: 'Pagamento já liberado ou em processamento' }, req);
     }
 
     /* ── 8. Ler profile do freelancer ── */
@@ -174,10 +188,28 @@ module.exports = async function handler(req, res) {
             value:           String(valueNum)
           }
         },
-        { idempotencyKey: 'release_' + contrato.id }
+        { idempotencyKey: 'release_' + contrato.id + '_' + amountCents }
       );
     } catch (stripeErr) {
-      console.error('[release-payment] Stripe transfer error:', stripeErr.message);
+      // Reverter lock — Transfer NÃO ocorreu; contrato não pode ficar travado
+      console.error('[release-payment] Stripe transfer error — revertendo lock:', stripeErr.message);
+      try {
+        await fetch(
+          `${SUPABASE_URL}/rest/v1/contracts?id=eq.${encodeURIComponent(contrato.id)}`,
+          {
+            method: 'PATCH',
+            headers: {
+              'apikey':        SERVICE_ROLE_KEY,
+              'Authorization': 'Bearer ' + SERVICE_ROLE_KEY,
+              'Content-Type':  'application/json'
+            },
+            body: JSON.stringify({ escrow_released: false })
+          }
+        );
+        console.log('[release-payment] Lock revertido para contrato', contrato.id);
+      } catch (revertErr) {
+        console.error('[release-payment] CRÍTICO: falha ao reverter lock — contrato pode travar:', contrato.id, revertErr.message);
+      }
       return respond(res, 502, { error: 'Falha ao processar repasse', stripe: stripeErr.message }, req);
     }
 
@@ -192,7 +224,7 @@ module.exports = async function handler(req, res) {
           'Content-Type':  'application/json',
           'Prefer':        'return=representation'
         },
-        body: JSON.stringify({ escrow_released: true, stripe_transfer_id: transfer.id })
+        body: JSON.stringify({ stripe_transfer_id: transfer.id })
       }
     );
     if (!patchRes.ok) {
