@@ -108,6 +108,7 @@ describe('payment_intent.succeeded', () => {
           id: 'uuid-prop', project_id: 'proj-1',
           freelancer_id: 'free-1', value: 300, deadline_days: 7
       }]))
+      .mockImplementationOnce(() => ok([]))                           // A.2a: sem contrato por proposal_id
       .mockImplementationOnce(() => ok([]))                           // A.2b: regra 1:1 → sem contrato vivo
       .mockImplementationOnce(() => ok([{ title: 'Projeto Teste' }])) // A.3: título do projeto
       .mockImplementationOnce(() => ok([{ id: 'contract-new' }]));    // A.4: POST cria contrato
