@@ -8847,11 +8847,10 @@ section { padding: 64px 0; }
       <div class="form-group">
         <label for="invite-proj" class="form-label" data-pt="Selecione o projeto" data-es="Selecciona el proyecto">Selecione o projeto</label>
         <select class="form-select" id="invite-proj">
-          <option data-pt="Nenhum projeto no momento" data-es="Ningún proyecto por ahora">Nenhum projeto no momento</option>
-          <option data-pt="E-commerce WooCommerce" data-es="E-commerce WooCommerce">E-commerce WooCommerce</option>
-          <option data-pt="Identidade visual startup" data-es="Identidad visual startup">Identidade visual startup</option>
+          <option value="">Selecione um projeto...</option>
         </select>
       </div>
+      <div id="invite-no-proj" style="display:none;margin-bottom:16px;"></div>
       <div class="form-group">
         <label for="invite-msg" class="form-label" data-pt="Mensagem de convite" data-es="Mensaje de invitación">Mensagem de convite</label>
         <textarea class="form-textarea" id="invite-msg" data-placeholder-pt="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..." data-placeholder-es="¡Hola! Vi tu perfil y creo que serías perfecto para nuestro proyecto de..." placeholder="Olá! Vi seu perfil e achei que você seria perfeito para o nosso projeto de..."></textarea>
@@ -8916,7 +8915,7 @@ section { padding: 64px 0; }
         </div>
       </div>
       <div style="display:flex;gap:12px;">
-        <button class="btn btn-green btn-lg" style="flex:1;" onclick="closeModal('profile');setTimeout(function(){openModal('invite');},200);" data-pt="Convidar para Projeto" data-es="Invitar al Proyecto">Convidar para Projeto</button>
+        <button class="btn btn-green btn-lg" style="flex:1;" onclick="closeModal('profile');setTimeout(function(){openInviteModal(window._profileViewId,window._profileViewName);},200);" data-pt="Convidar para Projeto" data-es="Invitar al Proyecto">Convidar para Projeto</button>
         <button class="btn btn-outline" onclick="closeModal('profile')" data-pt="Fechar" data-es="Cerrar">Fechar</button>
       </div>
     </div>
@@ -12256,6 +12255,10 @@ function openProfile(card) {
       skillsEl.appendChild(span);
     });
   }
+  var _vpBtn2 = card.querySelector('[onclick*="openFreelancerProfile"]');
+  var _vpMatch2 = _vpBtn2 ? (_vpBtn2.getAttribute('onclick')||'').match(/openFreelancerProfile\('([^']+)'\)/) : null;
+  window._profileViewId   = _vpMatch2 ? _vpMatch2[1] : null;
+  window._profileViewName = name;
   openModal('profile');
 }
 function _setText(id, val) {
@@ -13432,16 +13435,98 @@ function submitProposal() {
   }
 }
 
-function submitInvite() {
+async function openInviteModal(freelancerId, freelancerName) {
+  if (!_requireAuth('Você precisa estar logado para convidar freelancers.',
+      function(){ openInviteModal(freelancerId, freelancerName); })) return;
+
+  window._inviteCtx = { freelancerId: freelancerId || null, freelancerName: freelancerName || '' };
+
+  var sub = document.querySelector('#overlay-invite .modal-subtitle');
+  if (sub) sub.textContent = 'Convidar ' + (freelancerName || 'Freelancer');
+
+  var ov = document.getElementById('overlay-invite');
+  if (ov) ov.classList.add('open');
+
+  var sel    = document.getElementById('invite-proj');
+  var noProj = document.getElementById('invite-no-proj');
+  if (sel)    { sel.innerHTML = '<option value="">Carregando projetos...</option>'; sel.closest('.form-group').style.display = ''; }
+  if (noProj) noProj.style.display = 'none';
+
+  var projects = await _sbGetMyProjects();
+  var projIds  = (projects || []).map(function(p){ return p.id; });
+  var vincSet  = new Set();
+  if (freelancerId && projIds.length) {
+    var vincRes = await _sb.from('proposals')
+      .select('project_id')
+      .eq('freelancer_id', freelancerId)
+      .in('project_id', projIds);
+    (vincRes.data || []).forEach(function(v){ vincSet.add(v.project_id); });
+  }
+
+  if (!sel) return;
+
+  if (!projects || projects.length === 0) {
+    sel.closest('.form-group').style.display = 'none';
+    if (noProj) {
+      noProj.style.display = '';
+      noProj.innerHTML = '<p style="color:var(--text-2);font-size:14px;margin:0 0 12px;">Você ainda não tem projetos. Crie um projeto para convidar este freelancer.</p>' +
+        '<button class="btn btn-green btn-block" onclick="closeModal(\'invite\');setTimeout(function(){_guardedPublishModal();},200);">+ Criar Projeto</button>';
+    }
+  } else {
+    sel.closest('.form-group').style.display = '';
+    sel.innerHTML = '<option value="">Selecione um projeto...</option>';
+    projects.forEach(function(proj) {
+      var opt = document.createElement('option');
+      opt.value = proj.id;
+      if (vincSet.has(proj.id)) {
+        opt.disabled = true;
+        opt.textContent = proj.title + ' — já participa';
+      } else {
+        opt.textContent = proj.title;
+      }
+      sel.appendChild(opt);
+    });
+  }
+}
+
+async function submitInvite() {
   var m   = document.getElementById('invite-msg');
   var btn = document.querySelector('#overlay-invite .btn-green');
-  if (!_vField(m,'err-invite-msg', lang()==='pt'?'Escreva uma mensagem':'Escribe un mensaje')) return;
+
+  var projSel   = document.getElementById('invite-proj');
+  var projectId = projSel ? projSel.value : '';
+  if (!projectId) { showToast('Selecione um projeto.', 'warn'); return; }
+  if (!_vField(m, 'err-invite-msg', lang()==='pt' ? 'Escreva uma mensagem' : 'Escribe un mensaje')) return;
+  if (!window._inviteCtx || !window._inviteCtx.freelancerId) {
+    showToast('Freelancer não identificado. Reabra o convite.', 'error');
+    return;
+  }
+
+  var mensagem = m ? m.value.trim() : '';
   _setBtnLoading(btn, true);
-  setTimeout(function(){
+  try {
+    var r = await _sb.rpc('create_project_invite', {
+      p_project_id:    projectId,
+      p_freelancer_id: window._inviteCtx.freelancerId,
+      p_message:       mensagem
+    });
     _setBtnLoading(btn, false);
+    if (r.error) {
+      var emsg = r.error.message || '';
+      var friendly = /já tem uma proposta ou convite/i.test(emsg)
+        ? 'Este freelancer já tem proposta/convite neste projeto.'
+        : /Apenas o dono/i.test(emsg)
+          ? 'Apenas o dono do projeto pode convidar.'
+          : (emsg || 'Não foi possível enviar o convite.');
+      showToast(friendly, 'error');
+      return;
+    }
+    showToast('Convite enviado!', 'success');
     closeModal('invite');
-    showToast(lang()==='pt' ? 'Convite enviado!' : 'Invitación enviada!', 'success');
-  }, 600);
+  } catch(e) {
+    _setBtnLoading(btn, false);
+    showToast('Erro ao enviar convite: ' + (e.message || 'Erro desconhecido'), 'error');
+  }
 }
 
 /* ═══════════════════════════════════════════
