@@ -79,3 +79,20 @@ O protocolo é gerado como `TYPE + '-' + Date.now().toString(36).toUpperCase().s
 ---
 
 *E2E de validação pendente — aguarda PASSO 0 resolvido pelo usuário.*
+
+---
+
+## PASSO 3 — CSP + _timeAgo guard (fix/csp-realtime-connect, 2026-06-16)
+
+| # | Finding | Arquivo(s) | Status | Diagnóstico |
+|---|---------|-----------|--------|-------------|
+| C01 | CSP bloqueava WebSocket Supabase Realtime: `wss://*.supabase.co` ausente do `connect-src` | `app.html:13`, `vercel.json:38` | **CORRIGIDO** — `wss://*.supabase.co` adicionado ao `connect-src` em ambos |
+| C02 | `_timeAgo(p.created_at)` chamado sem guarda de `typeof` em linha 18291, único ponto sem proteção das 4 chamadas | `app.html:18291` | **CORRIGIDO** — alinhado ao padrão `typeof _timeAgo === 'function' ? ... : ''` |
+
+### Débito D9 — CSP duplicada (não resolver nesta fase)
+
+> **ACHADO:** A política CSP está duplicada: meta tag em `app.html:13` (aplicada pelo browser ao carregar o arquivo diretamente) e header HTTP `Content-Security-Policy` em `vercel.json:38` (aplicado pelo servidor). O browser aplica a interseção de ambas, o que significa que qualquer atualização futura precisa ser feita em dois lugares — fonte de divergência silenciosa.
+>
+> **Débito:** Consolidar em fonte única (remover a meta tag, deixar apenas o header Vercel) ou garantir processo de manutenção sincronizado (ex.: script de verificação de igualdade no CI).
+>
+> **Impacto:** baixo agora; médio em manutenção contínua — uma edição esquecida em um dos dois cria restrição inesperada em produção.

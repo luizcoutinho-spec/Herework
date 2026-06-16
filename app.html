@@ -10,7 +10,7 @@
 })();
 </script>
 <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://connect-js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; form-action 'self'; base-uri 'self'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://connect-js.stripe.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://*.stripe.com wss://*.stripe.com https://merchant-ui-api.stripe.com https://cdn.jsdelivr.net; frame-src https://js.stripe.com https://hooks.stripe.com https://*.stripe.com; form-action 'self'; base-uri 'self'">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -18288,7 +18288,7 @@ async function _renderDashFLProposals(data) {
     var stLabel = st === 'accepted' ? 'Aceita' : st === 'rejected' ? 'Recusada' : st === 'shortlisted' ? 'Pré-selecionada' : st === 'viewed' ? 'Visualizada' : 'Aguardando resposta';
     var stKey = st === 'accepted' ? 'done' : st === 'rejected' ? 'cancelled' : 'sent';
     var valor = (p.value != null) ? Number(p.value).toLocaleString('pt-BR') : '0';
-    var quando = p.created_at ? _timeAgo(p.created_at) : '';
+    var quando = p.created_at ? (typeof _timeAgo === 'function' ? _timeAgo(p.created_at) : '') : '';
     return '<div class="dash-proj-card">' +
       '<div class="dash-proj-card-top">' +
         '<div class="dash-proj-title">' + _sanitize(proj.title || 'Projeto') + '</div>' +
