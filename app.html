@@ -16066,7 +16066,17 @@ async function _refreshMyPublishedProjects() {
        (mesmo com o projeto publicado e salvo corretamente no banco). */
     await _sbEnsureSession();
     var list = await _sbGetMyProjects();
-    list = list.filter(function(p){ return p.status === 'open'; });
+    var contractedProjIds = new Set();
+    try {
+      var cRes = await _sb.from('contracts')
+        .select('project_id,status')
+        .eq('client_id', _session.uid)
+        .in('status', ['pending_acceptance','active','review','revision','completed']);
+      if (cRes && !cRes.error && Array.isArray(cRes.data)) {
+        cRes.data.forEach(function(c){ if (c.project_id) contractedProjIds.add(c.project_id); });
+      }
+    } catch(e) { /* se falhar, segue com filtro de status apenas */ }
+    list = list.filter(function(p){ return p.status === 'open' && !contractedProjIds.has(p.id); });
     if (!list.length) {
       /* limpa o container — projeto virou in_progress ou foi excluído */
       el.innerHTML = typeof _emptyState === 'function'
