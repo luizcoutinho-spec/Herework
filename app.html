@@ -13453,10 +13453,15 @@ async function openInviteModal(freelancerId, freelancerName) {
   if (noProj) noProj.style.display = 'none';
 
   var projects = await _sbGetMyProjects();
-  var vincRes  = freelancerId
-    ? await _sb.from('proposals').select('project_id').eq('freelancer_id', freelancerId)
-    : { data: [] };
-  var vincSet  = new Set((vincRes.data || []).map(function(v){ return v.project_id; }));
+  var projIds  = (projects || []).map(function(p){ return p.id; });
+  var vincSet  = new Set();
+  if (freelancerId && projIds.length) {
+    var vincRes = await _sb.from('proposals')
+      .select('project_id')
+      .eq('freelancer_id', freelancerId)
+      .in('project_id', projIds);
+    (vincRes.data || []).forEach(function(v){ vincSet.add(v.project_id); });
+  }
 
   if (!sel) return;
 
