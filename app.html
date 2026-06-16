@@ -11613,7 +11613,7 @@ function _renderRealFreelancers() {
         '</div>',
         '<div class="fl-list-right">',
           '<div class="fl-list-rate">' + rate + rateSmall + '</div>',
-          _isOwnCard ? '' : '<button class="btn btn-green btn-sm" onclick="openInviteModal(\'' + (p.id||'') + '\',\'' + p.name.replace(/'/g,"\\'") + '\')">Convidar</button>',
+          _isOwnCard ? '' : '<button class="btn btn-green btn-sm" data-invite-fl="' + (p.id||'') + '" onclick="openInviteModal(\'' + (p.id||'') + '\',\'' + p.name.replace(/'/g,"\\'") + '\')">Convidar</button>',
           '<button class="btn btn-outline btn-sm" onclick="openFreelancerProfile(\'' + (p.id||'') + '\')">Ver Perfil</button>',
           _ownBtns,
         '</div>'
@@ -13522,6 +13522,14 @@ async function submitInvite() {
       return;
     }
     showToast('Convite enviado!', 'success');
+    var _flId = window._inviteCtx && window._inviteCtx.freelancerId;
+    if (_flId) {
+      document.querySelectorAll('[data-invite-fl="' + _flId + '"]').forEach(function(btn) {
+        btn.textContent = '✓ Convite enviado';
+        btn.classList.remove('btn-green');
+        btn.classList.add('btn-outline');
+      });
+    }
     closeModal('invite');
   } catch(e) {
     _setBtnLoading(btn, false);
