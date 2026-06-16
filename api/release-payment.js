@@ -210,7 +210,34 @@ module.exports = async function handler(req, res) {
       } catch (revertErr) {
         console.error('[release-payment] CRÍTICO: falha ao reverter lock — contrato pode travar:', contrato.id, revertErr.message);
       }
-      return respond(res, 502, { error: 'Falha ao processar repasse', stripe: stripeErr.message }, req);
+      const errCode = stripeErr.code || (stripeErr.raw && stripeErr.raw.code) || '';
+      const errMsg  = stripeErr.message || '';
+      let httpStatus, friendlyError;
+      if (/capability|destination.*not.*enabl|account.*not.*enabl|no such.*account|account.*invalid/i.test(errMsg) ||
+          /^(account_invalid|transfer_not_allowed|destination_capability_missing|no_account)$/.test(errCode)) {
+        httpStatus    = 422;
+        friendlyError = 'A conta de recebimento do freelancer ainda está sendo verificada pelo Stripe. Aguarde a conclusão do onboarding e tente novamente.';
+      } else if (/source_transaction|charge.*already.*transfer|already.*transfer|no such charge/i.test(errMsg) ||
+                 /^(charge_already_refunded|source_transfer_already_paid_out)$/.test(errCode)) {
+        httpStatus    = 422;
+        friendlyError = 'O pagamento original não está mais disponível para repasse automático. Contate o suporte.';
+      } else if (/idempoten/i.test(errMsg) || /^idempotency_key_in_use$/.test(errCode)) {
+        httpStatus    = 409;
+        friendlyError = 'Já existe uma solicitação de repasse em andamento ou concluída para este contrato.';
+      } else if (/balance_insufficient|insufficient.*fund|insufficient.*balance/i.test(errMsg) ||
+                 /^balance_insufficient$/.test(errCode)) {
+        httpStatus    = 422;
+        friendlyError = 'Saldo insuficiente na plataforma para processar o repasse. Contate o suporte.';
+      } else {
+        httpStatus    = 502;
+        friendlyError = 'Não foi possível concluir o repasse no momento. Tente novamente em alguns minutos.';
+      }
+      console.error('[release-payment] Stripe transfer falhou:', {
+        message: stripeErr.message, code: errCode, type: stripeErr.type, contract: contrato.id
+      });
+      const errBody = { error: friendlyError };
+      if (errCode) errBody.code = errCode;
+      return respond(res, httpStatus, errBody, req);
     }
 
     /* ── 13. Gravar escrow_released + stripe_transfer_id (service role) ── */
