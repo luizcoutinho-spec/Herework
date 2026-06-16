@@ -13004,7 +13004,7 @@ function _showPlanLimitModal(resourceKey, used, limit) {
   /* Benefícios do próximo plano disponível */
   var benEl = document.getElementById('pl-benefits');
   if (benEl) {
-    if (next) {
+    if (next && Array.isArray(next.benefits) && next.benefits.length) {
       benEl.style.display = '';
       benEl.innerHTML =
         '<p style="font-size:14px;color:#166534;font-weight:600;margin-bottom:6px;">📬 Faça upgrade para o Plano ' + next.name + ' e tenha:</p>' +
