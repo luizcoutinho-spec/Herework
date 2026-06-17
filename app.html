@@ -17336,13 +17336,7 @@ function openDashboard() {
   }
 
   var _vd = _getViewData();
-  var garantia = _vd.client.active.reduce(function(s,p){return s+p.value;},0);
-  var done   = _vd.client.done.length + _vd.freelancer.done.length;
-  var active = _vd.client.active.length + _vd.freelancer.active.length;
-  var waiting = _vd.client.waiting.length;
-  el = document.getElementById('ds-active'); if(el) el.textContent = active;
-  el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
-  el = document.getElementById('ds-done');   if(el) el.textContent = done;
+  /* ds-active / ds-escrow / ds-done são escritos por _loadRealContracts (fonte única — dados reais) */
   /* Update contract badges */
   el = document.getElementById('dct-client-count');
   if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
