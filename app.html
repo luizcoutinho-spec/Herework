@@ -7665,67 +7665,67 @@ section { padding: 64px 0; }
         <!-- Tabela comparativa — Híbrido -->
         <div class="pricing-compare" style="margin-top:40px;">
           <div class="pricing-compare-title">Comparativo completo — Conta completa (cliente + freelancer)</div>
-          <table class="compare-table">
+          <table class="compare-table" id="compare-hybrid">
             <thead>
               <tr>
                 <th>Recurso</th>
-                <th>Grátis</th>
-                <th style="color:var(--green);">PRO</th>
-                <th>Pro Max</th>
+                <th class="compare-head" data-plan-key="hybrid_start">Grátis</th>
+                <th class="compare-head" data-plan-key="hybrid_sinergy" style="color:var(--green);">PRO</th>
+                <th class="compare-head" data-plan-key="hybrid_nexus">Pro Max</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style="font-weight:700;">Mensalidade</td>
                 <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">R$ 79,90</span></td>
-                <td><span class="compare-val">R$ 149,90</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="price_month"><span class="compare-val">R$ 79,90</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="price_month"><span class="compare-val">R$ 149,90</span></td>
               </tr>
               <tr>
                 <td style="font-weight:700;">Plano Anual <span style="color:var(--green);font-weight:600;">(-20%)</span></td>
                 <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">R$ 767,04</span></td>
-                <td><span class="compare-val">R$ 1.439,04</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="price_year"><span class="compare-val">R$ 767,04</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="price_year"><span class="compare-val">R$ 1.439,04</span></td>
               </tr>
 
               <tr><td class="compare-section-row" colspan="4">Como cliente</td></tr>
               <tr>
                 <td>Projetos ativos simultâneos</td>
-                <td><span class="compare-val">1</span></td>
-                <td><span class="compare-val">10</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="projects_active"><span class="compare-val">1</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="projects_active"><span class="compare-val">10</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="projects_active"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Projetos em destaque / mês</td>
-                <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">3</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="featured_projects_month"><span class="compare-no">—</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="featured_projects_month"><span class="compare-val">3</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="featured_projects_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Convites diretos a freelancers / mês</td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">50</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="direct_invites_month"><span class="compare-val">5</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="direct_invites_month"><span class="compare-val">50</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="direct_invites_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Taxa de serviço (nova contratação)</td>
-                <td><span class="compare-val">8%</span></td>
-                <td><span class="compare-val">5%</span></td>
+                <td data-plan-key="hybrid_start" data-field="service_fee_new"><span class="compare-val">8%</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="service_fee_new"><span class="compare-val">5%</span></td>
                 <td><span class="compare-val">negociável</span></td>
               </tr>
               <tr>
                 <td>Taxa em cliente recorrente</td>
-                <td><span class="compare-val">6%</span></td>
-                <td><span class="compare-val">3%</span></td>
+                <td data-plan-key="hybrid_start" data-field="service_fee_recurrent"><span class="compare-val">6%</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="service_fee_recurrent"><span class="compare-val">3%</span></td>
                 <td><span class="compare-val">negociável</span></td>
               </tr>
 
               <tr><td class="compare-section-row" colspan="4">Como freelancer</td></tr>
               <tr>
                 <td>Envios de proposta / mês</td>
-                <td><span class="compare-val">3</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="proposals_month"><span class="compare-val">3</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="proposals_month"><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="proposals_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Comprar envios avulsos (R$ 4,90)</td>
@@ -7735,33 +7735,33 @@ section { padding: 64px 0; }
               </tr>
               <tr>
                 <td>Propostas em destaque / mês</td>
-                <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="featured_proposals_month"><span class="compare-no">—</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="featured_proposals_month"><span class="compare-val">5</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="featured_proposals_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Comissão projeto novo</td>
-                <td><span class="compare-val">18%</span></td>
-                <td><span class="compare-val">12%</span></td>
-                <td><span class="compare-val">8%</span></td>
+                <td data-plan-key="hybrid_start" data-field="commission_new"><span class="compare-val">18%</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="commission_new"><span class="compare-val">12%</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="commission_new"><span class="compare-val">8%</span></td>
               </tr>
               <tr>
                 <td>Comissão cliente recorrente</td>
-                <td><span class="compare-val">12%</span></td>
-                <td><span class="compare-val">8%</span></td>
-                <td><span class="compare-val">5%</span></td>
+                <td data-plan-key="hybrid_start" data-field="commission_recurrent"><span class="compare-val">12%</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="commission_recurrent"><span class="compare-val">8%</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="commission_recurrent"><span class="compare-val">5%</span></td>
               </tr>
               <tr>
                 <td>Itens no portfólio</td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">20</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="portfolio_items"><span class="compare-val">5</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="portfolio_items"><span class="compare-val">20</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="portfolio_items"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Áreas de atuação</td>
-                <td><span class="compare-val">3</span></td>
-                <td><span class="compare-val">10</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="areas"><span class="compare-val">3</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="areas"><span class="compare-val">10</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="areas"><span class="compare-val">Ilimitado</span></td>
               </tr>
 
               <tr><td class="compare-section-row" colspan="4">Comum aos dois papéis</td></tr>
@@ -7791,9 +7791,9 @@ section { padding: 64px 0; }
               </tr>
               <tr>
                 <td>Usuários / assentos</td>
-                <td><span class="compare-val">1</span></td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="hybrid_start" data-field="seats"><span class="compare-val">1</span></td>
+                <td data-plan-key="hybrid_sinergy" data-field="seats"><span class="compare-val">5</span></td>
+                <td data-plan-key="hybrid_nexus" data-field="seats"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>SLA de resposta</td>
@@ -12863,6 +12863,7 @@ async function _loadPlanConfig() {
     if (typeof _applyPricingCards === 'function') _applyPricingCards();
     if (typeof _applyCompareFreelancer === 'function') _applyCompareFreelancer();
     if (typeof _applyCompareClient === 'function') _applyCompareClient();
+    if (typeof _applyCompareHybrid === 'function') _applyCompareHybrid();
   } catch(e) { /* silencioso: fallback _PLAN_LIMITS responde */ }
 }
 
@@ -12976,6 +12977,23 @@ function _applyCompareClient() {
     if (row && row.label) th.textContent = row.label;
   });
   document.querySelectorAll('#compare-client [data-field][data-plan-key]').forEach(function(td) {
+    var row = _planConfigCache[td.dataset.planKey];
+    if (!row) return;
+    var field = td.dataset.field;
+    if (!row.hasOwnProperty(field)) return;
+    var span = td.querySelector('span');
+    if (!span) return;
+    span.textContent = _fmtCompare(field, row[field]);
+  });
+}
+
+function _applyCompareHybrid() {
+  if (!_planConfigCache) return;
+  document.querySelectorAll('#compare-hybrid .compare-head[data-plan-key]').forEach(function(th) {
+    var row = _planConfigCache[th.dataset.planKey];
+    if (row && row.label) th.textContent = row.label;
+  });
+  document.querySelectorAll('#compare-hybrid [data-field][data-plan-key]').forEach(function(td) {
     var row = _planConfigCache[td.dataset.planKey];
     if (!row) return;
     var field = td.dataset.field;
@@ -22169,6 +22187,7 @@ window.showPage = function(name) {
     if (typeof _applyPricingCards === 'function') setTimeout(_applyPricingCards, 50);
     if (typeof _applyCompareFreelancer === 'function') setTimeout(_applyCompareFreelancer, 50);
     if (typeof _applyCompareClient === 'function') setTimeout(_applyCompareClient, 50);
+    if (typeof _applyCompareHybrid === 'function') setTimeout(_applyCompareHybrid, 50);
   }
 };
 
