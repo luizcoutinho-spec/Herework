@@ -5570,7 +5570,7 @@ section { padding: 64px 0; }
             <div>
               <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Volume Total Movimentado</div>
               <div style="font-size:30px;font-weight:900;color:#fff;" id="pay-total-all">R$ 0</div>
-              <div style="font-size:11px;color:#64748b;margin-top:3px;">Soma de todos os contratos (pagamentos + recebimentos)</div>
+              <div id="pay-total-sub" style="font-size:11px;color:#64748b;margin-top:3px;">Soma de todos os contratos (pagamentos + recebimentos)</div>
             </div>
             <div style="display:flex;gap:12px;flex-wrap:wrap;">
               <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
@@ -20308,6 +20308,19 @@ function switchPayHistory(tab) {
     if(pnl) pnl.style.display = t === tab ? 'block' : 'none';
   });
   if (tab === 'in' && typeof loadConnectStatus === 'function') loadConnectStatus();
+  if (typeof _renderPayBanner === 'function') _renderPayBanner(tab === 'in' ? 'freelancer' : 'cliente');
+}
+
+function _renderPayBanner(scope) {
+  var d = (window._payData && window._payData[scope]) ? window._payData[scope] : null;
+  if (!d) return;
+  var fmt = function(n){ return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2}); };
+  var el;
+  el = document.getElementById('pay-total-all');        if(el) el.textContent = fmt(d.total);
+  el = document.getElementById('pay-summary-liberado'); if(el) el.textContent = fmt(d.liberado);
+  el = document.getElementById('pay-summary-garantia'); if(el) el.textContent = fmt(d.garantia);
+  el = document.getElementById('pay-summary-pendente'); if(el) el.textContent = fmt(d.pendente);
+  el = document.getElementById('pay-total-sub');        if(el) el.textContent = d.sub;
 }
 
 /* ─── Update payment summary cards ─── */
@@ -20341,13 +20354,15 @@ async function _updatePaymentSummary() {
   var totalGarantia = clientGarantia;
   var totalPendente = flPendente;
 
+  window._payData = {
+    geral:      { total: totalAll,    liberado: totalLiberado,  garantia: totalGarantia, pendente: totalPendente, sub: 'Soma de todos os contratos (pagamentos + recebimentos)' },
+    cliente:    { total: clientTotal, liberado: clientLiberado, garantia: clientGarantia, pendente: 0,            sub: 'Total como cliente' },
+    freelancer: { total: flTotal,     liberado: flRecebido,     garantia: 0,             pendente: flPendente,    sub: 'Total como freelancer' }
+  };
+  _renderPayBanner('cliente');
+
   /* Update DOM */
   var el;
-  /* Banner geral */
-  el = document.getElementById('pay-total-all');        if(el) el.textContent = fmt(totalAll);
-  el = document.getElementById('pay-summary-liberado'); if(el) el.textContent = fmt(totalLiberado);
-  el = document.getElementById('pay-summary-garantia'); if(el) el.textContent = fmt(totalGarantia);
-  el = document.getElementById('pay-summary-pendente'); if(el) el.textContent = fmt(totalPendente);
   /* Como cliente */
   el = document.getElementById('pay-total-paid');       if(el) el.textContent = fmt(clientTotal);
   el = document.getElementById('pay-client-liberado');  if(el) el.textContent = fmt(clientLiberado);
