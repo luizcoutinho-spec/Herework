@@ -16123,12 +16123,6 @@ async function _refreshMyPublishedProjects() {
         '<div id="proposals-inline-' + _sanitize(p.id) + '" class="proposals-inline" style="display:none;margin-top:12px;"></div>' +
       '</div>';
     }).join('');
-    /* Atualizar badge de contagem do painel "Como Cliente" */
-    var badge = document.getElementById('dct-client-count');
-    if (badge) {
-      var _vd = _getViewData();
-      badge.textContent = _vd.client.active.length + list.length + _vd.client.done.length;
-    }
   } catch(e) { console.warn('_refreshMyPublishedProjects:', e); }
 }
 
