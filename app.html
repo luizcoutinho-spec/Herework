@@ -13245,6 +13245,11 @@ function _showPlanLimitModal(resourceKey, used, limit) {
     };
   }
 
+  var addonBtnEl = document.getElementById('addon-buy-btn');
+  if (addonBtnEl) {
+    addonBtnEl.style.display = (_isFL() || _isBoth()) ? '' : 'none';
+  }
+
   ov.classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -13255,6 +13260,12 @@ function _showPlanLimitModal(resourceKey, used, limit) {
                   '— recurso:', resourceKey, '(' + used + '/' + limit + ')');
     }, 2000);
   }
+}
+
+function _buyAddonProposal() {
+  var ov = document.getElementById('overlay-plan-limit');
+  if (ov) { ov.classList.remove('open'); document.body.style.overflow = ''; }
+  openStripePayment({ addonProposal: true, title: 'Comprar 1 envio de proposta', amount: 4.90 });
 }
 
 /* Compatibilidade com chamadas antigas (cenário "limite de projetos do plano gratuito") */
@@ -23352,10 +23363,15 @@ async function openStripePayment(opts) {
       }
     } catch(e) {}
     var _isSubscription = !!(opts.plan);
+    var _isAddonProposal = !!(opts.addonProposal);
+    window._spIsAddon = _isAddonProposal;
     var _edgeUrl, _edgeBody;
     if (_isSubscription) {
       _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-subscription';
       _edgeBody = JSON.stringify({ plan: opts.plan, interval: (opts.interval === 'year' ? 'year' : 'month') });
+    } else if (_isAddonProposal) {
+      _edgeUrl  = 'https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/hw-create-addon-pi';
+      _edgeBody = '{}';
     } else {
       // TEMP (fase de testes): A01 corrigido — sempre hw-create-payment-intent; amount vem do banco via proposalId.
       // GO-LIVE: avaliar se endpoint live separado é necessário ou manter este com chaves live.
@@ -23423,6 +23439,7 @@ async function openStripePayment(opts) {
     window._spPaymentId    = data.paymentIntentId;
 
   } catch(err) {
+    window._spIsAddon = false;
     _stripeElements = null;
     _stripeInstance = null;
     document.getElementById('sp-loading').style.display           = 'none';
@@ -23550,6 +23567,12 @@ async function confirmStripePayment() {
       document.getElementById('sp-element-container').style.display = 'none';
       document.getElementById('sp-success').style.display           = 'block';
 
+      if (window._spIsAddon) {
+        window._spIsAddon = false;
+        showToast('✅ Pagamento confirmado! Seu envio extra foi creditado. Reenvie sua proposta.', 'success', 6000);
+        setTimeout(closeStripePayment, 4000);
+      }
+
       if (_spProposalId) {
         /* ── Pagamento de garantia de contrato ── */
         showToast('✅ Pagamento confirmado! Valor em Garantia.', 'success');
@@ -23657,6 +23680,7 @@ async function confirmStripePayment() {
 }
 
 function closeStripePayment() {
+  window._spIsAddon = false;
   var ov = document.getElementById('overlay-stripe-payment');
   if (ov) ov.classList.remove('open');
   document.body.style.overflow = '';
@@ -24184,6 +24208,9 @@ function hwGetEmailLogs(n) {
       <div style="display:flex;flex-direction:column;gap:10px;">
         <button id="pl-cta" class="btn btn-green btn-block btn-lg" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';showPage('pricing');">
           🚀 Fazer Upgrade
+        </button>
+        <button id="addon-buy-btn" class="btn btn-outline btn-block" onclick="_buyAddonProposal();" style="display:none;border-color:var(--green);color:var(--green);">
+          💳 Comprar 1 envio — R$ 4,90
         </button>
         <button class="btn btn-outline btn-block" onclick="document.getElementById('overlay-plan-limit').classList.remove('open');document.body.style.overflow='';">
           Continuar no plano atual
