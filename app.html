@@ -20324,14 +20324,14 @@ async function _updatePaymentSummary() {
   var flDone       = contracts.filter(function(c){ return c.freelancer_id === _session.uid && c.status === 'completed'; });
 
   /* ── CLIENTE ── */
-  var clientLiberado  = clientDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var clientGarantia  = clientActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var clientLiberado  = clientDone.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
+  var clientGarantia  = clientActive.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
   var clientTotal     = clientLiberado + clientGarantia;
   var clientCount     = clientActive.length + clientDone.length;
 
   /* ── FREELANCER ── */
-  var flRecebido = flDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var flPendente = flActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var flRecebido = flDone.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
+  var flPendente = flActive.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
   var flTotal    = flRecebido + flPendente;
   var flCount    = flActive.length + flDone.length;
 
