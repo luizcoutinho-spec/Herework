@@ -17336,18 +17336,7 @@ function openDashboard() {
   }
 
   var _vd = _getViewData();
-  var garantia = _vd.client.active.reduce(function(s,p){return s+p.value;},0);
-  var done   = _vd.client.done.length + _vd.freelancer.done.length;
-  var active = _vd.client.active.length + _vd.freelancer.active.length;
-  var waiting = _vd.client.waiting.length;
-  el = document.getElementById('ds-active'); if(el) el.textContent = active;
-  el = document.getElementById('ds-escrow'); if(el) el.textContent = 'R$ ' + garantia.toLocaleString('pt-BR');
-  el = document.getElementById('ds-done');   if(el) el.textContent = done;
-  /* Update contract badges */
-  el = document.getElementById('dct-client-count');
-  if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
-  el = document.getElementById('dct-fl-count');
-  if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
+  /* ds-active/ds-escrow/ds-done e dct-client-count/dct-fl-count escritos por _loadRealContracts (fonte única) */
 
   el = document.getElementById('dash-profile-avatar'); if(el) el.textContent = name.charAt(0).toUpperCase();
   el = document.getElementById('dash-profile-name');   if(el) el.textContent = name;
@@ -17366,9 +17355,6 @@ function openDashboard() {
   if (ctEl) ctEl.value = (_session && _session.city)  || _odCache.city  || '';
   var phEl = document.getElementById('profile-phone');
   if (phEl) phEl.value = (_session && _session.phone) || _odCache.phone || '';
-
-  el = document.getElementById('dct-client-count'); if(el) el.textContent = _vd.client.active.length + _vd.client.waiting.length + _vd.client.done.length;
-  el = document.getElementById('dct-fl-count');     if(el) el.textContent = _vd.freelancer.active.length + _vd.freelancer.proposals.length + _vd.freelancer.done.length;
 
   _renderDashClientActive(_vd);
   _renderDashClientWaiting(_vd);
