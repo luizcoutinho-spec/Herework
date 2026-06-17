@@ -25020,10 +25020,15 @@ async function _loadRealContracts() {
   var _orig = window.openDashboard;
   window.openDashboard = function() {
     if (typeof _orig === 'function') _orig.apply(this, arguments);
-    /* Carrega contratos reais após render */
-    setTimeout(function() {
-      if (_sbReady() && _session && _session.uid) _loadRealContracts();
-    }, 600);
+    /* Carrega contratos reais quando a sessão estiver pronta (polling até ~6s) */
+    var _tries = 0;
+    (function _waitSession() {
+      if (_sbReady() && _session && _session.uid) {
+        _loadRealContracts();
+        return;
+      }
+      if (_tries++ < 30) { setTimeout(_waitSession, 200); }  // 30 x 200ms = 6s teto
+    })();
   };
 })();
 
