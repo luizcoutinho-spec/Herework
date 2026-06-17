@@ -12931,16 +12931,23 @@ function _applyPricingCards() {
 
 /* Formata um valor do plan_config para exibição na tabela comparativa. */
 function _fmtCompare(field, v) {
-  if (v == null) return 'Ilimitado';
+  var LIMIT_FIELDS = ['proposals_month','featured_proposals_month','portfolio_items','areas','projects_active','featured_projects_month','direct_invites_month','seats'];
+  if (LIMIT_FIELDS.indexOf(field) !== -1) {
+    if (v == null) return 'Ilimitado';
+    if (v === 0 || v === '0') return '—';
+    return String(v);
+  }
+  if (v == null || v === '') return '—';
   if (field === 'price_month' || field === 'price_year') {
     var n = parseFloat(v);
+    if (isNaN(n) || n === 0) return '—';
     return 'R$ ' + (n % 1 === 0 ? String(n) : n.toFixed(2).replace('.', ','));
   }
-  if (field === 'commission_new' || field === 'commission_recurrent') {
+  if (field === 'commission_new' || field === 'commission_recurrent' || field === 'service_fee_new' || field === 'service_fee_recurrent') {
     return Math.round(v * 100) + '%';
   }
   if (field === 'payout_days') {
-    return v === 1 ? '24h' : v + ' dias';
+    return Number(v) <= 1 ? '24h' : (v + ' dias');
   }
   return String(v);
 }
