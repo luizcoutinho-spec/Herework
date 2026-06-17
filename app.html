@@ -15313,6 +15313,13 @@ function _adminPlanCard(p) {
   function sectionLabel(txt) {
     return '<div style="font-size:11px;font-weight:700;color:var(--accent,#7c6fff);margin:10px 0 5px;">' + txt + '</div>';
   }
+  function boolInput(field, label) {
+    var checked = (p[field] === true) ? ' checked' : '';
+    return '<div style="margin-bottom:7px;display:flex;align-items:center;gap:8px;">' +
+      '<input type="checkbox" id="apc-' + k + '-' + field + '"' + checked + ' style="width:16px;height:16px;cursor:pointer;">' +
+      '<label for="apc-' + k + '-' + field + '" style="font-size:11px;color:#475569;cursor:pointer;">' + label + '</label>' +
+      '</div>';
+  }
 
   var fields = '';
   fields += sectionLabel('Preços');
@@ -15345,6 +15352,22 @@ function _adminPlanCard(p) {
     fields += sectionLabel('Taxa de Serviço — Cliente');
     fields += numInput('service_fee_new',       'Taxa cliente novo (0–1)',  '0.001', '0.05 = 5%');
     fields += numInput('service_fee_recurrent', 'Taxa recorrente (0–1)',    '0.001', '0.03 = 3%');
+  }
+  fields += sectionLabel('Recursos & Confiança');
+  fields += boolInput('escrow',                'Pagamento garantido (escrow)');
+  fields += boolInput('verified_badge',        'Selo de perfil verificado');
+  fields += boolInput('proposal_comparator',   'Comparador de propostas');
+  fields += boolInput('ai_proposal_generator', 'Gerador de propostas com IA');
+  if (isCL) {
+    fields += sectionLabel('Recursos — Cliente');
+    fields += boolInput('milestone_payment',      'Pagamento por milestones');
+    fields += boolInput('satisfaction_guarantee', 'Garantia de satisfação (reembolso)');
+    fields += boolInput('verified_freelancers',   'Freelancers verificados');
+    fields += boolInput('premium_talent_access',  'Acesso a talentos Premium/Top');
+    fields += boolInput('ai_matching',            'Matching por IA');
+    fields += boolInput('expert_preselection',    'Pré-seleção por especialista');
+    fields += boolInput('expense_reports',        'Relatórios de gastos');
+    fields += boolInput('api_integration',        'Integração / API');
   }
   fields += sectionLabel('Stripe (opcional)');
   fields += txtInput('stripe_price_id_month', 'Price ID Mensal');
@@ -15445,6 +15468,14 @@ async function _adminSavePlan(planKey) {
 
   ['stripe_price_id_month','stripe_price_id_year','stripe_prod_id'].forEach(function(f) {
     var v = txtVal(f); if (v !== undefined) patch[f] = v;
+  });
+
+  var BOOL_FIELDS = ['escrow','verified_badge','proposal_comparator','ai_proposal_generator',
+    'milestone_payment','satisfaction_guarantee','verified_freelancers','premium_talent_access',
+    'ai_matching','expert_preselection','expense_reports','api_integration'];
+  BOOL_FIELDS.forEach(function(f) {
+    var el = document.getElementById('apc-' + planKey + '-' + f);
+    if (el) patch[f] = !!el.checked;
   });
 
   if (!Object.keys(patch).length) { showToast('Nenhum campo para salvar.', 'warn'); return; }
