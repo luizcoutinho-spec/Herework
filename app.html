@@ -10863,6 +10863,9 @@ async function _sbCreateProposal(data) {
   if (r.error) {
     var code = r.error.code || '';
     var msg  = (r.error.message || '').toLowerCase();
+    if (code === 'P0001' || (r.error.message || '').indexOf('PLAN_LIMIT') >= 0) {
+      var _e = new Error('PLAN_LIMIT'); _e.code = 'PLAN_LIMIT'; throw _e;
+    }
     if (code === '23505' || msg.indexOf('duplicate') >= 0 || msg.indexOf('unique') >= 0) {
       throw new Error('Você já enviou uma proposta para este projeto.');
     }
@@ -12837,7 +12840,7 @@ var _PLAN_LIMITS = {
      Premium (pro)    : ilimitadas,      portfólio 20, comissão 12%/8%
      Elite (enterp.)  : ilimitadas,      ilimitado,    comissão  8%/5% */
   freelancer: {
-    free:       { proposals_month: 3,        portfolio_items: 5,        verified_badges: 0,        commission: 0.18, commission_recurrent: 0.12 },
+    free:       { proposals_month: 5,        portfolio_items: 5,        verified_badges: 0,        commission: 0.18, commission_recurrent: 0.12 },
     pro:        { proposals_month: Infinity, portfolio_items: 20,       verified_badges: 1,        commission: 0.12, commission_recurrent: 0.08 },
     enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission: 0.08, commission_recurrent: 0.05 }
   },
@@ -12846,7 +12849,7 @@ var _PLAN_LIMITS = {
      commission_client/commission_client_recurrent → ação de contratação
      commission_fl/commission_fl_recurrent         → ação de prestação   */
   both: {
-    free:       { projects_month: 1,        proposals_month: 3,        direct_invites: 5,        candidates_per_project: 10,       portfolio_items: 5,        verified_badges: 0,        commission_client: 0.08, commission_client_recurrent: 0.06, commission_fl: 0.18, commission_fl_recurrent: 0.12 },
+    free:       { projects_month: 1,        proposals_month: 5,        direct_invites: 5,        candidates_per_project: 10,       portfolio_items: 5,        verified_badges: 0,        commission_client: 0.08, commission_client_recurrent: 0.06, commission_fl: 0.18, commission_fl_recurrent: 0.12 },
     pro:        { projects_month: 10,       proposals_month: Infinity, direct_invites: 50,       candidates_per_project: Infinity, portfolio_items: 20,       verified_badges: 1,        commission_client: 0.05, commission_client_recurrent: 0.03, commission_fl: 0.12, commission_fl_recurrent: 0.08 },
     enterprise: { projects_month: Infinity, proposals_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission_client: 0.03, commission_client_recurrent: 0.02, commission_fl: 0.08, commission_fl_recurrent: 0.05 }
   }
@@ -12860,15 +12863,23 @@ var _planConfigCache = null;
 async function _loadPlanConfig() {
   try {
     var r = await _sb.from('plan_config').select('*');
-    if (r.error || !r.data) return;
+    if (r.error || !r.data) {
+      console.warn('[HereWork] plan_config NÃO carregou — front em fail-safe', r.error);
+      window._planConfigLoaded = false;
+      return;
+    }
     var map = {};
     r.data.forEach(function(row) { map[row.plan_key] = row; });
     _planConfigCache = map;
+    window._planConfigLoaded = true;
     if (typeof _applyPricingCards === 'function') _applyPricingCards();
     if (typeof _applyCompareFreelancer === 'function') _applyCompareFreelancer();
     if (typeof _applyCompareClient === 'function') _applyCompareClient();
     if (typeof _applyCompareHybrid === 'function') _applyCompareHybrid();
-  } catch(e) { /* silencioso: fallback _PLAN_LIMITS responde */ }
+  } catch(e) {
+    console.warn('[HereWork] plan_config NÃO carregou — front em fail-safe', e);
+    window._planConfigLoaded = false;
+  }
 }
 
 /* Traduz (type, tier) → plan_key da tabela plan_config.
@@ -13047,23 +13058,18 @@ function _registerPlanUsage(resourceKey, amount) {
 
 /* ── Limite vigente para o usuário atual, conforme tipo + plano ── */
 function _getResourceLimit(resourceKey) {
-  /* Bypass de limite para contas de teste internas — NÃO afeta usuários reais.
-     Mantém o gate de plano intacto para todos os demais e-mails. */
-  var _testEmails = ['contato@herework.com.br', 'luiz.coutinho@brandvakt.com', 'teste.fl@herework-test.com'];
-  if (_session && _session.email && _testEmails.indexOf(String(_session.email).toLowerCase()) !== -1) {
-    return Infinity;
-  }
   var type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
   var tier = _getUserPlan();
   if (_planConfigCache) {
     var row = _planConfigCache[_planKeyFor(type, tier)];
     if (row && row.hasOwnProperty(resourceKey)) {
-      return (row[resourceKey] == null) ? Infinity : row[resourceKey];
+      return (row[resourceKey] == null) ? Infinity : row[resourceKey]; // NULL legítimo = ilimitado (ex. pro/master)
     }
   }
-  var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
-  var plan  = table[tier] || table.free;
-  return (plan && plan.hasOwnProperty(resourceKey)) ? plan[resourceKey] : Infinity;
+  /* fail-safe: cache ausente → limite do freelancer_start hardcoded, nunca ilimitado.
+     Premissa: só trilha freelancer em produção (revisitar ao entrar Cliente/Híbrido). */
+  var _fsPlan = (_PLAN_LIMITS.freelancer && _PLAN_LIMITS.freelancer.free) || {};
+  return _fsPlan.hasOwnProperty(resourceKey) ? _fsPlan[resourceKey] : 5;
 }
 
 /* ── Próximo plano disponível e seus benefícios (jornada de upgrade) ── */
@@ -13632,6 +13638,11 @@ function submitProposal() {
       if (res) { onSuccess(); }
       else { onError('Proposta não salva. Verifique se está logado.'); }
     }).catch(function(err) {
+      if (err && (err.code === 'PLAN_LIMIT' || (err.message || '').indexOf('PLAN_LIMIT') >= 0)) {
+        if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+        _showPlanLimitModal('proposals_month', _getUsage('proposals_month'), _getResourceLimit('proposals_month'));
+        return;
+      }
       onError(err && err.message ? err.message : 'Erro desconhecido');
     });
   } else if (_session && !projId) {
