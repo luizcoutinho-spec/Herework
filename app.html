@@ -15051,13 +15051,23 @@ async function adminDoLogin() {
     showToast('Faça login na sua conta antes de acessar o painel admin.', 'warn');
     return;
   }
+  var pass = document.getElementById('admin-login-pass').value || '';
+  if (!pass) {
+    showToast('Digite a senha do painel.', 'warn');
+    return;
+  }
   _setBtnLoading(btn, true);
   try {
-    var result = await _sb.from('profiles').select('is_admin').eq('id', _session.uid).maybeSingle();
+    var r = await _sb.rpc('verify_admin_password', { p_password: pass });
     _setBtnLoading(btn, false);
-    if (result.data && result.data.is_admin === true) {
+    if (r.error) {
+      showToast('Erro ao verificar acesso: ' + r.error.message, 'error');
+      return;
+    }
+    if (r.data === true) {
       _adminAuth = true;
       _adminTries = 0;
+      document.getElementById('admin-login-pass').value = '';
       document.getElementById('overlay-admin-login').classList.remove('open');
       document.body.style.overflow = '';
       showAdminPage();
@@ -15074,7 +15084,7 @@ async function adminDoLogin() {
     }
   } catch (err) {
     _setBtnLoading(btn, false);
-    showToast('❌ Erro ao verificar permissão: ' + (err.message || 'tente novamente.'), 'error');
+    showToast('❌ Erro ao verificar acesso: ' + (err.message || 'tente novamente.'), 'error');
   }
 }
 
