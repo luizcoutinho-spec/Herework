@@ -15369,6 +15369,23 @@ function _adminPlanCard(p) {
     fields += boolInput('expense_reports',        'Relatórios de gastos');
     fields += boolInput('api_integration',        'Integração / API');
   }
+  fields += sectionLabel('Atendimento & SLA');
+  fields += txtInput('support_level',    'Atendimento (padrão/prioritário/gerente dedicado)');
+  fields += txtInput('sla_response',     'SLA de resposta (—/24h/4h)');
+  fields += txtInput('price_calculator', 'Calculadora de preço');
+  if (isFL) {
+    fields += sectionLabel('Projetos & Visibilidade — Freelancer');
+    fields += txtInput('project_visibility', 'Visibilidade de Projetos');
+    fields += txtInput('project_alert',      'Alerta de novos projetos');
+    fields += txtInput('proposal_position',  'Posição do Envio de Proposta');
+    fields += txtInput('search_highlight',   'Destaque nas buscas');
+  }
+  if (isCL) {
+    fields += sectionLabel('Gestão & Disputas — Cliente');
+    fields += txtInput('contract_management',    'Gestão de contratos/milestones');
+    fields += txtInput('guaranteed_replacement', 'Substituição garantida');
+    fields += txtInput('dispute_mediation',      'Mediação de disputas');
+  }
   fields += sectionLabel('Stripe (opcional)');
   fields += txtInput('stripe_price_id_month', 'Price ID Mensal');
   fields += txtInput('stripe_price_id_year',  'Price ID Anual');
@@ -15467,6 +15484,12 @@ async function _adminSavePlan(planKey) {
   });
 
   ['stripe_price_id_month','stripe_price_id_year','stripe_prod_id'].forEach(function(f) {
+    var v = txtVal(f); if (v !== undefined) patch[f] = v;
+  });
+
+  ['support_level','sla_response','price_calculator','project_visibility','project_alert',
+   'proposal_position','search_highlight','contract_management','guaranteed_replacement',
+   'dispute_mediation'].forEach(function(f) {
     var v = txtVal(f); if (v !== undefined) patch[f] = v;
   });
 
