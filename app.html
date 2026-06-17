@@ -15317,6 +15317,7 @@ function _adminPlanCard(p) {
   fields += sectionLabel('Preços');
   fields += numInput('price_month', 'Preço mensal (R$)',  '0.01');
   fields += numInput('price_year',  'Preço anual (R$)',   '0.01');
+  if (isFL) { fields += numInput('addon_proposal_price', 'Comprar envios avulsos (R$)', '0.01'); }
 
   if (isFL) {
     fields += sectionLabel('Limites — Freelancer');
@@ -15419,11 +15420,13 @@ async function _adminSavePlan(planKey) {
   }
 
   var patch = {};
-  var pm = numVal('price_month'), py = numVal('price_year');
-  if (pm !== undefined) patch.price_month = pm;
-  if (py !== undefined) patch.price_year  = py;
-  if ((patch.price_month !== undefined && patch.price_month !== null && patch.price_month < 0) ||
-      (patch.price_year  !== undefined && patch.price_year  !== null && patch.price_year  < 0)) {
+  var pm = numVal('price_month'), py = numVal('price_year'), addon = numVal('addon_proposal_price');
+  if (pm    !== undefined) patch.price_month          = pm;
+  if (py    !== undefined) patch.price_year           = py;
+  if (addon !== undefined) patch.addon_proposal_price = addon;
+  if ((patch.price_month          !== undefined && patch.price_month          !== null && patch.price_month          < 0) ||
+      (patch.price_year           !== undefined && patch.price_year           !== null && patch.price_year           < 0) ||
+      (patch.addon_proposal_price !== undefined && patch.addon_proposal_price !== null && patch.addon_proposal_price < 0)) {
     showToast('Preços devem ser >= 0.', 'error'); return;
   }
 
