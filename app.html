@@ -5008,15 +5008,15 @@ section { padding: 64px 0; }
       <div class="dash-stats-row">
         <div class="dash-stat">
           <div class="dash-stat-val" id="ds-active">0</div>
-          <div class="dash-stat-lbl">Contratos ativos</div>
+          <div class="dash-stat-lbl">Em andamento</div>
         </div>
         <div class="dash-stat">
           <div class="dash-stat-val" id="ds-escrow">R$ 0</div>
-          <div class="dash-stat-lbl">Em Garantia</div>
+          <div class="dash-stat-lbl">A Receber</div>
         </div>
         <div class="dash-stat">
-          <div class="dash-stat-val" id="ds-done">0</div>
-          <div class="dash-stat-lbl">Conclu&iacute;dos</div>
+          <div class="dash-stat-val" id="ds-done">R$ 0</div>
+          <div class="dash-stat-lbl">Recebido</div>
         </div>
         <div class="dash-stat">
           <div class="dash-stat-val" id="ds-plan">Gratuito</div>
@@ -20311,23 +20311,27 @@ function switchPayHistory(tab) {
 }
 
 /* ─── Update payment summary cards ─── */
-function _updatePaymentSummary() {
+async function _updatePaymentSummary() {
+  if (!_sbReady() || !_session) return;
   var fmt = function(n){ return 'R\$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2}); };
 
+  var cRes = await _sb.from('contracts').select('*').or('client_id.eq.' + _session.uid + ',freelancer_id.eq.' + _session.uid);
+  var contracts = (cRes && !cRes.error && Array.isArray(cRes.data)) ? cRes.data : [];
+  var liveStatuses = ['active', 'review', 'revision', 'pending_acceptance'];
+  var clientActive = contracts.filter(function(c){ return c.client_id === _session.uid && liveStatuses.indexOf(c.status) !== -1; });
+  var clientDone   = contracts.filter(function(c){ return c.client_id === _session.uid && c.status === 'completed'; });
+  var flActive     = contracts.filter(function(c){ return c.freelancer_id === _session.uid && liveStatuses.indexOf(c.status) !== -1; });
+  var flDone       = contracts.filter(function(c){ return c.freelancer_id === _session.uid && c.status === 'completed'; });
+
   /* ── CLIENTE ── */
-  var _vd = _getViewData();
-  var clientActive    = _vd.client.active;
-  var clientDone      = _vd.client.done;
-  var clientLiberado  = clientDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var clientGarantia  = clientActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var clientLiberado  = clientDone.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
+  var clientGarantia  = clientActive.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
   var clientTotal     = clientLiberado + clientGarantia;
   var clientCount     = clientActive.length + clientDone.length;
 
   /* ── FREELANCER ── */
-  var flActive   = _vd.freelancer.active;
-  var flDone     = _vd.freelancer.done;
-  var flRecebido = flDone.reduce(function(s,p){ return s+(p.value||0); }, 0);
-  var flPendente = flActive.reduce(function(s,p){ return s+(p.value||0); }, 0);
+  var flRecebido = flDone.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
+  var flPendente = flActive.reduce(function(s,p){ return s+(parseFloat(p.value)||0); }, 0);
   var flTotal    = flRecebido + flPendente;
   var flCount    = flActive.length + flDone.length;
 
@@ -24990,18 +24994,20 @@ async function _loadRealContracts() {
 
     /* Atualiza badges */
     var totalActive = clientActive.length + flActive.length;
-    var totalDone   = clientDone.length + flDone.length;
     var el;
     el = document.getElementById('ds-active'); if(el) el.textContent = totalActive;
-    el = document.getElementById('ds-done');   if(el) el.textContent = totalDone;
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
     el = document.getElementById('dct-fl-count');     if(el) el.textContent = flActive.length + flDone.length;
 
-    /* Valor em garantia */
-    var escrow = clientActive.filter(function(c){ return c.status === 'active'; })
-                             .reduce(function(s,c){ return s + c.value; }, 0);
+    /* A Receber: soma dos contratos vivos como freelancer */
+    var aReceber = flActive.reduce(function(s,c){ return s + (c.value||0); }, 0);
     el = document.getElementById('ds-escrow');
-    if (el) el.textContent = 'R$ ' + escrow.toLocaleString('pt-BR', {minimumFractionDigits:2});
+    if (el) el.textContent = 'R$ ' + aReceber.toLocaleString('pt-BR', {minimumFractionDigits:2});
+
+    /* Recebido: soma dos contratos concluídos como freelancer */
+    var recebido = flDone.reduce(function(s,c){ return s + (c.value||0); }, 0);
+    el = document.getElementById('ds-done');
+    if (el) el.textContent = 'R$ ' + recebido.toLocaleString('pt-BR', {minimumFractionDigits:2});
 
     _realContractsLoaded = true;
   } catch(e) {
