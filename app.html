@@ -12685,6 +12685,17 @@ function _getPlanCommission(isRecurrent, roleOverride) {
   } else {
     key = isRecurrent ? 'commission_recurrent' : 'commission';
   }
+  if (_planConfigCache) {
+    var _cRow = _planConfigCache[_planKeyFor(type, tier)];
+    if (_cRow) {
+      /* plan_config usa commission_new/recurrent (FL) e service_fee_new/recurrent (CL) */
+      var _cIsFL = (type === 'freelancer') || (type === 'both' && roleOverride === 'freelancer');
+      var _cKey  = _cIsFL
+        ? (isRecurrent ? 'commission_recurrent'  : 'commission_new')
+        : (isRecurrent ? 'service_fee_recurrent' : 'service_fee_new');
+      if (_cRow[_cKey] != null) return _cRow[_cKey];
+    }
+  }
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
   var plan  = table[tier] || table.free;
   return (plan && plan[key] != null) ? plan[key] : (isRecurrent ? 0.12 : 0.18);
@@ -12837,6 +12848,35 @@ var _PLAN_LIMITS = {
   }
 };
 
+/* ── Cache de plan_config (carregado do banco no boot) ─────────────────
+   Enquanto null, _getResourceLimit e _getPlanCommission usam _PLAN_LIMITS.
+   NULL no banco = ilimitado = Infinity no retorno das funções-porta.       */
+var _planConfigCache = null;
+
+async function _loadPlanConfig() {
+  try {
+    var r = await _sb.from('plan_config').select('*');
+    if (r.error || !r.data) return;
+    var map = {};
+    r.data.forEach(function(row) { map[row.plan_key] = row; });
+    _planConfigCache = map;
+  } catch(e) { /* silencioso: fallback _PLAN_LIMITS responde */ }
+}
+
+/* Traduz (type, tier) → plan_key da tabela plan_config.
+   type: 'freelancer'|'client'|'both'(→hybrid).
+   tier: 'free'|'pro'|'enterprise'. */
+function _planKeyFor(type, tier) {
+  var role = (type === 'both') ? 'hybrid' : type;
+  var t2   = ({ free: 0, pro: 1, enterprise: 2 }[tier] != null) ? tier : 'free';
+  var tierName = {
+    freelancer: { free: 'start', pro: 'pro',     enterprise: 'master'    },
+    client:     { free: 'essential', pro: 'growth', enterprise: 'corporate' },
+    hybrid:     { free: 'start', pro: 'sinergy', enterprise: 'nexus'     }
+  }[role][t2];
+  return role + '_' + tierName;
+}
+
 /* Metadados de exibição de cada recurso controlado (rótulo, ícone e
    período de reinício do contador: month | project | lifetime) */
 var _RESOURCE_META = {
@@ -12878,8 +12918,14 @@ function _getResourceLimit(resourceKey) {
   if (_session && _session.email && _testEmails.indexOf(String(_session.email).toLowerCase()) !== -1) {
     return Infinity;
   }
-  var type  = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
-  var tier  = _getUserPlan();                                 /* 'free' | 'pro' | 'enterprise' */
+  var type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
+  var tier = _getUserPlan();
+  if (_planConfigCache) {
+    var row = _planConfigCache[_planKeyFor(type, tier)];
+    if (row && row.hasOwnProperty(resourceKey)) {
+      return (row[resourceKey] == null) ? Infinity : row[resourceKey];
+    }
+  }
   var table = _PLAN_LIMITS[type] || _PLAN_LIMITS.client;
   var plan  = table[tier] || table.free;
   return (plan && plan.hasOwnProperty(resourceKey)) ? plan[resourceKey] : Infinity;
@@ -14486,6 +14532,7 @@ function init() {
   /* Carregar projetos publicados por usuários reais (Supabase) na lista "Projetos Ativos" —
      garante que continuem visíveis após recarregar a página ou novo login */
   setTimeout(function(){ if (typeof _loadRealProjects === 'function') _loadRealProjects(); }, 500);
+  setTimeout(function(){ if (typeof _loadPlanConfig  === 'function') _loadPlanConfig();  }, 300);
   setLang('pt');
   /* Override openModal para montar Stripe quando necessário */
   (function() {
