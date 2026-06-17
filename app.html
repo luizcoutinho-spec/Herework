@@ -7474,34 +7474,34 @@ section { padding: 64px 0; }
         <!-- Tabela comparativa — Freelancers -->
         <div class="pricing-compare" style="margin-top:40px;">
           <div class="pricing-compare-title" data-pt="Comparativo completo — Freelancers" data-es="Comparativo completo — Freelancers">Comparativo completo — Freelancers</div>
-          <table class="compare-table">
+          <table class="compare-table" id="compare-freelancer">
             <thead>
               <tr>
                 <th data-pt="Recurso" data-es="Función">Recurso</th>
-                <th data-pt="Grátis" data-es="Gratis">Grátis</th>
-                <th style="color:var(--green);" data-pt="Premium" data-es="Premium">Premium</th>
-                <th data-pt="Elite" data-es="Elite">Elite</th>
+                <th class="compare-head" data-plan-key="freelancer_start" data-pt="Grátis" data-es="Gratis">Grátis</th>
+                <th class="compare-head" data-plan-key="freelancer_pro" style="color:var(--green);" data-pt="Premium" data-es="Premium">Premium</th>
+                <th class="compare-head" data-plan-key="freelancer_master" data-pt="Elite" data-es="Elite">Elite</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style="font-weight:700;">Mensalidade</td>
                 <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">R$ 39,90</span></td>
-                <td><span class="compare-val">R$ 69,90</span></td>
+                <td data-plan-key="freelancer_pro" data-field="price_month"><span class="compare-val">R$ 39,90</span></td>
+                <td data-plan-key="freelancer_master" data-field="price_month"><span class="compare-val">R$ 69,90</span></td>
               </tr>
               <tr>
                 <td style="font-weight:700;">Plano Anual <span style="color:var(--green);font-weight:600;">(-20%)</span></td>
                 <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">R$ 383,04</span></td>
-                <td><span class="compare-val">R$ 671,04</span></td>
+                <td data-plan-key="freelancer_pro" data-field="price_year"><span class="compare-val">R$ 383,04</span></td>
+                <td data-plan-key="freelancer_master" data-field="price_year"><span class="compare-val">R$ 671,04</span></td>
               </tr>
               <tr><td class="compare-section-row" colspan="4">Envios e propostas</td></tr>
               <tr>
                 <td>Envios de proposta / mês</td>
-                <td><span class="compare-val">3</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="freelancer_start" data-field="proposals_month"><span class="compare-val">3</span></td>
+                <td data-plan-key="freelancer_pro" data-field="proposals_month"><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="freelancer_master" data-field="proposals_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Comprar envios avulsos (R$ 4,90)</td>
@@ -7511,29 +7511,29 @@ section { padding: 64px 0; }
               </tr>
               <tr>
                 <td>Propostas em destaque / mês</td>
-                <td><span class="compare-no">—</span></td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="freelancer_start" data-field="featured_proposals_month"><span class="compare-no">—</span></td>
+                <td data-plan-key="freelancer_pro" data-field="featured_proposals_month"><span class="compare-val">5</span></td>
+                <td data-plan-key="freelancer_master" data-field="featured_proposals_month"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr><td class="compare-section-row" colspan="4">Comissão</td></tr>
               <tr>
                 <td>Comissão projeto novo</td>
-                <td><span class="compare-val">18%</span></td>
-                <td><span class="compare-val">12%</span></td>
-                <td><span class="compare-val">8%</span></td>
+                <td data-plan-key="freelancer_start" data-field="commission_new"><span class="compare-val">18%</span></td>
+                <td data-plan-key="freelancer_pro" data-field="commission_new"><span class="compare-val">12%</span></td>
+                <td data-plan-key="freelancer_master" data-field="commission_new"><span class="compare-val">8%</span></td>
               </tr>
               <tr>
                 <td>Comissão cliente recorrente</td>
-                <td><span class="compare-val">12%</span></td>
-                <td><span class="compare-val">8%</span></td>
-                <td><span class="compare-val">5%</span></td>
+                <td data-plan-key="freelancer_start" data-field="commission_recurrent"><span class="compare-val">12%</span></td>
+                <td data-plan-key="freelancer_pro" data-field="commission_recurrent"><span class="compare-val">8%</span></td>
+                <td data-plan-key="freelancer_master" data-field="commission_recurrent"><span class="compare-val">5%</span></td>
               </tr>
               <tr><td class="compare-section-row" colspan="4">Recebimento e acesso</td></tr>
               <tr>
                 <td>Prazo de recebimento</td>
-                <td><span class="compare-val">4 dias</span></td>
-                <td><span class="compare-val">2 dias</span></td>
-                <td><span class="compare-val">24h</span></td>
+                <td data-plan-key="freelancer_start" data-field="payout_days"><span class="compare-val">4 dias</span></td>
+                <td data-plan-key="freelancer_pro" data-field="payout_days"><span class="compare-val">2 dias</span></td>
+                <td data-plan-key="freelancer_master" data-field="payout_days"><span class="compare-val">24h</span></td>
               </tr>
               <tr>
                 <td>Acesso a novos projetos</td>
@@ -7550,15 +7550,15 @@ section { padding: 64px 0; }
               <tr><td class="compare-section-row" colspan="4">Perfil e ferramentas</td></tr>
               <tr>
                 <td>Itens no portfólio</td>
-                <td><span class="compare-val">5</span></td>
-                <td><span class="compare-val">20</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="freelancer_start" data-field="portfolio_items"><span class="compare-val">5</span></td>
+                <td data-plan-key="freelancer_pro" data-field="portfolio_items"><span class="compare-val">20</span></td>
+                <td data-plan-key="freelancer_master" data-field="portfolio_items"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Áreas de atuação</td>
-                <td><span class="compare-val">3</span></td>
-                <td><span class="compare-val">10</span></td>
-                <td><span class="compare-val">Ilimitado</span></td>
+                <td data-plan-key="freelancer_start" data-field="areas"><span class="compare-val">3</span></td>
+                <td data-plan-key="freelancer_pro" data-field="areas"><span class="compare-val">10</span></td>
+                <td data-plan-key="freelancer_master" data-field="areas"><span class="compare-val">Ilimitado</span></td>
               </tr>
               <tr>
                 <td>Selo de perfil verificado</td>
@@ -12861,6 +12861,7 @@ async function _loadPlanConfig() {
     r.data.forEach(function(row) { map[row.plan_key] = row; });
     _planConfigCache = map;
     if (typeof _applyPricingCards === 'function') _applyPricingCards();
+    if (typeof _applyCompareFreelancer === 'function') _applyCompareFreelancer();
   } catch(e) { /* silencioso: fallback _PLAN_LIMITS responde */ }
 }
 
@@ -12925,6 +12926,45 @@ function _applyPricingCards() {
     if (nw == null) return; /* enterprise/negociável: não sobrescrever */
     var termo = isClient ? 'nova contratação' : 'novo projeto';
     el.textContent = 'Comissão: ' + Math.round(nw * 100) + '% ' + termo + ' · ' + Math.round(rc * 100) + '% recorrente';
+  });
+}
+
+/* Formata um valor do plan_config para exibição na tabela comparativa. */
+function _fmtCompare(field, v) {
+  var LIMIT_FIELDS = ['proposals_month','featured_proposals_month','portfolio_items','areas','projects_active','featured_projects_month','direct_invites_month','seats'];
+  if (LIMIT_FIELDS.indexOf(field) !== -1) {
+    if (v == null) return 'Ilimitado';
+    if (v === 0 || v === '0') return '—';
+    return String(v);
+  }
+  if (v == null || v === '') return '—';
+  if (field === 'price_month' || field === 'price_year') {
+    var n = parseFloat(v);
+    if (isNaN(n) || n === 0) return '—';
+    return 'R$ ' + (n % 1 === 0 ? String(n) : n.toFixed(2).replace('.', ','));
+  }
+  if (field === 'commission_new' || field === 'commission_recurrent' || field === 'service_fee_new' || field === 'service_fee_recurrent') {
+    return Math.round(v * 100) + '%';
+  }
+  if (field === 'payout_days') {
+    return Number(v) <= 1 ? '24h' : (v + ' dias');
+  }
+  return String(v);
+}
+
+/* Sincroniza a tabela #compare-freelancer com _planConfigCache. */
+function _applyCompareFreelancer() {
+  if (!_planConfigCache) return;
+  document.querySelectorAll('#compare-freelancer [data-field][data-plan-key]').forEach(function(td) {
+    var row = _planConfigCache[td.dataset.planKey];
+    if (!row) return;
+    var field = td.dataset.field;
+    if (!row.hasOwnProperty(field)) return;
+    var span = td.querySelector('span');
+    if (!span) return;
+    var text = _fmtCompare(field, row[field]);
+    span.className = (row[field] == null) ? 'compare-val' : 'compare-val';
+    span.textContent = text;
   });
 }
 
@@ -22107,8 +22147,9 @@ function faqCarouselToggle(item) {
 var _origShowPagePricing = window.showPage;
 window.showPage = function(name) {
   _origShowPagePricing(name);
-  if (name === 'pricing' && typeof _applyPricingCards === 'function') {
-    setTimeout(_applyPricingCards, 50);
+  if (name === 'pricing') {
+    if (typeof _applyPricingCards === 'function') setTimeout(_applyPricingCards, 50);
+    if (typeof _applyCompareFreelancer === 'function') setTimeout(_applyCompareFreelancer, 50);
   }
 };
 
