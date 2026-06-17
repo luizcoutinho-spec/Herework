@@ -7181,8 +7181,8 @@ section { padding: 64px 0; }
 
           <!-- CLIENTES — Grátis -->
           <div class="pricing-card">
-            <div class="pricing-plan-name" data-pt="Grátis" data-es="Gratis">Grátis</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-name" data-pt="Grátis" data-es="Gratis" data-plan-key="client_essential">Grátis</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0" data-plan-key="client_essential">0</span></div>
             <div class="pricing-plan-period" data-pt="Gratuito para sempre" data-es="Gratis para siempre">Gratuito para sempre</div>
             <div class="pricing-plan-desc" data-pt="Ideal para quem está começando e quer testar a plataforma sem custo." data-es="Ideal para quienes están empezando y quieren probar la plataforma sin costo.">Ideal para quem está começando e quer testar a plataforma sem custo.</div>
             <div class="pricing-divider"></div>
@@ -7195,15 +7195,15 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gestão de contratos (básico)" data-es="Gestión de contratos (básico)">Gestão de contratos (básico)</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Mediação de disputas" data-es="Mediación de disputas">Mediação de disputas</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 8% nova contratação · 6% recorrente" data-es="Comisión: 8% nueva · 6% recurrente">Comissão: 8% nova contratação · 6% recorrente</div>
+            <div class="pricing-commission" data-plan-key="client_essential" style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 8% nova contratação · 6% recorrente" data-es="Comisión: 8% nueva · 6% recurrente">Comissão: 8% nova contratação · 6% recorrente</div>
             <button class="btn btn-outline btn-block btn-lg" onclick="openModal('register')" data-pt="Começar Grátis" data-es="Empezar Gratis">Começar Grátis</button>
           </div>
 
           <!-- CLIENTES — Business -->
           <div class="pricing-card featured">
             <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
-            <div class="pricing-plan-name" data-pt="Business" data-es="Business">Business</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="49.90" data-annual="479.04">49,90</span></div>
+            <div class="pricing-plan-name" data-pt="Business" data-es="Business" data-plan-key="client_growth">Business</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="49.90" data-annual="479.04" data-plan-key="client_growth">49,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para empresas que contratam com frequência e precisam de agilidade e controle." data-es="Para empresas que contratan frecuentemente y necesitan agilidad y control.">Para empresas que contratam com frequência e precisam de agilidade e controle.</div>
             <div class="pricing-divider"></div>
@@ -7216,13 +7216,13 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gestão avançada de contratos · 5 usuários" data-es="Gestión avanzada · 5 usuarios">Gestão avançada de contratos · 5 usuários</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Relatórios de gastos · Suporte prioritário (SLA 24h)" data-es="Reportes de gastos · Soporte prioritario (SLA 24h)">Relatórios de gastos · Suporte prioritário (SLA 24h)</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 5% nova contratação · 3% recorrente" data-es="Comisión: 5% nueva · 3% recurrente">Comissão: 5% nova contratação · 3% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?479.04:49.90,'Plano Business · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'business',isAnnual?'year':'month')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
+            <div class="pricing-commission" data-plan-key="client_growth" style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 5% nova contratação · 3% recorrente" data-es="Comisión: 5% nueva · 3% recurrente">Comissão: 5% nova contratação · 3% recorrente</div>
+            <button class="btn btn-green btn-block btn-lg" onclick="_payFromCard('client_growth','Plano Business','business')" data-pt="Assinar Business" data-es="Suscribirse Business">Assinar Business</button>
           </div>
 
           <!-- CLIENTES — Enterprise -->
           <div class="pricing-card">
-            <div class="pricing-plan-name" data-pt="Enterprise" data-es="Enterprise">Enterprise</div>
+            <div class="pricing-plan-name" data-pt="Enterprise" data-es="Enterprise" data-plan-key="client_corporate">Enterprise</div>
             <div class="pricing-plan-price"><sup></sup><span style="font-size:36px;" data-pt="Sob consulta" data-es="A consultar">Sob consulta</span></div>
             <div class="pricing-plan-period" data-pt="Personalizado para sua empresa" data-es="Personalizado para tu empresa">Personalizado para sua empresa</div>
             <div class="pricing-plan-desc" data-pt="Para grandes empresas com volume alto de contratações e necessidades específicas." data-es="Para grandes empresas con alto volumen de contrataciones y necesidades específicas.">Para grandes empresas com volume alto de contratações e necessidades específicas.</div>
@@ -7412,8 +7412,8 @@ section { padding: 64px 0; }
         <div class="pricing-grid-cards">
 
           <div class="pricing-card">
-            <div class="pricing-plan-name" data-pt="Grátis" data-es="Gratis">Grátis</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-name" data-pt="Grátis" data-es="Gratis" data-plan-key="freelancer_start">Grátis</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0" data-plan-key="freelancer_start">0</span></div>
             <div class="pricing-plan-period" data-pt="Gratuito para sempre" data-es="Gratis para siempre">Gratuito para sempre</div>
             <div class="pricing-plan-desc" data-pt="Para freelancers começando e que querem explorar a plataforma." data-es="Para freelancers que empiezan y quieren explorar la plataforma.">Para freelancers começando e que querem explorar a plataforma.</div>
             <div class="pricing-divider"></div>
@@ -7426,14 +7426,14 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Acesso a projetos (disponíveis após 24h)" data-es="Acceso a proyectos (disponibles tras 24h)">Acesso a projetos (disponíveis após 24h)</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Recebimento em até 4 dias úteis" data-es="Cobro en hasta 4 días hábiles">Recebimento em até 4 dias úteis</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 18% novo projeto · 12% recorrente" data-es="Comisión: 18% nuevo · 12% recurrente">Comissão: 18% novo projeto · 12% recorrente</div>
+            <div class="pricing-commission" data-plan-key="freelancer_start" style="font-size:13px;color:var(--text-3);margin-bottom:20px;" data-pt="Comissão: 18% novo projeto · 12% recorrente" data-es="Comisión: 18% nuevo · 12% recurrente">Comissão: 18% novo projeto · 12% recorrente</div>
             <button class="btn btn-outline btn-block btn-lg" onclick="openModal('register')" data-pt="Cadastrar Grátis" data-es="Registrarse Gratis">Cadastrar Grátis</button>
           </div>
 
           <div class="pricing-card featured">
             <div class="pricing-popular-badge" data-pt="Mais popular" data-es="Más popular">Mais popular</div>
-            <div class="pricing-plan-name" data-pt="Premium" data-es="Premium">Premium</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="39.90" data-annual="383.04">39,90</span></div>
+            <div class="pricing-plan-name" data-pt="Premium" data-es="Premium" data-plan-key="freelancer_pro">Premium</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="39.90" data-annual="383.04" data-plan-key="freelancer_pro">39,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para freelancers que querem mais visibilidade, oportunidades e ganhar mais." data-es="Para freelancers que quieren más visibilidad, oportunidades y ganar más.">Para freelancers que querem mais visibilidade, oportunidades e ganhar mais.</div>
             <div class="pricing-divider"></div>
@@ -7446,13 +7446,13 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Selo de perfil verificado · destaque nas buscas" data-es="Sello de perfil verificado · destacado en búsquedas">Selo de perfil verificado · destaque nas buscas</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Calculadora de preço" data-es="Calculadora de precio">Calculadora de preço</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 12% novo projeto · 8% recorrente" data-es="Comisión: 12% nuevo · 8% recurrente">Comissão: 12% novo projeto · 8% recorrente</div>
-            <button class="btn btn-green btn-block btn-lg" onclick="openPaymentModal(isAnnual?383.04:39.90,'Plano Premium · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'premium',isAnnual?'year':'month')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
+            <div class="pricing-commission" data-plan-key="freelancer_pro" style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 12% novo projeto · 8% recorrente" data-es="Comisión: 12% nuevo · 8% recurrente">Comissão: 12% novo projeto · 8% recorrente</div>
+            <button class="btn btn-green btn-block btn-lg" onclick="_payFromCard('freelancer_pro','Plano Premium','premium')" data-pt="Assinar Premium" data-es="Suscribirse Premium">Assinar Premium</button>
           </div>
 
           <div class="pricing-card">
-            <div class="pricing-plan-name" data-pt="Elite" data-es="Elite">Elite</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="69.90" data-annual="671.04">69,90</span></div>
+            <div class="pricing-plan-name" data-pt="Elite" data-es="Elite" data-plan-key="freelancer_master">Elite</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="69.90" data-annual="671.04" data-plan-key="freelancer_master">69,90</span></div>
             <div class="pricing-plan-period" data-pt="/mês · cobrado mensalmente" data-es="/mes · cobrado mensualmente">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc" data-pt="Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos." data-es="Para los mejores freelancers que buscan máxima visibilidad y los mejores proyectos.">Para os melhores freelancers que buscam máxima visibilidade e os melhores projetos.</div>
             <div class="pricing-divider"></div>
@@ -7465,8 +7465,8 @@ section { padding: 64px 0; }
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Gerador de propostas com IA" data-es="Generador de propuestas con IA">Gerador de propostas com IA</span></li>
               <li class="pricing-feature"><span class="pricing-check">✓</span><span data-pt="Suporte prioritário" data-es="Soporte prioritario">Suporte prioritário</span></li>
             </ul>
-            <div style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 8% novo projeto · 5% recorrente" data-es="Comisión: 8% nuevo · 5% recurrente">Comissão: 8% novo projeto · 5% recorrente</div>
-            <button class="btn btn-outline btn-block btn-lg" onclick="openPaymentModal(isAnnual?671.04:69.90,'Plano Elite · '+(isAnnual?'Cobrado anualmente':'Cobrado mensalmente'),'elite',isAnnual?'year':'month')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
+            <div class="pricing-commission" data-plan-key="freelancer_master" style="font-size:13px;color:var(--green-dark);font-weight:700;margin-bottom:20px;" data-pt="Comissão: 8% novo projeto · 5% recorrente" data-es="Comisión: 8% nuevo · 5% recurrente">Comissão: 8% novo projeto · 5% recorrente</div>
+            <button class="btn btn-outline btn-block btn-lg" onclick="_payFromCard('freelancer_master','Plano Elite','elite')" data-pt="Assinar Elite" data-es="Suscribirse Elite">Assinar Elite</button>
           </div>
 
         </div>
@@ -7606,8 +7606,8 @@ section { padding: 64px 0; }
 
           <!-- HÍBRIDO — Grátis -->
           <div class="pricing-card">
-            <div class="pricing-plan-name">Grátis</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0">0</span></div>
+            <div class="pricing-plan-name" data-plan-key="hybrid_start">Grátis</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="0" data-annual="0" data-plan-key="hybrid_start">0</span></div>
             <div class="pricing-plan-period">Gratuito para sempre</div>
             <div class="pricing-plan-desc">Para quem contrata e presta serviço, começando na plataforma.</div>
             <div class="pricing-divider"></div>
@@ -7625,8 +7625,8 @@ section { padding: 64px 0; }
           <!-- HÍBRIDO — PRO (destaque) -->
           <div class="pricing-card featured">
             <div class="pricing-popular-badge" data-pt="Conta completa" data-es="Cuenta completa">Conta completa</div>
-            <div class="pricing-plan-name">PRO</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="79.90" data-annual="767.04">79,90</span></div>
+            <div class="pricing-plan-name" data-plan-key="hybrid_sinergy">PRO</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="79.90" data-annual="767.04" data-plan-key="hybrid_sinergy">79,90</span></div>
             <div class="pricing-plan-period">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc">Contrate e trabalhe na mesma conta, com recursos dos dois lados.</div>
             <div class="pricing-divider"></div>
@@ -7644,8 +7644,8 @@ section { padding: 64px 0; }
 
           <!-- HÍBRIDO — Pro Max -->
           <div class="pricing-card">
-            <div class="pricing-plan-name">Pro Max</div>
-            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="149.90" data-annual="1439.04">149,90</span></div>
+            <div class="pricing-plan-name" data-plan-key="hybrid_nexus">Pro Max</div>
+            <div class="pricing-plan-price"><sup>R$</sup><span class="price-val" data-monthly="149.90" data-annual="1439.04" data-plan-key="hybrid_nexus">149,90</span></div>
             <div class="pricing-plan-period">/mês · cobrado mensalmente</div>
             <div class="pricing-plan-desc">Tudo ilimitado, para quem opera nos dois lados em alto volume.</div>
             <div class="pricing-divider"></div>
@@ -12860,6 +12860,7 @@ async function _loadPlanConfig() {
     var map = {};
     r.data.forEach(function(row) { map[row.plan_key] = row; });
     _planConfigCache = map;
+    if (typeof _applyPricingCards === 'function') _applyPricingCards();
   } catch(e) { /* silencioso: fallback _PLAN_LIMITS responde */ }
 }
 
@@ -12875,6 +12876,56 @@ function _planKeyFor(type, tier) {
     hybrid:     { free: 'start', pro: 'sinergy', enterprise: 'nexus'     }
   }[role][t2];
   return role + '_' + tierName;
+}
+
+/* Abre o modal de pagamento lendo preço do cache (fallback no dataset). */
+function _payFromCard(planKey, planLabel, planId) {
+  var row    = _planConfigCache ? _planConfigCache[planKey] : null;
+  var span   = document.querySelector('.price-val[data-plan-key="' + planKey + '"]');
+  var amount = isAnnual
+    ? (row && row.price_year  != null ? row.price_year  : (span ? parseFloat(span.dataset.annual)  : 0))
+    : (row && row.price_month != null ? row.price_month : (span ? parseFloat(span.dataset.monthly) : 0));
+  openPaymentModal(
+    amount,
+    planLabel + (isAnnual ? ' · Cobrado anualmente' : ' · Cobrado mensalmente'),
+    planId,
+    isAnnual ? 'year' : 'month'
+  );
+}
+
+/* Atualiza nome, preço e comissão dos cards da página pricing a partir do
+   _planConfigCache. Chamada por _loadPlanConfig() e ao abrir showPage('pricing').
+   hybrid_* têm comissão ambígua (FL vs cliente) — deixada hardcoded. */
+function _applyPricingCards() {
+  if (!_planConfigCache) return;
+  /* Nomes */
+  document.querySelectorAll('.pricing-plan-name[data-plan-key]').forEach(function(el) {
+    var row = _planConfigCache[el.dataset.planKey];
+    if (row && row.label) el.textContent = row.label;
+  });
+  /* Preços */
+  document.querySelectorAll('.price-val[data-plan-key]').forEach(function(el) {
+    var row = _planConfigCache[el.dataset.planKey];
+    if (!row) return;
+    if (row.price_month != null) el.dataset.monthly = row.price_month;
+    if (row.price_year  != null) el.dataset.annual  = row.price_year;
+    var v = isAnnual ? el.dataset.annual : el.dataset.monthly;
+    var n = parseFloat(v);
+    if (!isNaN(n) && n > 0) el.textContent = (n % 1 === 0 ? String(n) : n.toFixed(2).replace('.', ','));
+  });
+  /* Comissões (hybrid_* pulados: comissão hardcoded para evitar ambiguidade FL/cliente) */
+  document.querySelectorAll('.pricing-commission[data-plan-key]').forEach(function(el) {
+    var key = el.dataset.planKey;
+    if (key.indexOf('hybrid_') === 0) return;
+    var row = _planConfigCache[key];
+    if (!row) return;
+    var isClient = key.indexOf('client_') === 0;
+    var nw = isClient ? row.service_fee_new       : row.commission_new;
+    var rc = isClient ? row.service_fee_recurrent  : row.commission_recurrent;
+    if (nw == null) return; /* enterprise/negociável: não sobrescrever */
+    var termo = isClient ? 'nova contratação' : 'novo projeto';
+    el.textContent = 'Comissão: ' + Math.round(nw * 100) + '% ' + termo + ' · ' + Math.round(rc * 100) + '% recorrente';
+  });
 }
 
 /* Metadados de exibição de cada recurso controlado (rótulo, ícone e
@@ -22051,6 +22102,15 @@ function faqCarouselGoto(wrapId, idx) {
 function faqCarouselToggle(item) {
   item.classList.toggle('open');
 }
+
+/* Aplica dados do cache ao abrir a página de preços */
+var _origShowPagePricing = window.showPage;
+window.showPage = function(name) {
+  _origShowPagePricing(name);
+  if (name === 'pricing' && typeof _applyPricingCards === 'function') {
+    setTimeout(_applyPricingCards, 50);
+  }
+};
 
 /* Init on page show */
 var _origShowPageFaq = window.showPage;
