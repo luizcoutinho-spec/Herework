@@ -15295,9 +15295,10 @@ function _adminPlanCard(p) {
   function numInput(field, label, step, tip) {
     var val = (p[field] !== null && p[field] !== undefined) ? p[field] : '';
     var tipHtml = tip ? ' <span title="' + tip + '" style="cursor:help;font-size:10px;">ℹ️</span>' : '';
+    var phHtml  = (tip === 'vazio = ilimitado') ? ' placeholder="Ilimitado"' : '';
     return '<div style="margin-bottom:7px;">' +
       '<label style="font-size:11px;color:#475569;display:block;margin-bottom:2px;">' + label + tipHtml + '</label>' +
-      '<input id="apc-' + k + '-' + field + '" type="number" step="' + (step || '1') + '" value="' + val + '" ' +
+      '<input id="apc-' + k + '-' + field + '" type="number" step="' + (step || '1') + '" value="' + val + '"' + phHtml + ' ' +
         'style="width:100%;padding:4px 6px;font-size:12px;background:#ffffff;border:1px solid #cbd5e1;border-radius:4px;color:#1a1a2e;">' +
       '</div>';
   }
