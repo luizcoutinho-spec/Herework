@@ -105,6 +105,33 @@ module.exports = async function handler(req, res) {
       console.log(`[HereWork] ✅ Pagamento confirmado: ${pi.id} — R$ ${pi.amount / 100}` +
                   (proposalId ? ` — proposta ${proposalId}` : ''));
 
+      /* ── C) ADDON DE PROPOSTA: crédito avulso de envio ── */
+      const _purpose = (pi.metadata && pi.metadata.purpose) || null;
+      if (_purpose === 'addon_proposal') {
+        const _uid = md.user_id;
+        if (!_uid) {
+          console.error('[HereWork] addon_proposal sem user_id:', pi.id);
+          break;
+        }
+        const _insRes = await fetch(`${SUPABASE_URL}/rest/v1/proposal_credits`, {
+          method: 'POST',
+          headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ user_id: _uid, amount: 1, reason: 'purchase', payment_intent_id: pi.id })
+        });
+        if (!_insRes.ok) {
+          const _insText = await _insRes.text().catch(() => '');
+          // PostgREST sinaliza violação de unique como 409 Conflict (idempotência da compra)
+          if (_insRes.status === 409 || _insText.includes('23505') || _insText.includes('ux_proposal_credits_pi')) {
+            console.log('[HereWork] addon já creditado (retry idempotente):', pi.id);
+          } else {
+            console.error('[HereWork] addon credit FALHOU:', _insRes.status, _insText, pi.id);
+          }
+        } else {
+          console.log('[HereWork] addon credit +1 OK para', _uid, pi.id);
+        }
+        break;
+      }
+
       /* ── A) CONTRATAÇÃO: pagamento de uma proposta cria o contrato (escrow retido) ── */
       if (proposalId) {
         try {
