@@ -11328,30 +11328,6 @@ async function _sbGetProposalsReceived(statusFilter) {
   return r.data || [];
 }
 
-/* ── CONTRATOS: Criar a partir de proposta aceita ─────────────── */
-async function _sbCreateContractFromProposal(proposal) {
-  if (!_sbReady() || !_session) return null;
-  var user = await _sbEnsureSession();
-  if (!user) { console.warn('_sbCreateContractFromProposal: sem sessao Supabase ativa'); return null; }
-  var proj = proposal.project || {};
-  var fl   = proposal.freelancer || {};
-  var r = await _sb.from('contracts').insert({
-    proposal_id:   proposal.id,
-    project_id:    proposal.project_id || (proj.id || ''),
-    client_id:     user.id,
-    freelancer_id: proposal.freelancer_id || (fl.id || ''),
-    title:         proj.title || 'Contrato',
-    value:         proposal.value,
-    deadline_days: proposal.deadline_days,
-    status:        'active',
-    started_at:    new Date().toISOString()
-  }).select().single();
-  if (r.error) {
-    throw new Error(r.error.message || 'Erro ao criar contrato.');
-  }
-  return r.data;
-}
-
 /* ── REALTIME: Escutar mensagens novas ────────────────────────── */
 function _sbListenMessages(contractId, callback) {
   if (!_sbReady()) return null;
@@ -24792,46 +24768,6 @@ function _renderProposalStats(proposals, viewType) {
 /* ════════════════════════════════════════════════════════════════
    6. AÇÕES DO CLIENTE
 ════════════════════════════════════════════════════════════════ */
-async function _acceptProposal(proposalId) {
-  if (!confirm('Aceitar esta proposta e criar um contrato automaticamente?')) return;
-  var btn = document.querySelector('#pcard-' + proposalId + ' .btn-primary');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Processando…'; }
-
-  /* 1) Atualizar status da proposta */
-  var updated = await _sbUpdateProposalStatus(proposalId, 'accepted');
-  if (!updated) {
-    showToast('Erro ao aceitar proposta. Tente novamente.', 'error');
-    if (btn) { btn.disabled = false; btn.textContent = '✅ Aceitar'; }
-    return;
-  }
-
-  /* 2) Buscar dados completos da proposta para criar contrato */
-  var r = await _sb.from('proposals')
-    .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days,client_id), freelancer:profiles!freelancer_id(id,name,avatar_url)')
-    .eq('id', proposalId).single();
-
-  if (!r.error && r.data) {
-    try {
-      var contract = await _sbCreateContractFromProposal(r.data);
-      if (contract) {
-        showToast('🎉 Proposta aceita! Contrato criado com sucesso.', 'success');
-        /* 3) Rejeitar outras propostas para o mesmo projeto */
-        await _sbRejectOtherProposals(r.data.project_id, proposalId);
-        /* 4) Enviar e-mail de aceite ao freelancer */
-        _hwTriggerProposalAcceptedEmail(r.data);
-      } else {
-        showToast('✅ Proposta aceita! (Não foi possível criar contrato automaticamente.)', 'info');
-      }
-    } catch (e) {
-      showToast('✅ Proposta aceita, mas erro ao criar contrato: ' + (e.message || 'Erro desconhecido.'), 'error');
-    }
-  } else {
-    showToast('✅ Proposta aceita!', 'success');
-  }
-  _loadProposalsReceived();
-  _updateProposalBadge();
-}
-
 async function _rejectProposal(proposalId) {
   if (!confirm('Recusar esta proposta?')) return;
   try {
