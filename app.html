@@ -5499,6 +5499,30 @@ section { padding: 64px 0; }
         </button>
       </div>
 
+      <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;margin-bottom:18px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Total de Contratos</div>
+            <div style="font-size:30px;font-weight:900;color:#fff;" id="ctr-total">0</div>
+            <div id="ctr-total-sub" style="font-size:11px;color:#64748b;margin-top:3px;">Todos os seus contratos (cliente + freelancer)</div>
+          </div>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+              <div style="font-size:16px;font-weight:800;color:#4ade80;" id="ctr-active">0</div>
+              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Ativos</div>
+            </div>
+            <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+              <div style="font-size:16px;font-weight:800;color:#60a5fa;" id="ctr-done">0</div>
+              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Conclu&#237;dos</div>
+            </div>
+            <div style="text-align:center;background:rgba(255,255,255,.07);border-radius:var(--radius);padding:10px 16px;">
+              <div style="font-size:16px;font-weight:800;color:#fb923c;" id="ctr-waiting">0</div>
+              <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Aguardando</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="dcontracts-client">
         <div class="dash-section">
           <div class="dash-section-title"><span>&#128203;</span> Meus Projetos Publicados &mdash; Aguardando Propostas</div>
@@ -25007,6 +25031,19 @@ async function _loadRealContracts() {
     el = document.getElementById('ds-active'); if(el) el.textContent = totalActive;
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
     el = document.getElementById('dct-fl-count');     if(el) el.textContent = flActive.length + flDone.length;
+
+    /* Banner de contagem da página Contratos */
+    var allLive = clientActive.concat(flActive);
+    var allDone = clientDone.concat(flDone);
+    var ctrTotal   = allLive.length + allDone.length;
+    var ctrWaiting = allLive.filter(function(c){ return c.status === 'pending_acceptance'; }).length;
+    var ctrActive  = allLive.length - ctrWaiting;
+    var ctrDone    = allDone.filter(function(c){ return c.status === 'completed'; }).length;
+    var elc;
+    elc = document.getElementById('ctr-total');   if(elc) elc.textContent = ctrTotal;
+    elc = document.getElementById('ctr-active');  if(elc) elc.textContent = ctrActive;
+    elc = document.getElementById('ctr-done');    if(elc) elc.textContent = ctrDone;
+    elc = document.getElementById('ctr-waiting'); if(elc) elc.textContent = ctrWaiting;
 
     /* A Receber: soma dos contratos vivos como freelancer */
     var aReceber = flActive.reduce(function(s,c){ return s + (c.value||0); }, 0);
