@@ -15317,7 +15317,7 @@ function _adminPlanCard(p) {
   fields += sectionLabel('Preços');
   fields += numInput('price_month', 'Preço mensal (R$)',  '0.01');
   fields += numInput('price_year',  'Preço anual (R$)',   '0.01');
-  if (isFL) { fields += numInput('addon_proposal_price', 'Comprar envios avulsos (R$)', '0.01'); }
+  fields += numInput('addon_proposal_price', 'Comprar envios avulsos (R$)', '0.01');
 
   if (isFL) {
     fields += sectionLabel('Limites — Freelancer');
