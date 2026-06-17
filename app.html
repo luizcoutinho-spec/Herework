@@ -7971,6 +7971,12 @@ section { padding: 64px 0; }
       <button class="admin-action-btn danger" onclick="adminAction('cache')">🗑️ Limpar Cache</button>
     </div>
 
+    <!-- Gestão de Planos -->
+    <div class="admin-section-title"><span>💳</span> Gestão de Planos</div>
+    <div id="admin-plans-container" style="margin-bottom:28px;">
+      <div style="padding:16px;color:var(--text-3);">Carregando planos…</div>
+    </div>
+
     <!-- Controles da plataforma -->
     <div class="admin-section-title"><span>⚙️</span> Configurações da Plataforma</div>
     <div class="admin-controls-grid" style="margin-bottom:28px;">
@@ -15027,7 +15033,8 @@ function showAdminPage() {
     showPage('admin');
     setTimeout(function(){
       initAdminContracts();
-      if (typeof _admInitMigPanel === 'function') _admInitMigPanel();
+      if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
+      if (typeof _adminLoadPlans   === 'function') _adminLoadPlans();
     }, 50);
   } else {
     openModal('admin-login');
@@ -15086,6 +15093,175 @@ function _startLockoutCountdown(errEl) {
   }, 1000);
 }
 
+
+/* ── Gestão de Planos (plan_config) ── */
+function _adminPlanCard(p) {
+  var k = p.plan_key;
+  var isFL = p.role === 'freelancer' || p.role === 'hybrid';
+  var isCL = p.role === 'client'     || p.role === 'hybrid';
+
+  function numInput(field, label, step, tip) {
+    var val = (p[field] !== null && p[field] !== undefined) ? p[field] : '';
+    var tipHtml = tip ? ' <span title="' + tip + '" style="cursor:help;font-size:10px;">ℹ️</span>' : '';
+    return '<div style="margin-bottom:7px;">' +
+      '<label style="font-size:11px;color:var(--text-3);display:block;margin-bottom:2px;">' + label + tipHtml + '</label>' +
+      '<input id="apc-' + k + '-' + field + '" type="number" step="' + (step || '1') + '" value="' + val + '" ' +
+        'style="width:100%;padding:4px 6px;font-size:12px;background:var(--surface,#1a1a2e);border:1px solid var(--border);border-radius:4px;color:var(--text-1);">' +
+      '</div>';
+  }
+  function txtInput(field, label) {
+    var val = (p[field] !== null && p[field] !== undefined) ? p[field] : '';
+    return '<div style="margin-bottom:7px;">' +
+      '<label style="font-size:11px;color:var(--text-3);display:block;margin-bottom:2px;">' + label + '</label>' +
+      '<input id="apc-' + k + '-' + field + '" type="text" value="' + val + '" ' +
+        'style="width:100%;padding:4px 6px;font-size:12px;background:var(--surface,#1a1a2e);border:1px solid var(--border);border-radius:4px;color:var(--text-1);">' +
+      '</div>';
+  }
+  function sectionLabel(txt) {
+    return '<div style="font-size:11px;font-weight:700;color:var(--accent,#7c6fff);margin:10px 0 5px;">' + txt + '</div>';
+  }
+
+  var fields = '';
+  fields += sectionLabel('Preços');
+  fields += numInput('price_month', 'Preço mensal (R$)',  '0.01');
+  fields += numInput('price_year',  'Preço anual (R$)',   '0.01');
+
+  if (isFL) {
+    fields += sectionLabel('Limites — Freelancer');
+    fields += numInput('proposals_month',          'Propostas/mês',          '1', 'vazio = ilimitado');
+    fields += numInput('featured_proposals_month', 'Propostas destaque/mês', '1', 'vazio = ilimitado');
+    fields += numInput('portfolio_items',          'Itens portfólio',        '1', 'vazio = ilimitado');
+    fields += numInput('areas',                    'Áreas de atuação',       '1', 'vazio = ilimitado');
+    fields += numInput('direct_invites_month',     'Convites diretos/mês',   '1', 'vazio = ilimitado');
+  }
+  if (isCL) {
+    fields += sectionLabel('Limites — Cliente');
+    fields += numInput('projects_active',         'Projetos ativos',       '1', 'vazio = ilimitado');
+    fields += numInput('featured_projects_month', 'Destaques/mês',         '1', 'vazio = ilimitado');
+    if (!isFL) fields += numInput('direct_invites_month', 'Convites diretos/mês', '1', 'vazio = ilimitado');
+    fields += numInput('seats',                   'Assentos (vagas)',       '1', 'vazio = ilimitado');
+  }
+  if (isFL) {
+    fields += sectionLabel('Comissões — Freelancer');
+    fields += numInput('commission_new',       'Comissão cliente novo (0–1)',  '0.001', '0.18 = 18%');
+    fields += numInput('commission_recurrent', 'Comissão recorrente (0–1)',    '0.001', '0.08 = 8%');
+    fields += numInput('payout_days',          'Dias liberação pagamento',     '1');
+  }
+  if (isCL) {
+    fields += sectionLabel('Taxa de Serviço — Cliente');
+    fields += numInput('service_fee_new',       'Taxa cliente novo (0–1)',  '0.001', '0.05 = 5%');
+    fields += numInput('service_fee_recurrent', 'Taxa recorrente (0–1)',    '0.001', '0.03 = 3%');
+  }
+  fields += sectionLabel('Stripe (opcional)');
+  fields += txtInput('stripe_price_id_month', 'Price ID Mensal');
+  fields += txtInput('stripe_price_id_year',  'Price ID Anual');
+  fields += txtInput('stripe_prod_id',        'Product ID');
+
+  return '<div style="background:var(--card-bg,#16162a);border:1px solid var(--border);border-radius:10px;padding:16px;' +
+    'min-width:260px;flex:1 1 260px;max-width:340px;">' +
+    '<div style="font-size:14px;font-weight:700;margin-bottom:10px;color:var(--text-1);">' + (p.label || k) +
+      ' <span style="font-size:11px;color:var(--text-3);font-weight:400;">(' + k + ')</span></div>' +
+    fields +
+    '<button onclick="_adminSavePlan(\'' + k + '\')" ' +
+      'style="margin-top:10px;width:100%;padding:7px;background:var(--accent,#7c6fff);color:#fff;' +
+      'border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;">Salvar</button>' +
+    '</div>';
+}
+
+async function _adminLoadPlans() {
+  var container = document.getElementById('admin-plans-container');
+  if (!container) return;
+  if (!_sbReady() || !_session) {
+    container.innerHTML = '<div style="padding:16px;color:var(--text-3);">Sessão não disponível.</div>';
+    return;
+  }
+  container.innerHTML = '<div style="padding:16px;color:var(--text-3);">Carregando planos…</div>';
+  try {
+    var r = await _sb.from('plan_config').select('*').order('role').order('tier_rank');
+    if (r.error) throw r.error;
+    var plans = r.data || [];
+    if (!plans.length) {
+      container.innerHTML = '<div style="padding:16px;color:var(--text-3);">Nenhum plano encontrado na tabela plan_config.</div>';
+      return;
+    }
+    var groups = {};
+    plans.forEach(function(p) { (groups[p.role] = groups[p.role] || []).push(p); });
+    var roleLabels = { freelancer: '🧑 Freelancer', client: '🏢 Cliente', hybrid: '🔄 Híbrido' };
+    var knownRoles = ['freelancer', 'client', 'hybrid'];
+    var allRoles = knownRoles.concat(Object.keys(groups).filter(function(role) { return knownRoles.indexOf(role) === -1; }));
+    var html = '';
+    allRoles.forEach(function(role) {
+      if (!groups[role] || !groups[role].length) return;
+      html += '<div style="margin-bottom:20px;">';
+      html += '<div style="font-size:13px;font-weight:700;color:var(--text-2);margin-bottom:10px;padding:6px 0;border-bottom:1px solid var(--border);">' + (roleLabels[role] || role) + '</div>';
+      html += '<div style="display:flex;flex-wrap:wrap;gap:16px;">';
+      groups[role].forEach(function(p) { html += _adminPlanCard(p); });
+      html += '</div></div>';
+    });
+    container.innerHTML = html;
+  } catch(e) {
+    container.innerHTML = '<div style="padding:16px;color:var(--red,#f87171);">Erro ao carregar planos: ' + (e.message || e) + '</div>';
+    showToast('Erro ao carregar planos: ' + (e.message || e), 'error');
+  }
+}
+
+async function _adminSavePlan(planKey) {
+  function getEl(field) { return document.getElementById('apc-' + planKey + '-' + field); }
+  function numVal(field) {
+    var el = getEl(field);
+    if (!el) return undefined;
+    var v = el.value.trim();
+    return v === '' ? null : parseFloat(v);
+  }
+  function intVal(field) {
+    var el = getEl(field);
+    if (!el) return undefined;
+    var v = el.value.trim();
+    return v === '' ? null : parseInt(v, 10);
+  }
+  function txtVal(field) {
+    var el = getEl(field);
+    if (!el) return undefined;
+    var v = el.value.trim();
+    return v === '' ? null : v;
+  }
+
+  var patch = {};
+  var pm = numVal('price_month'), py = numVal('price_year');
+  if (pm !== undefined) patch.price_month = pm;
+  if (py !== undefined) patch.price_year  = py;
+  if ((patch.price_month !== undefined && patch.price_month !== null && patch.price_month < 0) ||
+      (patch.price_year  !== undefined && patch.price_year  !== null && patch.price_year  < 0)) {
+    showToast('Preços devem ser >= 0.', 'error'); return;
+  }
+
+  var commFields = ['commission_new','commission_recurrent','service_fee_new','service_fee_recurrent'];
+  commFields.forEach(function(f) { var v = numVal(f); if (v !== undefined) patch[f] = v; });
+  var invalidComm = commFields.some(function(f) {
+    return patch[f] !== undefined && patch[f] !== null && (patch[f] < 0 || patch[f] > 1);
+  });
+  if (invalidComm) { showToast('Comissões/taxas devem estar entre 0 e 1.', 'error'); return; }
+
+  ['proposals_month','featured_proposals_month','portfolio_items','areas','direct_invites_month',
+   'projects_active','featured_projects_month','seats','payout_days'].forEach(function(f) {
+    var v = intVal(f); if (v !== undefined) patch[f] = v;
+  });
+
+  ['stripe_price_id_month','stripe_price_id_year','stripe_prod_id'].forEach(function(f) {
+    var v = txtVal(f); if (v !== undefined) patch[f] = v;
+  });
+
+  if (!Object.keys(patch).length) { showToast('Nenhum campo para salvar.', 'warn'); return; }
+
+  try {
+    var r = await _sb.from('plan_config').update(patch).eq('plan_key', planKey);
+    if (r.error) throw r.error;
+    showToast('Plano ' + planKey + ' atualizado', 'success');
+    _adminLoadPlans();
+  } catch(e) {
+    showToast('Erro ao salvar plano ' + planKey + ': ' + (e.message || e), 'error');
+  }
+}
 
 function adminAction(type) {
   var msgs = {
