@@ -12957,6 +12957,10 @@ function _fmtCompare(field, v) {
 /* Sincroniza a tabela #compare-freelancer com _planConfigCache. */
 function _applyCompareFreelancer() {
   if (!_planConfigCache) return;
+  document.querySelectorAll('#compare-freelancer .compare-head[data-plan-key]').forEach(function(th) {
+    var row = _planConfigCache[th.dataset.planKey];
+    if (row && row.label) th.textContent = row.label;
+  });
   document.querySelectorAll('#compare-freelancer [data-field][data-plan-key]').forEach(function(td) {
     var row = _planConfigCache[td.dataset.planKey];
     if (!row) return;
