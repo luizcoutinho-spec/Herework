@@ -134,13 +134,14 @@ CREATE TABLE IF NOT EXISTS contracts (
   value           DECIMAL(10,2) NOT NULL,
   deadline_days   INTEGER NOT NULL,
   status          TEXT    DEFAULT 'active'
-                          CHECK (status IN ('active','review','revision','completed','disputed','cancelled')),
-  escrow_released BOOLEAN DEFAULT FALSE,
-  started_at      TIMESTAMPTZ,
-  paid_at         TIMESTAMPTZ,
-  completed_at    TIMESTAMPTZ,
-  created_at      TIMESTAMPTZ DEFAULT NOW(),
-  updated_at      TIMESTAMPTZ DEFAULT NOW()
+                          CHECK (status IN ('active','review','revision','completed','disputed','cancelled','pending_acceptance','awaiting_release')),
+  escrow_released          BOOLEAN DEFAULT FALSE,
+  stripe_transfer_id       TEXT,
+  started_at               TIMESTAMPTZ,
+  paid_at                  TIMESTAMPTZ,
+  completed_at             TIMESTAMPTZ,
+  created_at               TIMESTAMPTZ DEFAULT NOW(),
+  updated_at               TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_contracts_client ON contracts(client_id);
@@ -397,7 +398,7 @@ DROP POLICY IF EXISTS "profiles_read"   ON profiles;
 DROP POLICY IF EXISTS "profiles_insert" ON profiles;
 DROP POLICY IF EXISTS "profiles_update" ON profiles;
 CREATE POLICY "profiles_read"   ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (true);
+CREATE POLICY "profiles_insert" ON profiles FOR INSERT WITH CHECK (auth.uid() = id AND COALESCE(is_admin, false) = false);
 CREATE POLICY "profiles_update" ON profiles FOR UPDATE USING (auth.uid() = id);
 
 -- projects
