@@ -17558,6 +17558,21 @@ function switchContractView(view) {
     if(btn) btn.classList.toggle('active', v === view);
     if(pnl) pnl.style.display = v === view ? 'block' : 'none';
   });
+  if (typeof _renderContractsBanner === 'function') _renderContractsBanner(view === 'freelancer' ? 'freelancer' : 'cliente');
+}
+
+function _renderContractsBanner(scope) {
+  var d = (window._ctrData && window._ctrData[scope]) ? window._ctrData[scope] : null;
+  if (!d) return;
+  var sub = scope === 'cliente'     ? 'Seus contratos como cliente'
+          : scope === 'freelancer'  ? 'Seus contratos como freelancer'
+          : 'Todos os seus contratos (cliente + freelancer)';
+  var elc;
+  elc = document.getElementById('ctr-total');    if(elc) elc.textContent = d.total;
+  elc = document.getElementById('ctr-active');   if(elc) elc.textContent = d.active;
+  elc = document.getElementById('ctr-done');     if(elc) elc.textContent = d.done;
+  elc = document.getElementById('ctr-waiting');  if(elc) elc.textContent = d.waiting;
+  elc = document.getElementById('ctr-total-sub'); if(elc) elc.textContent = sub;
 }
 
 /* ── Tipo de conta — seletor no painel de perfil ── */
@@ -25032,18 +25047,23 @@ async function _loadRealContracts() {
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
     el = document.getElementById('dct-fl-count');     if(el) el.textContent = flActive.length + flDone.length;
 
-    /* Banner de contagem da página Contratos */
-    var allLive = clientActive.concat(flActive);
-    var allDone = clientDone.concat(flDone);
-    var ctrTotal   = allLive.length + allDone.length;
-    var ctrWaiting = allLive.filter(function(c){ return c.status === 'pending_acceptance'; }).length;
-    var ctrActive  = allLive.length - ctrWaiting;
-    var ctrDone    = allDone.filter(function(c){ return c.status === 'completed'; }).length;
-    var elc;
-    elc = document.getElementById('ctr-total');   if(elc) elc.textContent = ctrTotal;
-    elc = document.getElementById('ctr-active');  if(elc) elc.textContent = ctrActive;
-    elc = document.getElementById('ctr-done');    if(elc) elc.textContent = ctrDone;
-    elc = document.getElementById('ctr-waiting'); if(elc) elc.textContent = ctrWaiting;
+    /* Banner de contagem da página Contratos — por escopo */
+    function _countScope(live, done) {
+      var waiting = live.filter(function(c){ return c.status === 'pending_acceptance'; }).length;
+      return {
+        total:   live.length + done.length,
+        active:  live.length - waiting,
+        done:    done.filter(function(c){ return c.status === 'completed'; }).length,
+        waiting: waiting
+      };
+    }
+    window._ctrData = {
+      geral:      _countScope(clientActive.concat(flActive), clientDone.concat(flDone)),
+      cliente:    _countScope(clientActive, clientDone),
+      freelancer: _countScope(flActive, flDone)
+    };
+    var _actView = (document.getElementById('dct-freelancer') && document.getElementById('dct-freelancer').classList.contains('active')) ? 'freelancer' : 'cliente';
+    _renderContractsBanner(_actView);
 
     /* A Receber: soma dos contratos vivos como freelancer */
     var aReceber = flActive.reduce(function(s,c){ return s + (c.value||0); }, 0);
