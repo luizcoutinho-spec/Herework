@@ -12073,6 +12073,10 @@ function switchPricingTab(tab, btn) {
   if (fl) fl.style.display = tab === 'freelancers' ? '' : 'none';
   var hy = document.getElementById('pricing-hybrid');
   if (hy) hy.style.display = tab === 'hybrid' ? '' : 'none';
+  if (typeof _applyPricingCards      === 'function') _applyPricingCards();
+  if (typeof _applyCompareFreelancer === 'function') _applyCompareFreelancer();
+  if (typeof _applyCompareClient     === 'function') _applyCompareClient();
+  if (typeof _applyCompareHybrid     === 'function') _applyCompareHybrid();
 }
 
 /* ═══════════════════════════════════════════
