@@ -13268,6 +13268,141 @@ function _buyAddonProposal() {
   openStripePayment({ addonProposal: true, title: 'Comprar 1 envio de proposta', amount: 4.90 });
 }
 
+async function _loadPlanDashboard() {
+  var qb = document.getElementById('plan-quota-block');
+  if (!qb) return;
+  if (typeof _isFL === 'function' && !_isFL()) { qb.style.display = 'none'; return; }
+  try {
+    var session = await _sb.auth.getSession();
+    var uid = session && session.data && session.data.session ? session.data.session.user.id : null;
+    if (!uid) { qb.style.display = 'none'; return; }
+
+    var usageRes  = await _sb.rpc('get_freelancer_usage', { p_user: uid });
+    var ledgerRes = await _sb.from('proposal_credits')
+      .select('amount,reason,payment_intent_id,created_at')
+      .eq('user_id', uid)
+      .order('created_at', { ascending: false });
+
+    var u      = (usageRes  && !usageRes.error)  ? usageRes.data    : null;
+    var ledger = (ledgerRes && !ledgerRes.error)  ? (ledgerRes.data || []) : [];
+
+    if (!u) {
+      qb.innerHTML = '<div style="color:var(--text-3);font-size:13px;">Não foi possível carregar seu consumo.</div>';
+      qb.style.display = 'block';
+      return;
+    }
+
+    var _pFeatEl = document.getElementById('dash-plan-features');
+    if (_pFeatEl) {
+      var lp  = (u.lim_proposals !== null && u.lim_proposals !== undefined) ? u.lim_proposals : '∞';
+      var lpo = (u.lim_portfolio !== null && u.lim_portfolio !== undefined) ? u.lim_portfolio : '∞';
+      var la  = (u.lim_areas    !== null && u.lim_areas    !== undefined) ? u.lim_areas    : '∞';
+      var feats = [
+        (u.lim_proposals !== null ? lp + ' propostas/mês (+ avulso R$4,90)' : 'Propostas ilimitadas'),
+        'Portfólio até ' + lpo + ' itens',
+        'Até ' + la + ' áreas de atuação',
+        'Pagamento garantido (escrow)'
+      ];
+      _pFeatEl.innerHTML = feats.map(function(f) {
+        return '<div class="plan-feature"><span class="plan-feature-check">✓</span> ' + f + '</div>';
+      }).join('');
+    }
+
+    qb.innerHTML = _renderQuotaBlock(u, ledger);
+    qb.style.display = 'block';
+  } catch(e) {
+    console.warn('[HereWork] _loadPlanDashboard erro:', e);
+    if (qb) {
+      qb.innerHTML = '<div style="color:var(--text-3);font-size:13px;">Não foi possível carregar seu consumo.</div>';
+      qb.style.display = 'block';
+    }
+  }
+}
+
+function _renderQuotaBlock(u, ledger) {
+  function _quotaBar(used, lim) {
+    if (lim === null || lim === undefined) {
+      return '<span style="background:#dcfce7;color:#166534;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:600;">Ilimitado</span>';
+    }
+    if (Number(lim) === 0) {
+      return '<span style="color:var(--text-3);font-size:12px;">Não incluído neste plano</span>';
+    }
+    var usedN = Number(used || 0), limN = Number(lim);
+    var pct = Math.min(100, Math.round(usedN / limN * 100));
+    var over = usedN >= limN;
+    var barColor = over ? '#dc2626' : pct >= 80 ? '#d97706' : '#16a34a';
+    return (over
+      ? '<span style="color:#dc2626;font-weight:600;font-size:12px;">Limite atingido (' + usedN + ' de ' + limN + ')</span>'
+      : '<span style="font-size:12px;color:var(--text-3);">' + usedN + ' de ' + limN + '</span>') +
+      '<div style="height:8px;background:var(--border);border-radius:4px;margin-top:4px;overflow:hidden;">' +
+      '<div style="height:100%;width:' + pct + '%;background:' + barColor + ';border-radius:4px;"></div></div>';
+  }
+
+  var up = Number(u.used_proposals || 0);
+  var cb = Number(u.credit_balance || 0);
+
+  var propSection =
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Propostas</div>' +
+    _quotaBar(up, u.lim_proposals) +
+    '</div>';
+
+  var creditSection =
+    '<div style="margin-bottom:16px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Créditos Avulsos</div>' +
+    '<div style="font-size:28px;font-weight:800;color:var(--text);line-height:1;">' + cb + '</div>' +
+    '<div style="font-size:12px;color:var(--text-3);margin-bottom:10px;">envio(s) disponível(is)</div>' +
+    '<button class="btn btn-outline btn-sm" onclick="_buyAddonProposal()" style="border-color:var(--green);color:var(--green);font-size:12px;">💳 Comprar 1 envio — R$ 4,90</button>' +
+    '</div>';
+
+  var ledgerHTML =
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Extrato de Créditos</div>';
+  if (!ledger || ledger.length === 0) {
+    ledgerHTML += '<div style="font-size:12px;color:var(--text-3);">Nenhuma compra de avulso ainda.</div>';
+  } else {
+    ledgerHTML +=
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;">' +
+      '<thead><tr style="color:var(--text-3);border-bottom:1px solid var(--border);">' +
+      '<th style="text-align:left;padding:4px 6px;font-weight:600;">Data</th>' +
+      '<th style="text-align:left;padding:4px 6px;font-weight:600;">Tipo</th>' +
+      '<th style="text-align:left;padding:4px 6px;font-weight:600;">Ref.</th>' +
+      '</tr></thead><tbody>';
+    ledger.forEach(function(row) {
+      var isPlus = Number(row.amount) > 0;
+      var typeLabel = isPlus
+        ? '<span style="color:#16a34a;font-weight:600;">+1 Compra</span>'
+        : '<span style="color:var(--text-3);">&#8722;1 Consumo</span>';
+      var ref  = row.payment_intent_id ? row.payment_intent_id.slice(-8) : '—';
+      var date = row.created_at ? row.created_at.slice(0, 10) : '—';
+      ledgerHTML +=
+        '<tr style="border-bottom:1px solid var(--border);">' +
+        '<td style="padding:5px 6px;color:var(--text-2);">' + date + '</td>' +
+        '<td style="padding:5px 6px;">' + typeLabel + '</td>' +
+        '<td style="padding:5px 6px;color:var(--text-3);font-family:monospace;">' + ref + '</td>' +
+        '</tr>';
+    });
+    ledgerHTML += '</tbody></table>';
+  }
+  ledgerHTML += '</div>';
+
+  var lpo = (u.lim_portfolio !== null && u.lim_portfolio !== undefined) ? 'até ' + u.lim_portfolio : 'ilimitado';
+  var la  = (u.lim_areas    !== null && u.lim_areas    !== undefined) ? 'até ' + u.lim_areas    : 'ilimitado';
+  var lf  = (u.lim_featured === 0) ? 'não incluído' : ((u.lim_featured === null || u.lim_featured === undefined) ? 'ilimitado' : u.lim_featured);
+  var infoSection =
+    '<div style="margin-bottom:16px;padding:10px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text-3);">' +
+    '<strong style="color:var(--text-2);">Incluído no plano</strong><br>' +
+    'Portfólio ' + lpo + ' itens · Áreas ' + la + ' · Destaque: ' + lf +
+    '</div>';
+
+  var upgradeLabel = (u.plan === 'free' || !u.plan) ? '🚀 Fazer upgrade — PRO' : '🚀 Ver planos';
+  var ctaSection =
+    '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')" style="width:100%;">' + upgradeLabel + '</button>';
+
+  return '<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;">Seu consumo este mês</div>' +
+    propSection + creditSection + ledgerHTML + infoSection + ctaSection;
+}
+
 /* Compatibilidade com chamadas antigas (cenário "limite de projetos do plano gratuito") */
 function showPlanLimitModal() {
   _showPlanLimitModal('projects_month', _getUsage('projects_month'), _getResourceLimit('projects_month'));
@@ -17949,37 +18084,8 @@ function switchDashPanel(panel) {
       _pFeatEl.innerHTML = (_pFeatures[_pTier] || _pFeatures.free).map(function(f){
         return '<div class="plan-feature"><span class="plan-feature-check">✓</span> ' + f + '</div>';
       }).join('');
-      // bloco de cota de destaques (só cliente; RPC é a fonte de verdade)
-      (async function(){
-        var qb = document.getElementById('plan-quota-block');
-        if (!qb) return;
-        try {
-          if (typeof _sbReady === 'function' && !_sbReady()) { qb.style.display = 'none'; return; }
-          if (typeof _sbEnsureSession === 'function') { await _sbEnsureSession(); }
-          var qr = await _sb.rpc('get_feature_quota', {});
-          if (qr && qr.error) { console.warn('[quota] RPC erro:', qr.error.message); qb.style.display = 'none'; return; }
-          var q = qr && qr.data ? qr.data : null;
-          if (!q || q.applicable === false) { qb.style.display = 'none'; return; }
-          var usado = q.used || 0, limite = q.limit, rest = q.remaining;
-          var linhaCota, barra = '';
-          if (limite === -1) {
-            linhaCota = '⭐ Destaques de projetos: <strong>ilimitados</strong>';
-          } else if (limite === 0) {
-            linhaCota = '⭐ Destaques de projetos: <strong>0</strong> — assine um plano para destacar';
-          } else {
-            linhaCota = '⭐ Destaques de projetos: <strong>' + usado + ' de ' + limite + '</strong> usados este mês · ' + rest + ' restantes';
-            var pct = Math.min(100, Math.round((usado / limite) * 100));
-            barra = '<div style="height:8px;background:var(--border);border-radius:4px;margin-top:8px;overflow:hidden;">' +
-                    '<div style="height:100%;width:' + pct + '%;background:#16a34a;"></div></div>';
-          }
-          var botoes = '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">' +
-            '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')">⬆️ Fazer upgrade</button>' +
-            '<button class="btn btn-outline btn-sm" onclick="showToast(\'Compra avulsa de destaques em breve!\',\'info\')">➕ Comprar destaque avulso</button>' +
-            '</div>';
-          qb.innerHTML = '<div style="font-size:14px;color:var(--text-2);">' + linhaCota + '</div>' + barra + botoes;
-          qb.style.display = 'block';
-        } catch(e){ console.warn('[quota]', e); qb.style.display = 'none'; }
-      })();
+      // bloco de consumo — fonte: RPC get_freelancer_usage
+      if (typeof _loadPlanDashboard === 'function') _loadPlanDashboard();
     }
   }
   /* Sincroniza toggles de notificação com preferências salvas */
