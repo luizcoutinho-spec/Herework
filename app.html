@@ -8859,6 +8859,11 @@ section { padding: 64px 0; }
         </div>
         <div class="form-error" id="err-prop-pdf"></div>
       </div>
+      <div class="form-group" id="prop-featured-group" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;">
+        <input type="checkbox" id="prop-featured-check" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;flex-shrink:0;">
+        <label for="prop-featured-check" style="font-size:13px;font-weight:600;color:var(--text);cursor:pointer;flex:1;margin:0;">⭐ Destacar minha proposta <span style="font-size:12px;font-weight:400;color:var(--text-3);">(aparece no topo para o cliente)</span></label>
+        <span id="prop-featured-hint" style="font-size:11px;white-space:nowrap;"></span>
+      </div>
       <button class="btn btn-green btn-block btn-lg" onclick="submitProposal()" data-pt="📩 Enviar Proposta" data-es="📩 Enviar Propuesta">📩 Enviar Proposta</button>
     </div>
   </div>
@@ -10858,12 +10863,20 @@ async function _sbCreateProposal(data) {
     value:         data.value,
     deadline_days: data.deadline,
     cover_letter:  data.coverLetter,
-    status:        'pending'
+    status:        'pending',
+    featured:      (data.featured === true)
   }).select().single();
   if (r.error) {
     var code = r.error.code || '';
     var msg  = (r.error.message || '').toLowerCase();
-    if (code === 'P0001' || (r.error.message || '').indexOf('PLAN_LIMIT') >= 0) {
+    var _rm  = r.error.message || '';
+    if (code === 'P0001' && _rm.indexOf('PLAN_FEATURE_LOCKED') >= 0) {
+      var _e = new Error('PLAN_FEATURE_LOCKED'); _e.code = 'PLAN_FEATURE_LOCKED'; throw _e;
+    }
+    if (code === 'P0001' && _rm.indexOf('FEATURE_QUOTA_EXCEEDED') >= 0) {
+      var _e = new Error('FEATURE_QUOTA_EXCEEDED'); _e.code = 'FEATURE_QUOTA_EXCEEDED'; throw _e;
+    }
+    if (code === 'P0001' || _rm.indexOf('PLAN_LIMIT') >= 0) {
       var _e = new Error('PLAN_LIMIT'); _e.code = 'PLAN_LIMIT'; throw _e;
     }
     if (code === '23505' || msg.indexOf('duplicate') >= 0 || msg.indexOf('unique') >= 0) {
@@ -11354,6 +11367,7 @@ async function _sbGetProposalsReceived(statusFilter) {
   var q = _sb.from('proposals')
     .select('*, project:projects!project_id(id,title,budget_min,budget_max,deadline_days), freelancer:profiles!freelancer_id(id,name,avatar_url,rating,completed_jobs,skills)')
     .in('project_id', ids)
+    .order('featured', { ascending: false })
     .order('created_at', { ascending: false });
   if (statusFilter) q = q.eq('status', statusFilter);
   var r = await q;
@@ -13347,6 +13361,12 @@ function _renderQuotaBlock(u, ledger) {
     _quotaBar(up, u.lim_proposals) +
     '</div>';
 
+  var featSection =
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Destaques de Proposta</div>' +
+    _quotaBar(Number(u.used_featured || 0), u.lim_featured) +
+    '</div>';
+
   var creditSection =
     '<div style="margin-bottom:16px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;">' +
     '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Créditos Avulsos</div>' +
@@ -13400,7 +13420,7 @@ function _renderQuotaBlock(u, ledger) {
     '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')" style="width:100%;">' + upgradeLabel + '</button>';
 
   return '<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;">Seu consumo este mês</div>' +
-    propSection + creditSection + ledgerHTML + infoSection + ctaSection;
+    propSection + featSection + creditSection + ledgerHTML + infoSection + ctaSection;
 }
 
 /* Compatibilidade com chamadas antigas (cenário "limite de projetos do plano gratuito") */
@@ -13774,16 +13794,28 @@ function submitProposal() {
   if (_sbReady() && projId && _session) {
     var _pdfInput = document.getElementById('prop-pdf-input');
     var _pdfFile  = (_pdfInput && _pdfInput.files && _pdfInput.files[0]) ? _pdfInput.files[0] : null;
+    var _featEl = document.getElementById('prop-featured-check');
     _sbCreateProposal({
       projectId:   projId,
       value:       value,
       deadline:    days,
       coverLetter: coverLetter,
-      pdfFile:     _pdfFile
+      pdfFile:     _pdfFile,
+      featured:    (_featEl && !_featEl.disabled) ? _featEl.checked : false
     }).then(function(res) {
       if (res) { onSuccess(); }
       else { onError('Proposta não salva. Verifique se está logado.'); }
     }).catch(function(err) {
+      if (err && err.code === 'PLAN_FEATURE_LOCKED') {
+        if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+        _showPlanLimitModal('featured_proposals_month');
+        return;
+      }
+      if (err && err.code === 'FEATURE_QUOTA_EXCEEDED') {
+        if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
+        showToast('Você usou todos os seus destaques do mês.', 'info', 5000);
+        return;
+      }
       if (err && (err.code === 'PLAN_LIMIT' || (err.message || '').indexOf('PLAN_LIMIT') >= 0)) {
         if (btn) { btn.disabled = false; btn.textContent = '📩 Enviar Proposta'; }
         _showPlanLimitModal('proposals_month', _getUsage('proposals_month'), _getResourceLimit('proposals_month'));
@@ -17270,6 +17302,22 @@ async function _openProposalModal(ctx) {
   }
 
   window._activeProposalProjectId = ctx.projId || '';
+
+  /* Configurar checkbox de destaque com base no limite do plano */
+  var _featChk  = document.getElementById('prop-featured-check');
+  var _featHint = document.getElementById('prop-featured-hint');
+  if (_featChk && _featHint) {
+    var _limF = (typeof _getResourceLimit === 'function') ? _getResourceLimit('featured_proposals_month') : 0;
+    if (_limF === 0) {
+      _featChk.disabled = true; _featChk.checked = false;
+      _featHint.textContent = '🔒 Disponível no plano PRO';
+      _featHint.style.color = 'var(--text-3)';
+    } else {
+      _featChk.disabled = false; _featChk.checked = false;
+      _featHint.textContent = (_limF === null ? 'Destaques ilimitados' : 'Inclui destaques no seu plano');
+      _featHint.style.color = 'var(--green)';
+    }
+  }
 
   /* Abrir modal diretamente (sem guard de tipo) */
   var overlay = document.getElementById('overlay-proposal');
@@ -25166,6 +25214,10 @@ function _renderReceivedProposalCard(p, idx) {
     ].join('');
   }
 
+  var featuredBadge = p.featured
+    ? '<span style="background:#fef9c3;color:#92400e;font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;border:1px solid #fde68a;margin-left:6px;white-space:nowrap;">⭐ Destaque</span>'
+    : '';
+
   /* Nível 2 — linha compacta clicável */
   var rowHtml = [
     '<div id="pcard-' + p.id + '" onclick="_toggleProposalDetail(\'' + p.id + '\')"',
@@ -25174,6 +25226,7 @@ function _renderReceivedProposalCard(p, idx) {
       avatarSmHtml,
       '<div style="flex:1;min-width:0;overflow:hidden;">',
         '<span style="font-weight:600;font-size:13px;color:var(--text-1);">' + flName + '</span>',
+        featuredBadge,
         '<span style="margin-left:6px;font-size:11px;color:var(--text-3);">' + stars + ' ' + rating.toFixed(1) + '</span>',
       '</div>',
       '<div style="font-size:12px;color:var(--text-3);white-space:nowrap;margin-right:8px;">R$&nbsp;' + value + '&nbsp;·&nbsp;' + days + '&nbsp;dias</div>',
