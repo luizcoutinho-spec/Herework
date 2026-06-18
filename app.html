@@ -13090,32 +13090,27 @@ function _getResourceLimit(resourceKey) {
 function _getNextPlanInfo() {
   var type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
   var tier = _getUserPlan();
-  if (_isBoth()) {
-    if (tier === 'free') return { key:'pro', name:'PRO', price:'R$ 79,90/mês', variant:'pro' };
-    if (tier === 'pro')  return { key:'enterprise', name:'Pro Max', price:'R$ 149,90/mês', variant:'pro_max' };
-    return null;
-  }
-  if (type === 'freelancer') {
-    if (tier === 'free') return { key:'pro', name:'Premium', price:'R$ 39,90/mês', benefits:[
-      'Propostas ilimitadas por mês', 'Portfólio com até 20 itens', 'Comissão reduzida: 12% (8% p/ recorrente)',
-      'Acesso a projetos na hora', 'Selo de verificação no perfil', 'Destaque nas buscas'
-    ]};
-    if (tier === 'pro') return { key:'enterprise', name:'Elite', price:'R$ 59,90/mês', benefits:[
-      'Tudo do plano Premium', 'Comissão 8% (5% p/ cliente recorrente)', 'Portfólio ilimitado',
-      'Acesso antecipado a projetos (24h antes)', 'Suporte prioritário', 'Gerador de propostas com IA'
-    ]};
-    return null;
-  }
-  /* cliente */
-  if (tier === 'free') return { key:'pro', name:'Business', price:'R$ 49,90/mês', benefits:[
-    'Até 10 projetos simultâneos', 'Até 50 convites diretos/mês', 'Comissão reduzida: 5% (3% p/ recorrente)',
-    'Matching por IA', 'Pagamento por milestones', 'Relatórios de gastos', 'SLA de resposta em 24h'
-  ]};
-  if (tier === 'pro') return { key:'enterprise', name:'Enterprise', price:'sob consulta', benefits:[
-    'Tudo do plano Business', 'Projetos e convites ilimitados', 'Comissão negociável por contrato',
-    'Gerente de conta dedicado', 'SLA de resposta em 4h', 'Integração via API'
-  ]};
-  return null;
+  var nextTier = (tier === 'free') ? 'pro' : (tier === 'pro') ? 'enterprise' : null;
+  if (!nextTier) return null;
+
+  var role    = (type === 'both') ? 'hybrid' : type;
+  var nextKey = _planKeyFor(type, nextTier);
+  var row     = (typeof _planConfigCache !== 'undefined' && _planConfigCache) ? _planConfigCache[nextKey] : null;
+
+  /* nome e preço sempre do banco; cache ausente → null (CTA cai em "Ver planos") */
+  var nm   = row && row.label ? row.label : null;
+  var pm   = (row && row.price_month != null) ? row.price_month : null;
+  var pStr = (pm != null && Number(pm) > 0) ? ('R$ ' + Number(pm).toFixed(2).replace('.', ',') + '/mês')
+           : (pm != null && Number(pm) === 0 ? 'Grátis' : null);
+
+  var benefitsMap = {
+    'freelancer_pro':        ['Propostas ilimitadas por mês', 'Portfólio com até 20 itens', 'Comissão reduzida: 12% (8% p/ recorrente)', 'Acesso a projetos na hora', 'Selo de verificação no perfil', 'Destaque nas buscas'],
+    'freelancer_enterprise': ['Tudo do plano anterior', 'Comissão 8% (5% p/ cliente recorrente)', 'Portfólio ilimitado', 'Acesso antecipado a projetos (24h antes)', 'Suporte prioritário', 'Gerador de propostas com IA'],
+    'client_pro':            ['Até 10 projetos simultâneos', 'Até 50 convites diretos/mês', 'Comissão reduzida: 5% (3% p/ recorrente)', 'Matching por IA', 'Pagamento por milestones', 'Relatórios de gastos', 'SLA de resposta em 24h'],
+    'client_enterprise':     ['Tudo do plano anterior', 'Projetos e convites ilimitados', 'Comissão negociável por contrato', 'Gerente de conta dedicado', 'SLA de resposta em 4h', 'Integração via API']
+  };
+  var bKey = (role === 'hybrid' ? 'freelancer' : type) + '_' + nextTier;
+  return { key: nextTier, name: nm, price: pStr, variant: (nextTier === 'pro' ? 'pro' : 'pro_max'), benefits: (benefitsMap[bKey] || []) };
 }
 
 /* ── Log de eventos de limite — auditoria e análise de conversão ──
@@ -13250,7 +13245,11 @@ function _showPlanLimitModal(resourceKey, used, limit) {
   /* CTA de upgrade — leva direto para a página de planos */
   var ctaEl = document.getElementById('pl-cta');
   if (ctaEl) {
-    ctaEl.textContent = next ? ('🚀 Fazer Upgrade — ' + next.name + (next.price ? ' · ' + next.price : '')) : '🚀 Ver planos disponíveis';
+    if (next && next.name) {
+      ctaEl.textContent = '🚀 Fazer Upgrade — ' + next.name + (next.price ? ' · ' + next.price : '');
+    } else {
+      ctaEl.textContent = '🚀 Ver planos disponíveis';
+    }
     ctaEl.onclick = function() {
       ov.classList.remove('open');
       document.body.style.overflow = '';
@@ -13415,7 +13414,8 @@ function _renderQuotaBlock(u, ledger) {
     'Portfólio ' + lpo + ' itens · Áreas ' + la + ' · Destaque: ' + lf +
     '</div>';
 
-  var upgradeLabel = (u.plan === 'free' || !u.plan) ? '🚀 Fazer upgrade — PRO' : '🚀 Ver planos';
+  var _npi = (typeof _getNextPlanInfo === 'function') ? _getNextPlanInfo() : null;
+  var upgradeLabel = (_npi && _npi.name) ? ('🚀 Fazer upgrade — ' + _npi.name) : '🚀 Ver planos';
   var ctaSection =
     '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')" style="width:100%;">' + upgradeLabel + '</button>';
 
