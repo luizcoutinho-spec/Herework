@@ -13361,6 +13361,12 @@ function _renderQuotaBlock(u, ledger) {
     _quotaBar(up, u.lim_proposals) +
     '</div>';
 
+  var featSection =
+    '<div style="margin-bottom:16px;">' +
+    '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Destaques de Proposta</div>' +
+    _quotaBar(Number(u.used_featured || 0), u.lim_featured) +
+    '</div>';
+
   var creditSection =
     '<div style="margin-bottom:16px;padding:12px 14px;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;">' +
     '<div style="font-size:12px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px;">Créditos Avulsos</div>' +
@@ -13414,7 +13420,7 @@ function _renderQuotaBlock(u, ledger) {
     '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')" style="width:100%;">' + upgradeLabel + '</button>';
 
   return '<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;">Seu consumo este mês</div>' +
-    propSection + creditSection + ledgerHTML + infoSection + ctaSection;
+    propSection + featSection + creditSection + ledgerHTML + infoSection + ctaSection;
 }
 
 /* Compatibilidade com chamadas antigas (cenário "limite de projetos do plano gratuito") */
