@@ -12677,17 +12677,12 @@ function _sortFeatured(list,ownerKey){
 function _isPro()        { var p = _getUserPlan(); return p === 'pro' || p === 'enterprise'; }
 function _isEnterprise() { return _getUserPlan() === 'enterprise'; }
 function _getPlanLabel() {
-  var v = _session && _session.plan_variant;
-  if (v) {
-    var labels = { business:'Business', premium:'Premium', elite:'Elite',
-                   enterprise:'Enterprise', pro:'PRO', pro_max:'Pro Max' };
-    if (labels[v]) return labels[v];
-  }
-  switch(_getUserPlan()) {
-    case 'pro':        return _isFL() ? 'Premium'   : 'Business';
-    case 'enterprise': return _isFL() ? 'Elite'     : 'Enterprise';
-    default:           return 'Grátis';
-  }
+  var type = _isBoth() ? 'both' : (_isFL() ? 'freelancer' : 'client');
+  var tier = _getUserPlan();
+  var key  = (typeof _planKeyFor === 'function') ? _planKeyFor(type, tier) : null;
+  var row  = (key && typeof _planConfigCache !== 'undefined' && _planConfigCache) ? _planConfigCache[key] : null;
+  if (row && row.label) return row.label;
+  return (tier === 'free') ? 'Plano atual' : (tier === 'pro' ? 'Plano Pro' : 'Plano avançado');
 }
 function _getPlanCommission(isRecurrent, roleOverride) {
   /* Tabela de comissões por tipo + plano (nova contratação / cliente recorrente):
