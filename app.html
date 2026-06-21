@@ -7930,7 +7930,10 @@ section { padding: 64px 0; }
 
     <!-- Tabs -->
     <div class="adm-contracts-tabs">
-      <button class="adm-ctab active" id="adm-ctab-approval" onclick="switchAdmContractTab('approval')">
+      <button class="adm-ctab active" id="adm-ctab-aceite" onclick="switchAdmContractTab('aceite')">
+        &#128229; Aguardando Aceite <span class="adm-ctab-count" id="adm-ctab-aceite-count">0</span>
+      </button>
+      <button class="adm-ctab" id="adm-ctab-approval" onclick="switchAdmContractTab('approval')">
         &#9989; Aguardando Aprova&ccedil;&atilde;o <span class="adm-ctab-count" id="adm-ctab-approval-count">0</span>
       </button>
       <button class="adm-ctab" id="adm-ctab-revision" onclick="switchAdmContractTab('revision')">
@@ -7939,7 +7942,7 @@ section { padding: 64px 0; }
       <button class="adm-ctab" id="adm-ctab-pending" onclick="switchAdmContractTab('pending')">
         &#9203; Pendente de Envio <span class="adm-ctab-count" id="adm-ctab-pending-count">0</span>
       </button>
-      <button class="adm-ctab" id="adm-ctab-active" onclick="switchAdmContractTab('active')">
+      <button class="adm-ctab" id="adm-ctab-active" onclick="switchAdmContractTab('all')">
         &#9889; Todos em Andamento <span class="adm-ctab-count" id="adm-ctab-active-count">0</span>
       </button>
     </div>
@@ -19838,109 +19841,41 @@ function submitRevision() {
 ═══════════════════════════════════════════════════════════ */
 
 /* Dados de contrato para o admin (inclui _dashData + extra demo) */
-var _adminContracts = [
-  /* Aguardando aprovação — cliente precisa aprovar */
-  {
-    id:'ac1', title:'Identidade visual para startup fintech',
-    category:'Design & Criação',
-    client:{ name:'Tech Solutions Ltda', email:'contato@techsolutions.com.br' },
-    freelancer:{ name:'Marina Lima', email:'marina@herework.com.br', role:'Designer UI/UX' },
-    value:3800, status:'approval', statusLabel:'Aguardando Aprovação',
-    deadline:'2 dias', deadlineClass:'adm-deadline-warn',
-    deliveredAt:'Há 5 dias'
-  },
-  {
-    id:'ac2', title:'API REST para plataforma de cursos online',
-    category:'Web, Mobile & Software',
-    client:{ name:'EduPlus Educação', email:'projetos@eduplus.com.br' },
-    freelancer:{ name:'Carlos Almeida', email:'carlos@herework.com.br', role:'Dev Full Stack' },
-    value:7200, status:'approval', statusLabel:'Aguardando Aprovação',
-    deadline:'5 dias', deadlineClass:'adm-deadline-ok',
-    deliveredAt:'Há 2 dias'
-  },
-  /* Em revisão */
-  {
-    id:'ac3', title:'Campanha de SEO para e-commerce de moda',
-    category:'Vendas & Marketing',
-    client:{ name:'Loja Bella Moda', email:'marketing@bellamoda.com.br' },
-    freelancer:{ name:'Rafael Pereira', email:'rafael@herework.com.br', role:'Especialista SEO' },
-    value:3200, status:'revision', statusLabel:'Em Revisão',
-    deadline:'1 dia', deadlineClass:'adm-deadline-late',
-    revisionReason:'Relatório incompleto — faltam métricas de conversão'
-  },
-  {
-    id:'ac4', title:'App de delivery para restaurante',
-    category:'Web, Mobile & Software',
-    client:{ name:'Restaurante Sabor & Arte', email:'ti@saborarte.com.br' },
-    freelancer:{ name:'Fernando Melo', email:'fernando@herework.com.br', role:'Dev Mobile' },
-    value:12000, status:'revision', statusLabel:'Em Revisão',
-    deadline:'3 dias', deadlineClass:'adm-deadline-warn',
-    revisionReason:'Rastreamento de pedidos não funciona no iOS 17'
-  },
-  /* Pendente de envio — freelancer ainda não entregou */
-  {
-    id:'ac5', title:'Desenvolvimento de e-commerce com WooCommerce',
-    category:'Web, Mobile & Software',
-    client:{ name:'Boutique Elegance', email:'admin@boutique.com.br' },
-    freelancer:{ name:'Carlos Almeida', email:'carlos@herework.com.br', role:'Dev Full Stack' },
-    value:4800, status:'pending', statusLabel:'Pendente de Envio',
-    deadline:'18 dias', deadlineClass:'adm-deadline-ok',
-    progress:45
-  },
-  {
-    id:'ac6', title:'Gestão mensal de redes sociais',
-    category:'Vendas & Marketing',
-    client:{ name:'Padaria Dona Maria', email:'donaria@padaria.com.br' },
-    freelancer:{ name:'Rafael Pereira', email:'rafael@herework.com.br', role:'Social Media' },
-    value:2400, status:'pending', statusLabel:'Pendente de Envio',
-    deadline:'22 dias', deadlineClass:'adm-deadline-ok',
-    progress:30
-  },
-  {
-    id:'ac7', title:'Edição de vídeo institucional 5 min',
-    category:'Fotografia & AudioVisual',
-    client:{ name:'Construtora Horizonte', email:'marketing@horizonte.com.br' },
-    freelancer:{ name:'Tatiane Carvalho', email:'tatiane@herework.com.br', role:'Editora de Vídeo' },
-    value:1800, status:'pending', statusLabel:'Pendente de Envio',
-    deadline:'7 dias', deadlineClass:'adm-deadline-warn',
-    progress:70
-  },
-  /* Todos em andamento */
-  {
-    id:'ac8', title:'Copywriting para campanha Black Friday',
-    category:'Escrita',
-    client:{ name:'MegaStore Online', email:'marketing@megastore.com.br' },
-    freelancer:{ name:'Juliana Santos', email:'juliana@herework.com.br', role:'Copywriter' },
-    value:2800, status:'active', statusLabel:'Em Desenvolvimento',
-    deadline:'12 dias', deadlineClass:'adm-deadline-ok',
-    progress:55
+var _adminContracts = [];
+
+var _admCurrentTab = 'aceite';
+
+async function initAdminContracts() {
+  try {
+    var res = await _sb.rpc('get_admin_contracts');
+    if (res.error) throw res.error;
+    _adminContracts = res.data || [];
+  } catch(e) {
+    _adminContracts = [];
+    var box = document.getElementById('adm-contracts-content');
+    if (box) box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);">Não foi possível carregar os contratos.</div>';
+    return;
   }
-];
-
-var _admCurrentTab = 'approval';
-
-function initAdminContracts() {
-  /* Atualiza contagens nos tabs */
-  var counts = { approval:0, revision:0, pending:0, active:0 };
+  var counts = { aceite:0, approval:0, revision:0, pending:0 };
   _adminContracts.forEach(function(c) {
-    if(counts[c.status] !== undefined) counts[c.status]++;
-    if(c.status !== 'approval') counts.active++;
+    if      (c.status === 'pending_acceptance') counts.aceite++;
+    else if (c.status === 'review')             counts.approval++;
+    else if (c.status === 'revision')           counts.revision++;
+    else if (c.status === 'active')             counts.pending++;
   });
-  counts.active = _adminContracts.length;
-
-  var el;
-  el = document.getElementById('adm-ctab-approval-count'); if(el) el.textContent = counts.approval;
-  el = document.getElementById('adm-ctab-revision-count'); if(el) el.textContent = counts.revision;
-  el = document.getElementById('adm-ctab-pending-count');  if(el) el.textContent = counts.pending;
-  el = document.getElementById('adm-ctab-active-count');   if(el) el.textContent = _adminContracts.length;
-
-  renderAdminContracts(_admCurrentTab);
+  _setText('adm-ctab-aceite-count',    counts.aceite);
+  _setText('adm-ctab-approval-count',  counts.approval);
+  _setText('adm-ctab-revision-count',  counts.revision);
+  _setText('adm-ctab-pending-count',   counts.pending);
+  _setText('adm-ctab-active-count',    _adminContracts.length);
+  renderAdminContracts(_admCurrentTab || 'aceite');
 }
 
 function switchAdmContractTab(tab) {
   _admCurrentTab = tab;
-  ['approval','revision','pending','active'].forEach(function(t) {
-    var btn = document.getElementById('adm-ctab-' + t);
+  ['aceite','approval','revision','pending','all'].forEach(function(t) {
+    var btnId = (t === 'all') ? 'adm-ctab-active' : 'adm-ctab-' + t;
+    var btn = document.getElementById(btnId);
     if(btn) btn.classList.toggle('active', t === tab);
   });
   renderAdminContracts(tab);
@@ -19950,46 +19885,69 @@ function renderAdminContracts(tab) {
   var el = document.getElementById('adm-contracts-content');
   if(!el) return;
 
-  var list = tab === 'active'
+  var statusMap = { aceite:'pending_acceptance', approval:'review', revision:'revision', pending:'active' };
+  var list = (tab === 'all')
     ? _adminContracts
-    : _adminContracts.filter(function(c){ return c.status === tab; });
+    : _adminContracts.filter(function(c){ return c.status === statusMap[tab]; });
 
   if(!list.length) {
     el.innerHTML = '<div class="adm-empty-contracts">&#10003; Nenhum contrato nesta categoria no momento.</div>';
     return;
   }
 
+  var labelMap = {
+    pending_acceptance: 'Aguardando Aceite',
+    review:             'Aguardando Aprovação',
+    active:             'Em Andamento',
+    revision:           'Em Revisão',
+    completed:          'Concluído',
+    cancelled:          'Cancelado'
+  };
+  var pillClassMap = {
+    pending_acceptance: 'adm-pill-pending',
+    review:             'adm-pill-approval',
+    active:             'adm-pill-active',
+    revision:           'adm-pill-revision',
+    completed:          'adm-pill-active',
+    cancelled:          'adm-pill-pending'
+  };
+  var pillIconMap = {
+    pending_acceptance: '&#128229;',
+    review:             '&#9989;',
+    active:             '&#9889;',
+    revision:           '&#9998;',
+    completed:          '&#10003;',
+    cancelled:          '&#10007;'
+  };
+
   el.innerHTML = list.map(function(c) {
-    /* Status pill */
-    var pillClass = { approval:'adm-pill-approval', revision:'adm-pill-revision', pending:'adm-pill-pending', active:'adm-pill-active' }[c.status] || 'adm-pill-pending';
-    var pillIcon  = { approval:'&#9989;', revision:'&#9998;', pending:'&#9203;', active:'&#9889;' }[c.status] || '';
+    var st        = c.status || 'active';
+    var pillClass = pillClassMap[st] || 'adm-pill-pending';
+    var pillIcon  = pillIconMap[st]  || '';
+    var statusLbl = labelMap[st]     || st;
 
-    /* Extra info row */
-    var extraInfo = '';
-    if(c.status === 'revision' && c.revisionReason) {
-      extraInfo = '<div style="font-size:11px;color:#7e22ce;margin-top:3px;">&#128172; ' + c.revisionReason + '</div>';
-    } else if(c.status === 'pending' && c.progress !== undefined) {
-      extraInfo = '<div style="font-size:11px;color:var(--text-4);margin-top:3px;">' +
-        '<div style="width:80px;height:4px;background:var(--border);border-radius:2px;display:inline-block;vertical-align:middle;margin-right:4px;">' +
-        '<div style="width:'+c.progress+'%;height:100%;background:var(--green);border-radius:2px;"></div></div>' +
-        c.progress + '%</div>';
-    } else if(c.status === 'approval' && c.deliveredAt) {
-      extraInfo = '<div style="font-size:11px;color:var(--text-4);margin-top:3px;">&#128228; Entregue ' + c.deliveredAt + '</div>';
-    }
+    var clientName     = c.client_name     || c.client_email   || '—';
+    var clientEmail    = c.client_email    || '';
+    var flName         = c.freelancer_name || '—';
+    var flRating       = c.freelancer_rating ? (' · ★' + Number(c.freelancer_rating).toFixed(1)) : '';
+    var projTitle      = c.project_title   || '—';
+    var valueNum       = Number(c.value    || 0);
+    var deadlineDays   = c.deadline_days   != null ? (c.deadline_days + ' dias') : '—';
+    var paidAt         = c.paid_at ? new Date(c.paid_at).toLocaleDateString('pt-BR') : '—';
 
-    /* Action buttons */
+    /* Action buttons — release desabilitado até Etapa 9 */
     var actions = '';
-    if(c.status === 'approval') {
+    if (st === 'review') {
       actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
-        '<button class="adm-mini-btn primary" onclick="admContractAction(\'release\',\''+c.id+'\')">&#128176; Liberar</button>' +
+        '<button class="adm-mini-btn primary" disabled title="Disponível após Etapa 8" style="opacity:.5;cursor:not-allowed;">&#128176; Liberar</button>' +
         '<button class="adm-mini-btn warn" onclick="admContractAction(\'remind\',\''+c.id+'\')">&#128276; Lembrar</button>' +
         '</div>';
-    } else if(c.status === 'revision') {
+    } else if (st === 'revision') {
       actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
         '<button class="adm-mini-btn warn" onclick="admContractAction(\'mediate\',\''+c.id+'\')">&#9878;&#65039; Mediar</button>' +
         '<button class="adm-mini-btn" onclick="admContractAction(\'extend\',\''+c.id+'\')">&#128197; Prazo +7d</button>' +
         '</div>';
-    } else if(c.status === 'pending') {
+    } else if (st === 'active') {
       actions = '<div style="display:flex;gap:4px;flex-direction:column;">' +
         '<button class="adm-mini-btn warn" onclick="admContractAction(\'nudge\',\''+c.id+'\')">&#128276; Cobrar FL</button>' +
         '<button class="adm-mini-btn" onclick="admContractAction(\'extend\',\''+c.id+'\')">&#128197; Prazo +7d</button>' +
@@ -19999,45 +19957,45 @@ function renderAdminContracts(tab) {
     }
 
     return '<div class="adm-contract-row">' +
-      /* Project */ '<div><div class="adm-proj-name">' + c.title + '</div>' +
-        '<div class="adm-proj-cat">' + c.category + ' &nbsp;·&nbsp; <span class="adm-pill ' + pillClass + '">' + pillIcon + ' ' + c.statusLabel + '</span></div>' +
-        extraInfo + '</div>' +
-      /* Client */ '<div class="adm-person">' +
-        '<div class="adm-person-av client">' + c.client.name.charAt(0).toUpperCase() + '</div>' +
-        '<div><div class="adm-person-name">' + c.client.name + '</div>' +
-        '<div class="adm-person-role">' + c.client.email + '</div></div>' +
+      '<div><div class="adm-proj-name">' + projTitle + '</div>' +
+        '<div class="adm-proj-cat"><span class="adm-pill ' + pillClass + '">' + pillIcon + ' ' + statusLbl + '</span>' +
+        ' &nbsp;·&nbsp; pago em ' + paidAt + '</div></div>' +
+      '<div class="adm-person">' +
+        '<div class="adm-person-av client">' + clientName.charAt(0).toUpperCase() + '</div>' +
+        '<div><div class="adm-person-name">' + clientName + '</div>' +
+        '<div class="adm-person-role">' + clientEmail + '</div></div>' +
       '</div>' +
-      /* Freelancer */ '<div class="adm-person">' +
-        '<div class="adm-person-av fl">' + c.freelancer.name.charAt(0).toUpperCase() + '</div>' +
-        '<div><div class="adm-person-name">' + c.freelancer.name + '</div>' +
-        '<div class="adm-person-role">' + c.freelancer.role + '</div></div>' +
+      '<div class="adm-person">' +
+        '<div class="adm-person-av fl">' + flName.charAt(0).toUpperCase() + '</div>' +
+        '<div><div class="adm-person-name">' + flName + '</div>' +
+        '<div class="adm-person-role">' + flRating + '</div></div>' +
       '</div>' +
-      /* Garantia */ '<div><div class="adm-escrow-val">R$ ' + c.value.toLocaleString('pt-BR') + '</div>' +
+      '<div><div class="adm-escrow-val">R$ ' + valueNum.toLocaleString('pt-BR') + '</div>' +
         '<div class="adm-escrow-sub">em garantia</div></div>' +
-      /* Deadline */ '<div class="' + c.deadlineClass + '">' + c.deadline + '</div>' +
-      /* Actions */ '<div>' + actions + '</div>' +
+      '<div>' + deadlineDays + '</div>' +
+      '<div>' + actions + '</div>' +
     '</div>';
   }).join('');
 }
 
 function admContractAction(action, contractId) {
+  if (action === 'release') {
+    showToast('Liberação será habilitada na próxima etapa.', 'info');
+    return;
+  }
   var c = _adminContracts.filter(function(x){ return x.id === contractId; })[0];
   if(!c) return;
+  var flName     = c.freelancer_name || 'freelancer';
+  var clientName = c.client_name     || 'cliente';
+  var title      = c.project_title   || contractId;
   var msgs = {
-    release: '&#128176; Pagamento de R$ ' + (c.value||0).toLocaleString('pt-BR') + ' liberado para ' + (c.freelancer ? c.freelancer.name : 'freelancer') + '!',
-    remind:  '&#128276; Lembrete enviado para ' + (c.client ? c.client.name : 'cliente') + ' aprovar a entrega.',
-    mediate: '&#9878;&#65039; Processo de mediação aberto para "' + c.title + '". Equipe notificada.',
-    nudge:   '&#128276; ' + (c.freelancer ? c.freelancer.name : 'Freelancer') + ' foi cobrado sobre a entrega pendente.',
-    extend:  '&#128197; Prazo estendido em 7 dias para "' + c.title + '".',
+    remind:  '&#128276; Lembrete enviado para ' + clientName + ' aprovar a entrega.',
+    mediate: '&#9878;&#65039; Processo de mediação aberto para "' + title + '". Equipe notificada.',
+    nudge:   '&#128276; ' + flName + ' foi cobrado sobre a entrega pendente.',
+    extend:  '&#128197; Prazo estendido em 7 dias para "' + title + '".',
     view:    '&#128269; Abrindo detalhes do contrato...'
   };
-  showToast(msgs[action] || 'Ação executada.', action === 'release' ? 'success' : 'info');
-
-  /* Remove from list if released */
-  if(action === 'release') {
-    _adminContracts = _adminContracts.filter(function(x){ return x.id !== contractId; });
-    initAdminContracts();
-  }
+  showToast(msgs[action] || 'Ação executada.', 'info');
 }
 
 /* ═══════════════════════════════════════════════════════════
