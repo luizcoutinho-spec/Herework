@@ -8028,17 +8028,12 @@ section { padding: 64px 0; }
             <tr>
               <th>Nome</th>
               <th>Tipo</th>
-              <th>Status</th>
+              <th>Plano</th>
               <th>Cadastro</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td><strong>Carlos Almeida</strong></td><td>Freelancer</td><td><span class="status-pill pill-green">Ativo</span></td><td>Hoje</td></tr>
-            <tr><td><strong>Marina Lima</strong></td><td>Freelancer</td><td><span class="status-pill pill-green">Ativo</span></td><td>Hoje</td></tr>
-            <tr><td><strong>Tech Solutions Ltda</strong></td><td>Empresa</td><td><span class="status-pill pill-blue">Verificando</span></td><td>Ontem</td></tr>
-            <tr><td><strong>João Fernandes</strong></td><td>Freelancer</td><td><span class="status-pill pill-green">Ativo</span></td><td>Ontem</td></tr>
-            <tr><td><strong>Ana Costa</strong></td><td>Empresa</td><td><span class="status-pill pill-orange">Pendente</span></td><td>2 dias</td></tr>
-            <tr><td><strong>Pedro Oliveira</strong></td><td>Freelancer</td><td><span class="status-pill pill-red">Suspenso</span></td><td>3 dias</td></tr>
+          <tbody id="adm-recent-users-body">
+            <tr><td colspan="4" style="padding:8px;color:var(--text-3);font-size:13px;">Carregando…</td></tr>
           </tbody>
         </table>
         <div style="margin-top:12px;text-align:right;">
@@ -8058,13 +8053,8 @@ section { padding: 64px 0; }
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
-            <tr><td><strong>E-commerce WooCommerce</strong></td><td>Web</td><td>R$ 4K</td><td><span class="status-pill pill-green">Aberto</span></td></tr>
-            <tr><td><strong>Identidade Visual Fintech</strong></td><td>Design</td><td>R$ 1,5K</td><td><span class="status-pill pill-green">Aberto</span></td></tr>
-            <tr><td><strong>Gestão Redes Sociais</strong></td><td>Mktg</td><td>R$ 2K/mês</td><td><span class="status-pill pill-blue">Em andamento</span></td></tr>
-            <tr><td><strong>App Delivery iOS/Android</strong></td><td>Apps</td><td>R$ 15K</td><td><span class="status-pill pill-green">Aberto</span></td></tr>
-            <tr><td><strong>Dashboard Analytics BI</strong></td><td>Dados</td><td>R$ 8K</td><td><span class="status-pill pill-orange">Em revisão</span></td></tr>
-            <tr><td><strong>Chatbot IA Atendimento</strong></td><td>IA</td><td>R$ 12K</td><td><span class="status-pill pill-gray">Rascunho</span></td></tr>
+          <tbody id="adm-recent-projects-body">
+            <tr><td colspan="4" style="padding:8px;color:var(--text-3);font-size:13px;">Carregando…</td></tr>
           </tbody>
         </table>
         <div style="margin-top:12px;text-align:right;">
@@ -15393,6 +15383,7 @@ function showAdminPage() {
     setTimeout(function(){
       initAdminContracts();
       _loadAdminStats();
+      _loadRecentLists();
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
       if (typeof _adminLoadPlans   === 'function') _adminLoadPlans();
     }, 50);
@@ -20025,6 +20016,37 @@ async function _loadAdminStats() {
       var el = document.getElementById(id); if (el) el.textContent = '—';
     });
   }
+}
+
+async function _loadRecentLists() {
+  function _typeLabel(t){ return t==='freelancer'?'Freelancer':t==='client'?'Cliente':t==='both'?'Híbrido':(t||'—'); }
+  var C='padding:8px;border-bottom:1px solid var(--border);font-size:13px;';
+  try {
+    var ru = await _sb.rpc('get_admin_list',{p_which:'recent_users'});
+    if (ru.error) throw ru.error;
+    var ub = document.getElementById('adm-recent-users-body');
+    if (ub) ub.innerHTML = (ru.data||[]).map(function(u){
+      return '<tr>'
+        +'<td style="'+C+'">'+(u.name?_escHtml(u.name):'—')+'</td>'
+        +'<td style="'+C+'">'+_typeLabel(u.type)+'</td>'
+        +'<td style="'+C+'">'+(u.plan_key?_escHtml(u.plan_key):'—')+'</td>'
+        +'<td style="'+C+'">'+(u.created_at?new Date(u.created_at).toLocaleDateString('pt-BR'):'—')+'</td>'
+        +'</tr>';
+    }).join('')||'<tr><td colspan="4" style="'+C+'">Nenhum usuário.</td></tr>';
+  } catch(e){ var ub=document.getElementById('adm-recent-users-body'); if(ub) ub.innerHTML='<tr><td colspan="4" style="'+C+'">Não foi possível carregar.</td></tr>'; }
+  try {
+    var rp = await _sb.rpc('get_admin_list',{p_which:'recent_projects'});
+    if (rp.error) throw rp.error;
+    var pb = document.getElementById('adm-recent-projects-body');
+    if (pb) pb.innerHTML = (rp.data||[]).map(function(p){
+      return '<tr>'
+        +'<td style="'+C+'">'+(p.title?_escHtml(p.title):'—')+'</td>'
+        +'<td style="'+C+'">'+(p.category?_escHtml(p.category):'—')+'</td>'
+        +'<td style="'+C+'">R$ '+Number(p.budget_min||0).toLocaleString('pt-BR')+'–'+Number(p.budget_max||0).toLocaleString('pt-BR')+'</td>'
+        +'<td style="'+C+'">'+(p.status?_escHtml(p.status):'—')+'</td>'
+        +'</tr>';
+    }).join('')||'<tr><td colspan="4" style="'+C+'">Nenhum projeto.</td></tr>';
+  } catch(e){ var pb=document.getElementById('adm-recent-projects-body'); if(pb) pb.innerHTML='<tr><td colspan="4" style="'+C+'">Não foi possível carregar.</td></tr>'; }
 }
 
 function switchAdmContractTab(tab) {
