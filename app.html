@@ -17485,42 +17485,61 @@ function toggleDemoList(which) {
   var data = (which==='fl') ? (window._demoFLData||[]) : (window._demoProjData||[]);
   if (!data.length) { box.innerHTML = '<div style="padding:16px;color:var(--text-3);">Nenhum demo gerado. (Os demos são criados ao abrir o painel admin.)</div>'; box.style.display='block'; box.dataset.open=which; return; }
   var html;
+  var C2 = 'padding:6px 8px;border-bottom:1px solid var(--border);';
   if (which==='fl') {
     html = '<table class="adm-demo-table" style="width:100%;border-collapse:collapse;font-size:13px;">'
-      + '<thead><tr>' + ['Nome','Cargo','Cidade','R$/h','Rating','Recs','Projetos','Desde','Badges','Skills'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
-      + data.map(function(d){
+      + '<thead><tr>' + ['Nome','Cargo','Cidade','R$/h','Rating','Recs','Projetos','Desde','Badges','Skills','Ação'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
+      + data.map(function(d, i){
           var badges = (d.verified==='true'?'✓ ':'')+(d.top==='true'?'⭐':'');
           return '<tr>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.name+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.role+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.city+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">R$ '+d.rate+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.rating+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.recs+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.proj+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.since+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+badges+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.skills||[]).join(', ')+'</td>'
+            + '<td style="'+C2+'">'+d.name+'</td>'
+            + '<td style="'+C2+'">'+d.role+'</td>'
+            + '<td style="'+C2+'">'+d.city+'</td>'
+            + '<td style="'+C2+'">R$ '+d.rate+'</td>'
+            + '<td style="'+C2+'">'+d.rating+'</td>'
+            + '<td style="'+C2+'">'+d.recs+'</td>'
+            + '<td style="'+C2+'">'+d.proj+'</td>'
+            + '<td style="'+C2+'">'+d.since+'</td>'
+            + '<td style="'+C2+'">'+badges+'</td>'
+            + '<td style="'+C2+'">'+(d.skills||[]).join(', ')+'</td>'
+            + '<td style="'+C2+'"><span onclick="_removeDemoRow(\'fl\','+i+')" title="Remover este demo" style="cursor:pointer;color:#ef4444;font-size:15px;">🗑️</span></td>'
             + '</tr>';
         }).join('') + '</tbody></table>';
   } else {
     html = '<table class="adm-demo-table" style="width:100%;border-collapse:collapse;font-size:13px;">'
-      + '<thead><tr>' + ['Título','Categoria','Tipo','Orçamento','Prazo','Propostas','Views','Skills'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
-      + data.map(function(d){
+      + '<thead><tr>' + ['Título','Categoria','Tipo','Orçamento','Prazo','Propostas','Views','Skills','Ação'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
+      + data.map(function(d, i){
           return '<tr>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.title+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.cat+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.type+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">R$ '+d.budMin+'–'+d.budMax+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.deadline?d.deadline+' dias':'—')+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.props+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.views+'</td>'
-            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.skills||[]).join(', ')+'</td>'
+            + '<td style="'+C2+'">'+d.title+'</td>'
+            + '<td style="'+C2+'">'+d.cat+'</td>'
+            + '<td style="'+C2+'">'+d.type+'</td>'
+            + '<td style="'+C2+'">R$ '+d.budMin+'–'+d.budMax+'</td>'
+            + '<td style="'+C2+'">'+(d.deadline?d.deadline+' dias':'—')+'</td>'
+            + '<td style="'+C2+'">'+d.props+'</td>'
+            + '<td style="'+C2+'">'+d.views+'</td>'
+            + '<td style="'+C2+'">'+(d.skills||[]).join(', ')+'</td>'
+            + '<td style="'+C2+'"><span onclick="_removeDemoRow(\'proj\','+i+')" title="Remover este demo" style="cursor:pointer;color:#ef4444;font-size:15px;">🗑️</span></td>'
             + '</tr>';
         }).join('') + '</tbody></table>';
   }
   box.innerHTML = '<div style="max-height:400px;overflow:auto;">'+html+'</div>';
   box.style.display='block'; box.dataset.open=which;
+}
+
+/* ─── Remove single demo row ─── */
+function _removeDemoRow(which, index) {
+  var arr = (which==='fl') ? window._demoFLData : window._demoProjData;
+  if (!arr || index<0 || index>=arr.length) return;
+  arr.splice(index, 1);
+  var cntId = (which==='fl') ? 'adm-demo-fl-total' : 'adm-demo-proj-total';
+  var cntEl = document.getElementById(cntId);
+  if (cntEl) {
+    var n = parseInt(String(cntEl.textContent).replace(/\D/g,''),10) || arr.length;
+    cntEl.textContent = Math.max(0, n-1).toLocaleString('pt-BR');
+  }
+  var box = document.getElementById('adm-demo-list-container');
+  if (box) { box.dataset.open=''; toggleDemoList(which); }
+  if (typeof showToast==='function') showToast('Demo removido');
 }
 
 /* ─── Remove demo cards ─── */
