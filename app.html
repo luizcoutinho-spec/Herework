@@ -8088,6 +8088,38 @@ section { padding: 64px 0; }
       </div>
     </div>
 
+    <!-- Dashboard Financeiro -->
+    <div class="admin-panel" style="margin-top:20px;">
+      <div class="admin-section-title"><span>📊</span> Dashboard Financeiro — Receita HereWork</div>
+      <!-- 4 cards de acumulado -->
+      <div class="admin-stats" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;">
+        <div class="admin-stat-card">
+          <div class="admin-stat-val" id="adm-dash-mrr">—</div>
+          <div class="admin-stat-label">MRR — Receita recorrente/mês (assinaturas ativas)</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-val" id="adm-dash-mrr-anual">—</div>
+          <div class="admin-stat-label">Projeção anual (MRR × 12)</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-val" id="adm-dash-comissao">—</div>
+          <div class="admin-stat-label">Comissão projetada (cobrada a partir da Etapa 8)</div>
+        </div>
+        <div class="admin-stat-card">
+          <div class="admin-stat-val" id="adm-dash-gmv">—</div>
+          <div class="admin-stat-label">GMV — Volume transacionado</div>
+        </div>
+      </div>
+      <!-- gráfico mês a mês -->
+      <div style="margin:16px 0;">
+        <div style="font-weight:600;margin-bottom:8px;">Mês a mês (GMV e comissão projetada)</div>
+        <div id="adm-dash-chart"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-3);margin-top:12px;">
+        ℹ️ Receita de comissão será cobrada a partir da Etapa 8. MRR baseado em <span id="adm-dash-subs">—</span> assinaturas Stripe ativas. Histórico de cobranças individuais no painel Stripe.
+      </div>
+    </div>
+
     <!-- Denúncias e suporte -->
     <div class="admin-grid-2">
       <!-- TODO: feature de denúncias não implementada — esconder até existir tabela real -->
@@ -15378,6 +15410,7 @@ function showAdminPage() {
       initAdminContracts();
       _loadAdminStats();
       _loadAdminFinancial();
+      _loadFinancialDashboard();
       _loadRecentLists();
       var fe=document.getElementById('adm-footer-updated'); if(fe) fe.textContent=new Date().toLocaleString('pt-BR');
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
@@ -20030,6 +20063,42 @@ async function _loadAdminFinancial() {
       var el=document.getElementById(id); if(el) el.textContent='—';
     });
   }
+}
+
+async function _loadFinancialDashboard(){
+  try {
+    var r = await _sb.rpc('get_admin_dashboard_financial');
+    if (r.error) throw r.error;
+    var s = r.data||{};
+    _setText('adm-dash-mrr',       'R$ '+Number(s.mrr_atual||0).toLocaleString('pt-BR'));
+    _setText('adm-dash-mrr-anual', 'R$ '+Number(s.mrr_anual||0).toLocaleString('pt-BR'));
+    _setText('adm-dash-comissao',  'R$ '+Number(s.comissao_projetada_total||0).toLocaleString('pt-BR'));
+    _setText('adm-dash-gmv',       'R$ '+Number(s.gmv_total||0).toLocaleString('pt-BR'));
+    _setText('adm-dash-subs',      String(s.assinaturas_ativas||0));
+    _renderDashChart(s.por_mes||[]);
+  } catch(e){
+    ['adm-dash-mrr','adm-dash-mrr-anual','adm-dash-comissao','adm-dash-gmv'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent='—'; });
+    var ch=document.getElementById('adm-dash-chart'); if(ch) ch.innerHTML='<div style="color:var(--text-3);padding:12px;">Não foi possível carregar.</div>';
+  }
+}
+
+function _renderDashChart(porMes){
+  var ch=document.getElementById('adm-dash-chart'); if(!ch) return;
+  if(!porMes.length){ ch.innerHTML='<div style="color:var(--text-3);padding:12px;">Sem dados ainda.</div>'; return; }
+  var maxGmv = Math.max.apply(null, porMes.map(function(m){return Number(m.gmv)||0;})) || 1;
+  ch.innerHTML = porMes.map(function(m){
+    var pct = Math.round((Number(m.gmv)||0)/maxGmv*100);
+    var mesLabel = _escHtml(m.mes);
+    return '<div style="display:flex;align-items:center;gap:10px;margin:6px 0;">'
+      + '<span style="width:70px;font-size:12px;color:var(--text-2);">'+mesLabel+'</span>'
+      + '<div style="flex:1;background:var(--surface-2);border-radius:6px;overflow:hidden;height:24px;">'
+      +   '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,var(--primary),#6366f1);min-width:2px;"></div>'
+      + '</div>'
+      + '<span style="width:130px;text-align:right;font-size:12px;font-weight:600;">R$ '+Number(m.gmv||0).toLocaleString('pt-BR')+'</span>'
+      + '<span style="width:40px;text-align:right;font-size:11px;color:var(--text-3);">'+(m.contratos||0)+' ctr</span>'
+      + '</div>';
+  }).join('');
 }
 
 async function _loadRecentLists() {
