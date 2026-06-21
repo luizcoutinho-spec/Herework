@@ -17405,15 +17405,19 @@ async function toggleAdminTopList(which) {
 
 function _escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
 
+function _copyId(id,ev){ if(ev){ev.stopPropagation();} try{navigator.clipboard.writeText(id); if(typeof showToast==='function')showToast('ID copiado');}catch(e){} }
+
 function _renderTopList(which, data) {
   if (!data.length) return '<div style="padding:16px;color:var(--text-3);">Nenhum registro.</div>';
   var C = 'padding:6px 8px;border-bottom:1px solid var(--border);font-size:13px;';
   var H = 'text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);';
   var rows, heads;
+  var idCell = function(d){ return '<td style="'+C+'"><span onclick="_copyId(\''+_escHtml(d.id||'')+'\',event)" title="Clique para copiar" style="cursor:pointer;font-family:monospace;font-size:11px;color:var(--primary);text-decoration:underline;">'+_escHtml(d.id||'—')+'</span></td>'; };
   if (which === 'freelancers') {
-    heads = ['Nome','Email','Cidade/UF','R$/h','Rating','Jobs','Plano','Desde'];
+    heads = ['ID','Nome','Email','Cidade/UF','R$/h','Rating','Jobs','Plano','Desde'];
     rows = data.map(function(d){
       return '<tr>'
+        + idCell(d)
         + '<td style="'+C+'">'+(d.name?_escHtml(d.name):'—')+'</td>'
         + '<td style="'+C+'">'+(d.email?_escHtml(d.email):'—')+'</td>'
         + '<td style="'+C+'">'+_escHtml(d.city||'')+'/'+_escHtml(d.state||'')+'</td>'
@@ -17425,9 +17429,10 @@ function _renderTopList(which, data) {
         + '</tr>';
     }).join('');
   } else if (which === 'projects') {
-    heads = ['Título','Cliente','Categoria','Status','Orçamento','Propostas','Views','Criado'];
+    heads = ['ID','Título','Cliente','Categoria','Status','Orçamento','Propostas','Views','Criado'];
     rows = data.map(function(d){
       return '<tr>'
+        + idCell(d)
         + '<td style="'+C+'">'+(d.title?_escHtml(d.title):'—')+'</td>'
         + '<td style="'+C+'">'+(d.client_name?_escHtml(d.client_name):'—')+'</td>'
         + '<td style="'+C+'">'+(d.category?_escHtml(d.category):'—')+'</td>'
@@ -17439,9 +17444,10 @@ function _renderTopList(which, data) {
         + '</tr>';
     }).join('');
   } else if (which === 'transactions') {
-    heads = ['Projeto','Cliente','Freelancer','Valor','Comissão','Taxa','Status'];
+    heads = ['ID','Projeto','Cliente','Freelancer','Valor','Comissão','Taxa','Status'];
     rows = data.map(function(d){
       return '<tr>'
+        + idCell(d)
         + '<td style="'+C+'">'+(d.project_title?_escHtml(d.project_title):'—')+'</td>'
         + '<td style="'+C+'">'+(d.client_name?_escHtml(d.client_name):'—')+'</td>'
         + '<td style="'+C+'">'+(d.freelancer_name?_escHtml(d.freelancer_name):'—')+'</td>'
@@ -17452,9 +17458,10 @@ function _renderTopList(which, data) {
         + '</tr>';
     }).join('');
   } else if (which === 'reviews') {
-    heads = ['Avaliador','Avaliado','Nota','Comentário','Data'];
+    heads = ['ID','Avaliador','Avaliado','Nota','Comentário','Data'];
     rows = data.map(function(d){
       return '<tr>'
+        + idCell(d)
         + '<td style="'+C+'">'+(d.reviewer_name?_escHtml(d.reviewer_name):'—')+'</td>'
         + '<td style="'+C+'">'+(d.reviewed_name?_escHtml(d.reviewed_name):'—')+'</td>'
         + '<td style="'+C+'">'+(d.rating||0)+' ★</td>'
