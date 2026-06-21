@@ -7861,27 +7861,28 @@ section { padding: 64px 0; }
 
     <!-- Stats -->
     <div class="admin-stats">
-      <div class="admin-stat-card">
+      <div class="admin-stat-card" style="cursor:pointer;" onclick="toggleAdminTopList('freelancers')">
         <div class="admin-stat-icon">🧑‍💻</div>
         <div class="admin-stat-val" id="adm-stat-users">—</div>
         <div class="admin-stat-label">Freelancers cadastrados</div>
       </div>
-      <div class="admin-stat-card orange">
+      <div class="admin-stat-card orange" style="cursor:pointer;" onclick="toggleAdminTopList('projects')">
         <div class="admin-stat-icon">📋</div>
         <div class="admin-stat-val" id="adm-stat-projects">—</div>
         <div class="admin-stat-label">Projetos publicados</div>
       </div>
-      <div class="admin-stat-card blue">
+      <div class="admin-stat-card blue" style="cursor:pointer;" onclick="toggleAdminTopList('transactions')">
         <div class="admin-stat-icon">💰</div>
         <div class="admin-stat-val" id="adm-stat-transactions">R$ 48,7M</div>
         <div class="admin-stat-label">Transações este mês</div>
       </div>
-      <div class="admin-stat-card purple">
+      <div class="admin-stat-card purple" style="cursor:pointer;" onclick="toggleAdminTopList('reviews')">
         <div class="admin-stat-icon">⭐</div>
         <div class="admin-stat-val" id="adm-stat-satisfaction">98,2%</div>
         <div class="admin-stat-label">Satisfação dos usuários</div>
       </div>
     </div>
+    <div id="adm-top-list-container" style="display:none;margin-top:16px;"></div>
 
     <!-- Painel de dados demo -->
     <div class="admin-section-title" style="margin-top:4px;"><span>🧪</span> Perfis Demo — Recurso de Lançamento</div>
@@ -17378,6 +17379,95 @@ function pdfRemove(e) {
 }
 function _pdfReset() {
   pdfRemove({ stopPropagation: function(){} });
+}
+
+/* ─── Top cards drilldown ─── */
+async function toggleAdminTopList(which) {
+  var box = document.getElementById('adm-top-list-container');
+  if (!box) return;
+  if (box.dataset.open === which) { box.style.display='none'; box.dataset.open=''; return; }
+  box.innerHTML = '<div style="padding:16px;color:var(--text-3);">Carregando…</div>';
+  box.style.display='block'; box.dataset.open=which;
+  try {
+    var r, data;
+    if (which === 'transactions') {
+      r = await _sb.rpc('get_admin_contracts');
+      if (r.error) throw r.error; data = r.data || [];
+    } else {
+      r = await _sb.rpc('get_admin_list', { p_which: which });
+      if (r.error) throw r.error; data = r.data || [];
+    }
+    box.innerHTML = '<div style="max-height:420px;overflow:auto;">' + _renderTopList(which, data) + '</div>';
+  } catch(e) {
+    box.innerHTML = '<div style="padding:16px;color:var(--text-3);">Não foi possível carregar a lista.</div>';
+  }
+}
+
+function _escHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+function _renderTopList(which, data) {
+  if (!data.length) return '<div style="padding:16px;color:var(--text-3);">Nenhum registro.</div>';
+  var C = 'padding:6px 8px;border-bottom:1px solid var(--border);font-size:13px;';
+  var H = 'text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);';
+  var rows, heads;
+  if (which === 'freelancers') {
+    heads = ['Nome','Email','Cidade/UF','R$/h','Rating','Jobs','Plano','Desde'];
+    rows = data.map(function(d){
+      return '<tr>'
+        + '<td style="'+C+'">'+(d.name?_escHtml(d.name):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.email?_escHtml(d.email):'—')+'</td>'
+        + '<td style="'+C+'">'+_escHtml(d.city||'')+'/'+_escHtml(d.state||'')+'</td>'
+        + '<td style="'+C+'">R$ '+(d.hourly_rate||0)+'</td>'
+        + '<td style="'+C+'">'+(d.rating!=null?d.rating+' ★ ('+(d.rating_count||0)+')':'—')+'</td>'
+        + '<td style="'+C+'">'+(d.completed_jobs||0)+'</td>'
+        + '<td style="'+C+'">'+(d.plan_key?_escHtml(d.plan_key):'—')+'</td>'
+        + '<td style="'+C+'">'+new Date(d.created_at).toLocaleDateString('pt-BR')+'</td>'
+        + '</tr>';
+    }).join('');
+  } else if (which === 'projects') {
+    heads = ['Título','Cliente','Categoria','Status','Orçamento','Propostas','Views','Criado'];
+    rows = data.map(function(d){
+      return '<tr>'
+        + '<td style="'+C+'">'+(d.title?_escHtml(d.title):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.client_name?_escHtml(d.client_name):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.category?_escHtml(d.category):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.status?_escHtml(d.status):'—')+'</td>'
+        + '<td style="'+C+'">R$ '+(d.budget_min||0)+'–'+(d.budget_max||0)+'</td>'
+        + '<td style="'+C+'">'+(d.proposal_count||0)+'</td>'
+        + '<td style="'+C+'">'+(d.views||0)+'</td>'
+        + '<td style="'+C+'">'+new Date(d.created_at).toLocaleDateString('pt-BR')+'</td>'
+        + '</tr>';
+    }).join('');
+  } else if (which === 'transactions') {
+    heads = ['Projeto','Cliente','Freelancer','Valor','Comissão','Taxa','Status'];
+    rows = data.map(function(d){
+      return '<tr>'
+        + '<td style="'+C+'">'+(d.project_title?_escHtml(d.project_title):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.client_name?_escHtml(d.client_name):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.freelancer_name?_escHtml(d.freelancer_name):'—')+'</td>'
+        + '<td style="'+C+'">R$ '+Number(d.value||0).toLocaleString('pt-BR')+'</td>'
+        + '<td style="'+C+'">R$ '+Number(d.commission_amount||0).toLocaleString('pt-BR')+'</td>'
+        + '<td style="'+C+'">R$ '+Number(d.service_fee_amount||0).toLocaleString('pt-BR')+'</td>'
+        + '<td style="'+C+'">'+(d.status?_escHtml(d.status):'—')+'</td>'
+        + '</tr>';
+    }).join('');
+  } else if (which === 'reviews') {
+    heads = ['Avaliador','Avaliado','Nota','Comentário','Data'];
+    rows = data.map(function(d){
+      return '<tr>'
+        + '<td style="'+C+'">'+(d.reviewer_name?_escHtml(d.reviewer_name):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.reviewed_name?_escHtml(d.reviewed_name):'—')+'</td>'
+        + '<td style="'+C+'">'+(d.rating||0)+' ★</td>'
+        + '<td style="'+C+'">'+(d.comment?_escHtml(d.comment):'—')+'</td>'
+        + '<td style="'+C+'">'+new Date(d.created_at).toLocaleDateString('pt-BR')+'</td>'
+        + '</tr>';
+    }).join('');
+  } else {
+    return '<div style="padding:16px;color:var(--text-3);">Tipo desconhecido: '+which+'</div>';
+  }
+  return '<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+    + '<thead><tr>'+heads.map(function(h){return '<th style="'+H+'">'+h+'</th>';}).join('')+'</tr></thead>'
+    + '<tbody>'+rows+'</tbody></table>';
 }
 
 /* ─── Toggle demo list table ─── */
