@@ -7873,12 +7873,12 @@ section { padding: 64px 0; }
       </div>
       <div class="admin-stat-card blue" style="cursor:pointer;" onclick="toggleAdminTopList('transactions')">
         <div class="admin-stat-icon">💰</div>
-        <div class="admin-stat-val" id="adm-stat-transactions">R$ 48,7M</div>
+        <div class="admin-stat-val" id="adm-stat-transactions">—</div>
         <div class="admin-stat-label">Transações este mês</div>
       </div>
       <div class="admin-stat-card purple" style="cursor:pointer;" onclick="toggleAdminTopList('reviews')">
         <div class="admin-stat-icon">⭐</div>
-        <div class="admin-stat-val" id="adm-stat-satisfaction">98,2%</div>
+        <div class="admin-stat-val" id="adm-stat-satisfaction">—</div>
         <div class="admin-stat-label">Satisfação dos usuários</div>
       </div>
     </div>
@@ -8064,31 +8064,27 @@ section { padding: 64px 0; }
     </div>
 
     <!-- Financeiro -->
-    <div class="admin-section-title"><span>💳</span> Resumo Financeiro — Maio 2025</div>
+    <div class="admin-section-title"><span>💳</span> Resumo Financeiro — <span id="adm-fin-month">—</span></div>
     <div class="admin-stats" style="margin-bottom:28px;">
       <div class="admin-stat-card">
         <div class="admin-stat-icon">💵</div>
-        <div class="admin-stat-val">R$ 48,7M</div>
+        <div class="admin-stat-val" id="adm-fin-volume">—</div>
         <div class="admin-stat-label">Volume total transacionado</div>
-        <span class="admin-stat-delta delta-up">+12,3% ↑</span>
       </div>
       <div class="admin-stat-card orange">
         <div class="admin-stat-icon">🏦</div>
-        <div class="admin-stat-val">R$ 2,4 M</div>
-        <div class="admin-stat-label">Receita líquida (taxas)</div>
-        <span class="admin-stat-delta delta-up">+8,7% ↑</span>
+        <div class="admin-stat-val" id="adm-fin-comissao">—</div>
+        <div class="admin-stat-label">Comissão prevista</div>
       </div>
       <div class="admin-stat-card blue">
         <div class="admin-stat-icon">⏳</div>
-        <div class="admin-stat-val">R$ 1,1M</div>
+        <div class="admin-stat-val" id="adm-fin-garantia">—</div>
         <div class="admin-stat-label">Em Garantia (aguardando)</div>
-        <span class="admin-stat-delta delta-up">+3,2% ↑</span>
       </div>
       <div class="admin-stat-card purple">
         <div class="admin-stat-icon">🔄</div>
-        <div class="admin-stat-val">R$ 84K</div>
-        <div class="admin-stat-label">Reembolsos processados</div>
-        <span class="admin-stat-delta delta-down">+0,5% ↑</span>
+        <div class="admin-stat-val" id="adm-fin-cancelados">—</div>
+        <div class="admin-stat-label">Contratos cancelados</div>
       </div>
     </div>
 
@@ -15381,6 +15377,7 @@ function showAdminPage() {
     setTimeout(function(){
       initAdminContracts();
       _loadAdminStats();
+      _loadAdminFinancial();
       _loadRecentLists();
       var fe=document.getElementById('adm-footer-updated'); if(fe) fe.textContent=new Date().toLocaleString('pt-BR');
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
@@ -20013,6 +20010,24 @@ async function _loadAdminStats() {
   } catch(e) {
     ['adm-stat-users','adm-stat-projects','adm-stat-transactions','adm-stat-satisfaction'].forEach(function(id){
       var el = document.getElementById(id); if (el) el.textContent = '—';
+    });
+  }
+}
+
+async function _loadAdminFinancial() {
+  var m = document.getElementById('adm-fin-month');
+  if (m) { var d=new Date(); m.textContent=d.toLocaleDateString('pt-BR',{month:'long',year:'numeric'}); }
+  try {
+    var r = await _sb.rpc('get_admin_financial');
+    if (r.error) throw r.error;
+    var s = r.data || {};
+    _setText('adm-fin-volume',     'R$ '+Number(s.volume_total||0).toLocaleString('pt-BR'));
+    _setText('adm-fin-comissao',   'R$ '+Number(s.comissao_prevista||0).toLocaleString('pt-BR'));
+    _setText('adm-fin-garantia',   'R$ '+Number(s.em_garantia||0).toLocaleString('pt-BR'));
+    _setText('adm-fin-cancelados', String(s.cancelados_count||0));
+  } catch(e) {
+    ['adm-fin-volume','adm-fin-comissao','adm-fin-garantia','adm-fin-cancelados'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent='—';
     });
   }
 }
