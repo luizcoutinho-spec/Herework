@@ -8094,7 +8094,8 @@ section { padding: 64px 0; }
 
     <!-- Denúncias e suporte -->
     <div class="admin-grid-2">
-      <div class="admin-panel">
+      <!-- TODO: feature de denúncias não implementada — esconder até existir tabela real -->
+      <div class="admin-panel" style="display:none">
         <div class="admin-section-title"><span>🚨</span> Denúncias Recentes</div>
         <table class="admin-table">
           <thead><tr><th>Usuário</th><th>Motivo</th><th>Prioridade</th><th>Ação</th></tr></thead>
@@ -8127,7 +8128,8 @@ section { padding: 64px 0; }
         </table>
       </div>
 
-      <div class="admin-panel">
+      <!-- TODO: feature de tickets não implementada — esconder até existir tabela real -->
+      <div class="admin-panel" style="display:none">
         <div class="admin-section-title"><span>🎧</span> Tickets de Suporte</div>
         <table class="admin-table">
           <thead><tr><th>Ticket</th><th>Assunto</th><th>Status</th><th>Há</th></tr></thead>
@@ -8144,7 +8146,7 @@ section { padding: 64px 0; }
 
     <!-- Rodapé admin -->
     <div style="text-align:center;margin-top:32px;color:var(--text-4);font-size:12px;">
-      🛡️ HereWork Admin v2.1 · Acesso restrito ao proprietário · Última sessão registrada em 28/05/2025 às 14:32
+      🛡️ HereWork Admin v2.1 · Acesso restrito ao proprietário · Última sessão registrada em <span id="adm-footer-updated">—</span>
     </div>
 
   </div>
@@ -15384,6 +15386,7 @@ function showAdminPage() {
       initAdminContracts();
       _loadAdminStats();
       _loadRecentLists();
+      var fe=document.getElementById('adm-footer-updated'); if(fe) fe.textContent=new Date().toLocaleString('pt-BR');
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
       if (typeof _adminLoadPlans   === 'function') _adminLoadPlans();
     }, 50);
