@@ -7942,6 +7942,12 @@ section { padding: 64px 0; }
       <button class="adm-ctab" id="adm-ctab-pending" onclick="switchAdmContractTab('pending')">
         &#9203; Pendente de Envio <span class="adm-ctab-count" id="adm-ctab-pending-count">0</span>
       </button>
+      <button class="adm-ctab" id="adm-ctab-completed" onclick="switchAdmContractTab('completed')">
+        &#9989; Conclu&iacute;do <span class="adm-ctab-count" id="adm-ctab-completed-count">0</span>
+      </button>
+      <button class="adm-ctab" id="adm-ctab-cancelled" onclick="switchAdmContractTab('cancelled')">
+        &#10007; Cancelado <span class="adm-ctab-count" id="adm-ctab-cancelled-count">0</span>
+      </button>
       <button class="adm-ctab" id="adm-ctab-active" onclick="switchAdmContractTab('all')">
         &#9889; Todos em Andamento <span class="adm-ctab-count" id="adm-ctab-active-count">0</span>
       </button>
@@ -19856,18 +19862,22 @@ async function initAdminContracts() {
     if (box) box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-3);">Não foi possível carregar os contratos.</div>';
     return;
   }
-  var counts = { aceite:0, approval:0, revision:0, pending:0 };
+  var counts = { aceite:0, approval:0, revision:0, pending:0, completed:0, cancelled:0 };
   _adminContracts.forEach(function(c) {
     if      (c.status === 'pending_acceptance') counts.aceite++;
     else if (c.status === 'review')             counts.approval++;
     else if (c.status === 'revision')           counts.revision++;
     else if (c.status === 'active')             counts.pending++;
+    else if (c.status === 'completed')          counts.completed++;
+    else if (c.status === 'cancelled')          counts.cancelled++;
   });
-  _setText('adm-ctab-aceite-count',    counts.aceite);
-  _setText('adm-ctab-approval-count',  counts.approval);
-  _setText('adm-ctab-revision-count',  counts.revision);
-  _setText('adm-ctab-pending-count',   counts.pending);
-  _setText('adm-ctab-active-count',    _adminContracts.length);
+  _setText('adm-ctab-aceite-count',     counts.aceite);
+  _setText('adm-ctab-approval-count',   counts.approval);
+  _setText('adm-ctab-revision-count',   counts.revision);
+  _setText('adm-ctab-pending-count',    counts.pending);
+  _setText('adm-ctab-completed-count',  counts.completed);
+  _setText('adm-ctab-cancelled-count',  counts.cancelled);
+  _setText('adm-ctab-active-count',     _adminContracts.length);
   renderAdminContracts(_admCurrentTab || 'aceite');
 }
 
@@ -19885,7 +19895,7 @@ function renderAdminContracts(tab) {
   var el = document.getElementById('adm-contracts-content');
   if(!el) return;
 
-  var statusMap = { aceite:'pending_acceptance', approval:'review', revision:'revision', pending:'active' };
+  var statusMap = { aceite:'pending_acceptance', approval:'review', revision:'revision', pending:'active', completed:'completed', cancelled:'cancelled' };
   var list = (tab === 'all')
     ? _adminContracts
     : _adminContracts.filter(function(c){ return c.status === statusMap[tab]; });
