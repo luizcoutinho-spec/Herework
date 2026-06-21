@@ -7865,33 +7865,21 @@ section { padding: 64px 0; }
         <div class="admin-stat-icon">🧑‍💻</div>
         <div class="admin-stat-val" id="adm-stat-users">—</div>
         <div class="admin-stat-label">Freelancers cadastrados</div>
-        <div style="font-size:11px;color:var(--text-4);margin-top:3px;">
-          <span id="adm-stat-fl-real" style="color:var(--green);font-weight:600;">0 reais</span>
-          &nbsp;·&nbsp;
-          <span id="adm-stat-fl-demo" style="color:var(--text-3);">0 demo</span>
-        </div>
       </div>
       <div class="admin-stat-card orange">
         <div class="admin-stat-icon">📋</div>
         <div class="admin-stat-val" id="adm-stat-projects">—</div>
         <div class="admin-stat-label">Projetos publicados</div>
-        <div style="font-size:11px;color:var(--text-4);margin-top:3px;">
-          <span id="adm-stat-proj-real" style="color:#f97316;font-weight:600;">0 reais</span>
-          &nbsp;·&nbsp;
-          <span id="adm-stat-proj-demo" style="color:var(--text-3);">0 demo</span>
-        </div>
       </div>
       <div class="admin-stat-card blue">
         <div class="admin-stat-icon">💰</div>
-        <div class="admin-stat-val">R$ 48,7M</div>
+        <div class="admin-stat-val" id="adm-stat-transactions">R$ 48,7M</div>
         <div class="admin-stat-label">Transações este mês</div>
-        <span class="admin-stat-delta delta-up">+12,3% ↑</span>
       </div>
       <div class="admin-stat-card purple">
         <div class="admin-stat-icon">⭐</div>
-        <div class="admin-stat-val">98,2%</div>
+        <div class="admin-stat-val" id="adm-stat-satisfaction">98,2%</div>
         <div class="admin-stat-label">Satisfação dos usuários</div>
-        <span class="admin-stat-delta delta-down">-0,1% ↓</span>
       </div>
     </div>
 
@@ -15408,6 +15396,7 @@ function showAdminPage() {
     showPage('admin');
     setTimeout(function(){
       initAdminContracts();
+      _loadAdminStats();
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
       if (typeof _adminLoadPlans   === 'function') _adminLoadPlans();
     }, 50);
@@ -16851,16 +16840,8 @@ function _buildDemo() {
   var flDemo   = flGrid   ? flGrid.querySelectorAll('.fl-list-card.demo-card').length   : 0;
   var projDemo = projGrid ? projGrid.querySelectorAll('.proj-list-card.demo-card').length : 0;
 
-  // Atualizar cards principais
-  var el;
-  el = document.getElementById('adm-stat-users');    if (el) el.textContent = totalFL.toLocaleString('pt-BR');
-  el = document.getElementById('adm-stat-projects'); if (el) el.textContent = totalProj.toLocaleString('pt-BR');
-  el = document.getElementById('adm-stat-fl-real');  if (el) el.textContent = flReal + ' reais';
-  el = document.getElementById('adm-stat-fl-demo');  if (el) el.textContent = flDemo + ' demo';
-  el = document.getElementById('adm-stat-proj-real'); if (el) el.textContent = projReal + ' reais';
-  el = document.getElementById('adm-stat-proj-demo'); if (el) el.textContent = projDemo + ' demo';
-
   // Atualizar painel demo
+  var el;
   el = document.getElementById('adm-demo-fl-total');   if (el) el.textContent = flDemo.toLocaleString('pt-BR');
   el = document.getElementById('adm-demo-proj-total'); if (el) el.textContent = projDemo.toLocaleString('pt-BR');
   el = document.getElementById('adm-real-fl-total');   if (el) el.textContent = flReal.toLocaleString('pt-BR');
@@ -19879,6 +19860,22 @@ async function initAdminContracts() {
   _setText('adm-ctab-cancelled-count',  counts.cancelled);
   _setText('adm-ctab-active-count',     _adminContracts.length);
   renderAdminContracts(_admCurrentTab || 'aceite');
+}
+
+async function _loadAdminStats() {
+  try {
+    var res = await _sb.rpc('get_admin_stats');
+    if (res.error) throw res.error;
+    var s = res.data || {};
+    _setText('adm-stat-users',        Number(s.freelancers||0).toLocaleString('pt-BR'));
+    _setText('adm-stat-projects',     Number(s.projetos||0).toLocaleString('pt-BR'));
+    _setText('adm-stat-transactions', 'R$ ' + Number(s.transacoes||0).toLocaleString('pt-BR'));
+    _setText('adm-stat-satisfaction', (s.satisfacao != null ? String(s.satisfacao).replace('.',',') + ' ★' : '—'));
+  } catch(e) {
+    ['adm-stat-users','adm-stat-projects','adm-stat-transactions','adm-stat-satisfaction'].forEach(function(id){
+      var el = document.getElementById(id); if (el) el.textContent = '—';
+    });
+  }
 }
 
 function switchAdmContractTab(tab) {
