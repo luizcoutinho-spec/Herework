@@ -7887,15 +7887,18 @@ section { padding: 64px 0; }
     <div class="admin-section-title" style="margin-top:4px;"><span>🧪</span> Perfis Demo — Recurso de Lançamento</div>
     <div class="admin-panel" style="margin-bottom:24px;">
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:16px;" id="adm-demo-grid">
-        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;" onclick="toggleDemoList('fl')">
           <div style="font-size:22px;font-weight:800;color:var(--text);" id="adm-demo-fl-total">—</div>
           <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Freelancers demo</div>
+          <div style="font-size:11px;color:var(--text-4);margin-top:4px;">▼ ver lista</div>
         </div>
-        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);">
+        <div style="text-align:center;padding:14px;background:var(--bg);border-radius:var(--radius);border:1px solid var(--border);cursor:pointer;" onclick="toggleDemoList('proj')">
           <div style="font-size:22px;font-weight:800;color:var(--text);" id="adm-demo-proj-total">—</div>
           <div style="font-size:12px;color:var(--text-3);margin-top:3px;">Projetos demo</div>
+          <div style="font-size:11px;color:var(--text-4);margin-top:4px;">▼ ver lista</div>
         </div>
       </div>
+      <div id="adm-demo-list-container" style="display:none;margin-top:16px;"></div>
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
         <div style="font-size:13px;color:var(--text-3);">
           ℹ️ Perfis demo são identificados pela classe <code style="background:var(--bg);padding:1px 6px;border-radius:4px;font-size:12px;">.demo-card</code>.
@@ -16251,6 +16254,7 @@ function _flCard(cat, idx) {
   var ver  = _rnd(4) > 0 ? 'true' : 'false';
   var since= _between(2018, 2024);
 
+  _demoFLData.push({ name:name, role:role, city:city, rate:rate, rating:rat, recs:recs, proj:proj, since:since, verified:ver, top:top, skills:sk });
   return '<div class="fl-list-card demo-card" data-cat="' + cat + '" data-rate="' + rate +
     '" data-rating="' + rat.toFixed(1) + '" data-verified="' + ver + '" data-top="' + top +
     '" data-recs="' + recs + '" style="display:none">' +
@@ -16328,6 +16332,7 @@ function _projCard(cat, idx) {
   var budStr= 'R$ ' + bMin.toLocaleString('pt-BR') + ' – ' + bMax.toLocaleString('pt-BR');
   var dlStr = type === 'recorrente' ? 'Por mês' : 'Prazo: ' + dl + ' dias';
 
+  _demoProjData.push({ title:title, cat:catLbl, type:type, budMin:bMin, budMax:bMax, deadline:dl, props:props, views:views, skills:sk });
   return '<div class="proj-list-card demo-card" data-cat="' + cat + '" data-budget="' + bMax +
     '" data-type="' + type + '" data-deadline="' + dl + '" style="display:none">' +
     '<div class="proj-list-header">' +
@@ -16799,6 +16804,7 @@ window._rejectProposalInline = _rejectProposalInline;
 
 /* ── Inserir no DOM ── */
 function _buildDemo() {
+  window._demoFLData = []; window._demoProjData = [];
   var flGrid   = document.getElementById('fl-list-grid');
   var projGrid = document.getElementById('proj-list-grid');
   if (!flGrid && !projGrid) return;
@@ -17372,6 +17378,52 @@ function pdfRemove(e) {
 }
 function _pdfReset() {
   pdfRemove({ stopPropagation: function(){} });
+}
+
+/* ─── Toggle demo list table ─── */
+function toggleDemoList(which) {
+  var box = document.getElementById('adm-demo-list-container');
+  if (!box) return;
+  if (box.dataset.open === which) { box.style.display='none'; box.dataset.open=''; return; }
+  var data = (which==='fl') ? (window._demoFLData||[]) : (window._demoProjData||[]);
+  if (!data.length) { box.innerHTML = '<div style="padding:16px;color:var(--text-3);">Nenhum demo gerado. (Os demos são criados ao abrir o painel admin.)</div>'; box.style.display='block'; box.dataset.open=which; return; }
+  var html;
+  if (which==='fl') {
+    html = '<table class="adm-demo-table" style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<thead><tr>' + ['Nome','Cargo','Cidade','R$/h','Rating','Recs','Projetos','Desde','Badges','Skills'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
+      + data.map(function(d){
+          var badges = (d.verified==='true'?'✓ ':'')+(d.top==='true'?'⭐':'');
+          return '<tr>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.name+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.role+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.city+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">R$ '+d.rate+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.rating+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.recs+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.proj+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.since+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+badges+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.skills||[]).join(', ')+'</td>'
+            + '</tr>';
+        }).join('') + '</tbody></table>';
+  } else {
+    html = '<table class="adm-demo-table" style="width:100%;border-collapse:collapse;font-size:13px;">'
+      + '<thead><tr>' + ['Título','Categoria','Tipo','Orçamento','Prazo','Propostas','Views','Skills'].map(function(h){return '<th style="text-align:left;padding:6px 8px;border-bottom:2px solid var(--border);">'+h+'</th>';}).join('') + '</tr></thead><tbody>'
+      + data.map(function(d){
+          return '<tr>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.title+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.cat+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.type+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">R$ '+d.budMin+'–'+d.budMax+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.deadline?d.deadline+' dias':'—')+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.props+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+d.views+'</td>'
+            + '<td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(d.skills||[]).join(', ')+'</td>'
+            + '</tr>';
+        }).join('') + '</tbody></table>';
+  }
+  box.innerHTML = '<div style="max-height:400px;overflow:auto;">'+html+'</div>';
+  box.style.display='block'; box.dataset.open=which;
 }
 
 /* ─── Remove demo cards ─── */
