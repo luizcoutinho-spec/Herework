@@ -8311,29 +8311,25 @@ section { padding: 64px 0; }
     <div class="admin-section-title"><span>&#128202;</span> Status de Seguran&ccedil;a do Sistema</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:32px;">
       <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
+        <span id="adm-secstat-csp" style="font-size:22px;">—</span>
         <div><div style="font-weight:700;color:#166534;font-size:13px;">CSP Ativo</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Content Security Policy configurada para todos os recursos</div></div>
       </div>
       <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
+        <span id="adm-secstat-ratelimit" style="font-size:22px;">—</span>
         <div><div style="font-weight:700;color:#166534;font-size:13px;">Rate Limiting</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Bloqueio ap&oacute;s 3 tentativas falhas (5 min de lockout)</div></div>
       </div>
       <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
+        <span id="adm-secstat-session" style="font-size:22px;">—</span>
         <div><div style="font-weight:700;color:#166534;font-size:13px;">Session Timeout</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Auto-logout ap&oacute;s 30 min de inatividade (aviso em 25 min)</div></div>
       </div>
       <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
+        <span id="adm-secstat-xss" style="font-size:22px;">—</span>
         <div><div style="font-weight:700;color:#166534;font-size:13px;">Anti-XSS</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">Sanitiza&ccedil;&atilde;o HTML em todos os inputs exibidos</div></div>
       </div>
-      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
-        <div><div style="font-weight:700;color:#166534;font-size:13px;">Anti-Clickjacking</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">X-Frame-Options DENY &mdash; impede embedding em iframes</div></div>
-      </div>
-      <div style="background:var(--surface);border:1.5px solid #bbf7d0;border-radius:var(--radius-lg);padding:14px 16px;display:flex;gap:10px;align-items:flex-start;">
-        <span style="font-size:22px;">&#9989;</span>
-        <div><div style="font-weight:700;color:#166534;font-size:13px;">LGPD Compliant</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">IPs mascarados &mdash; dados sens&iacute;veis apenas em mem&oacute;ria de sess&atilde;o</div></div>
-      </div>
+      <!-- TODO: sem teste funcional — esconder até existir verificação real -->
+      <div style="display:none"><span style="font-size:22px;">&#9989;</span><div><div style="font-weight:700;color:#166534;font-size:13px;">Anti-Clickjacking</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">X-Frame-Options DENY &mdash; impede embedding em iframes</div></div></div>
+      <!-- TODO: sem teste funcional — esconder até existir verificação real -->
+      <div style="display:none"><span style="font-size:22px;">&#9989;</span><div><div style="font-weight:700;color:#166534;font-size:13px;">LGPD Compliant</div><div style="font-size:11px;color:var(--text-3);margin-top:2px;">IPs mascarados &mdash; dados sens&iacute;veis apenas em mem&oacute;ria de sess&atilde;o</div></div></div>
     </div>
 
     <!-- ─────────────────────────────────────────────────────────
@@ -20729,6 +20725,14 @@ var _secTestResults={},_secTestRunning=false;
 function _secTerminal(msg,type){var log=document.getElementById('sec-live-log');if(!log)return;var ts=new Date().toLocaleTimeString('pt-BR');var line=document.createElement('div');line.className='sec-log-line '+(type||'info');line.textContent='['+ts+'] '+msg;log.appendChild(line);log.scrollTop=log.scrollHeight;}
 function secLiveLog(action){var log=document.getElementById('sec-live-log');if(!log)return;if(action==='clear'){log.innerHTML='<div class="sec-log-line info">Log limpo.</div>';}else if(action==='export'){var lines=Array.from(log.querySelectorAll('.sec-log-line')).map(function(l){return l.textContent;}).join('\n');var blob=new Blob([lines],{type:'text/plain'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='herework-security-log.txt';a.click();showToast('Log exportado!','success');}}
 function _secSetCard(id,status,txt){var card=document.getElementById('sec-card-'+id);var badge=document.getElementById('sec-badge-'+id);var result=document.getElementById('sec-result-'+id);var labels={running:'TESTANDO...',pass:'PASSOU',fail:'FALHOU',warn:'ATENCAO'};if(card)card.className='sec-test-card '+status;if(badge){badge.className='sec-test-badge '+status;badge.textContent=labels[status]||status;}if(result)result.textContent=txt;_secTestResults[id]=status;}
+function _syncSecStatCard(key,status){
+  var map={csp:'adm-secstat-csp',xss:'adm-secstat-xss',ratelimit:'adm-secstat-ratelimit',session:'adm-secstat-session'};
+  var el=document.getElementById(map[key]); if(!el) return;
+  if(status==='pass'){el.textContent='✅';el.style.color='var(--green)';}
+  else if(status==='warn'){el.textContent='⚠️';el.style.color='#f59e0b';}
+  else{el.textContent='❌';el.style.color='#ef4444';}
+}
+
 async function runFullAudit(){
   if(_secTestRunning)return;
   _secTestRunning=true;
@@ -20745,8 +20749,8 @@ async function runFullAudit(){
     var h=['Content-Security-Policy','X-Frame-Options','Referrer-Policy','Permissions-Policy','X-Content-Type-Options'];
     var f=h.filter(function(x){return!!document.querySelector('meta[http-equiv="'+x+'"]');});
     f.forEach(function(x){_secTerminal('  OK: '+x,'ok');});
-    if(f.length===h.length){_secSetCard('csp','pass',f.length+'/5 headers OK');_secTerminal('CSP: PASSOU','ok');}
-    else{_secSetCard('csp','fail','Faltando '+(h.length-f.length));_secTerminal('CSP: FALHOU','fail');}
+    if(f.length===h.length){_secSetCard('csp','pass',f.length+'/5 headers OK');_secTerminal('CSP: PASSOU','ok');_syncSecStatCard('csp','pass');}
+    else{_secSetCard('csp','fail','Faltando '+(h.length-f.length));_secTerminal('CSP: FALHOU','fail');_syncSecStatCard('csp','fail');}
   })();
   /* XSS */
   await(async function(){
@@ -20762,8 +20766,8 @@ async function runFullAudit(){
       if(b)ok++;_secTerminal('  '+(b?'OK':'FAIL')+': '+p[i][0],b?'ok':'fail');
     }
     window._xT=false;
-    if(ok===p.length){_secSetCard('xss','pass',ok+'/'+p.length+' bloqueados');_secTerminal('XSS: PASSOU','ok');}
-    else{_secSetCard('xss','fail',ok+'/'+p.length+' bloqueados');_secTerminal('XSS: FALHOU','fail');}
+    if(ok===p.length){_secSetCard('xss','pass',ok+'/'+p.length+' bloqueados');_secTerminal('XSS: PASSOU','ok');_syncSecStatCard('xss','pass');}
+    else{_secSetCard('xss','fail',ok+'/'+p.length+' bloqueados');_secTerminal('XSS: FALHOU','fail');_syncSecStatCard('xss','fail');}
   })();
   /* Rate Limiting */
   await(async function(){
@@ -20773,8 +20777,8 @@ async function runFullAudit(){
     for(var i=1;i<=4;i++){_adminTries++;if(_adminTries>3)_adminLockout=Date.now()+300000;_secTerminal('  Tent.'+i+': '+(_adminLockout>Date.now()?'BLOQUEADA':'rejeitada'),_adminLockout>Date.now()?'ok':'warn');}
     var locked=_adminLockout>Date.now();
     _adminTries=orig;_adminLockout=origL;
-    if(locked){_secSetCard('ratelimit','pass','Lockout 300s OK');_secTerminal('Rate Limit: PASSOU','ok');}
-    else{_secSetCard('ratelimit','fail','Sem lockout');_secTerminal('Rate Limit: FALHOU','fail');}
+    if(locked){_secSetCard('ratelimit','pass','Lockout 300s OK');_secTerminal('Rate Limit: PASSOU','ok');_syncSecStatCard('ratelimit','pass');}
+    else{_secSetCard('ratelimit','fail','Sem lockout');_secTerminal('Rate Limit: FALHOU','fail');_syncSecStatCard('ratelimit','fail');}
   })();
   /* Session */
   await(async function(){
@@ -20783,8 +20787,8 @@ async function runFullAudit(){
     var ok=typeof _startSessionTimeout==='function'&&_SESSION_TIMEOUT===1800000&&_SESSION_WARN===1500000;
     _secTerminal('  Timeout: '+(_SESSION_TIMEOUT/60000)+'min',_SESSION_TIMEOUT===1800000?'ok':'warn');
     _secTerminal('  Aviso: '+(_SESSION_WARN/60000)+'min',_SESSION_WARN===1500000?'ok':'warn');
-    if(ok){_secSetCard('session','pass','30min/25min OK');_secTerminal('Session: PASSOU','ok');}
-    else{_secSetCard('session','warn','Verificar valores');_secTerminal('Session: ATENCAO','warn');}
+    if(ok){_secSetCard('session','pass','30min/25min OK');_secTerminal('Session: PASSOU','ok');_syncSecStatCard('session','pass');}
+    else{_secSetCard('session','warn','Verificar valores');_secTerminal('Session: ATENCAO','warn');_syncSecStatCard('session','warn');}
   })();
   /* Inputs */
   await(async function(){
