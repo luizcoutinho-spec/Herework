@@ -7970,6 +7970,8 @@ section { padding: 64px 0; }
       <div style="padding:16px;color:var(--text-3);">Carregando planos…</div>
     </div>
 
+    <!-- TODO: Configurações da Plataforma ocultada — toggles eram UI-only sem persistencia; reimplementar com backend real se necessario -->
+    <div style="display:none">
     <!-- Controles da plataforma -->
     <div class="admin-section-title"><span>⚙️</span> Configurações da Plataforma</div>
     <div class="admin-controls-grid" style="margin-bottom:28px;">
@@ -8015,6 +8017,7 @@ section { padding: 64px 0; }
         </div>
         <label class="admin-toggle" aria-label="toggle"><input type="checkbox" onchange="adminToggle('maintenance',this)"><span class="admin-toggle-slider"></span></label>
       </div>
+    </div>
     </div>
 
     <!-- Tabelas: Usuários e Projetos -->
