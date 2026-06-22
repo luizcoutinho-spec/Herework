@@ -15741,6 +15741,7 @@ async function _adminSavePlan(planKey) {
 function adminAction(type) {
   if (type === 'export')   { _openExportMenu(); return; }
   if (type === 'announce') { _openAnnounceModal(); return; }
+  if (type === 'email')    { _openBulkEmailModal(); return; }
   var msgs = {
     'backup':       ['💾 Backup','Backup agendado para próxima manutenção programada.'],
     'email':        ['📧 E-mail em Massa','Campanha de e-mail configurada.'],
@@ -15753,7 +15754,7 @@ function adminAction(type) {
   var data = msgs[type] || ['⚙️ Ação','Executando: ' + type];
   showToast(data[0] + ' — ' + data[1], 'success');
   /* Ações que abrem mailto */
-  if(type === 'report' || type === 'email') {
+  if(type === 'report') {
     var subj = encodeURIComponent('[HereWork Admin] Solicitação: ' + data[0]);
     var body = encodeURIComponent('Ação solicitada: ' + type + '\nData: ' + new Date().toLocaleString('pt-BR'));
     setTimeout(function(){ window.open('mailto:suporte@herework.com.br?subject='+subj+'&body='+body,'_blank'); }, 500);
@@ -20200,6 +20201,36 @@ async function _createAnnouncement(){
   } catch(e){
     if (typeof showToast==='function') showToast('Erro: '+((e && e.message)||'tente novamente'));
   }
+}
+
+function _openBulkEmailModal(){
+  var existing=document.getElementById('bulk-email-modal'); if(existing) existing.remove();
+  var modal=document.createElement('div');
+  modal.id='bulk-email-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML='<div style="background:var(--surface);border-radius:12px;padding:28px;max-width:520px;width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.4);">'
+    +'<h3 style="margin:0 0 4px;font-size:18px;">📧 Enviar E-mail em Massa</h3>'
+    +'<p style="margin:0 0 16px;font-size:12px;color:var(--text-3);">Envio real disponível na próxima fase. Aqui você prepara o conteúdo e vê o alcance.</p>'
+    +'<input id="bulk-email-title" class="form-input" placeholder="Assunto do e-mail" style="margin-bottom:10px;">'
+    +'<textarea id="bulk-email-msg" class="form-input" placeholder="Mensagem..." rows="6" style="margin-bottom:14px;resize:vertical;"></textarea>'
+    +'<div id="bulk-email-preview" style="font-size:13px;color:var(--text-2);margin-bottom:14px;">—</div>'
+    +'<div style="display:flex;gap:10px;">'
+    +'<button class="btn btn-green" onclick="_previewBulkEmail()">Pré-visualizar alcance</button>'
+    +'<button class="btn" onclick="document.getElementById(\'bulk-email-modal\').remove()">Fechar</button>'
+    +'</div></div>';
+  document.body.appendChild(modal);
+}
+
+async function _previewBulkEmail(){
+  var t=(document.getElementById('bulk-email-title')||{}).value||'';
+  var m=(document.getElementById('bulk-email-msg')||{}).value||'';
+  var prev=document.getElementById('bulk-email-preview'); if(!prev) return;
+  if(!t.trim()||!m.trim()){ prev.innerHTML='<span style="color:var(--danger,#e11);">Preencha assunto e mensagem.</span>'; return; }
+  try {
+    var r=await _sb.rpc('get_optin_count'); if(r.error) throw r.error;
+    var d=r.data||{};
+    prev.innerHTML='✉️ Enviaria para <strong>'+Number(d.opt_in||0)+'</strong> usuário(s) com opt-in (de '+Number(d.total||0)+' no total). <br><span style="font-size:11px;color:var(--text-3);">Envio real na próxima fase (Cco + confirmação).</span>';
+  } catch(e){ prev.innerHTML='<span style="color:var(--text-3);">Não foi possível obter a contagem.</span>'; }
 }
 
 async function _checkAnnouncement(){
