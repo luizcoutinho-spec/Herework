@@ -19795,49 +19795,8 @@ function chatSendMessage() {
 
   /* Hide emoji picker */
   var ep = document.getElementById('chat-emoji-picker'); if(ep) ep.classList.remove('show');
-
-  /* Show typing indicator after a moment */
-  var delay = 1200 + Math.random() * 2000;
-  setTimeout(function(){
-    var typing = document.getElementById('chat-typing');
-    if(typing && document.getElementById('overlay-chat').classList.contains('open')) {
-      typing.classList.add('show');
-      /* Auto-reply after 1.5-3s */
-      setTimeout(function(){
-        if(typing) typing.classList.remove('show');
-        var reply = _chatAutoReply(text);
-        var t2 = new Date();
-        var time2 = t2.getHours().toString().padStart(2,'0') + ':' + t2.getMinutes().toString().padStart(2,'0');
-        _chatHistory[projId].push({ from:'client', text:reply, time:time2, read:true });
-        _chatRender(projId);
-      }, 1500 + Math.random()*1500);
-    }
-  }, delay);
 }
 
-/* Smart auto-replies */
-var _chatReplies = [
-  'Entendido! Vou verificar isso agora.',
-  'Ótimo ponto. Deixa eu analisar e te retorno em breve. 👍',
-  'Claro, pode deixar! Vou resolver isso.',
-  'Perfeito, anotado. Continuo trabalhando nisso.',
-  'Boa observação! Vou ajustar conforme solicitado.',
-  'Sim, já estou trabalhando nisso. Prazo mantido! ✅',
-  'Recebi! Obrigado pelo feedback. Terei novidades em breve.',
-  'Com certeza! Vou incluir isso na entrega.',
-  'Ok, vou fazer os ajustes necessários. 🛠️',
-  'Combinado! Qualquer dúvida é só chamar aqui.'
-];
-function _chatAutoReply(msg) {
-  var lc = msg.toLowerCase();
-  if(/prazo|quando|data|entrega/.test(lc)) return 'Dentro do prazo! Sem problemas por aqui. 📅';
-  if(/arquivo|pdf|documento/.test(lc))    return 'Vou enviar o arquivo em breve. Aguarde um momento. 📎';
-  if(/ok|certo|entendi|ótimo|perfeito/.test(lc)) return 'Ótimo! Qualquer novidade te aviso por aqui. 👌';
-  if(/problema|erro|bug/.test(lc))        return 'Entendido. Vou investigar e corrijo o mais rápido possível. 🔧';
-  if(/obrigad/.test(lc))                  return 'Por nada! Estou aqui para ajudar. 😊';
-  if(/oi|olá|bom dia|boa tarde/.test(lc)) return 'Olá! Tudo bem? Em que posso ajudar? 👋';
-  return _chatReplies[Math.floor(Math.random() * _chatReplies.length)];
-}
 
 function chatKeyDown(e) {
   if(e.key === 'Enter' && !e.shiftKey) {
