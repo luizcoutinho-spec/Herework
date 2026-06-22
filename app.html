@@ -2872,8 +2872,9 @@ section { padding: 64px 0; }
 .delivery-check-item:hover { border-color: var(--green); background: #f0fdf4; }
 .delivery-check-item.checked { border-color: var(--green); background: #f0fdf4; }
 .delivery-check-item input[type=checkbox] {
-  width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; flex-shrink: 0;
+  width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; outline: none;
 }
+.delivery-check-item input[type=checkbox]:focus-visible { box-shadow: 0 0 0 2px var(--green); }
 .delivery-check-label { font-size: 13px; font-weight: 500; color: var(--text-2); flex: 1; }
 .delivery-check-item.checked .delivery-check-label { color: var(--green); text-decoration: none; }
 
@@ -19382,10 +19383,10 @@ function openDeliveryModal(proj) {
   var cl = document.getElementById('delivery-checklist');
   if(cl) {
     cl.innerHTML = items.map(function(item, i) {
-      return '<label for="dcheck-'+i+'" class="delivery-check-item" id="dci-'+i+'" onclick="toggleDeliveryCheck('+i+',this)">' +
-        '<input type="checkbox" id="dcheck-'+i+'" onclick="event.stopPropagation();" onchange="toggleDeliveryCheck('+i+',this.closest(\'label\'))">' +
+      return '<label for="dcheck-'+i+'" class="delivery-check-item" id="dci-'+i+'">' +
+        '<input type="checkbox" id="dcheck-'+i+'" onchange="toggleDeliveryCheck('+i+',this.closest(\'label\'))">' +
         '<span class="delivery-check-label">'+item+'</span>' +
-        '<span style="font-size:14px;color:var(--green);display:none;" id="dcheck-icon-'+i+'">&#10003;</span>' +
+        '<span style="font-size:14px;color:var(--green);visibility:hidden;" id="dcheck-icon-'+i+'">&#10003;</span>' +
       '</label>';
     }).join('');
   }
@@ -19411,9 +19412,8 @@ function toggleDeliveryCheck(i, lbl) {
   var cb   = document.getElementById('dcheck-'+i);
   var icon = document.getElementById('dcheck-icon-'+i);
   if(!cb) return;
-  cb.checked = !cb.checked;
   if(lbl) lbl.classList.toggle('checked', cb.checked);
-  if(icon) icon.style.display = cb.checked ? '' : 'none';
+  if(icon) icon.style.visibility = cb.checked ? 'visible' : 'hidden';
 }
 
 function _updateMsgCount() {
