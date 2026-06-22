@@ -8121,11 +8121,12 @@ section { padding: 64px 0; }
           <thead><tr>
             <th>Fonte</th><th style="text-align:right;">Qtd (mês)</th><th style="text-align:right;">Valor (mês)</th>
             <th style="text-align:right;">Qtd (ano)</th><th style="text-align:right;">Valor (ano)</th>
+            <th>Detalhe</th>
           </tr></thead>
-          <tbody id="adm-sales-body"><tr><td colspan="5" style="color:var(--text-3);padding:12px;">Carregando…</td></tr></tbody>
+          <tbody id="adm-sales-body"><tr><td colspan="6" style="color:var(--text-3);padding:12px;">Carregando…</td></tr></tbody>
           <tfoot><tr style="font-weight:700;border-top:2px solid var(--border);">
             <td>TOTAL REALIZADO</td><td></td><td style="text-align:right;" id="adm-sales-total-mes">—</td>
-            <td></td><td style="text-align:right;" id="adm-sales-total-ano">—</td>
+            <td></td><td style="text-align:right;" id="adm-sales-total-ano">—</td><td></td>
           </tr></tfoot>
         </table>
       </div>
@@ -20128,11 +20129,15 @@ async function _loadSalesBySource(){
     var CR='padding:8px;border-bottom:1px solid var(--border);font-size:13px;text-align:right;';
     var p=s.planos||{}, a=s.avulsos||{}, c=s.comissao||{}, f=s.fee||{};
     var tag8=' <span style="font-size:10px;color:var(--text-3);">(a partir da Etapa 8)</span>';
+    var pd = (p.detalhe||[]);
+    var planoDetalhe = pd.length
+      ? pd.map(function(x){ return Number(x.qtd||0)+'×'+_escHtml(x.label)+' (R$ '+Number(x.preco_unit||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+')'; }).join(' + ')
+      : '—';
     var rows = [
-      ['a) Contratação de plano (MRR recorrente)', p.mrr_qtd, p.mrr_valor, p.mrr_qtd, p.mrr_valor, false],
-      ['b) Compras individuais (avulsos)', a.qtd_mes, a.valor_mes, a.qtd_ano, a.valor_ano, false],
-      ['c) Comissão freelance', c.qtd_mes, c.valor_mes, c.qtd_ano, c.valor_ano, true],
-      ['d) Fee projeto', f.qtd_mes, f.valor_mes, f.qtd_ano, f.valor_ano, true]
+      ['a) Contratação de plano (MRR recorrente)', p.mrr_qtd, p.mrr_valor, p.mrr_qtd, p.mrr_valor, false, planoDetalhe],
+      ['b) Compras individuais (avulsos)', a.qtd_mes, a.valor_mes, a.qtd_ano, a.valor_ano, false, '—'],
+      ['c) Comissão freelance', c.qtd_mes, c.valor_mes, c.qtd_ano, c.valor_ano, true, '—'],
+      ['d) Fee projeto', f.qtd_mes, f.valor_mes, f.qtd_ano, f.valor_ano, true, '—']
     ];
     body.innerHTML = rows.map(function(row){
       return '<tr>'
@@ -20141,6 +20146,7 @@ async function _loadSalesBySource(){
         + '<td style="'+CR+'">'+rs(row[2])+'</td>'
         + '<td style="'+CR+'">'+Number(row[3]||0)+'</td>'
         + '<td style="'+CR+'">'+rs(row[4])+'</td>'
+        + '<td style="'+C+'font-size:11px;color:var(--text-2);">'+(row[6]||'—')+'</td>'
         + '</tr>';
     }).join('');
     var totMes = Number(p.mrr_valor||0)+Number(a.valor_mes||0)+Number(c.valor_mes||0)+Number(f.valor_mes||0);
@@ -20148,7 +20154,7 @@ async function _loadSalesBySource(){
     _setText('adm-sales-total-mes', rs(totMes));
     _setText('adm-sales-total-ano', rs(totAno));
   } catch(e){
-    body.innerHTML='<tr><td colspan="5" style="color:var(--text-3);padding:12px;">Não foi possível carregar.</td></tr>';
+    body.innerHTML='<tr><td colspan="6" style="color:var(--text-3);padding:12px;">Não foi possível carregar.</td></tr>';
   }
 }
 
