@@ -10073,7 +10073,7 @@ section { padding: 64px 0; }
         <div class="fl-rate-label">Valor por hora &nbsp;&#183;&nbsp; <span id="flp-location">Brasil</span></div>
       </div>
       <div style="margin-left:auto;display:flex;gap:10px;">
-        <button class="btn btn-outline" onclick="openChatModal({projectId:'direct',projectTitle:'Chat direto',withName:document.getElementById('flp-name').textContent,myRole:'client'});closeModal('fl-profile')">&#128172; Mensagem</button>
+        <button class="btn btn-outline" id="flp-msg-btn">&#128172; Mensagem</button>
         <button class="btn btn-primary btn-lg" id="flp-hire-btn">&#128274; Contratar</button>
       </div>
     </div>
@@ -23137,6 +23137,9 @@ function openFreelancerProfile(profileId) {
   var hb=document.getElementById('flp-hire-btn');
   if(hb) hb.onclick=function(){ closeModal('fl-profile'); openContractModal({name:p.name,role:p.title,value:p.rate*40,project:'Meu Projeto',deadline:'30 dias'}); };
 
+  var mb=document.getElementById('flp-msg-btn');
+  if(mb) mb.onclick=function(){ showToast('Contrate este freelancer para usar o chat.','info'); };
+
   openModal('fl-profile');
 }
 
@@ -23354,6 +23357,25 @@ function _openRealUserProfile(prof) {
     } else {
       hb.style.display = 'none';
     }
+  }
+
+  /* Botão Mensagem: abre chat do contrato ativo se houver, senão orienta */
+  var mb = document.getElementById('flp-msg-btn');
+  if (mb) {
+    mb.onclick = function() {
+      var flUid = prof.id;
+      var entry = null;
+      Object.keys(_dashProj).forEach(function(k) {
+        var e = _dashProj[k];
+        if (!entry && e.myRole === 'client' && e.freelancerId === flUid) entry = e;
+      });
+      if (entry) {
+        closeModal('fl-profile');
+        openChatModal({ contractId: entry.contractId, projectTitle: entry.title, withName: name, myRole: 'client' });
+      } else {
+        showToast('Para conversar, contrate este freelancer primeiro.', 'info');
+      }
+    };
   }
 
   openModal('fl-profile');
@@ -26273,6 +26295,12 @@ var _activeChatChannel    = null;
 
     _activeChatContractId = cid;
 
+    /* Bloqueia modo demo quando Supabase está pronto mas sem contrato real */
+    if (!cid && _sbReady()) {
+      showToast('Chat disponível somente em contratos ativos.', 'info');
+      return;
+    }
+
     /* Fecha canal anterior se existia */
     if (_activeChatChannel) {
       try { _sb.removeChannel(_activeChatChannel); } catch(x) {}
@@ -26319,6 +26347,12 @@ async function _loadSbChatHistory(contractId, projId) {
     /* Antes de chamar o original, captura texto */
     var inp = document.getElementById('chat-input');
     var text = inp ? inp.value.trim() : '';
+
+    /* Bloqueia envio sem contrato ativo — evita perda silenciosa de mensagens */
+    if (text && !_activeChatContractId && _sbReady()) {
+      showToast('Chat disponível somente em contratos ativos.', 'warn');
+      return;
+    }
 
     /* Chama o original (renderiza localmente e limpa input) */
     if (_origSend) _origSend.apply(this, arguments);
