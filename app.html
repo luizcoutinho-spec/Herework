@@ -20210,12 +20210,14 @@ function _openBulkEmailModal(){
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;display:flex;align-items:center;justify-content:center;';
   modal.innerHTML='<div style="background:var(--surface);border-radius:12px;padding:28px;max-width:520px;width:92vw;box-shadow:0 20px 60px rgba(0,0,0,.4);">'
     +'<h3 style="margin:0 0 4px;font-size:18px;">📧 Enviar E-mail em Massa</h3>'
-    +'<p style="margin:0 0 16px;font-size:12px;color:var(--text-3);">Envio real disponível na próxima fase. Aqui você prepara o conteúdo e vê o alcance.</p>'
+    +'<p style="margin:0 0 16px;font-size:12px;color:var(--text-3);">Prepare o conteúdo, pré-visualize o alcance e envie para a base de opt-in ou apenas para você (teste).</p>'
     +'<input id="bulk-email-title" class="form-input" placeholder="Assunto do e-mail" style="margin-bottom:10px;">'
     +'<textarea id="bulk-email-msg" class="form-input" placeholder="Mensagem..." rows="6" style="margin-bottom:14px;resize:vertical;"></textarea>'
     +'<div id="bulk-email-preview" style="font-size:13px;color:var(--text-2);margin-bottom:14px;">—</div>'
-    +'<div style="display:flex;gap:10px;">'
+    +'<div style="display:flex;gap:10px;flex-wrap:wrap;">'
     +'<button class="btn btn-green" onclick="_previewBulkEmail()">Pré-visualizar alcance</button>'
+    +'<button class="btn" onclick="_sendBulkTest()">📨 Enviar teste para mim</button>'
+    +'<button class="btn" style="background:var(--danger,#dc2626);color:#fff;" onclick="_sendBulkReal()">🚀 Enviar para a base</button>'
     +'<button class="btn" onclick="document.getElementById(\'bulk-email-modal\').remove()">Fechar</button>'
     +'</div></div>';
   document.body.appendChild(modal);
@@ -20231,6 +20233,46 @@ async function _previewBulkEmail(){
     var d=r.data||{};
     prev.innerHTML='✉️ Enviaria para <strong>'+Number(d.opt_in||0)+'</strong> usuário(s) com opt-in (de '+Number(d.total||0)+' no total). <br><span style="font-size:11px;color:var(--text-3);">Envio real na próxima fase (Cco + confirmação).</span>';
   } catch(e){ prev.innerHTML='<span style="color:var(--text-3);">Não foi possível obter a contagem.</span>'; }
+}
+
+async function _sendBulkEmail(testTo){
+  var t=(document.getElementById('bulk-email-title')||{}).value||'';
+  var m=(document.getElementById('bulk-email-msg')||{}).value||'';
+  if(!t.trim()||!m.trim()){ if(typeof showToast==='function') showToast('Preencha assunto e mensagem.'); return null; }
+  var sess = await _sb.auth.getSession();
+  var token = sess && sess.data && sess.data.session && sess.data.session.access_token;
+  if(!token){ if(typeof showToast==='function') showToast('Sessão expirada.'); return null; }
+  var body = { bulk:true, subject:t,
+    html:'<p>'+_escHtml(m).replace(/\n/g,'<br>')+'</p>', text:m };
+  if(testTo) body.testTo = testTo;
+  var r = await fetch('/api/send-email', {
+    method:'POST',
+    headers:{ 'Content-Type':'application/json', 'Authorization':'Bearer '+token },
+    body: JSON.stringify(body)
+  });
+  return await r.json();
+}
+
+async function _sendBulkTest(){
+  var meuEmail = _session && _session.email;
+  if(!meuEmail){ if(typeof showToast==='function') showToast('Não foi possível identificar seu e-mail.'); return; }
+  if(typeof showToast==='function') showToast('Enviando teste para '+meuEmail+'...');
+  var res = await _sendBulkEmail(meuEmail);
+  if(res && res.ok){ if(typeof showToast==='function') showToast('✅ Teste enviado para '+meuEmail+' ('+res.sent+' enviado). Confira sua caixa.'); }
+  else { if(typeof showToast==='function') showToast('❌ Erro: '+((res&&res.error)||'falha no envio')); }
+}
+
+async function _sendBulkReal(){
+  var cnt;
+  try { var rc = await _sb.rpc('get_optin_count'); cnt = (rc.data&&rc.data.opt_in)||0; }
+  catch(e){ cnt = '?'; }
+  if(cnt===0){ if(typeof showToast==='function') showToast('Nenhum usuário com opt-in. Nada a enviar.'); return; }
+  var ok = confirm('⚠️ ATENÇÃO — AÇÃO IRREVERSÍVEL\n\nVocê vai enviar este e-mail para '+cnt+' usuário(s) com opt-in.\nEsta ação NÃO pode ser desfeita.\n\nConfirma o envio para a base?');
+  if(!ok) return;
+  if(typeof showToast==='function') showToast('Enviando para '+cnt+' usuário(s)...');
+  var res = await _sendBulkEmail(null);
+  if(res && res.ok){ if(typeof showToast==='function') showToast('✅ Enviado: '+res.sent+' | Falhas: '+res.failed); }
+  else { if(typeof showToast==='function') showToast('❌ Erro: '+((res&&res.error)||'falha')); }
 }
 
 async function _checkAnnouncement(){
