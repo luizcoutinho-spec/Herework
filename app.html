@@ -15731,8 +15731,8 @@ async function _adminSavePlan(planKey) {
 }
 
 function adminAction(type) {
+  if (type === 'export') { _openExportMenu(); return; }
   var msgs = {
-    'export':       ['📊 Exportar Dados','Iniciando exportação CSV de usuários e projetos...'],
     'announce':     ['📣 Anúncio','Abrindo editor de comunicado...'],
     'backup':       ['💾 Backup','Backup agendado para próxima manutenção programada.'],
     'email':        ['📧 E-mail em Massa','Campanha de e-mail configurada.'],
@@ -20064,6 +20064,84 @@ async function _loadAdminStats() {
       var el = document.getElementById(id); if (el) el.textContent = '—';
     });
   }
+}
+
+function _openExportMenu(){
+  var existing = document.getElementById('adm-export-modal');
+  if (existing) { existing.remove(); return; }
+  var modal = document.createElement('div');
+  modal.id = 'adm-export-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = '<div style="background:var(--surface);border-radius:12px;padding:28px;min-width:340px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.4);">'
+    + '<div style="font-weight:700;font-size:16px;margin-bottom:16px;">📊 Exportar Relatório</div>'
+    + '<div style="margin-bottom:12px;font-size:13px;color:var(--text-2);">Fonte de dados:</div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">'
+    + ['contratos','usuarios','projetos','financeiro'].map(function(f){
+        var label={'contratos':'📋 Contratos','usuarios':'👥 Usuários','projetos':'🏗️ Projetos','financeiro':'💳 Financeiro'}[f];
+        return '<button class="admin-action-btn" onclick="_admExportChoose(\''+f+'\',this)" style="font-size:13px;">'+label+'</button>';
+      }).join('')
+    + '</div>'
+    + '<div id="adm-export-fmt" style="display:none;margin-bottom:16px;">'
+    +   '<div style="font-size:13px;color:var(--text-2);margin-bottom:8px;">Formato:</div>'
+    +   '<div style="display:flex;gap:8px;">'
+    +     '<button class="admin-action-btn" onclick="_exportReport(_admExportFonte,\'csv\')">⬇️ CSV</button>'
+    +     '<button class="admin-action-btn" onclick="_exportReport(_admExportFonte,\'json\')">⬇️ JSON</button>'
+    +   '</div>'
+    + '</div>'
+    + '<button class="admin-action-btn" style="width:100%;margin-top:4px;" onclick="document.getElementById(\'adm-export-modal\').remove()">✕ Cancelar</button>'
+    + '</div>';
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+var _admExportFonte = null;
+function _admExportChoose(fonte, btn){
+  _admExportFonte = fonte;
+  var btns = btn.parentNode.querySelectorAll('button');
+  btns.forEach(function(b){ b.style.opacity='0.5'; });
+  btn.style.opacity='1'; btn.style.fontWeight='700';
+  document.getElementById('adm-export-fmt').style.display='block';
+}
+
+async function _exportReport(fonte, formato){
+  try {
+    var data;
+    if (fonte==='contratos'){ var r=await _sb.rpc('get_admin_contracts'); if(r.error)throw r.error; data=r.data||[]; }
+    else if (fonte==='usuarios'){ var r=await _sb.rpc('get_admin_list',{p_which:'freelancers'}); if(r.error)throw r.error; data=r.data||[]; }
+    else if (fonte==='projetos'){ var r=await _sb.rpc('get_admin_list',{p_which:'projects'}); if(r.error)throw r.error; data=r.data||[]; }
+    else if (fonte==='financeiro'){ var r=await _sb.rpc('get_admin_dashboard_financial'); if(r.error)throw r.error; data=r.data||{}; }
+    else return;
+    var content, mime, ext;
+    if (formato==='json'){
+      content = JSON.stringify(data, null, 2); mime='application/json'; ext='json';
+    } else {
+      content = _toCSV(Array.isArray(data)?data:[data]); mime='text/csv;charset=utf-8'; ext='csv';
+    }
+    var blob = new Blob([content], {type:mime});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'herework_'+fonte+'_'+new Date().toISOString().slice(0,10)+'.'+ext;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    var modal=document.getElementById('adm-export-modal'); if(modal) modal.remove();
+    if (typeof showToast==='function') showToast('Relatório exportado: '+fonte+'.'+ext);
+  } catch(e){
+    if (typeof showToast==='function') showToast('Erro ao exportar: '+(e.message||'tente novamente'));
+  }
+}
+
+function _toCSV(arr){
+  if(!arr || !arr.length) return '';
+  var keys = Object.keys(arr[0]);
+  function esc(v){
+    if(v==null) return '';
+    var s = (typeof v==='object') ? JSON.stringify(v) : String(v);
+    if(/[",\n;]/.test(s)) s = '"'+s.replace(/"/g,'""')+'"';
+    return s;
+  }
+  var head = keys.join(',');
+  var rows = arr.map(function(o){ return keys.map(function(k){ return esc(o[k]); }).join(','); });
+  return head + '\n' + rows.join('\n');
 }
 
 async function _loadAdminFinancial() {
