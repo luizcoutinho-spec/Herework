@@ -8115,6 +8115,20 @@ section { padding: 64px 0; }
         <div style="font-weight:600;margin-bottom:8px;">Mês a mês (GMV e comissão projetada)</div>
         <div id="adm-dash-chart"></div>
       </div>
+      <div style="margin-top:20px;">
+        <div style="font-weight:600;margin-bottom:8px;">Resultado de Vendas Bruto — <span id="adm-sales-mes">—</span></div>
+        <table class="admin-table" style="width:100%;">
+          <thead><tr>
+            <th>Fonte</th><th style="text-align:right;">Qtd (mês)</th><th style="text-align:right;">Valor (mês)</th>
+            <th style="text-align:right;">Qtd (ano)</th><th style="text-align:right;">Valor (ano)</th>
+          </tr></thead>
+          <tbody id="adm-sales-body"><tr><td colspan="5" style="color:var(--text-3);padding:12px;">Carregando…</td></tr></tbody>
+          <tfoot><tr style="font-weight:700;border-top:2px solid var(--border);">
+            <td>TOTAL REALIZADO</td><td></td><td style="text-align:right;" id="adm-sales-total-mes">—</td>
+            <td></td><td style="text-align:right;" id="adm-sales-total-ano">—</td>
+          </tr></tfoot>
+        </table>
+      </div>
       <div style="font-size:12px;color:var(--text-3);margin-top:12px;">
         ℹ️ Receita de comissão será cobrada a partir da Etapa 8. MRR baseado em <span id="adm-dash-subs">—</span> assinaturas Stripe ativas. Histórico de cobranças individuais no painel Stripe.
       </div>
@@ -15411,6 +15425,7 @@ function showAdminPage() {
       _loadAdminStats();
       _loadAdminFinancial();
       _loadFinancialDashboard();
+      _loadSalesBySource();
       _loadRecentLists();
       var fe=document.getElementById('adm-footer-updated'); if(fe) fe.textContent=new Date().toLocaleString('pt-BR');
       if (typeof _admInitMigPanel  === 'function') _admInitMigPanel();
@@ -20099,6 +20114,42 @@ function _renderDashChart(porMes){
       + '<span style="width:40px;text-align:right;font-size:11px;color:var(--text-3);">'+(m.contratos||0)+' ctr</span>'
       + '</div>';
   }).join('');
+}
+
+async function _loadSalesBySource(){
+  var body=document.getElementById('adm-sales-body'); if(!body) return;
+  function rs(n){ return 'R$ '+Number(n||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+  try {
+    var r = await _sb.rpc('get_admin_sales_by_source');
+    if (r.error) throw r.error;
+    var s = r.data||{};
+    _setText('adm-sales-mes', (s.mes_referencia||'—'));
+    var C='padding:8px;border-bottom:1px solid var(--border);font-size:13px;';
+    var CR='padding:8px;border-bottom:1px solid var(--border);font-size:13px;text-align:right;';
+    var p=s.planos||{}, a=s.avulsos||{}, c=s.comissao||{}, f=s.fee||{};
+    var tag8=' <span style="font-size:10px;color:var(--text-3);">(a partir da Etapa 8)</span>';
+    var rows = [
+      ['a) Contratação de plano (MRR recorrente)', p.mrr_qtd, p.mrr_valor, p.mrr_qtd, p.mrr_valor, false],
+      ['b) Compras individuais (avulsos)', a.qtd_mes, a.valor_mes, a.qtd_ano, a.valor_ano, false],
+      ['c) Comissão freelance', c.qtd_mes, c.valor_mes, c.qtd_ano, c.valor_ano, true],
+      ['d) Fee projeto', f.qtd_mes, f.valor_mes, f.qtd_ano, f.valor_ano, true]
+    ];
+    body.innerHTML = rows.map(function(row){
+      return '<tr>'
+        + '<td style="'+C+'">'+_escHtml(row[0])+(row[5]?tag8:'')+'</td>'
+        + '<td style="'+CR+'">'+Number(row[1]||0)+'</td>'
+        + '<td style="'+CR+'">'+rs(row[2])+'</td>'
+        + '<td style="'+CR+'">'+Number(row[3]||0)+'</td>'
+        + '<td style="'+CR+'">'+rs(row[4])+'</td>'
+        + '</tr>';
+    }).join('');
+    var totMes = Number(p.mrr_valor||0)+Number(a.valor_mes||0)+Number(c.valor_mes||0)+Number(f.valor_mes||0);
+    var totAno = Number(p.mrr_valor||0)+Number(a.valor_ano||0)+Number(c.valor_ano||0)+Number(f.valor_ano||0);
+    _setText('adm-sales-total-mes', rs(totMes));
+    _setText('adm-sales-total-ano', rs(totAno));
+  } catch(e){
+    body.innerHTML='<tr><td colspan="5" style="color:var(--text-3);padding:12px;">Não foi possível carregar.</td></tr>';
+  }
 }
 
 async function _loadRecentLists() {
