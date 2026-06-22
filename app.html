@@ -8542,6 +8542,10 @@ section { padding: 64px 0; }
           <span id="reg-strength-lbl" class="pwd-strength-lbl"></span>
         </div>
       </div>
+      <label style="display:flex;align-items:flex-start;gap:8px;font-size:12px;color:var(--text-2);margin:10px 0;cursor:pointer;">
+        <input type="checkbox" id="reg-email-optin" style="margin-top:2px;flex-shrink:0;">
+        <span>Aceito receber comunicações, novidades e atualizações por e-mail. Posso cancelar a qualquer momento. (LGPD)</span>
+      </label>
       <div style="font-size:12px;color:var(--text-3);margin-bottom:18px;" data-pt="Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade." data-es="Al crear cuenta aceptas nuestros Términos de Uso y Política de Privacidad.">Ao criar conta você concorda com nossos Termos de Uso e Política de Privacidade.</div>
       <button id="reg-submit-btn" class="btn btn-green btn-block btn-lg" onclick="submitRegister()" data-pt="Criar conta grátis" data-es="Crear cuenta gratis">Criar conta grátis</button>
       <div class="modal-switch-link">
@@ -10646,7 +10650,7 @@ async function _sbLogin(email, pass) {
 }
 
 /* ── AUTH: Registro ───────────────────────────────────────────── */
-async function _sbRegister(name, email, pass, type) {
+async function _sbRegister(name, email, pass, type, optIn) {
   if (!_sbReady()) return { error: 'Supabase não configurado' };
   var r = await _sb.auth.signUp({
     email: email,
@@ -10661,7 +10665,9 @@ async function _sbRegister(name, email, pass, type) {
         id:    r.data.user.id,
         name:  name,
         email: email,
-        type:  type || 'client'
+        type:  type || 'client',
+        email_opt_in:    !!optIn,
+        email_opt_in_at: optIn ? new Date().toISOString() : null
       }, { onConflict: 'id', ignoreDuplicates: true });
     } catch(profileErr) { /* trigger já criou ou erro ignorado */ }
   }
@@ -13537,9 +13543,10 @@ function submitRegister() {
   var email = e ? e.value.trim() : '';
   var pass  = p ? p.value : '';
   var type  = regType || 'client';
+  var optIn = !!(document.getElementById('reg-email-optin') && document.getElementById('reg-email-optin').checked);
 
   if (_sbReady()) {
-    _sbRegister(name, email, pass, type).then(function(res) {
+    _sbRegister(name, email, pass, type, optIn).then(function(res) {
       _setBtnLoading(btn, false);
       if (res.error) {
         var errEl = document.getElementById('err-reg-email');
