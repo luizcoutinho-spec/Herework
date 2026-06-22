@@ -7958,10 +7958,11 @@ section { padding: 64px 0; }
     <div class="admin-actions-row">
       <button class="admin-action-btn" onclick="adminAction('export')">📊 Exportar Relatório</button>
       <button class="admin-action-btn" onclick="adminAction('announce')">📢 Enviar Comunicado</button>
-      <button class="admin-action-btn" onclick="adminAction('backup')">💾 Backup do Sistema</button>
+      <!-- TODO: ocultados — backup=infra/impossivel no front, manutencao=perigoso (tira site do ar), cache=placebo -->
+      <button class="admin-action-btn" onclick="adminAction('backup')" style="display:none">💾 Backup do Sistema</button>
       <button class="admin-action-btn" onclick="adminAction('email')">📧 Enviar E-mail em Massa</button>
-      <button class="admin-action-btn danger" onclick="adminAction('maintenance')">🔧 Modo Manutenção</button>
-      <button class="admin-action-btn danger" onclick="adminAction('cache')">🗑️ Limpar Cache</button>
+      <button class="admin-action-btn danger" onclick="adminAction('maintenance')" style="display:none">🔧 Modo Manutenção</button>
+      <button class="admin-action-btn danger" onclick="adminAction('cache')" style="display:none">🗑️ Limpar Cache</button>
     </div>
 
     <!-- Gestão de Planos -->
