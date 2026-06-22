@@ -23364,11 +23364,16 @@ function _openRealUserProfile(prof) {
   if (mb) {
     mb.onclick = function() {
       var flUid = prof.id;
-      var entry = null;
+      var ATIVOS = ['active','pending_acceptance','review','revision','disputed'];
+      var entry = null, fallback = null;
       Object.keys(_dashProj).forEach(function(k) {
         var e = _dashProj[k];
-        if (!entry && e.myRole === 'client' && e.freelancerId === flUid) entry = e;
+        if (e.myRole === 'client' && e.freelancerId === flUid) {
+          if (!fallback) fallback = e;
+          if (!entry && ATIVOS.indexOf(e.status) >= 0) entry = e;
+        }
       });
+      entry = entry || fallback;
       if (entry) {
         closeModal('fl-profile');
         openChatModal({ contractId: entry.contractId, projectTitle: entry.title, withName: name, myRole: 'client' });
