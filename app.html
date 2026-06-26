@@ -12867,7 +12867,7 @@ var _PLAN_LIMITS = {
      Premium (pro)    : ilimitadas,      portfólio 20, comissão 12%/8%
      Elite (enterp.)  : ilimitadas,      ilimitado,    comissão  8%/5% */
   freelancer: {
-    free:       { proposals_month: 5,        portfolio_items: 5,        verified_badges: 0,        commission: 0.18, commission_recurrent: 0.12 },
+    free:       { proposals_month: 3,        featured_proposals_month: 0, projects_month: 0,        portfolio_items: 5,        verified_badges: 0,        commission: 0.18, commission_recurrent: 0.12 },
     pro:        { proposals_month: Infinity, portfolio_items: 20,       verified_badges: 1,        commission: 0.12, commission_recurrent: 0.08 },
     enterprise: { proposals_month: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission: 0.08, commission_recurrent: 0.05 }
   },
@@ -12876,7 +12876,7 @@ var _PLAN_LIMITS = {
      commission_client/commission_client_recurrent → ação de contratação
      commission_fl/commission_fl_recurrent         → ação de prestação   */
   both: {
-    free:       { projects_month: 1,        proposals_month: 5,        direct_invites: 5,        candidates_per_project: 10,       portfolio_items: 5,        verified_badges: 0,        commission_client: 0.08, commission_client_recurrent: 0.06, commission_fl: 0.18, commission_fl_recurrent: 0.12 },
+    free:       { projects_month: 1,        proposals_month: 3,        featured_proposals_month: 0, direct_invites: 5,        candidates_per_project: 10,       portfolio_items: 5,        verified_badges: 0,        commission_client: 0.08, commission_client_recurrent: 0.06, commission_fl: 0.18, commission_fl_recurrent: 0.12 },
     pro:        { projects_month: 10,       proposals_month: Infinity, direct_invites: 50,       candidates_per_project: Infinity, portfolio_items: 20,       verified_badges: 1,        commission_client: 0.05, commission_client_recurrent: 0.03, commission_fl: 0.12, commission_fl_recurrent: 0.08 },
     enterprise: { projects_month: Infinity, proposals_month: Infinity, direct_invites: Infinity, candidates_per_project: Infinity, portfolio_items: Infinity, verified_badges: Infinity, commission_client: 0.03, commission_client_recurrent: 0.02, commission_fl: 0.08, commission_fl_recurrent: 0.05 }
   }
@@ -13096,7 +13096,7 @@ function _getResourceLimit(resourceKey) {
   /* fail-safe: cache ausente → limite do freelancer_start hardcoded, nunca ilimitado.
      Premissa: só trilha freelancer em produção (revisitar ao entrar Cliente/Híbrido). */
   var _fsPlan = (_PLAN_LIMITS.freelancer && _PLAN_LIMITS.freelancer.free) || {};
-  return _fsPlan.hasOwnProperty(resourceKey) ? _fsPlan[resourceKey] : 5;
+  return _fsPlan.hasOwnProperty(resourceKey) ? _fsPlan[resourceKey] : 0;
 }
 
 /* ── Próximo plano disponível e seus benefícios (jornada de upgrade) ── */
