@@ -19295,6 +19295,8 @@ async function _renderDashFLProposals(data) {
   var el = document.getElementById('dash-fl-proposals');
   if(!el) return;
   var props = await _sbGetMyProposals();
+  var ct = document.getElementById('dct-fl-count');
+  if (ct) ct.textContent = props ? props.length : 0;
   if(!props || !props.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
   el.innerHTML = props.map(function(p) {
     var proj = p.project || {};
@@ -26170,7 +26172,6 @@ async function _loadRealContracts() {
     var el;
     el = document.getElementById('ds-active'); if(el) el.textContent = totalActive;
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
-    el = document.getElementById('dct-fl-count');     if(el) el.textContent = flActive.length + flDone.length;
 
     /* Banner de contagem da página Contratos — por escopo */
     function _countScope(live, done) {
