@@ -5500,7 +5500,7 @@ section { padding: 64px 0; }
         </button>
       </div>
 
-      <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;margin-bottom:18px;">
+      <div id="ctr-shared-banner" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;margin-bottom:18px;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
           <div>
             <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Total de Contratos</div>
@@ -5560,6 +5560,36 @@ section { padding: 64px 0; }
       </div>
 
       <div id="dcontracts-fl" style="display:none;">
+
+        <!-- Funil freelancer — IDs próprios, sem colisão com o banner compartilhado -->
+        <div id="fl-funnel-banner" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Minha Atividade como Freelancer</div>
+              <div style="font-size:30px;font-weight:900;color:#fff;" id="fl-ctr-candidaturas-big">—</div>
+              <div style="font-size:11px;color:#64748b;margin-top:3px;">candidaturas enviadas</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <div onclick="document.getElementById('dash-fl-proposals').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#60a5fa;" id="fl-ctr-candidaturas">—</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Candidaturas</div>
+              </div>
+              <div onclick="document.getElementById('dash-fl-invites').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#fbbf24;" id="fl-ctr-convites">—</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Convites</div>
+              </div>
+              <div onclick="document.getElementById('dash-fl-active').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#4ade80;" id="fl-ctr-ativos">—</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Contratos Ativos</div>
+              </div>
+              <div onclick="document.getElementById('dash-fl-done').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#a78bfa;" id="fl-ctr-concluidos">—</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Conclu&#237;dos</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="dash-section">
           <div class="dash-section-title"><span>&#9993;</span> Convites Recebidos</div>
           <div id="dash-fl-invites"></div>
@@ -18333,6 +18363,9 @@ function switchContractView(view) {
     if(btn) btn.classList.toggle('active', v === view);
     if(pnl) pnl.style.display = v === view ? 'block' : 'none';
   });
+  /* Banner compartilhado (contratos cliente) ↔ funil freelancer */
+  var sb = document.getElementById('ctr-shared-banner');
+  if (sb) sb.style.display = view === 'freelancer' ? 'none' : '';
   if (typeof _renderContractsBanner === 'function') _renderContractsBanner(view === 'freelancer' ? 'freelancer' : 'cliente');
 }
 
@@ -19231,6 +19264,7 @@ async function _renderDashFLInvites() {
   var el = document.getElementById('dash-fl-invites');
   if (!el) return;
   var invites = await _sbGetMyInvites();
+  var _fInv = document.getElementById('fl-ctr-convites'); if(_fInv) _fInv.textContent = invites ? invites.length : 0;
   if (!invites || !invites.length) {
     el.innerHTML = _emptyState('✉️', 'Você não tem convites no momento', 'Clientes podem convidar você diretamente para projetos');
     return;
@@ -19297,6 +19331,9 @@ async function _renderDashFLProposals(data) {
   var props = await _sbGetMyProposals();
   var ct = document.getElementById('dct-fl-count');
   if (ct) ct.textContent = props ? props.length : 0;
+  var n = props ? props.length : 0;
+  var _fBig  = document.getElementById('fl-ctr-candidaturas-big'); if(_fBig)  _fBig.textContent  = n;
+  var _fCard = document.getElementById('fl-ctr-candidaturas');     if(_fCard) _fCard.textContent = n;
   if(!props || !props.length) { el.innerHTML = _emptyState('📩','Nenhuma proposta enviada','<button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="showPage(\'projects\')">🔍 Encontrar Projetos</button>'); return; }
   el.innerHTML = props.map(function(p) {
     var proj = p.project || {};
@@ -26172,6 +26209,8 @@ async function _loadRealContracts() {
     var el;
     el = document.getElementById('ds-active'); if(el) el.textContent = totalActive;
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
+    el = document.getElementById('fl-ctr-ativos');    if(el) el.textContent = flActive.length;
+    el = document.getElementById('fl-ctr-concluidos'); if(el) el.textContent = flDone.length;
 
     /* Banner de contagem da página Contratos — por escopo */
     function _countScope(live, done) {
