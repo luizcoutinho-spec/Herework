@@ -4408,6 +4408,17 @@ body.vitae-active{overflow:hidden;}
 #page-vitae.vitae-fullscreen .page-banner{display:none;}
 #page-vitae.vitae-fullscreen>.container{padding:0 !important;max-width:none !important;}
 .vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
+/* ── Vitae About page (deslogado, tela Sobre) ── */
+.cv-about-page{max-width:680px;margin:0 auto;padding:48px 20px 60px;font-family:inherit;}
+.cv-about-page .cv-about-back{display:inline-block;margin-bottom:24px;font-size:13px;color:var(--text-2,#475569);text-decoration:none;cursor:pointer;}
+.cv-about-page .cv-about-back:hover{color:var(--text,#0f172a);}
+.cv-about-page h2{font-size:22px;font-weight:800;color:var(--text,#0f172a);margin:0 0 10px;}
+.cv-about-page .cv-about-open{font-size:14.5px;color:var(--text-2,#475569);line-height:1.65;margin:0 0 28px;}
+.cv-about-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:32px;}
+.cv-about-card{background:var(--surface,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:10px;padding:16px 18px;}
+.cv-about-card .cv-card-icon{font-size:22px;margin-bottom:8px;}
+.cv-about-card strong{display:block;font-size:13.5px;font-weight:700;color:var(--text,#0f172a);margin-bottom:4px;}
+.cv-about-card p{margin:0;font-size:12.5px;color:var(--text-2,#475569);line-height:1.5;}
 /* ── Vitae About popover (logado) ── */
 #cv-about-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9200;display:flex;align-items:center;justify-content:center;padding:20px;}
 #cv-about-backdrop.cv-hidden{display:none;}
@@ -12193,33 +12204,15 @@ function _renderVitaeGate() {
     if (pg) { pg.classList.remove('vitae-fullscreen'); document.body.classList.remove('vitae-active'); }
     var msg = isEs ? 'Inicia sesión para usar Vitae'  : 'Faça login para usar o Vitae';
     var btn = isEs ? 'Iniciar sesión'                 : 'Entrar';
-    var aboutTitle = isEs ? 'Qué es Vitae Studio'                                             : 'O que é o Vitae Studio';
-    var aboutPitch = isEs ? 'Un creador de currículums profesional, gratis para usuarios de HereWork.' : 'Um construtor de currículos profissional, gratuito para usuários do HereWork.';
-    var aboutItems = isEs ? [
-      'Editor en vivo con vista previa en A4 — lo que ves es lo que sale',
-      '3 plantillas profesionales (Ejecutivo, Clásico, Moderno), con color y fuente ajustables',
-      'Secciones flexibles, reordenables arrastrando',
-      'Análisis ATS — puntúa la compatibilidad de tu CV con los filtros de las empresas',
-      'Importación por IA — sube un CV anterior (PDF/Word) y la IA lo completa',
-      'Exportación en PDF, listo para enviar'
-    ] : [
-      'Editor ao vivo com pré-visualização em A4 — o que você vê é o que sai',
-      '3 templates profissionais (Executivo, Clássico, Moderno), com cor e fonte ajustáveis',
-      'Seções flexíveis, reordenáveis arrastando',
-      'Análise ATS — pontua a compatibilidade do seu CV com os filtros das empresas',
-      'Importação por IA — suba um CV antigo (PDF/Word) e a IA preenche tudo',
-      'Exportação em PDF, pronto para enviar'
-    ];
+    var aboutLink = isEs ? '¿Qué es Vitae Studio?' : 'O que é o Vitae Studio?';
     root.innerHTML =
       '<div style="text-align:center;padding:60px 20px 40px;">' +
         '<div style="font-size:48px;margin-bottom:20px;">📄</div>' +
         '<p style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;">' + msg + '</p>' +
-        '<p style="font-size:14px;color:var(--text-3);margin-bottom:24px;" data-pt="Crie seu currículo profissional com IA" data-es="Crea tu CV profesional con IA">Crie seu currículo profissional com IA</p>' +
+        '<p style="font-size:14px;color:var(--text-3);margin-bottom:24px);">Crie seu curr\xedculo profissional com IA</p>' +
         '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + btn + '</button>' +
-        '<div class="cv-about-inline">' +
-          '<h3>' + aboutTitle + '</h3>' +
-          '<p class="cv-about-pitch">' + aboutPitch + '</p>' +
-          '<ul>' + aboutItems.map(function(i){return '<li>'+i+'</li>';}).join('') + '</ul>' +
+        '<div style="margin-top:20px;">' +
+          '<a href="#" onclick="_vitaeShowAbout();return false;" style="font-size:13px;color:var(--text-2,#475569);text-decoration:underline;cursor:pointer;">' + aboutLink + '</a>' +
         '</div>' +
       '</div>';
     return;
@@ -12275,6 +12268,49 @@ function _renderVitaeGate() {
     '</div>';
   VitaeCV.init();
 }
+
+/* ── Vitae: telas deslogadas (globais para onclick inline) ── */
+window._vitaeShowBlock = function(){ _renderVitaeGate(); };
+window._vitaeShowAbout = function(){
+  var root = document.getElementById('vitae-root');
+  if (!root) return;
+  var isEs = (typeof lang === 'function' ? lang() : (document.documentElement.getAttribute('data-lang') || 'pt')) === 'es';
+  var title  = isEs ? 'Qué es Vitae Studio'    : 'O que é o Vitae Studio';
+  var open   = isEs
+    ? 'Vitae es un creador de currículums profesional — un producto HereWork, gratis para registrados. Transforma la tediosa tarea de armar un CV en algo rápido y visual:'
+    : 'O Vitae é um construtor de currículos profissional — um produto HereWork, gratuito para cadastrados. Ele transforma a tarefa chata de montar um CV em algo rápido e visual:';
+  var cta    = isEs ? 'Acceder a Vitae Currículo' : 'Acessar Vitae Currículo';
+  var back   = isEs ? '← Volver'                  : '← Voltar';
+  var cards  = isEs ? [
+    {i:'✏️', t:'Editor en vivo',        d:'Completa a un lado y ve el CV armarse en tiempo real al otro, en A4. Lo que ves es lo que sale.'},
+    {i:'🎨', t:'3 plantillas profesionales', d:'Ejecutivo, Clásico y Moderno. Cambia con un clic, con elección de color y fuente.'},
+    {i:'↕️', t:'Secciones flexibles',   d:'Experiencia, educación, competencias, idiomas y más — reordenables arrastrando.'},
+    {i:'🎯', t:'Análisis ATS',          d:'Puntúa la compatibilidad del CV con los filtros automáticos de las empresas y señala qué mejorar.'},
+    {i:'🤖', t:'Importación por IA',    d:'Sube un CV anterior (PDF o Word) y la IA lo completa todo automáticamente.'},
+    {i:'📥', t:'Exportación en PDF',    d:'Listo para enviar, en A4.'}
+  ] : [
+    {i:'✏️', t:'Editor ao vivo',        d:'Preencha de um lado e veja o currículo se montar em tempo real do outro, em A4. O que você vê é o que sai.'},
+    {i:'🎨', t:'3 templates profissionais', d:'Executivo, Clássico e Moderno. Troca com um clique, com escolha de cor e fonte.'},
+    {i:'↕️', t:'Seções flexíveis',      d:'Experiência, educação, competências, idiomas e mais — reordenáveis arrastando.'},
+    {i:'🎯', t:'Análise ATS',           d:'Pontua a compatibilidade do CV com os filtros automáticos das empresas e aponta o que melhorar, para seu currículo chegar ao recrutador.'},
+    {i:'🤖', t:'Importação por IA',     d:'Suba um CV antigo (PDF ou Word) e a IA preenche tudo automaticamente.'},
+    {i:'📥', t:'Exportação em PDF',     d:'Pronto para enviar, em A4.'}
+  ];
+  root.innerHTML =
+    '<div class="vitae-wrap"><div class="cv-about-page">' +
+      '<a class="cv-about-back" onclick="_vitaeShowBlock();return false;" href="#">' + back + '</a>' +
+      '<h2>' + title + '</h2>' +
+      '<p class="cv-about-open">' + open + '</p>' +
+      '<div class="cv-about-grid">' +
+        cards.map(function(c){
+          return '<div class="cv-about-card"><div class="cv-card-icon">'+c.i+'</div><strong>'+c.t+'</strong><p>'+c.d+'</p></div>';
+        }).join('') +
+      '</div>' +
+      '<div style="text-align:center;">' +
+        '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + cta + '</button>' +
+      '</div>' +
+    '</div></div>';
+};
 
 /* ── Freelancers: busca perfis reais (type = freelancer | both) ── */
 async function _sbGetFreelancers() {
