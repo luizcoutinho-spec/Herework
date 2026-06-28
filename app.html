@@ -4251,6 +4251,160 @@ section { padding: 64px 0; }
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
+
+  <!-- === VITAE CV STUDIO CSS (Etapa B.1) === -->
+  <style>
+/* === VITAE CV STUDIO CSS (Etapa B.1) — namespaced under .vitae-wrap === */
+.vitae-wrap{--accent:#149da4;--font:"Segoe UI",Arial,sans-serif;--ink:#222;--muted:#8a8a8a;--rule:#e3e3e3;--ui:#0f172a;--ui2:#1e293b;--line:#e2e8f0;--bg:#eef1f3;}
+.vitae-wrap *{box-sizing:border-box;}
+.vitae-wrap button{font-family:inherit;}
+.vitae-wrap .cv-app{display:flex;flex-direction:column;height:100vh;}
+/* ---------- Top bar ---------- */
+.vitae-wrap .cv-top{background:#0f172a;color:#e2e8f0;padding:0 16px;height:54px;display:flex;align-items:center;gap:14px;flex:0 0 auto;}
+.vitae-wrap .cv-top .cv-logo{font-weight:800;font-size:16px;letter-spacing:.3px;}
+.vitae-wrap .cv-top .cv-logo b{color:#34d8df;}
+.vitae-wrap .cv-top .cv-sp{flex:1;}
+.vitae-wrap .cv-top label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#94a3b8;margin-right:5px;}
+.vitae-wrap .cv-top select,.vitae-wrap .cv-top input[type=password]{height:32px;border-radius:6px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;padding:0 8px;font-size:12px;}
+.vitae-wrap .cv-top input[type=password]{width:200px;}
+.vitae-wrap .cv-tbtn{height:34px;border:1px solid #334155;background:#1e293b;color:#e2e8f0;border-radius:7px;padding:0 13px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
+.vitae-wrap .cv-tbtn:hover{background:#293548;}
+.vitae-wrap .cv-tbtn.cv-pri{background:var(--accent);border-color:var(--accent);color:#fff;}
+.vitae-wrap .cv-tbtn.cv-pri:hover{filter:brightness(1.07);}
+.vitae-wrap .cv-tbtn:disabled{opacity:.5;cursor:not-allowed;}
+/* ---------- Main split ---------- */
+.vitae-wrap .cv-main{flex:1;display:flex;min-height:0;}
+.vitae-wrap .cv-editor{width:430px;flex:0 0 430px;background:#fff;border-right:1px solid var(--line);overflow-y:auto;padding:16px;}
+.vitae-wrap .cv-preview{flex:1;overflow:auto;background:#dde3e7;padding:24px;display:flex;justify-content:center;align-items:flex-start;}
+/* ---------- Editor ---------- */
+.vitae-wrap .cv-ed-h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#64748b;margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+.vitae-wrap .cv-ed-h:first-child{margin-top:0;}
+.vitae-wrap .cv-fld{margin-bottom:9px;}
+.vitae-wrap .cv-fld label{display:block;font-size:11px;color:#64748b;margin-bottom:3px;font-weight:600;}
+.vitae-wrap .cv-fld input,.vitae-wrap .cv-fld textarea,.vitae-wrap .cv-fld select{width:100%;border:1px solid #cbd5e1;border-radius:7px;padding:7px 9px;font-size:13px;font-family:inherit;background:#fff;}
+.vitae-wrap .cv-fld textarea{resize:vertical;min-height:62px;line-height:1.45;}
+.vitae-wrap .cv-fld input:focus,.vitae-wrap .cv-fld textarea:focus,.vitae-wrap .cv-fld select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(20,157,164,.13);}
+.vitae-wrap .cv-grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.vitae-wrap .cv-card{border:1px solid var(--line);border-radius:10px;margin-bottom:12px;background:#fff;}
+.vitae-wrap .cv-card>.cv-hd{display:flex;align-items:center;gap:6px;padding:9px 11px;cursor:grab;border-bottom:1px solid var(--line);background:#f8fafc;border-radius:10px 10px 0 0;}
+.vitae-wrap .cv-card>.cv-hd .cv-ttl{flex:1;font-weight:700;font-size:13px;border:none;background:transparent;padding:2px 4px;}
+.vitae-wrap .cv-card>.cv-hd .cv-ttl:focus{outline:none;background:#fff;border-radius:5px;}
+.vitae-wrap .cv-ic{width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-size:13px;color:#475569;display:inline-flex;align-items:center;justify-content:center;}
+.vitae-wrap .cv-ic:hover{background:#f1f5f9;color:#0f172a;}
+.vitae-wrap .cv-ic.cv-dz{color:#dc2626;}
+.vitae-wrap .cv-card>.cv-bd{padding:11px;}
+.vitae-wrap .cv-item{border:1px dashed #d8dee6;border-radius:8px;padding:9px;margin-bottom:9px;position:relative;}
+.vitae-wrap .cv-item .cv-ihd{display:flex;justify-content:flex-end;gap:5px;margin-bottom:5px;}
+.vitae-wrap .cv-add{width:100%;border:1px dashed #b6c0cb;background:#f8fafc;color:#475569;border-radius:8px;padding:8px;font-size:12px;cursor:pointer;font-weight:600;}
+.vitae-wrap .cv-add:hover{border-color:var(--accent);color:var(--accent);}
+.vitae-wrap .cv-ai{border:1px solid var(--accent);color:var(--accent);background:#fff;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;font-weight:600;display:inline-flex;align-items:center;gap:4px;}
+.vitae-wrap .cv-ai:hover{background:#f0fbfb;}
+.vitae-wrap .cv-ai:disabled{opacity:.5;cursor:wait;}
+.vitae-wrap .cv-addsec{position:relative;}
+.vitae-wrap .cv-addsec .cv-menu{display:none;position:absolute;left:0;right:0;bottom:42px;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.12);padding:6px;z-index:5;}
+.vitae-wrap .cv-addsec.cv-open .cv-menu{display:block;}
+.vitae-wrap .cv-addsec .cv-menu button{display:block;width:100%;text-align:left;border:none;background:none;padding:8px 10px;border-radius:6px;font-size:13px;cursor:pointer;}
+.vitae-wrap .cv-addsec .cv-menu button:hover{background:#f1f5f9;}
+/* swatches */
+.vitae-wrap .cv-swatches{display:flex;gap:6px;flex-wrap:wrap;}
+.vitae-wrap .cv-sw{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px #cbd5e1;}
+.vitae-wrap .cv-sw.cv-on{box-shadow:0 0 0 2px #0f172a;}
+.vitae-wrap .cv-tmpls{display:flex;gap:8px;}
+.vitae-wrap .cv-tmpl{flex:1;border:2px solid var(--line);border-radius:8px;padding:7px;cursor:pointer;font-size:11px;font-weight:700;text-align:center;color:#475569;background:#fff;}
+.vitae-wrap .cv-tmpl.cv-on{border-color:var(--accent);color:var(--accent);}
+.vitae-wrap .cv-colbtn{font-size:10px;}
+.vitae-wrap .cv-chips-help{font-size:10px;color:#94a3b8;margin-top:-4px;margin-bottom:8px;}
+/* ATS panel */
+.vitae-wrap .cv-ats{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fff;}
+.vitae-wrap .cv-ats .cv-score{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.vitae-wrap .cv-ring{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#fff;flex:0 0 auto;}
+.vitae-wrap .cv-ats ul{margin:0;padding:0;list-style:none;}
+.vitae-wrap .cv-ats li{font-size:12px;padding:4px 0;display:flex;gap:7px;align-items:flex-start;}
+.vitae-wrap .cv-ats li .cv-mk{flex:0 0 auto;font-weight:800;}
+.vitae-wrap .cv-ats li.cv-ok .cv-mk{color:#16a34a;}
+.vitae-wrap .cv-ats li.cv-no .cv-mk{color:#dc2626;}
+.vitae-wrap .cv-ats li.cv-warn .cv-mk{color:#d97706;}
+.vitae-wrap .cv-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 16px;border-radius:8px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:50;}
+.vitae-wrap .cv-toast.cv-show{opacity:1;}
+.vitae-wrap .cv-spin{width:13px;height:13px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;display:inline-block;animation:cv-sp .7s linear infinite;}
+@keyframes cv-sp{to{transform:rotate(360deg);}}
+/* ===================== RESUME PAGE ===================== */
+.vitae-wrap .cv-pagewrap{transform-origin:top center;}
+.vitae-wrap .cv-page{width:210mm;height:297mm;overflow:hidden;position:relative;background:#fff;box-shadow:0 3px 22px rgba(0,0,0,.16);font-family:var(--font);color:var(--ink);}
+.vitae-wrap .cv-fit{width:210mm;transform-origin:top left;}
+.vitae-wrap .cv-page *{box-sizing:border-box;}
+.vitae-wrap .cv-page .cv-pad{padding:46px 42px;}
+.vitae-wrap .cv-r-name{font-size:30px;font-weight:800;letter-spacing:.4px;line-height:1.05;}
+.vitae-wrap .cv-r-head{color:var(--accent);font-weight:700;font-size:13.5px;margin-top:6px;}
+.vitae-wrap .cv-r-contact{display:flex;flex-wrap:wrap;gap:7px 15px;margin-top:9px;font-size:10.5px;color:#555;}
+.vitae-wrap .cv-r-contact span{display:inline-flex;align-items:center;gap:5px;}
+.vitae-wrap .cv-r-contact svg{width:11px;height:11px;fill:var(--accent);flex:0 0 auto;}
+.vitae-wrap .cv-photo{width:78px;height:78px;border-radius:50%;flex:0 0 auto;object-fit:cover;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:27px;font-weight:700;}
+.vitae-wrap .cv-sec-ttl{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;margin:0 0 10px;}
+.vitae-wrap .cv-blk{margin-bottom:15px;break-inside:avoid;}
+.vitae-wrap .cv-blk:last-child{margin-bottom:0;}
+.vitae-wrap .cv-entry{margin-bottom:11px;break-inside:avoid;}
+.vitae-wrap .cv-entry:last-child{margin-bottom:0;}
+.vitae-wrap .cv-e-t{font-size:13px;font-weight:700;}
+.vitae-wrap .cv-e-o{color:var(--accent);font-weight:600;font-size:12px;margin-top:1px;}
+.vitae-wrap .cv-e-m{display:flex;flex-wrap:wrap;gap:13px;margin-top:4px;font-size:10.5px;color:var(--muted);}
+.vitae-wrap .cv-e-m span{display:inline-flex;align-items:center;gap:4px;}
+.vitae-wrap .cv-e-m svg{width:10px;height:10px;fill:var(--muted);flex:0 0 auto;}
+.vitae-wrap .cv-e-d{font-size:11px;color:#444;line-height:1.5;margin-top:5px;}
+.vitae-wrap .cv-e-d ul{margin:4px 0 0;padding-left:16px;}
+.vitae-wrap .cv-e-d li{margin-bottom:2px;}
+.vitae-wrap .cv-r-summary{font-size:11.5px;line-height:1.55;color:#444;text-align:justify;}
+.vitae-wrap .cv-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.vitae-wrap .cv-chip{font-size:10.5px;border-radius:4px;padding:3px 9px;}
+.vitae-wrap .cv-lng{margin-bottom:8px;}
+.vitae-wrap .cv-lng:last-child{margin-bottom:0;}
+.vitae-wrap .cv-lng .cv-row{display:flex;justify-content:space-between;align-items:center;}
+.vitae-wrap .cv-lng .cv-n{font-size:11.5px;font-weight:600;}
+.vitae-wrap .cv-lng .cv-lv{font-size:9.5px;color:var(--muted);}
+.vitae-wrap .cv-dots{display:flex;gap:3px;}
+.vitae-wrap .cv-dot{width:8px;height:8px;border-radius:50%;background:#dfe3e6;}
+.vitae-wrap .cv-dot.cv-on{background:var(--accent);}
+.vitae-wrap .cv-ach{margin-bottom:9px;}
+.vitae-wrap .cv-ach:last-child{margin-bottom:0;}
+.vitae-wrap .cv-ach .cv-t{font-size:11.5px;font-weight:700;}
+.vitae-wrap .cv-ach .cv-d{font-size:10.5px;color:#666;line-height:1.45;margin-top:1px;}
+/* Template: Executivo (2-col) */
+.vitae-wrap .cv-t-exec .cv-pad{display:flex;flex-direction:column;}
+.vitae-wrap .cv-t-exec .cv-hdr{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;}
+.vitae-wrap .cv-t-exec .cv-cols{display:flex;gap:22px;margin-top:20px;}
+.vitae-wrap .cv-t-exec .cv-main{flex:0 0 58%;max-width:58%;}
+.vitae-wrap .cv-t-exec .cv-side{flex:1;min-width:0;}
+.vitae-wrap .cv-t-exec .cv-sec-ttl{border-bottom:1.5px solid var(--ink);padding-bottom:5px;}
+.vitae-wrap .cv-t-exec .cv-side .cv-sec-ttl{border-bottom-color:var(--accent);}
+/* Template: Clássico (1-col) */
+.vitae-wrap .cv-t-classic .cv-hdr{text-align:center;border-bottom:2px solid var(--accent);padding-bottom:12px;}
+.vitae-wrap .cv-t-classic .cv-r-contact{justify-content:center;}
+.vitae-wrap .cv-t-classic .cv-cols{margin-top:16px;}
+.vitae-wrap .cv-t-classic .cv-sec-ttl{border-bottom:1px solid var(--rule);padding-bottom:4px;color:var(--accent);}
+/* Template: Moderno (header band) */
+.vitae-wrap .cv-t-modern .cv-pad{padding:0;}
+.vitae-wrap .cv-t-modern .cv-band{background:var(--accent);color:#fff;padding:30px 42px;display:flex;justify-content:space-between;align-items:center;gap:16px;}
+.vitae-wrap .cv-t-modern .cv-band .cv-r-name{color:#fff;}
+.vitae-wrap .cv-t-modern .cv-band .cv-r-head{color:rgba(255,255,255,.92);}
+.vitae-wrap .cv-t-modern .cv-band .cv-r-contact{color:rgba(255,255,255,.92);}
+.vitae-wrap .cv-t-modern .cv-band .cv-r-contact svg{fill:#fff;}
+.vitae-wrap .cv-t-modern .cv-band .cv-photo{background:rgba(255,255,255,.25);}
+.vitae-wrap .cv-t-modern .cv-cols{padding:26px 42px;}
+.vitae-wrap .cv-t-modern .cv-sec-ttl{color:var(--accent);border-left:3px solid var(--accent);padding-left:8px;}
+/* ===================== PRINT ===================== */
+@media print{
+  .vitae-wrap .cv-top,.vitae-wrap .cv-editor,.vitae-wrap .cv-toast{display:none !important;}
+  .vitae-wrap .cv-app,.vitae-wrap .cv-main,.vitae-wrap .cv-preview{display:block;height:auto;overflow:visible;}
+  .vitae-wrap .cv-preview{padding:0;background:#fff;}
+  .vitae-wrap .cv-pagewrap{transform:none !important;height:auto !important;}
+  .vitae-wrap .cv-page{box-shadow:none;}
+}
+  </style>
+  <!-- === /VITAE CV STUDIO CSS === -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
 </head>
 <body>
 
