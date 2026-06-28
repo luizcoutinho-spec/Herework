@@ -46,6 +46,7 @@ function json(
 const SUPABASE_URL  = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE  = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const ANTHROPIC_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
+const AI_DAILY_LIMIT = 3;
 
 // ── JWT gate (molde idêntico a hw-create-payment-intent) ────────────────────
 async function getUid(authHeader: string | null): Promise<string | null> {
@@ -215,7 +216,7 @@ Deno.serve(async (req) => {
 
   // 4. LIMITE — incremento atômico ANTES de chamar a IA.
   //    Se false → limite atingido → 429 sem tocar na Anthropic.
-  const allowed = await incrementUsage(uid, 3);
+  const allowed = await incrementUsage(uid, AI_DAILY_LIMIT);
   if (!allowed) {
     return json(
       { error: "Limite diário de importações atingido.", code: "AI_LIMIT" },
