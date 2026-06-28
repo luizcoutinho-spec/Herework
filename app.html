@@ -12205,25 +12205,7 @@ function _renderVitaeGate() {
     var msg = isEs ? 'Inicia sesión para usar Vitae'  : 'Faça login para usar o Vitae';
     var btn = isEs ? 'Iniciar sesión'                 : 'Entrar';
     var aboutLink = isEs ? '¿Qué es Vitae Studio?' : 'O que é o Vitae Studio?';
-    root.innerHTML =
-      '<div style="text-align:center;padding:60px 20px 40px;">' +
-        '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + btn + '</button>' +
-        '<div style="margin-top:20px;">' +
-          '<a href="#" onclick="_vitaeShowAbout();return false;" style="font-size:13px;color:var(--text-2,#475569);text-decoration:underline;cursor:pointer;">' + aboutLink + '</a>' +
-        '</div>' +
-      '</div>' +
-      '<div class="cv-about-page" style="max-width:760px;margin:24px auto 60px;text-align:left;">' +
-        '<h3>' + (isEs?'Qué es Vitae Studio':'O que é o Vitae Studio') + '</h3>' +
-        '<p>' + (isEs?'El Vitae es un creador de currículos profesional — un producto HereWork, gratuito para usuarios registrados. Transforma la tarea tediosa de armar un CV en algo rápido y visual:':'O Vitae é um construtor de currículos profissional — um produto HereWork, gratuito para cadastrados. Ele transforma a tarefa chata de montar um CV em algo rápido e visual:') + '</p>' +
-        '<div class="cv-about-grid">' +
-          '<div class="cv-about-card"><strong>' + (isEs?'Editor en vivo':'Editor ao vivo') + '</strong> — ' + (isEs?'completa un lado y mira el CV armarse en tiempo real del otro, en A4. Lo que ves es lo que sale.':'preencha de um lado e veja o currículo se montar em tempo real do outro, em A4. O que você vê é o que sai.') + '</div>' +
-          '<div class="cv-about-card"><strong>' + (isEs?'3 plantillas profesionales':'3 templates profissionais') + '</strong> — ' + (isEs?'Ejecutivo, Clásico y Moderno, cambia con un clic, con elección de color y fuente.':'Executivo, Clássico e Moderno, troca com um clique, com escolha de cor e fonte.') + '</div>' +
-          '<div class="cv-about-card"><strong>' + (isEs?'Secciones flexibles':'Seções flexíveis') + '</strong> — ' + (isEs?'experiencia, educación, competencias, idiomas y más, reordenables arrastrando.':'experiência, educação, competências, idiomas e mais, reordenáveis arrastando.') + '</div>' +
-          '<div class="cv-about-card"><strong>' + (isEs?'Análisis ATS':'Análise ATS') + '</strong> — ' + (isEs?'puntúa la compatibilidad del CV con los filtros automáticos de las empresas y señala qué mejorar, para que tu CV llegue al reclutador.':'pontua a compatibilidade do CV com os filtros automáticos das empresas e aponta o que melhorar, para seu currículo chegar ao recrutador.') + '</div>' +
-          '<div class="cv-about-card"><strong>' + (isEs?'Importación por IA':'Importação por IA') + '</strong> — ' + (isEs?'sube un CV anterior (PDF o Word) y la IA lo completa automáticamente.':'suba um CV antigo (PDF ou Word) e a IA preenche tudo automaticamente.') + '</div>' +
-          '<div class="cv-about-card"><strong>' + (isEs?'Exportación en PDF':'Exportação em PDF') + '</strong> — ' + (isEs?'listo para enviar, en A4.':'pronto para enviar, em A4.') + '</div>' +
-        '</div>' +
-      '</div>';
+    _vitaeShowAbout();
     return;
   }
   if (pg) { pg.classList.add('vitae-fullscreen'); document.body.classList.add('vitae-active'); }
@@ -12307,7 +12289,6 @@ window._vitaeShowAbout = function(){
   ];
   root.innerHTML =
     '<div class="vitae-wrap"><div class="cv-about-page">' +
-      '<a class="cv-about-back" onclick="_vitaeShowBlock();return false;" href="#">' + back + '</a>' +
       '<h2>' + title + '</h2>' +
       '<p class="cv-about-open">' + open + '</p>' +
       '<div class="cv-about-grid">' +
