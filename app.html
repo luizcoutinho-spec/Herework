@@ -5116,7 +5116,7 @@ section { padding: 64px 0; }
             </div>
             <div class="form-group" style="margin-bottom:0;">
               <label class="form-label" for="profile-phone">Telefone</label>
-              <input class="form-input" id="profile-phone" type="tel" placeholder="(11) 90000-0000" autocomplete="tel">
+              <input class="form-input" id="profile-phone" type="tel" maxlength="15" placeholder="(11) 90000-0000" autocomplete="tel" oninput="_maskPhoneInput(this)">
             </div>
           </div>
         </div>
@@ -16277,6 +16277,33 @@ function _fullDateTime(iso) {
   return d.toLocaleDateString('pt-BR') + ' às ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
 }
 
+/* Máscara de telefone BR — (XX) XXXX-XXXX (fixo) ou (XX) XXXXX-XXXX (celular)
+   Chamada pelo oninput do #profile-phone e reutilizada por _fmtPhoneDisplay. */
+function _maskPhoneInput(el) {
+  var d = (el.value || '').replace(/\D/g, '').slice(0, 11);
+  var out;
+  if (d.length <= 10) {
+    out = d.replace(/^(\d{0,2})(\d{0,4})(\d{0,4})/, function(_, a, b, c) {
+      var s = ''; if (a) s = '(' + a; if (a && a.length === 2) s += ') '; if (b) s += b; if (c) s += '-' + c; return s;
+    });
+  } else {
+    out = d.replace(/^(\d{0,2})(\d{0,5})(\d{0,4})/, function(_, a, b, c) {
+      var s = ''; if (a) s = '(' + a; if (a && a.length === 2) s += ') '; if (b) s += b; if (c) s += '-' + c; return s;
+    });
+  }
+  el.value = out;
+}
+/* Formata um valor salvo (cru ou já formatado) para exibição */
+function _fmtPhoneDisplay(raw) {
+  var d = (raw || '').replace(/\D/g, '').slice(0, 11);
+  if (!d) return '';
+  var tmp = { value: d };
+  _maskPhoneInput(tmp);
+  return tmp.value;
+}
+/* Limpa máscara antes de salvar — banco recebe só dígitos */
+function _cleanPhone(raw) { return (raw || '').replace(/\D/g, '').slice(0, 11); }
+
 (function() {
 
 /* ── Pools de dados ── */
@@ -18229,7 +18256,7 @@ function openDashboard() {
   if (stEl) stEl.value = (_session && _session.state) || _odCache.state || '';
   if (ctEl) ctEl.value = (_session && _session.city)  || _odCache.city  || '';
   var phEl = document.getElementById('profile-phone');
-  if (phEl) phEl.value = (_session && _session.phone) || _odCache.phone || '';
+  if (phEl) phEl.value = _fmtPhoneDisplay((_session && _session.phone) || _odCache.phone || '');
 
   _renderDashClientActive(_vd);
   _renderDashClientWaiting(_vd);
@@ -18827,7 +18854,7 @@ function dashSaveProfile() {
     name:      newName,
     /* bio e phone: DOM quando presente, senão cache Supabase ou metadata existente */
     bio:       bioEl   ? bioEl.value.trim()   : (existingMeta.bio   || _cachedProf.bio   || ''),
-    phone:     phoneEl ? phoneEl.value.trim() : (_cachedProf.phone  || ''),
+    phone:     phoneEl ? _cleanPhone(phoneEl.value) : (_cachedProf.phone  || ''),
     city:      newCity,
     state:     newState,
     type:      newType,
