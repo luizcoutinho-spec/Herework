@@ -16051,7 +16051,7 @@ async function simulatePixPayment() {
     _pixPollingInterval = setInterval(async function() {
       if (!_pixPaymentIntentId) { clearInterval(_pixPollingInterval); return; }
       try {
-        var statusRes  = await fetch('/api/status?id=' + _pixPaymentIntentId);
+        var statusRes  = await fetch('/api/stripe-status?id=' + _pixPaymentIntentId);
         var statusData = await statusRes.json();
         if (statusData.succeeded) {
           clearInterval(_pixPollingInterval);
@@ -21466,7 +21466,7 @@ async function loadConnectStatus() {
     var s = await _sb.auth.getSession();
     var token = s.data.session ? s.data.session.access_token : '';
     if (!token) { box.innerHTML = _connectCardHTML('error', 'Faça login para ver seus recebimentos.'); return; }
-    var res = await fetch('/api/connect-account-status', {
+    var res = await fetch('/api/stripe-status', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token }
     });
