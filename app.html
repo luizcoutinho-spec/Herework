@@ -4402,6 +4402,14 @@ section { padding: 64px 0; }
   </style>
   <!-- === /VITAE CV STUDIO CSS === -->
 
+  <!-- Vitae B.2 — fullscreen layout -->
+  <style>
+body.vitae-active{overflow:hidden;}
+#page-vitae.vitae-fullscreen .page-banner{display:none;}
+#page-vitae.vitae-fullscreen>.container{padding:0 !important;max-width:none !important;}
+.vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
+  </style>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
@@ -11750,6 +11758,8 @@ function showPage(name) {
   if (name !== 'dashboard' && typeof _sbStopListenProposals === 'function') {
     _sbStopListenProposals();
   }
+  /* Vitae: limpa fullscreen ao navegar para outra página */
+  if (name !== 'vitae') { var _pvp = document.getElementById('page-vitae'); if (_pvp) _pvp.classList.remove('vitae-fullscreen'); document.body.classList.remove('vitae-active'); }
   /* Vitae: re-renderiza gate a cada visita (estado de login pode ter mudado) */
   if (name === 'vitae') { _renderVitaeGate(); }
 }
@@ -11758,8 +11768,10 @@ function showPage(name) {
 function _renderVitaeGate() {
   var root = document.getElementById('vitae-root');
   if (!root) return;
+  var pg   = document.getElementById('page-vitae');
   var isEs = (typeof lang === 'function' ? lang() : (document.documentElement.getAttribute('data-lang') || 'pt')) === 'es';
   if (!_session) {
+    if (pg) { pg.classList.remove('vitae-fullscreen'); document.body.classList.remove('vitae-active'); }
     var msg = isEs ? 'Inicia sesión para usar Vitae'  : 'Faça login para usar o Vitae';
     var btn = isEs ? 'Iniciar sesión'                 : 'Entrar';
     root.innerHTML =
@@ -11771,13 +11783,28 @@ function _renderVitaeGate() {
       '</div>';
     return;
   }
-  var placeholder = isEs
-    ? 'El constructor de CV estará disponible aquí (Etapa B)'
-    : 'O construtor de currículo ficará disponível aqui (Etapa B)';
+  if (pg) { pg.classList.add('vitae-fullscreen'); document.body.classList.add('vitae-active'); }
+  /* Idempotência: se o esqueleto já foi injetado, não reinjetar (preserva estado do B.3) */
+  if (document.getElementById('cv-editor')) return;
+
   root.innerHTML =
-    '<div style="text-align:center;padding:60px 20px;color:var(--text-3);font-size:15px;">' +
-      placeholder +
+    '<div class="vitae-wrap">' +
+      '<div class="cv-app">' +
+        '<div class="cv-top">' +
+          '<div class="cv-logo">Vitae<b>Studio</b></div>' +
+          '<button class="cv-tbtn" id="cv-importBtn" disabled title="Em breve (Etapa C)">&#10548; Importar PDF/Word</button>' +
+          '<input id="cv-file" type="file" accept=".pdf,.doc,.docx" hidden>' +
+          '<div class="cv-sp"></div>' +
+          '<button class="cv-tbtn cv-pri" id="cv-dlBtn">&#11015; Baixar PDF</button>' +
+        '</div>' +
+        '<div class="cv-main">' +
+          '<div class="cv-editor" id="cv-editor"></div>' +
+          '<div class="cv-preview"><div class="cv-pagewrap" id="cv-pagewrap"></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="cv-toast" id="cv-toast"></div>' +
     '</div>';
+  /* B.3: _initVitaeApp(); */
 }
 
 /* ── Freelancers: busca perfis reais (type = freelancer | both) ── */
