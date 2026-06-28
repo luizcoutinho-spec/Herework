@@ -4408,6 +4408,22 @@ body.vitae-active{overflow:hidden;}
 #page-vitae.vitae-fullscreen .page-banner{display:none;}
 #page-vitae.vitae-fullscreen>.container{padding:0 !important;max-width:none !important;}
 .vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
+/* ── Vitae About popover (logado) ── */
+#cv-about-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9200;display:flex;align-items:center;justify-content:center;padding:20px;}
+#cv-about-backdrop.cv-hidden{display:none;}
+#cv-about-panel{background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.22);max-width:480px;width:100%;max-height:80vh;overflow-y:auto;padding:28px 30px 26px;position:relative;}
+#cv-about-panel h3{margin:0 0 6px;font-size:17px;font-weight:800;color:var(--text,#0f172a);}
+#cv-about-panel .cv-about-pitch{font-size:14px;color:var(--text-2,#475569);margin:0 0 16px;}
+#cv-about-panel ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;}
+#cv-about-panel ul li{font-size:13.5px;color:var(--text,#0f172a);line-height:1.45;}
+#cv-about-close{position:absolute;top:14px;right:14px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-2,#475569);line-height:1;padding:4px 8px;border-radius:6px;}
+#cv-about-close:hover{background:var(--border,#e2e8f0);}
+/* ── Vitae About bloco inline (deslogado) ── */
+.cv-about-inline{margin-top:36px;text-align:left;max-width:440px;margin-left:auto;margin-right:auto;padding:22px 24px;background:var(--surface,#f8fafc);border:1px solid var(--border,#e2e8f0);border-radius:12px;}
+.cv-about-inline h3{margin:0 0 4px;font-size:15px;font-weight:700;color:var(--text,#0f172a);}
+.cv-about-inline .cv-about-pitch{font-size:13px;color:var(--text-2,#475569);margin:0 0 12px;}
+.cv-about-inline ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:5px;}
+.cv-about-inline ul li{font-size:13px;color:var(--text,#0f172a);line-height:1.4;}
   </style>
 
   <!-- Vitae B.3b — print isolado: só dispara quando body.vitae-active -->
@@ -4799,6 +4815,7 @@ function bindEvents(){
  ed.addEventListener('dragover',e=>{if(dragFrom!=null){e.preventDefault();}});
  ed.addEventListener('drop',e=>{const c=e.target.closest('.cv-card');if(c&&dragFrom!=null){e.preventDefault();const to=+c.dataset.sec;const x=S.sections.splice(dragFrom,1)[0];S.sections.splice(to,0,x);dragFrom=null;renderEditor();renderPreview();save();}});
  const dl=$('cv-dlBtn');if(dl)dl.addEventListener('click',()=>{fitOnePage();setTimeout(()=>window.print(),60);});
+ const ab=$('cv-aboutBtn');if(ab){ab.addEventListener('click',()=>{const bd=$('cv-about-backdrop');if(bd)bd.classList.remove('cv-hidden');});}
  const ib=$('cv-importBtn');if(ib){ib.addEventListener('click',()=>{const f=$('cv-file');if(f)f.click();});}
  const fi=$('cv-file');if(fi){fi.addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value='';});}
  if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
@@ -12176,12 +12193,34 @@ function _renderVitaeGate() {
     if (pg) { pg.classList.remove('vitae-fullscreen'); document.body.classList.remove('vitae-active'); }
     var msg = isEs ? 'Inicia sesión para usar Vitae'  : 'Faça login para usar o Vitae';
     var btn = isEs ? 'Iniciar sesión'                 : 'Entrar';
+    var aboutTitle = isEs ? 'Qué es Vitae Studio'                                             : 'O que é o Vitae Studio';
+    var aboutPitch = isEs ? 'Un creador de currículums profesional, gratis para usuarios de HereWork.' : 'Um construtor de currículos profissional, gratuito para usuários do HereWork.';
+    var aboutItems = isEs ? [
+      'Editor en vivo con vista previa en A4 — lo que ves es lo que sale',
+      '3 plantillas profesionales (Ejecutivo, Clásico, Moderno), con color y fuente ajustables',
+      'Secciones flexibles, reordenables arrastrando',
+      'Análisis ATS — puntúa la compatibilidad de tu CV con los filtros de las empresas',
+      'Importación por IA — sube un CV anterior (PDF/Word) y la IA lo completa',
+      'Exportación en PDF, listo para enviar'
+    ] : [
+      'Editor ao vivo com pré-visualização em A4 — o que você vê é o que sai',
+      '3 templates profissionais (Executivo, Clássico, Moderno), com cor e fonte ajustáveis',
+      'Seções flexíveis, reordenáveis arrastando',
+      'Análise ATS — pontua a compatibilidade do seu CV com os filtros das empresas',
+      'Importação por IA — suba um CV antigo (PDF/Word) e a IA preenche tudo',
+      'Exportação em PDF, pronto para enviar'
+    ];
     root.innerHTML =
-      '<div style="text-align:center;padding:60px 20px;">' +
+      '<div style="text-align:center;padding:60px 20px 40px;">' +
         '<div style="font-size:48px;margin-bottom:20px;">📄</div>' +
         '<p style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;">' + msg + '</p>' +
         '<p style="font-size:14px;color:var(--text-3);margin-bottom:24px;" data-pt="Crie seu currículo profissional com IA" data-es="Crea tu CV profesional con IA">Crie seu currículo profissional com IA</p>' +
         '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + btn + '</button>' +
+        '<div class="cv-about-inline">' +
+          '<h3>' + aboutTitle + '</h3>' +
+          '<p class="cv-about-pitch">' + aboutPitch + '</p>' +
+          '<ul>' + aboutItems.map(function(i){return '<li>'+i+'</li>';}).join('') + '</ul>' +
+        '</div>' +
       '</div>';
     return;
   }
@@ -12189,11 +12228,31 @@ function _renderVitaeGate() {
   /* Idempotência: se o esqueleto já foi injetado, não reinjetar (preserva estado do B.3) */
   if (document.getElementById('cv-editor')) return;
 
+  var isEsL = isEs;
+  var aboutTitleL = isEsL ? 'Qué es Vitae Studio'                                             : 'O que é o Vitae Studio';
+  var aboutPitchL = isEsL ? 'Un creador de currículums profesional, gratis para usuarios de HereWork.' : 'Um construtor de currículos profissional, gratuito para usuários do HereWork.';
+  var aboutItemsL = isEsL ? [
+    'Editor en vivo con vista previa en A4 — lo que ves es lo que sale',
+    '3 plantillas profesionales (Ejecutivo, Clásico, Moderno), con color y fuente ajustables',
+    'Secciones flexibles, reordenables arrastrando',
+    'Análisis ATS — puntúa la compatibilidad de tu CV con los filtros de las empresas',
+    'Importación por IA — sube un CV anterior (PDF/Word) y la IA lo completa',
+    'Exportación en PDF, listo para enviar'
+  ] : [
+    'Editor ao vivo com pré-visualização em A4 — o que você vê é o que sai',
+    '3 templates profissionais (Executivo, Clássico, Moderno), com cor e fonte ajustáveis',
+    'Seções flexíveis, reordenáveis arrastando',
+    'Análise ATS — pontua a compatibilidade do seu CV com os filtros das empresas',
+    'Importação por IA — suba um CV antigo (PDF/Word) e a IA preenche tudo',
+    'Exportação em PDF, pronto para enviar'
+  ];
+  var aboutBtnLabel = isEsL ? 'ⓘ Sobre' : 'ⓘ Sobre';
   root.innerHTML =
     '<div class="vitae-wrap">' +
       '<div class="cv-app">' +
         '<div class="cv-top">' +
           '<div class="cv-logo">Vitae<b>Studio</b></div>' +
+          '<button class="cv-tbtn" id="cv-aboutBtn" title="' + aboutTitleL + '" style="opacity:.85;font-size:13px;">' + aboutBtnLabel + '</button>' +
           '<button class="cv-tbtn" id="cv-importBtn">&#10548; Importar PDF/Word</button>' +
           '<input id="cv-file" type="file" accept=".pdf,.doc,.docx" hidden>' +
           '<div class="cv-sp"></div>' +
@@ -12205,6 +12264,14 @@ function _renderVitaeGate() {
         '</div>' +
       '</div>' +
       '<div class="cv-toast" id="cv-toast"></div>' +
+      '<div id="cv-about-backdrop" class="cv-hidden" onclick="if(event.target===this)document.getElementById(\'cv-about-backdrop\').classList.add(\'cv-hidden\')">' +
+        '<div id="cv-about-panel">' +
+          '<button id="cv-about-close" onclick="document.getElementById(\'cv-about-backdrop\').classList.add(\'cv-hidden\')" title="Fechar">&#x2715;</button>' +
+          '<h3>' + aboutTitleL + '</h3>' +
+          '<p class="cv-about-pitch">' + aboutPitchL + '</p>' +
+          '<ul>' + aboutItemsL.map(function(i){return '<li>'+i+'</li>';}).join('') + '</ul>' +
+        '</div>' +
+      '</div>' +
     '</div>';
   VitaeCV.init();
 }
