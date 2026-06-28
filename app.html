@@ -4410,6 +4410,20 @@ body.vitae-active{overflow:hidden;}
 .vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
   </style>
 
+  <!-- Vitae B.3b — print isolado: só dispara quando body.vitae-active -->
+  <style>
+@media print{
+  /* Condição: só afeta impressão quando o Vitae está em fullscreen.
+     Nas demais páginas do app, body NÃO tem vitae-active → regras ignoradas. */
+  body.vitae-active *{visibility:hidden;}
+  body.vitae-active #cv-pagewrap,
+  body.vitae-active #cv-pagewrap *{visibility:visible;}
+  body.vitae-active #cv-pagewrap{position:fixed;top:0;left:0;width:100%;transform:none !important;height:auto !important;}
+  body.vitae-active #cv-pagewrap .cv-fit{transform:none !important;width:210mm !important;}
+  body.vitae-active #cv-pagewrap .cv-page{box-shadow:none;}
+}
+  </style>
+
   <!-- === VitaeCV JS core (Etapa B.3a) === -->
   <script>
 /* === VitaeCV — CV Studio core (Etapa B.3a) ===========================
@@ -4493,6 +4507,8 @@ function bullets(d){if(!d)return '';const ls=String(d).split(/\n+/).map(x=>x.tri
 function levelN(lv){const m={'nativo':5,'fluente':5,'avançado':4,'avancado':4,'intermediário':3,'intermediario':3,'básico':2,'basico':2};return m[(lv||'').toLowerCase().trim()]||4;}
 function hex2rgba(h,a){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
 function moveArr(a,i,j){if(j<0||j>=a.length)return;const x=a.splice(i,1)[0];a.splice(j,0,x);}
+const ACTION_VERBS=['lidere','liderei','gerenciei','geri','aumentei','reduzi','implementei','desenvolvi','criei','coordenei','dirigi','negociei','otimizei','expandi','conduzi','estruturei','elevei','entreguei','transformei','lancei','construí','planejei','executei','superei','alcancei','led','managed','increased','reduced','built','launched','delivered','drove','achieved','improved','created'];
+let dragFrom=null;
 /* =========================================================
    EDITOR
 ========================================================= */
@@ -4522,11 +4538,12 @@ function renderEditor(){
  S.sections.forEach((sec,si)=>{h+=sectionCard(sec,si);});
  h+='<div class="cv-addsec" id="cv-addsec"><button class="cv-add" id="cv-addBtn">+ Adicionar seção</button><div class="cv-menu">'+
     Object.keys(TYPES).map(t=>`<button data-addtype="${t}">${TYPES[t].name}</button>`).join('')+'</div></div>';
- /* B.3b: ATS excluído */
+ h+='<div class="cv-ed-h">Análise ATS</div><div id="cv-atsBox"></div>';
  $('cv-editor').innerHTML=h;
+ renderATS();
 }
 function sectionCard(sec,si){
- const meta=TYPES[sec.type]; let h=`<div class="cv-card" data-sec="${si}">`;
+ const meta=TYPES[sec.type]; let h=`<div class="cv-card" data-sec="${si}" draggable="true">`;
  h+=`<div class="cv-hd">☰ <input class="cv-ttl" data-sectitle="${si}" value="${esc(sec.title)}">`;
  if(S.template==='exec') h+=`<button class="cv-ic cv-colbtn" data-col="${si}" title="Coluna">${sec.col==='side'?'▥':'▤'}</button>`;
  h+=`<button class="cv-ic" data-mvsec="${si}|-1" title="Subir">↑</button>
@@ -4614,8 +4631,7 @@ function renderPreview(){
  }
  const pw=$('cv-pagewrap'); if(!pw) return;
  pw.innerHTML=inner;
- applyTheme(); fitOnePage(); fitPreview();
- /* B.3b: renderATS() excluído */
+ applyTheme(); fitOnePage(); fitPreview(); renderATS();
 }
 function fitOnePage(){
  const pw=$('cv-pagewrap'); if(!pw) return;
@@ -4632,6 +4648,38 @@ function fitPreview(){
  const avail=pw.parentElement.clientWidth-48; const w=page.offsetWidth||794;
  const scale=Math.min(1,avail/w); pw.style.transform=`scale(${scale})`;
  pw.style.height=(page.offsetHeight*scale)+'px';
+}
+/* =========================================================
+   ATS SCORE (heurístico)
+========================================================= */
+function renderATS(){
+ const box=$('cv-atsBox'); if(!box) return;
+ const b=S.basics; const checks=[]; let score=0;
+ const add=(cond,pts,okMsg,noMsg,warn)=>{if(cond){score+=pts;checks.push({c:'ok',m:okMsg});}else checks.push({c:warn?'warn':'no',m:noMsg});};
+ add(!!(b.email||b.phone),12,'Contato (e-mail/telefone) presente','Adicione e-mail ou telefone');
+ add(!!b.linkedin,6,'LinkedIn incluído','Inclua seu LinkedIn',true);
+ add(!!(b.headline&&b.headline.length>3),8,'Headline/cargo definido','Defina um cargo/headline no topo');
+ const sw=(b.summary||'').trim().split(/\s+/).filter(Boolean).length;
+ add(sw>=25&&sw<=90,14,`Resumo com bom tamanho (${sw} palavras)`,sw<25?'Resumo curto — mire 30-80 palavras':'Resumo longo — reduza para até ~80 palavras',true);
+ const exp=S.sections.find(s=>s.type==='experience');
+ const expItems=exp?exp.items:[];
+ add(expItems.length>0,12,`${expItems.length} experiência(s) listada(s)`,'Adicione experiências profissionais');
+ const allDesc=expItems.map(i=>i.descricao||'').join('\n');
+ add(/%|\d/.test(allDesc),14,'Resultados com números/métricas','Quantifique resultados (use %, valores, volumes)');
+ const firstWords=allDesc.split(/\n+/).map(l=>l.trim().split(/\s+/)[0]||'').filter(Boolean).map(w=>w.toLowerCase().replace(/[^a-zà-ú]/g,''));
+ const verbHits=firstWords.filter(w=>ACTION_VERBS.includes(w)).length;
+ add(firstWords.length>0&&verbHits>=Math.max(1,Math.ceil(firstWords.length*0.4)),12,'Bullets começam com verbos de ação','Comece os bullets com verbos de ação (ex.: Liderei, Aumentei, Reduzi)',true);
+ const hasSkills=S.sections.some(s=>s.type==='skills'&&s.items.filter(x=>String(x).trim()).length>=3);
+ add(hasSkills,10,'Seção de competências preenchida','Liste ao menos 3 competências-chave');
+ const hasEdu=S.sections.some(s=>s.type==='education'&&s.items.length);
+ add(hasEdu,6,'Formação incluída','Inclua sua formação',true);
+ add(true,6,'Estrutura ATS-friendly (sem tabelas/imagens de texto)','',false);
+ score=Math.min(100,Math.round(score));
+ const col=score>=80?'#16a34a':score>=55?'#d97706':'#dc2626';
+ box.innerHTML=`<div class="cv-ats">
+   <div class="cv-score"><div class="cv-ring" style="background:${col}">${score}</div>
+     <div style="font-size:12px;color:#475569">Pontuação ATS estimada.<br>Ajuste os itens abaixo para subir.</div></div>
+   <ul>${checks.map(c=>`<li class="cv-${c.c}"><span class="cv-mk">${c.c==='ok'?'✓':c.c==='warn'?'!':'✕'}</span><span>${c.m}</span></li>`).join('')}</ul></div>`;
 }
 /* =========================================================
    EVENT BINDING
@@ -4672,8 +4720,10 @@ function bindEvents(){
    if(t.id==='cv-addBtn'){$('cv-addsec').classList.toggle('cv-open');return;}
    if(t.dataset.addtype){S.sections.push(newSection(t.dataset.addtype));$('cv-addsec').classList.remove('cv-open');renderEditor();renderPreview();save();return;}
  });
- /* B.3b: drag-and-drop excluído */
- /* B.3b: dlBtn click excluído */
+ ed.addEventListener('dragstart',e=>{const c=e.target.closest('.cv-card');if(c){dragFrom=+c.dataset.sec;e.dataTransfer.effectAllowed='move';}});
+ ed.addEventListener('dragover',e=>{if(dragFrom!=null){e.preventDefault();}});
+ ed.addEventListener('drop',e=>{const c=e.target.closest('.cv-card');if(c&&dragFrom!=null){e.preventDefault();const to=+c.dataset.sec;const x=S.sections.splice(dragFrom,1)[0];S.sections.splice(to,0,x);dragFrom=null;renderEditor();renderPreview();save();}});
+ const dl=$('cv-dlBtn');if(dl)dl.addEventListener('click',()=>{fitOnePage();setTimeout(()=>window.print(),60);});
  if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
 }
 /* =========================================================
