@@ -4410,6 +4410,281 @@ body.vitae-active{overflow:hidden;}
 .vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
   </style>
 
+  <!-- === VitaeCV JS core (Etapa B.3a) === -->
+  <script>
+/* === VitaeCV — CV Studio core (Etapa B.3a) ===========================
+   IIFE privada: internos ($, S, renderEditor, renderPreview…) não vazam.
+   Expõe: VitaeCV.init()
+   IDs: cv-editor, cv-pagewrap, cv-toast, cv-addsec, cv-addBtn,
+        cv-fontSel, cv-photoIn  (do esqueleto B.2)
+   Classes geradas: cv-* (batem com CSS B.1)
+   Excluído: ATS, drag-and-drop, print/download (→ B.3b), IA (→ Etapa C)
+================================================================= */
+var VitaeCV=(function(){
+'use strict';
+function $(id){return document.getElementById(id);}
+const I={
+ cal:'<svg viewBox="0 0 24 24"><path d="M7 2v2H5a2 2 0 00-2 2v13a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2h-2V2h-2v2H9V2H7zM5 9h14v10H5z"/></svg>',
+ pin:'<svg viewBox="0 0 24 24"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5A2.5 2.5 0 1112 6.5a2.5 2.5 0 010 5z"/></svg>',
+ ph:'<svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.6 21 3 13.4 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.3 1l-2.2 2.3z"/></svg>',
+ mail:'<svg viewBox="0 0 24 24"><path d="M3 5h18c.6 0 1 .4 1 1v12c0 .6-.4 1-1 1H3c-.6 0-1-.4-1-1V6c0-.6.4-1 1-1zm9 7L4 7v1l8 5 8-5V7z"/></svg>',
+ link:'<svg viewBox="0 0 24 24"><path d="M4.98 3.5C4.98 4.9 3.9 6 2.5 6S0 4.9 0 3.5 1.1 1 2.5 1s2.48 1.1 2.48 2.5zM.2 8h4.6v14H.2zm7.5 0h4.4v1.9h.06c.6-1.1 2.1-2.3 4.3-2.3 4.6 0 5.5 3 5.5 6.9V22h-4.6v-6.6c0-1.6 0-3.6-2.2-3.6s-2.5 1.7-2.5 3.5V22H7.7z"/></svg>',
+ web:'<svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm6.9 6h-2.8a15.7 15.7 0 00-1.3-3.4A8 8 0 0118.9 8zM12 4c.8 1.1 1.4 2.5 1.8 4h-3.6c.4-1.5 1-2.9 1.8-4zM4.3 14a7.9 7.9 0 010-4h3.2a17 17 0 000 4zm.8 2h2.8c.3 1.2.8 2.4 1.3 3.4A8 8 0 015.1 16zm2.8-8H5.1a8 8 0 014.1-3.4A15.7 15.7 0 007.9 8zM12 20c-.8-1.1-1.4-2.5-1.8-4h3.6c-.4 1.5-1 2.9-1.8 4zm2.2-6H9.8a15 15 0 010-4h4.4a15 15 0 010 4zm.6 5.4c.5-1 1-2.2 1.3-3.4h2.8a8 8 0 01-4.1 3.4zM16.5 14a17 17 0 000-4h3.2a7.9 7.9 0 010 4z"/></svg>'
+};
+const TYPES={
+ experience:{name:'Experiência',side:false,kind:'entries'},
+ education:{name:'Educação',side:false,kind:'entries'},
+ projects:{name:'Projetos',side:false,kind:'entries'},
+ custom:{name:'Seção personalizada',side:false,kind:'entries'},
+ achievements:{name:'Conquistas-Chave',side:true,kind:'ach'},
+ skills:{name:'Competências',side:true,kind:'skills'},
+ languages:{name:'Idiomas',side:true,kind:'langs'},
+ awards:{name:'Prêmios',side:true,kind:'entries'}
+};
+const LEVELS=['Nativo','Fluente','Avançado','Intermediário','Básico'];
+const ACCENTS=['#149da4','#2563eb','#7c3aed','#db2777','#dc2626','#0f766e','#b45309','#0f172a'];
+const FONTS={'Segoe UI':"'Segoe UI',Arial,sans-serif",'Georgia':"Georgia,'Times New Roman',serif",'Calibri':"Calibri,'Segoe UI',sans-serif",'Arial':"Arial,Helvetica,sans-serif"};
+const TEMPLATES={exec:'Executivo',classic:'Clássico',modern:'Moderno'};
+let uid=1; const nid=()=>'s'+(uid++);
+function blankItem(type){
+ const k=TYPES[type].kind;
+ if(k==='skills') return 'Nova competência';
+ if(k==='langs') return {idioma:'Idioma',nivel:'Avançado'};
+ if(k==='ach') return {titulo:'Conquista',descricao:'Descrição do resultado, com números quando possível.'};
+ return {cargo:'',empresa:'',periodo:'',local:'',descricao:''};
+}
+function newSection(type){
+ const meta=TYPES[type];
+ return {id:nid(),type,title:meta.name,col:meta.side?'side':'main',items:[blankItem(type)]};
+}
+let S;
+function save(){try{localStorage.setItem('cvstudio',JSON.stringify(S));}catch(e){}}
+function load(){try{const r=localStorage.getItem('cvstudio');if(!r)return null;return JSON.parse(r);}catch(e){return null;}}
+function demo(){
+ return {
+  basics:{name:'Luiz Coutinho',headline:'CEO na Brandvakt | CFO · Finanças',location:'Täby, Suécia',
+    phone:'',email:'',linkedin:'linkedin.com/in/luiz-c-1401a321',website:'',photo:'',
+    summary:'Executivo C-level com mais de 25 anos em finanças e gestão, atualmente CEO da Brandvakt. Trajetória em CFO, Diretor Financeiro e liderança de vendas globais, com atuação no Brasil, Angola e Suécia. Histórico de crescimento de receita, otimização de custos e expansão internacional.'},
+  template:'exec',accent:'#149da4',font:'Segoe UI',
+  sections:[
+   {id:nid(),type:'experience',title:'Experiência',col:'main',items:[
+     {cargo:'CEO do Grupo',empresa:'Brandvakt',periodo:'abr/2023 – Presente',local:'',descricao:'Lidero a estratégia global de uma empresa de tecnologia em segurança digital.\nExpansão da rede de vendas para 15 novos países em 2023.'},
+     {cargo:'Chief Financial Officer (CFO)',empresa:'YD | Investment Capital',periodo:'ago/2014 – Presente',local:'São Paulo, Brasil',descricao:'Gestão financeira e de investimentos (Venture Capital).'}
+   ]},
+   {id:nid(),type:'education',title:'Educação',col:'main',items:[
+     {cargo:'Engenharia Econômica e Financeira',empresa:'Universidade Federal Fluminense',periodo:'2004 – 2006',local:'',descricao:''}
+   ]},
+   {id:nid(),type:'achievements',title:'Conquistas-Chave',col:'side',items:[
+     {titulo:'Crescimento de Receita',descricao:'+20% na receita anual em 2023.'},
+     {titulo:'Otimização de Custos',descricao:'-30% nos custos operacionais até 2022.'}
+   ]},
+   {id:nid(),type:'skills',title:'Competências',col:'side',items:['Gestão Financeira','M&A','Planejamento Estratégico','Liderança','Expansão Internacional']},
+   {id:nid(),type:'languages',title:'Idiomas',col:'side',items:[{idioma:'Português',nivel:'Nativo'},{idioma:'Inglês',nivel:'Fluente'}]}
+  ]
+ };
+}
+/* ── Helpers ── */
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('cv-toast');if(!t)return;t.textContent=m;t.classList.add('cv-show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('cv-show'),2600);}
+function initials(n){const p=(n||'').trim().split(/\s+/).filter(Boolean);return p.length?((p[0][0]||'')+(p.length>1?p[p.length-1][0]:'')).toUpperCase():'CV';}
+function bullets(d){if(!d)return '';const ls=String(d).split(/\n+/).map(x=>x.trim()).filter(Boolean);
+ if(ls.length>1)return '<ul>'+ls.map(l=>'<li>'+esc(l)+'</li>').join('')+'</ul>';
+ return '<div>'+esc(ls[0]||'')+'</div>';}
+function levelN(lv){const m={'nativo':5,'fluente':5,'avançado':4,'avancado':4,'intermediário':3,'intermediario':3,'básico':2,'basico':2};return m[(lv||'').toLowerCase().trim()]||4;}
+function hex2rgba(h,a){h=h.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');const n=parseInt(h,16);return `rgba(${(n>>16)&255},${(n>>8)&255},${n&255},${a})`;}
+function moveArr(a,i,j){if(j<0||j>=a.length)return;const x=a.splice(i,1)[0];a.splice(j,0,x);}
+/* =========================================================
+   EDITOR
+========================================================= */
+function renderEditor(){
+ const b=S.basics; let h='';
+ h+='<div class="cv-ed-h">Design</div>';
+ h+='<div class="cv-fld"><label>Template</label><div class="cv-tmpls">'+
+    Object.keys(TEMPLATES).map(k=>`<div class="cv-tmpl ${S.template===k?'cv-on':''}" data-tmpl="${k}">${TEMPLATES[k]}</div>`).join('')+'</div></div>';
+ h+='<div class="cv-grid2">';
+ h+='<div class="cv-fld"><label>Cor de destaque</label><div class="cv-swatches">'+
+    ACCENTS.map(c=>`<div class="cv-sw ${S.accent===c?'cv-on':''}" data-acc="${c}" style="background:${c}"></div>`).join('')+'</div></div>';
+ h+='<div class="cv-fld"><label>Fonte</label><select id="cv-fontSel">'+Object.keys(FONTS).map(f=>`<option ${S.font===f?'selected':''}>${f}</option>`).join('')+'</select></div>';
+ h+='</div>';
+ h+='<div class="cv-ed-h">Dados pessoais</div>';
+ h+=`<div class="cv-grid2">
+   <div class="cv-fld"><label>Nome</label><input data-b="name" value="${esc(b.name)}"></div>
+   <div class="cv-fld"><label>Cargo / Headline</label><input data-b="headline" value="${esc(b.headline)}"></div>
+   <div class="cv-fld"><label>Telefone</label><input data-b="phone" value="${esc(b.phone)}"></div>
+   <div class="cv-fld"><label>E-mail</label><input data-b="email" value="${esc(b.email)}"></div>
+   <div class="cv-fld"><label>LinkedIn</label><input data-b="linkedin" value="${esc(b.linkedin)}"></div>
+   <div class="cv-fld"><label>Site / Portfólio</label><input data-b="website" value="${esc(b.website)}"></div>
+   <div class="cv-fld"><label>Localização</label><input data-b="location" value="${esc(b.location)}"></div>
+   <div class="cv-fld"><label>Foto</label><input type="file" accept="image/*" id="cv-photoIn" style="font-size:11px;padding:5px"></div>
+ </div>`;
+ h+=`<div class="cv-fld"><label>Resumo profissional</label><textarea data-b="summary">${esc(b.summary)}</textarea></div>`;
+ h+='<div class="cv-ed-h">Seções</div>';
+ S.sections.forEach((sec,si)=>{h+=sectionCard(sec,si);});
+ h+='<div class="cv-addsec" id="cv-addsec"><button class="cv-add" id="cv-addBtn">+ Adicionar seção</button><div class="cv-menu">'+
+    Object.keys(TYPES).map(t=>`<button data-addtype="${t}">${TYPES[t].name}</button>`).join('')+'</div></div>';
+ /* B.3b: ATS excluído */
+ $('cv-editor').innerHTML=h;
+}
+function sectionCard(sec,si){
+ const meta=TYPES[sec.type]; let h=`<div class="cv-card" data-sec="${si}">`;
+ h+=`<div class="cv-hd">☰ <input class="cv-ttl" data-sectitle="${si}" value="${esc(sec.title)}">`;
+ if(S.template==='exec') h+=`<button class="cv-ic cv-colbtn" data-col="${si}" title="Coluna">${sec.col==='side'?'▥':'▤'}</button>`;
+ h+=`<button class="cv-ic" data-mvsec="${si}|-1" title="Subir">↑</button>
+     <button class="cv-ic" data-mvsec="${si}|1" title="Descer">↓</button>
+     <button class="cv-ic cv-dz" data-delsec="${si}" title="Excluir">✕</button></div><div class="cv-bd">`;
+ sec.items.forEach((it,ii)=>{h+=itemEditor(sec,si,it,ii,meta.kind);});
+ h+=`<button class="cv-add" data-additem="${si}">+ Adicionar item</button>`;
+ h+='</div></div>'; return h;
+}
+function itemEditor(sec,si,it,ii,kind){
+ const ctl=`<div class="cv-ihd">
+   <button class="cv-ic" data-mvitem="${si}|${ii}|-1">↑</button>
+   <button class="cv-ic" data-mvitem="${si}|${ii}|1">↓</button>
+   <button class="cv-ic cv-dz" data-delitem="${si}|${ii}">✕</button></div>`;
+ if(kind==='skills') return `<div class="cv-item">${ctl}<input data-it="${si}|${ii}|" value="${esc(it)}"></div>`;
+ if(kind==='langs') return `<div class="cv-item">${ctl}<div class="cv-grid2">
+   <div class="cv-fld" style="margin:0"><input data-it="${si}|${ii}|idioma" value="${esc(it.idioma)}" placeholder="Idioma"></div>
+   <div class="cv-fld" style="margin:0"><select data-it="${si}|${ii}|nivel">${LEVELS.map(l=>`<option ${it.nivel===l?'selected':''}>${l}</option>`).join('')}</select></div>
+ </div></div>`;
+ if(kind==='ach') return `<div class="cv-item">${ctl}
+   <div class="cv-fld" style="margin-bottom:6px"><input data-it="${si}|${ii}|titulo" value="${esc(it.titulo)}" placeholder="Título"></div>
+   <div class="cv-fld" style="margin:0"><textarea data-it="${si}|${ii}|descricao" style="min-height:44px">${esc(it.descricao)}</textarea></div></div>`;
+ return `<div class="cv-item">${ctl}
+   <div class="cv-grid2">
+     <div class="cv-fld" style="margin-bottom:6px"><input data-it="${si}|${ii}|cargo" value="${esc(it.cargo)}" placeholder="Cargo / Título"></div>
+     <div class="cv-fld" style="margin-bottom:6px"><input data-it="${si}|${ii}|empresa" value="${esc(it.empresa)}" placeholder="Empresa / Instituição"></div>
+     <div class="cv-fld" style="margin-bottom:6px"><input data-it="${si}|${ii}|periodo" value="${esc(it.periodo)}" placeholder="Período"></div>
+     <div class="cv-fld" style="margin-bottom:6px"><input data-it="${si}|${ii}|local" value="${esc(it.local)}" placeholder="Local"></div>
+   </div>
+   <div class="cv-fld" style="margin:0"><label>Descrição / bullets (uma por linha)</label>
+     <textarea data-it="${si}|${ii}|descricao">${esc(it.descricao)}</textarea></div></div>`;
+}
+/* =========================================================
+   PREVIEW / TEMPLATES
+========================================================= */
+function applyTheme(){const pw=$('cv-pagewrap');if(!pw)return;pw.style.setProperty('--accent',S.accent);pw.style.setProperty('--font',FONTS[S.font]||S.font);}
+let pvTimer=null;
+function queuePreview(){clearTimeout(pvTimer);pvTimer=setTimeout(()=>{renderPreview();},120);}
+function applyAndPreview(){renderPreview();}
+function contactSpans(b){
+ const a=[];
+ if(b.phone)  a.push(`<span>${I.ph}${esc(b.phone)}</span>`);
+ if(b.email)  a.push(`<span>${I.mail}${esc(b.email)}</span>`);
+ if(b.linkedin) a.push(`<span>${I.link}${esc(b.linkedin)}</span>`);
+ if(b.website)  a.push(`<span>${I.web}${esc(b.website)}</span>`);
+ if(b.location) a.push(`<span>${I.pin}${esc(b.location)}</span>`);
+ return a.join('');
+}
+function photoEl(b){return b.photo?`<img class="cv-photo" src="${b.photo}">`:`<div class="cv-photo">${initials(b.name)}</div>`;}
+function entriesHTML(sec){
+ return sec.items.map(it=>{
+   const t=it.cargo||it.titulo||it.curso||''; const o=it.empresa||it.instituicao||'';
+   let m=''; if(it.periodo)m+=`<span>${I.cal}${esc(it.periodo)}</span>`; if(it.local)m+=`<span>${I.pin}${esc(it.local)}</span>`;
+   return `<div class="cv-entry">${t?`<div class="cv-e-t">${esc(t)}</div>`:''}${o?`<div class="cv-e-o">${esc(o)}</div>`:''}${m?`<div class="cv-e-m">${m}</div>`:''}${it.descricao?`<div class="cv-e-d">${bullets(it.descricao)}</div>`:''}</div>`;
+ }).join('');
+}
+function skillsHTML(sec){return `<div class="cv-chips">`+sec.items.filter(x=>String(x).trim()).map(s=>`<span class="cv-chip" style="background:${hex2rgba(S.accent,.12)};color:${S.accent}">${esc(s)}</span>`).join('')+`</div>`;}
+function langsHTML(sec){return sec.items.map(l=>{const n=levelN(l.nivel);let d='';for(let i=1;i<=5;i++)d+=`<i class="cv-dot ${i<=n?'cv-on':''}"></i>`;
+ return `<div class="cv-lng"><div class="cv-row"><div><div class="cv-n">${esc(l.idioma)}</div><div class="cv-lv">${esc(l.nivel)}</div></div><div class="cv-dots">${d}</div></div></div>`;}).join('');}
+function achHTML(sec){return sec.items.map(a=>`<div class="cv-ach"><div class="cv-t">${esc(a.titulo)}</div><div class="cv-d">${esc(a.descricao)}</div></div>`).join('');}
+function sectionBody(sec){const k=TYPES[sec.type].kind;if(k==='skills')return skillsHTML(sec);if(k==='langs')return langsHTML(sec);if(k==='ach')return achHTML(sec);return entriesHTML(sec);}
+function sectionBlock(sec){if(!sec.items.length)return '';return `<div class="cv-blk"><h2 class="cv-sec-ttl">${esc(sec.title)}</h2>${sectionBody(sec)}</div>`;}
+function headerHTML(b){
+ return `<div>
+   <div class="cv-r-name">${esc(b.name||'Seu Nome')}</div>
+   ${b.headline?`<div class="cv-r-head">${esc(b.headline)}</div>`:''}
+   <div class="cv-r-contact">${contactSpans(b)}</div>
+ </div>${photoEl(b)}`;
+}
+function renderPreview(){
+ const b=S.basics,t=S.template;
+ const sum=b.summary?`<div class="cv-blk"><h2 class="cv-sec-ttl">Resumo</h2><p class="cv-r-summary">${esc(b.summary).replace(/\n/g,'<br>')}</p></div>`:'';
+ let inner='';
+ if(t==='exec'){
+   const main=S.sections.filter(s=>s.col!=='side').map(sectionBlock).join('');
+   const side=sum+S.sections.filter(s=>s.col==='side').map(sectionBlock).join('');
+   inner=`<div class="cv-page cv-t-exec"><div class="cv-fit"><div class="cv-pad"><div class="cv-hdr">${headerHTML(b)}</div>
+     <div class="cv-cols"><div class="cv-main">${main}</div><div class="cv-side">${side}</div></div></div></div></div>`;
+ } else if(t==='classic'){
+   const all=sum+S.sections.map(sectionBlock).join('');
+   inner=`<div class="cv-page cv-t-classic"><div class="cv-fit"><div class="cv-pad"><div class="cv-hdr">${headerHTML(b)}</div><div class="cv-cols">${all}</div></div></div></div>`;
+ } else {
+   const all=sum+S.sections.map(sectionBlock).join('');
+   inner=`<div class="cv-page cv-t-modern"><div class="cv-fit"><div class="cv-pad"><div class="cv-band">${headerHTML(b)}</div><div class="cv-cols">${all}</div></div></div></div>`;
+ }
+ const pw=$('cv-pagewrap'); if(!pw) return;
+ pw.innerHTML=inner;
+ applyTheme(); fitOnePage(); fitPreview();
+ /* B.3b: renderATS() excluído */
+}
+function fitOnePage(){
+ const pw=$('cv-pagewrap'); if(!pw) return;
+ const page=pw.querySelector('.cv-page'); if(!page) return;
+ const fit=page.querySelector('.cv-fit'); if(!fit) return;
+ fit.style.transform='none'; fit.style.width='210mm';
+ const avail=page.clientHeight;
+ for(let i=0;i<4;i++){const h=fit.scrollHeight;const k=avail/h;if(k>=0.999){fit.style.width='210mm';break;}fit.style.width=(210/k)+'mm';}
+ const h=fit.scrollHeight; const k=Math.min(1,(avail-1)/h); fit.style.transform='scale('+k+')';
+}
+function fitPreview(){
+ const pw=$('cv-pagewrap'); if(!pw) return;
+ const page=pw.querySelector('.cv-page'); if(!page) return;
+ const avail=pw.parentElement.clientWidth-48; const w=page.offsetWidth||794;
+ const scale=Math.min(1,avail/w); pw.style.transform=`scale(${scale})`;
+ pw.style.height=(page.offsetHeight*scale)+'px';
+}
+/* =========================================================
+   EVENT BINDING
+========================================================= */
+let _resizeBound=false;
+function bindEvents(){
+ const ed=$('cv-editor');
+ ed.addEventListener('input',e=>{
+   const t=e.target;
+   if(t.dataset.b!==undefined){S.basics[t.dataset.b]=t.value;queuePreview();save();return;}
+   if(t.dataset.sectitle!==undefined){S.sections[+t.dataset.sectitle].title=t.value;queuePreview();save();return;}
+   if(t.dataset.it!==undefined){
+     const [si,ii,field]=t.dataset.it.split('|');const sec=S.sections[+si];
+     if(field==='')sec.items[+ii]=t.value;else sec.items[+ii][field]=t.value;
+     queuePreview();save();return;
+   }
+ });
+ ed.addEventListener('change',e=>{
+   if(e.target.id==='cv-fontSel'){S.font=e.target.value;applyAndPreview();save();}
+   if(e.target.dataset.it!==undefined&&e.target.tagName==='SELECT'){
+     const [si,ii,field]=e.target.dataset.it.split('|');S.sections[+si].items[+ii][field]=e.target.value;queuePreview();save();
+   }
+   if(e.target.id==='cv-photoIn'&&e.target.files[0]){
+     const r=new FileReader();r.onload=()=>{S.basics.photo=r.result;renderPreview();save();};r.readAsDataURL(e.target.files[0]);
+   }
+ });
+ ed.addEventListener('click',e=>{
+   const t=e.target.closest('[data-tmpl],[data-acc],[data-col],[data-mvsec],[data-delsec],[data-additem],[data-mvitem],[data-delitem],[data-addtype],#cv-addBtn');
+   if(!t) return;
+   if(t.dataset.tmpl){S.template=t.dataset.tmpl;renderEditor();applyAndPreview();save();return;}
+   if(t.dataset.acc){S.accent=t.dataset.acc;renderEditor();applyAndPreview();save();return;}
+   if(t.dataset.col!==undefined){const s=S.sections[+t.dataset.col];s.col=s.col==='side'?'main':'side';renderEditor();applyAndPreview();save();return;}
+   if(t.dataset.mvsec!==undefined){const [i,d]=t.dataset.mvsec.split('|').map(Number);moveArr(S.sections,i,i+d);renderEditor();renderPreview();save();return;}
+   if(t.dataset.delsec!==undefined){S.sections.splice(+t.dataset.delsec,1);renderEditor();renderPreview();save();return;}
+   if(t.dataset.additem!==undefined){const s=S.sections[+t.dataset.additem];s.items.push(blankItem(s.type));renderEditor();renderPreview();save();return;}
+   if(t.dataset.mvitem!==undefined){const [si,ii,d]=t.dataset.mvitem.split('|').map(Number);moveArr(S.sections[si].items,ii,ii+d);renderEditor();renderPreview();save();return;}
+   if(t.dataset.delitem!==undefined){const [si,ii]=t.dataset.delitem.split('|').map(Number);S.sections[si].items.splice(ii,1);renderEditor();renderPreview();save();return;}
+   if(t.id==='cv-addBtn'){$('cv-addsec').classList.toggle('cv-open');return;}
+   if(t.dataset.addtype){S.sections.push(newSection(t.dataset.addtype));$('cv-addsec').classList.remove('cv-open');renderEditor();renderPreview();save();return;}
+ });
+ /* B.3b: drag-and-drop excluído */
+ /* B.3b: dlBtn click excluído */
+ if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
+}
+/* =========================================================
+   PUBLIC API
+========================================================= */
+function init(){S=load()||demo();renderEditor();renderPreview();bindEvents();}
+return {init};
+})();
+  </script>
+  <!-- === /VitaeCV JS core === -->
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://js.stripe.com/v3/"></script>
   <script src="https://connect-js.stripe.com/v1.0/connect.js"></script>
@@ -11804,7 +12079,7 @@ function _renderVitaeGate() {
       '</div>' +
       '<div class="cv-toast" id="cv-toast"></div>' +
     '</div>';
-  /* B.3: _initVitaeApp(); */
+  VitaeCV.init();
 }
 
 /* ── Freelancers: busca perfis reais (type = freelancer | both) ── */
