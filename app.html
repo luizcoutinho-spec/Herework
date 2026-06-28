@@ -18264,7 +18264,11 @@ function openDashboard() {
     ? (window._realProfileCache[_session.uid] || {}) : {};
   var _acYear = _odCache.created_at ? new Date(_odCache.created_at).getFullYear() : null;
   el = document.getElementById('dash-member-since');    if(el) el.textContent = _acYear || '—';
-  el = document.getElementById('dash-account-created'); if(el) el.textContent = 'Conta criada em ' + (_acYear || '—');
+  var _acLabel = lang() === 'es' ? 'Cuenta creada en ' : 'Conta criada em ';
+  var _acDate  = _odCache.created_at
+    ? new Date(_odCache.created_at).toLocaleDateString(lang() === 'es' ? 'es-ES' : 'pt-BR', {month:'long', year:'numeric'})
+    : '—';
+  el = document.getElementById('dash-account-created'); if(el) el.textContent = _acLabel + _acDate;
   var stEl = document.getElementById('profile-state');
   var ctEl = document.getElementById('profile-city');
   if (stEl) stEl.value = (_session && _session.state) || _odCache.state || '';
