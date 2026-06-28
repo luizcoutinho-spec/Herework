@@ -13198,7 +13198,7 @@ function _getNextPlanInfo() {
     'client_enterprise':     ['Tudo do plano anterior', 'Projetos e convites ilimitados', 'Comissão negociável por contrato', 'Gerente de conta dedicado', 'SLA de resposta em 4h', 'Integração via API']
   };
   var bKey = (role === 'hybrid' ? 'freelancer' : type) + '_' + nextTier;
-  return { key: nextTier, name: nm, price: pStr, variant: (nextTier === 'pro' ? 'pro' : 'pro_max'), benefits: (benefitsMap[bKey] || []) };
+  return { key: nextTier, planKey: nextKey, name: nm, price: pStr, variant: (nextTier === 'pro' ? 'pro' : 'pro_max'), benefits: (benefitsMap[bKey] || []) };
 }
 
 /* ── Log de eventos de limite — auditoria e análise de conversão ──
@@ -13342,7 +13342,7 @@ function _showPlanLimitModal(resourceKey, used, limit) {
       ov.classList.remove('open');
       document.body.style.overflow = '';
       _logPlanEvent('UPGRADE_CTA_CLICK', resourceKey, used, limit);
-      showPage('pricing');
+      _showPricingPlan(next && next.planKey);
     };
   }
 
@@ -13505,7 +13505,7 @@ function _renderQuotaBlock(u, ledger) {
   var _npi = (typeof _getNextPlanInfo === 'function') ? _getNextPlanInfo() : null;
   var upgradeLabel = (_npi && _npi.name) ? ('🚀 Fazer upgrade — ' + _npi.name) : '🚀 Ver planos';
   var ctaSection =
-    '<button class="btn btn-primary btn-sm" onclick="showPage(\'pricing\')" style="width:100%;">' + upgradeLabel + '</button>';
+    '<button class="btn btn-primary btn-sm" onclick="_showPricingPlan(\'' + ((_npi && _npi.planKey) || '') + '\')" style="width:100%;">' + upgradeLabel + '</button>';
 
   return '<div style="font-size:14px;font-weight:800;color:var(--text);margin-bottom:14px;">Seu consumo este mês</div>' +
     propSection + featSection + creditSection + ledgerHTML + infoSection + ctaSection;
@@ -16320,6 +16320,20 @@ function _fmtPhoneDisplay(raw) {
 }
 /* Limpa máscara antes de salvar — banco recebe só dígitos */
 function _cleanPhone(raw) { return (raw || '').replace(/\D/g, '').slice(0, 11); }
+/* Navega para pricing e rola suavemente até o card do plano-alvo, destacando-o */
+function _showPricingPlan(planKey) {
+  showPage('pricing');
+  if (!planKey) return;
+  setTimeout(function() {
+    var nameEl = document.querySelector('.pricing-plan-name[data-plan-key="' + planKey + '"]');
+    var card = nameEl ? nameEl.closest('.pricing-card') : null;
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.outline = '2px solid var(--green)';
+    card.style.outlineOffset = '3px';
+    setTimeout(function() { card.style.outline = ''; card.style.outlineOffset = ''; }, 2000);
+  }, 150);
+}
 
 (function() {
 
