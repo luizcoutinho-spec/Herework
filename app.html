@@ -5492,7 +5492,7 @@ section { padding: 64px 0; }
             <div class="payment-icon" style="background:#f0fdf4;">&#127881;</div>
             <div class="payment-info">
               <div class="payment-title">Plano Grátis ativado</div>
-              <div class="payment-date">Conta criada em 2025</div>
+              <div class="payment-date" id="dash-account-created">Conta criada em 2025</div>
             </div>
             <div class="payment-amount success">Ativo</div>
           </div>
@@ -18257,12 +18257,14 @@ function openDashboard() {
   el = document.getElementById('dash-profile-email');  if(el) el.textContent = email;
   el = document.getElementById('dash-profile-type');
   if(el) el.textContent = type === 'both' ? '🔄 Cliente + Freelancer' : type === 'freelancer' ? '🧑 Freelancer' : '🏢 Cliente';
-  el = document.getElementById('dash-member-since');   if(el) el.textContent = new Date().getFullYear();
   el = document.getElementById('profile-name');        if(el) el.value = name;
   el = document.getElementById('profile-email');       if(el) el.value = email;
   /* Estado e cidade: _session (persistido em save) > cache Supabase > vazio */
   var _odCache = (_session && _session.uid && window._realProfileCache)
     ? (window._realProfileCache[_session.uid] || {}) : {};
+  var _acYear = _odCache.created_at ? new Date(_odCache.created_at).getFullYear() : null;
+  el = document.getElementById('dash-member-since');    if(el) el.textContent = _acYear || '—';
+  el = document.getElementById('dash-account-created'); if(el) el.textContent = 'Conta criada em ' + (_acYear || '—');
   var stEl = document.getElementById('profile-state');
   var ctEl = document.getElementById('profile-city');
   if (stEl) stEl.value = (_session && _session.state) || _odCache.state || '';
