@@ -5525,6 +5525,34 @@ section { padding: 64px 0; }
       </div>
 
       <div id="dcontracts-client">
+        <!-- Funil cliente — IDs próprios, sem colisão com o banner compartilhado -->
+        <div id="client-funnel-banner" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:var(--radius-lg);padding:18px;color:#fff;margin-bottom:18px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div>
+              <div style="font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;">Minha Atividade como Cliente</div>
+              <div style="font-size:30px;font-weight:900;color:#fff;" id="client-ctr-projetos-big">&#8212;</div>
+              <div style="font-size:11px;color:#64748b;margin-top:3px;">projetos criados</div>
+            </div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+              <div onclick="document.getElementById('dash-client-waiting').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#60a5fa;" id="client-ctr-projetos">&#8212;</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Projetos criados</div>
+              </div>
+              <div onclick="document.getElementById('plist-received').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#fbbf24;" id="client-ctr-propostas">&#8212;</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Propostas</div>
+              </div>
+              <div onclick="document.getElementById('dash-client-active').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#4ade80;" id="client-ctr-ativos">&#8212;</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Contratos Ativos</div>
+              </div>
+              <div onclick="document.getElementById('dash-client-done').scrollIntoView({behavior:'smooth'})" style="text-align:center;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:var(--radius);padding:10px 14px;cursor:pointer;">
+                <div style="font-size:16px;font-weight:800;color:#a78bfa;" id="client-ctr-concluidos">&#8212;</div>
+                <div style="font-size:10px;color:#94a3b8;margin-top:2px;">Conclu&#237;dos</div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="dash-section">
           <div class="dash-section-title"><span>&#128203;</span> Meus Projetos Publicados &mdash; Aguardando Propostas</div>
           <div id="dash-client-waiting"></div>
@@ -18365,7 +18393,7 @@ function switchContractView(view) {
   });
   /* Banner compartilhado (contratos cliente) ↔ funil freelancer */
   var sb = document.getElementById('ctr-shared-banner');
-  if (sb) sb.style.display = view === 'freelancer' ? 'none' : '';
+  if (sb) sb.style.display = 'none';
   if (typeof _renderContractsBanner === 'function') _renderContractsBanner(view === 'freelancer' ? 'freelancer' : 'cliente');
 }
 
@@ -25643,6 +25671,11 @@ async function _loadProposalsReceived() {
 
   /* Atualiza stats */
   _renderProposalStats(proposals, 'received');
+  /* Funil cliente: total de propostas recebidas (apenas chamada sem filtro) */
+  if (!statusFilter) {
+    var _fProp = document.getElementById('client-ctr-propostas');
+    if (_fProp) _fProp.textContent = proposals ? proposals.length : 0;
+  }
 
   if (!proposals.length) {
     listEl.innerHTML = [
@@ -26211,6 +26244,15 @@ async function _loadRealContracts() {
     el = document.getElementById('dct-client-count'); if(el) el.textContent = clientActive.length + clientDone.length;
     el = document.getElementById('fl-ctr-ativos');    if(el) el.textContent = flActive.length;
     el = document.getElementById('fl-ctr-concluidos'); if(el) el.textContent = flDone.length;
+    el = document.getElementById('client-ctr-ativos');    if(el) el.textContent = clientActive.length;
+    el = document.getElementById('client-ctr-concluidos'); if(el) el.textContent = clientDone.filter(function(c){ return c.status === 'completed'; }).length;
+    /* Total de projetos criados (inclui cancelados) — query leve só de IDs */
+    try {
+      var _pjR = await _sb.from('projects').select('id').eq('client_id', _session.uid);
+      var _nProj = _pjR && _pjR.data ? _pjR.data.length : null;
+      el = document.getElementById('client-ctr-projetos-big'); if(el) el.textContent = _nProj !== null ? _nProj : '—';
+      el = document.getElementById('client-ctr-projetos');     if(el) el.textContent = _nProj !== null ? _nProj : '—';
+    } catch(_pe) {}
 
     /* Banner de contagem da página Contratos — por escopo */
     function _countScope(live, done) {
