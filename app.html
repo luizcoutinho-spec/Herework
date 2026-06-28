@@ -4304,6 +4304,8 @@ section { padding: 64px 0; }
         data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</button>
       <button class="nav-link" id="nav-pricing" onclick="showPage('pricing')"
         data-pt="Planos" data-es="Planes">Planos</button>
+      <button class="nav-link" id="nav-vitae" onclick="showPage('vitae')"
+        data-pt="Vitae" data-es="Vitae">Vitae</button>
     </nav>
 
     <!-- Auth -->
@@ -4346,6 +4348,7 @@ section { padding: 64px 0; }
   <button class="mnav-link" id="mnav-projects" onclick="showPage('projects')" data-pt="Encontrar Projetos" data-es="Encontrar Proyectos">Encontrar Projetos</button>
   <button class="mnav-link" id="mnav-how" onclick="showPage('how')" data-pt="Como Funciona" data-es="Cómo Funciona">Como Funciona</button>
   <button class="mnav-link" id="mnav-pricing" onclick="showPage('pricing')" data-pt="Planos" data-es="Planes">Planos</button>
+  <button class="mnav-link" id="mnav-vitae" onclick="showPage('vitae')" data-pt="Vitae" data-es="Vitae">Vitae</button>
   <div class="mobile-divider"></div>
   <div class="mobile-menu-auth">
     <button class="btn btn-outline btn-block" onclick="closeMobileMenu();setTimeout(function(){openModal('login');},150)" data-pt="Entrar" data-es="Iniciar sesión">Entrar</button>
@@ -7904,6 +7907,21 @@ section { padding: 64px 0; }
 <!-- email-page-pricing -->
 <div style="text-align:center;padding:12px 16px 16px;"><span style="font-size:13px;color:var(--text-3);">&#128179; D&uacute;vidas sobre pagamentos e cobran&ccedil;as: </span><a href="mailto:financeiro@herework.com.br" style="color:var(--green);font-weight:600;font-size:13px;">financeiro@herework.com.br</a></div>
 </div><!-- /page-pricing -->
+
+<!-- ══════════════════════════════════════════════
+     PÁGINA: VITAE — CONSTRUTOR DE CURRÍCULO
+══════════════════════════════════════════════ -->
+<div class="page" id="page-vitae">
+  <div class="page-banner">
+    <div class="container">
+      <div class="page-banner-title" data-pt="Vitae — Construtor de Currículo" data-es="Vitae — Constructor de CV">Vitae — Construtor de Currículo</div>
+      <div class="page-banner-sub" data-pt="Crie e exporte seu currículo profissional" data-es="Crea y exporta tu CV profesional">Crie e exporte seu currículo profissional</div>
+    </div>
+  </div>
+  <div class="container" style="padding-top:48px;padding-bottom:80px;">
+    <div id="vitae-root"></div>
+  </div>
+</div><!-- /page-vitae -->
 
 <!-- ══════════════════════════════════════════════
      PÁGINA: ADMIN DASHBOARD
@@ -11578,6 +11596,34 @@ function showPage(name) {
   if (name !== 'dashboard' && typeof _sbStopListenProposals === 'function') {
     _sbStopListenProposals();
   }
+  /* Vitae: re-renderiza gate a cada visita (estado de login pode ter mudado) */
+  if (name === 'vitae') { _renderVitaeGate(); }
+}
+
+/* ── Vitae: gate de login + esqueleto ─────────────────────────── */
+function _renderVitaeGate() {
+  var root = document.getElementById('vitae-root');
+  if (!root) return;
+  var isEs = (typeof lang === 'function' ? lang() : (document.documentElement.getAttribute('data-lang') || 'pt')) === 'es';
+  if (!_session) {
+    var msg = isEs ? 'Inicia sesión para usar Vitae'  : 'Faça login para usar o Vitae';
+    var btn = isEs ? 'Iniciar sesión'                 : 'Entrar';
+    root.innerHTML =
+      '<div style="text-align:center;padding:60px 20px;">' +
+        '<div style="font-size:48px;margin-bottom:20px;">📄</div>' +
+        '<p style="font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;">' + msg + '</p>' +
+        '<p style="font-size:14px;color:var(--text-3);margin-bottom:24px;" data-pt="Crie seu currículo profissional com IA" data-es="Crea tu CV profesional con IA">Crie seu currículo profissional com IA</p>' +
+        '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + btn + '</button>' +
+      '</div>';
+    return;
+  }
+  var placeholder = isEs
+    ? 'El constructor de CV estará disponible aquí (Etapa B)'
+    : 'O construtor de currículo ficará disponível aqui (Etapa B)';
+  root.innerHTML =
+    '<div style="text-align:center;padding:60px 20px;color:var(--text-3);font-size:15px;">' +
+      placeholder +
+    '</div>';
 }
 
 /* ── Freelancers: busca perfis reais (type = freelancer | both) ── */
@@ -12683,6 +12729,9 @@ function _setSession(name, email, type, isAdmin) {
 
   /* Aplica automaticamente todas as regras de UI baseadas no tipo */
   if (typeof _applyAccountTypeUI === 'function') _applyAccountTypeUI(type);
+  /* Re-renderiza gate do Vitae se a página estiver ativa (cobre todos os caminhos de login) */
+  var _vp = document.getElementById('page-vitae');
+  if (_vp && _vp.classList.contains('active')) { _renderVitaeGate(); }
 }
 
 /* ── Helpers de tipo de conta ─────────────────────────────── *
