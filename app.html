@@ -12208,10 +12208,17 @@ function _renderVitaeGate() {
     _vitaeShowAbout();
     return;
   }
-  if (pg) { pg.classList.add('vitae-fullscreen'); document.body.classList.add('vitae-active'); }
-  /* Idempotência: se o esqueleto já foi injetado, não reinjetar (preserva estado do B.3) */
-  if (document.getElementById('cv-editor')) return;
+  _vitaeShowAbout();
+  return;
+}
 
+/* ── Vitae: telas deslogadas (globais para onclick inline) ── */
+window._vitaeOpenBuilder = function(){
+  var pg   = document.getElementById('page-vitae');
+  if (pg) { pg.classList.add('vitae-fullscreen'); document.body.classList.add('vitae-active'); }
+  var root = document.getElementById('vitae-root'); if (!root) return;
+  var isEs = (typeof lang === 'function' ? lang() : (document.documentElement.getAttribute('data-lang') || 'pt')) === 'es';
+  if (document.getElementById('cv-editor')) { VitaeCV.init(); return; }
   var isEsL = isEs;
   var aboutTitleL = isEsL ? 'Qué es Vitae Studio'                                             : 'O que é o Vitae Studio';
   var aboutPitchL = isEsL ? 'Un creador de currículums profesional, gratis para usuarios de HereWork.' : 'Um construtor de currículos profissional, gratuito para usuários do HereWork.';
@@ -12258,9 +12265,10 @@ function _renderVitaeGate() {
       '</div>' +
     '</div>';
   VitaeCV.init();
-}
-
-/* ── Vitae: telas deslogadas (globais para onclick inline) ── */
+};
+window._vitaeEnter = function(){
+  if (_session) { _vitaeOpenBuilder(); } else { openModal('login'); }
+};
 window._vitaeShowBlock = function(){ _renderVitaeGate(); };
 window._vitaeShowAbout = function(){
   var root = document.getElementById('vitae-root');
@@ -12297,7 +12305,7 @@ window._vitaeShowAbout = function(){
         }).join('') +
       '</div>' +
       '<div style="text-align:center;">' +
-        '<button class="btn btn-primary btn-lg" onclick="openModal(\'login\')">' + cta + '</button>' +
+        '<button class="btn btn-primary btn-lg" onclick="_vitaeEnter()">' + cta + '</button>' +
       '</div>' +
     '</div></div>';
 };
