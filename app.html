@@ -4537,7 +4537,7 @@ function moveArr(a,i,j){if(j<0||j>=a.length)return;const x=a.splice(i,1)[0];a.sp
 const ACTION_VERBS=['lidere','liderei','gerenciei','geri','aumentei','reduzi','implementei','desenvolvi','criei','coordenei','dirigi','negociei','otimizei','expandi','conduzi','estruturei','elevei','entreguei','transformei','lancei','construí','planejei','executei','superei','alcancei','led','managed','increased','reduced','built','launched','delivered','drove','achieved','improved','created'];
 let dragFrom=null;
 /* ── Etapa C.3: Import via Edge Function ── */
-let _pdfReady=false,_mamReady=false,_vitaeConsentGiven=false;
+let _pdfReady=false,_mamReady=false;
 const VITAE_AI_LIMIT=3;
 function _loadScript(url){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=url;s.onload=res;s.onerror=rej;document.head.appendChild(s);});}
 async function _ensurePdf(){
@@ -4830,7 +4830,7 @@ function bindEvents(){
  ed.addEventListener('drop',e=>{const c=e.target.closest('.cv-card');if(c&&dragFrom!=null){e.preventDefault();const to=+c.dataset.sec;const x=S.sections.splice(dragFrom,1)[0];S.sections.splice(to,0,x);dragFrom=null;renderEditor();renderPreview();save();}});
  const dl=$('cv-dlBtn');if(dl)dl.addEventListener('click',()=>{fitOnePage();setTimeout(()=>window.print(),60);});
  const ab=$('cv-aboutBtn');if(ab){ab.addEventListener('click',()=>{const bd=$('cv-about-backdrop');if(bd)bd.classList.remove('cv-hidden');});}
- const ib=$('cv-importBtn');if(ib){ib.addEventListener('click',()=>{if(_vitaeConsentGiven){const f=$('cv-file');if(f)f.click();}else{const bd=$('cv-consent-backdrop');if(bd)bd.classList.remove('cv-hidden');}});}
+ const ib=$('cv-importBtn');if(ib){ib.addEventListener('click',()=>{const f=$('cv-file');if(f)f.click();});}
  const fi=$('cv-file');if(fi){fi.addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value='';});}
  if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
 }
@@ -12263,32 +12263,11 @@ window._vitaeOpenBuilder = function(){
           '<ul>' + aboutItemsL.map(function(i){return '<li>'+i+'</li>';}).join('') + '</ul>' +
         '</div>' +
       '</div>' +
-      '<div id="cv-consent-backdrop" class="cv-hidden" style="position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9300;display:flex;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)window._vitaeConsentCancel()">' +
-        '<div style="background:#fff;border-radius:12px;padding:28px 24px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);">' +
-          '<h3 style="margin:0 0 10px;font-size:16px;color:#0f172a;">Importar com IA — Aviso de Privacidade</h3>' +
-          '<p style="font-size:13px;color:#475569;margin:0 0 18px;line-height:1.5;">O texto do seu currículo será processado pela <strong>Anthropic</strong> (IA de terceiro). A HereWork não armazena o conteúdo do arquivo. Ao continuar, você consente com esse processamento.</p>' +
-          '<div style="display:flex;gap:8px;justify-content:flex-end;">' +
-            '<button class="btn btn-outline btn-sm" onclick="window._vitaeConsentCancel()">Cancelar</button>' +
-            '<button class="btn btn-primary btn-sm" onclick="window._vitaeConsentAccept()">Aceitar e importar</button>' +
-          '</div>' +
-        '</div>' +
-      '</div>' +
     '</div>';
   VitaeCV.init();
 };
 window._vitaeEnter = function(){
   if (_session) { _vitaeOpenBuilder(); } else { openModal('login'); }
-};
-window._vitaeConsentAccept = function(){
-  _vitaeConsentGiven = true;
-  var bd = document.getElementById('cv-consent-backdrop');
-  if(bd) bd.classList.add('cv-hidden');
-  var f = document.getElementById('cv-file');
-  if(f) f.click();
-};
-window._vitaeConsentCancel = function(){
-  var bd = document.getElementById('cv-consent-backdrop');
-  if(bd) bd.classList.add('cv-hidden');
 };
 window._vitaeShowAbout = function(){
   var root = document.getElementById('vitae-root');
