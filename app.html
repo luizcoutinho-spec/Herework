@@ -10009,15 +10009,16 @@ return {init};
           &#128274; <strong>Proteção Garantia HereWork:</strong> O pagamento ser&aacute; retido com seguran&ccedil;a em nossa plataforma e s&oacute; ser&aacute; liberado ao freelancer ap&oacute;s voc&ecirc; <strong>aprovar a entrega</strong>. Em caso de disputa, nossa equipe medeia o processo.
         </div>
 
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
-          <input type="checkbox" id="contract-agree" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;">
-          <label for="contract-agree" style="font-size:13px;color:var(--text-2);cursor:pointer;">
-            Li e aceito os <a onclick="openInfoPage('terms')" style="color:var(--green);">Termos de Uso</a> e a pol&iacute;tica de garantia da HereWork.
-          </label>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:18px;">
+          <input type="checkbox" id="contract-agree" style="width:16px;height:16px;accent-color:var(--green);cursor:pointer;margin-top:2px;flex-shrink:0;"
+                 onchange="document.getElementById('contract-next').disabled=!this.checked;">
+          <span style="font-size:13px;color:var(--text-2);">
+            <label for="contract-agree" style="cursor:pointer;">Li e aceito os </label><a onclick="openInfoPage('terms')" style="color:var(--green);cursor:pointer;">Termos de Uso da HereWork (incluindo a pol&iacute;tica de garantia)</a><label for="contract-agree" style="cursor:pointer;">.</label>
+          </span>
         </div>
         <div class="form-error" id="err-contract-agree" style="margin-bottom:12px;"></div>
 
-        <button class="btn btn-primary btn-block btn-lg" onclick="contractStep2()">
+        <button id="contract-next" class="btn btn-primary btn-block btn-lg" onclick="contractStep2()" disabled>
           Avan&ccedil;ar para Pagamento &rarr;
         </button>
       </div>
