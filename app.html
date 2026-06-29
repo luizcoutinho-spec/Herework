@@ -4411,15 +4411,16 @@ html.vitae-locked, body.vitae-active{
 /* confina a página do Vitae à viewport — DESCENDENTE (espaço), não '>' :
    robusto a wrappers intermediários desconhecidos */
 body.vitae-active #page-vitae.vitae-fullscreen{
-  position:fixed; inset:0; height:100dvh; overflow:hidden;
-  display:flex; flex-direction:column; z-index:50;
+  position:fixed; top:102px; left:0; right:0; bottom:0;
+  height:calc(100dvh - 102px); overflow:hidden;
+  display:flex; flex-direction:column; z-index:30;
 }
 /* o container e o root preenchem e viram coluna flex, sem altura hardcoded */
 body.vitae-active #page-vitae.vitae-fullscreen .container,
 body.vitae-active #page-vitae.vitae-fullscreen #vitae-root,
 body.vitae-active #page-vitae.vitae-fullscreen .vitae-wrap{
   flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
-  width:100%; max-width:none; padding:0; margin:0; overflow:hidden;
+  width:100%; max-width:none; padding:0 !important; margin:0; overflow:hidden;
 }
 /* o corpo do builder absorve o resto e rola POR DENTRO */
 body.vitae-active #page-vitae.vitae-fullscreen .cv-app{
