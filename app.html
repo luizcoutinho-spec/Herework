@@ -4750,7 +4750,9 @@ function fitOnePage(){
 function fitPreview(){
  const pw=$('cv-pagewrap'); if(!pw) return;
  const page=pw.querySelector('.cv-page'); if(!page) return;
- const avail=pw.parentElement.clientWidth-48; const w=page.offsetWidth||794;
+ const avail=pw.parentElement.clientWidth-48;
+ if(avail<=0) return;
+ const w=page.offsetWidth||794;
  const scale=Math.min(1,avail/w); pw.style.transform=`scale(${scale})`;
  pw.style.height=(page.offsetHeight*scale)+'px';
 }
@@ -4789,7 +4791,7 @@ function renderATS(){
 /* =========================================================
    EVENT BINDING
 ========================================================= */
-let _resizeBound=false;
+let _resizeBound=false; let _roBound=false;
 function bindEvents(){
  const ed=$('cv-editor');
  ed.addEventListener('input',e=>{
@@ -4833,6 +4835,13 @@ function bindEvents(){
  const ib=$('cv-importBtn');if(ib){ib.addEventListener('click',()=>{const f=$('cv-file');if(f)f.click();});}
  const fi=$('cv-file');if(fi){fi.addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value='';});}
  if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
+ if(!_roBound && window.ResizeObserver){
+  var _pw=$('cv-pagewrap');
+  if(_pw && _pw.parentElement){
+   new ResizeObserver(function(){fitPreview();}).observe(_pw.parentElement);
+   _roBound=true;
+  }
+ }
 }
 /* =========================================================
    PUBLIC API
@@ -12195,6 +12204,15 @@ function showPage(name) {
   if (name !== 'vitae') { var _pvp = document.getElementById('page-vitae'); if (_pvp) _pvp.classList.remove('vitae-fullscreen'); document.body.classList.remove('vitae-active'); }
   /* Vitae: re-renderiza gate a cada visita (estado de login pode ter mudado) */
   if (name === 'vitae') { _renderVitaeGate(); }
+  _vitaeSyncChrome();
+}
+
+/* ── Vitae: reconciliação de estado fullscreen ─────────────────── */
+function _vitaeSyncChrome(){
+  var pg=document.getElementById('page-vitae'); if(!pg) return;
+  var open=pg.classList.contains('active') && !!document.getElementById('cv-editor');
+  pg.classList.toggle('vitae-fullscreen', open);
+  document.body.classList.toggle('vitae-active', open);
 }
 
 /* ── Vitae: gate de login + esqueleto ─────────────────────────── */
@@ -12218,7 +12236,7 @@ window._vitaeOpenBuilder = function(){
   if (pg) { pg.classList.add('vitae-fullscreen'); document.body.classList.add('vitae-active'); }
   var root = document.getElementById('vitae-root'); if (!root) return;
   var isEs = (typeof lang === 'function' ? lang() : (document.documentElement.getAttribute('data-lang') || 'pt')) === 'es';
-  if (document.getElementById('cv-editor')) { VitaeCV.init(); return; }
+  if (document.getElementById('cv-editor')) { VitaeCV.init(); _vitaeSyncChrome(); return; }
   var isEsL = isEs;
   var aboutTitleL = isEsL ? 'Qué es Vitae Studio'                                             : 'O que é o Vitae Studio';
   var aboutPitchL = isEsL ? 'Un creador de currículums profesional, gratis para usuarios de HereWork.' : 'Um construtor de currículos profissional, gratuito para usuários do HereWork.';
@@ -12265,6 +12283,7 @@ window._vitaeOpenBuilder = function(){
       '</div>' +
     '</div>';
   VitaeCV.init();
+  _vitaeSyncChrome();
 };
 window._vitaeEnter = function(){
   if (_session) { _vitaeOpenBuilder(); } else { openModal('login'); }
@@ -13413,7 +13432,8 @@ function _setSession(name, email, type, isAdmin) {
   if (typeof _applyAccountTypeUI === 'function') _applyAccountTypeUI(type);
   /* Re-renderiza gate do Vitae se a página estiver ativa (cobre todos os caminhos de login) */
   var _vp = document.getElementById('page-vitae');
-  if (_vp && _vp.classList.contains('active')) { _renderVitaeGate(); }
+  if (_vp && _vp.classList.contains('active') && !document.getElementById('cv-editor')) { _renderVitaeGate(); }
+  _vitaeSyncChrome();
 }
 
 /* ── Helpers de tipo de conta ─────────────────────────────── *
