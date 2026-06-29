@@ -4583,6 +4583,26 @@ function _vClean(v){
                   'nao informado','não informado','indisponivel','indisponível',''];
   return sentinelas.indexOf(bare)>=0 ? '' : s;
 }
+function _vCleanState(st){
+  if(!st) return false;
+  var changed=false;
+  var mark=function(o,k){ var v=_vClean(o[k]); if(v!==o[k]){ o[k]=v; changed=true; } };
+  var b=st.basics||{};
+  ['name','headline','location','phone','email','linkedin','website','summary']
+    .forEach(function(k){ if(k in b) mark(b,k); });
+  (st.sections||[]).forEach(function(sec){
+    if(!Array.isArray(sec.items)) return;
+    sec.items=sec.items.map(function(it){
+      if(typeof it==='string'){ var v=_vClean(it); if(v!==it) changed=true; return v; }
+      if(it && typeof it==='object'){
+        ['cargo','empresa','periodo','local','descricao','titulo','idioma','nivel']
+          .forEach(function(k){ if(k in it) mark(it,k); });
+      }
+      return it;
+    });
+  });
+  return changed;
+}
 function applyImported(d){
   if(!d) return;
   S.basics.name    =_vClean(d.nome)        ||S.basics.name;
@@ -4878,7 +4898,12 @@ function bindEvents(){
 /* =========================================================
    PUBLIC API
 ========================================================= */
-function init(){S=load()||demo();renderEditor();renderPreview();bindEvents();}
+function init(){
+  var loaded=load();
+  S=loaded||demo();
+  if(loaded){ var changed=_vCleanState(S); if(changed) save(); }
+  renderEditor();renderPreview();bindEvents();
+}
 return {init};
 })();
   </script>
