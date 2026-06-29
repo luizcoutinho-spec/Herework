@@ -4571,23 +4571,31 @@ async function _ensureMammoth(){
   await _loadScript('https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js');
   _mamReady=true;
 }
+function _vClean(v){
+  if(v==null) return '';
+  var s=String(v).trim();
+  var bare=s.replace(/^[<\[(]+|[>\])]+$/g,'').trim().toLowerCase();
+  var sentinelas=['unknown','n/a','na','null','undefined','none','desconhecido',
+                  'nao informado','não informado','indisponivel','indisponível',''];
+  return sentinelas.indexOf(bare)>=0 ? '' : s;
+}
 function applyImported(d){
   if(!d) return;
-  S.basics.name    =d.nome        ||S.basics.name;
-  S.basics.headline=d.headline    ||S.basics.headline;
-  S.basics.location=d.localizacao ||S.basics.location;
-  S.basics.phone   =d.telefone    ||'';
-  S.basics.email   =d.email       ||'';
-  S.basics.linkedin=d.linkedin    ||'';
-  S.basics.website =d.website     ||'';
-  S.basics.summary =d.resumo      ||'';
+  S.basics.name    =_vClean(d.nome)        ||S.basics.name;
+  S.basics.headline=_vClean(d.headline)    ||S.basics.headline;
+  S.basics.location=_vClean(d.localizacao) ||S.basics.location;
+  S.basics.phone   =_vClean(d.telefone)    ||'';
+  S.basics.email   =_vClean(d.email)       ||'';
+  S.basics.linkedin=_vClean(d.linkedin)    ||'';
+  S.basics.website =_vClean(d.website)     ||'';
+  S.basics.summary =_vClean(d.resumo)      ||'';
   const secs=[];
-  if(d.experiencias?.length) secs.push({id:nid(),type:'experience',title:'Experiência',col:'main',items:d.experiencias});
-  if(d.educacao?.length)     secs.push({id:nid(),type:'education', title:'Educação',   col:'main',items:d.educacao.map(e=>({cargo:e.curso,empresa:e.instituicao,periodo:e.periodo,local:'',descricao:''}))});
-  if(d.conquistas?.length)   secs.push({id:nid(),type:'achievements',title:'Conquistas-Chave',col:'side',items:d.conquistas});
-  if(d.competencias?.length) secs.push({id:nid(),type:'skills',    title:'Competências',col:'side',items:d.competencias});
-  if(d.idiomas?.length)      secs.push({id:nid(),type:'languages', title:'Idiomas',    col:'side',items:d.idiomas});
-  if(d.premios?.length)      secs.push({id:nid(),type:'awards',    title:'Prêmios',    col:'side',items:d.premios.map(p=>({cargo:p.titulo,empresa:'',periodo:'',local:'',descricao:p.descricao}))});
+  if(d.experiencias?.length) secs.push({id:nid(),type:'experience',title:'Experiência',col:'main',items:(d.experiencias||[]).map(e=>({cargo:_vClean(e.cargo),empresa:_vClean(e.empresa),periodo:_vClean(e.periodo),local:_vClean(e.local),descricao:_vClean(e.descricao)}))});
+  if(d.educacao?.length)     secs.push({id:nid(),type:'education', title:'Educação',   col:'main',items:(d.educacao||[]).map(e=>({cargo:_vClean(e.curso),empresa:_vClean(e.instituicao),periodo:_vClean(e.periodo),local:'',descricao:''}))});
+  if(d.conquistas?.length)   secs.push({id:nid(),type:'achievements',title:'Conquistas-Chave',col:'side',items:(d.conquistas||[]).map(c=>({titulo:_vClean(c.titulo),descricao:_vClean(c.descricao)}))});
+  if(d.competencias?.length) secs.push({id:nid(),type:'skills',    title:'Competências',col:'side',items:(d.competencias||[]).map(_vClean)});
+  if(d.idiomas?.length)      secs.push({id:nid(),type:'languages', title:'Idiomas',    col:'side',items:(d.idiomas||[]).map(l=>({idioma:_vClean(l.idioma),nivel:_vClean(l.nivel)}))});
+  if(d.premios?.length)      secs.push({id:nid(),type:'awards',    title:'Prêmios',    col:'side',items:(d.premios||[]).map(p=>({cargo:_vClean(p.titulo),empresa:'',periodo:'',local:'',descricao:_vClean(p.descricao)}))});
   if(secs.length) S.sections=secs;
   renderEditor();renderPreview();save();
 }
