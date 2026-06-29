@@ -4652,13 +4652,16 @@ async function importFile(file){
     const r=await fetch('https://melwkopuxuwmetfjfszn.supabase.co/functions/v1/vitae-ai-import',{
       method:'POST',
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
-      body:JSON.stringify({content:[{type:'text',text}]})
+      body:JSON.stringify({content:[{type:'text',text}]}),
+      signal:AbortSignal.timeout(70_000)
     });
     if(r.status===429){toast('Limite mensal de importações atingido ('+VITAE_AI_LIMIT+'/mês).');return;}
     if(r.status===401){toast('Sessão expirada, faça login novamente.');return;}
-    if(!r.ok){toast('Falha ao processar com IA. Tente novamente.');return;}
-    const {data}=await r.json();
-    applyImported(data);
+    if(!r.ok){console.warn('[vitae-import] status',r.status);toast('Erro ao importar (cód '+r.status+'). Tente novamente.');return;}
+    let _payload;
+    try{_payload=await r.json();}catch(_){toast('Resposta inválida do servidor. Tente novamente.');return;}
+    if(!_payload||!_payload.data){toast('Não foi possível extrair dados do arquivo. Tente outro formato.');return;}
+    applyImported(_payload.data);
     toast('Currículo importado com sucesso!');
   }catch(e){
     toast('Erro inesperado ao importar. Tente novamente.');
