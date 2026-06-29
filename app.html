@@ -4654,7 +4654,7 @@ async function importFile(file){
       headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
       body:JSON.stringify({content:[{type:'text',text}]})
     });
-    if(r.status===429){toast('Limite diário de importações atingido ('+VITAE_AI_LIMIT+'/dia).');return;}
+    if(r.status===429){toast('Limite mensal de importações atingido ('+VITAE_AI_LIMIT+'/mês).');return;}
     if(r.status===401){toast('Sessão expirada, faça login novamente.');return;}
     if(!r.ok){toast('Falha ao processar com IA. Tente novamente.');return;}
     const {data}=await r.json();
