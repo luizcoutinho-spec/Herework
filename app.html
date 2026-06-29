@@ -4430,8 +4430,10 @@ body.vitae-active #page-vitae.vitae-fullscreen .cv-app{
 }
 /* esconder o banner da página dentro do Vitae */
 body.vitae-active #page-vitae.vitae-fullscreen .page-banner{ display:none; }
+/* reduz gap banner→About no estado nao-fullscreen; !important vence inline style=padding-top:48px */
+#page-vitae:not(.vitae-fullscreen) .container{ padding-top:16px !important; }
 /* ── Vitae About page (deslogado, tela Sobre) ── */
-.cv-about-page{max-width:680px;margin:0 auto;padding:48px 20px 60px;font-family:inherit;}
+.cv-about-page{max-width:680px;margin:0 auto;padding:20px 20px 60px;font-family:inherit;}
 .cv-about-page .cv-about-back{display:inline-block;margin-bottom:24px;font-size:13px;color:var(--text-2,#475569);text-decoration:none;cursor:pointer;}
 .cv-about-page .cv-about-back:hover{color:var(--text,#0f172a);}
 .cv-about-page h2{font-size:22px;font-weight:800;color:var(--text,#0f172a);margin:0 0 10px;}
