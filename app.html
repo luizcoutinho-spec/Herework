@@ -12600,6 +12600,13 @@ function lang() { return document.documentElement.getAttribute('data-lang') || '
    BUSCA
 ═══════════════════════════════════════════ */
 function doHeroSearch() {
+  if(!_session){
+    var _inp=document.querySelector('.hero-search-input');
+    var _cat=document.getElementById('hero-cat-select');
+    var _catOpt=_cat&&_cat.selectedIndex>0?(_cat.options[_cat.selectedIndex].getAttribute('data-pt')||''):'';
+    try{sessionStorage.setItem('hw_pending_search',JSON.stringify({term:_inp?_inp.value.trim():'',cat:_catOpt}));}catch(x){}
+    openModal('register'); return;
+  }
   var inp    = document.querySelector('.hero-search-input');
   var term   = inp ? inp.value.trim() : '';
   var catSel = document.getElementById('hero-cat-select');
@@ -13490,6 +13497,23 @@ function _setSession(name, email, type, isAdmin) {
   var _vp = document.getElementById('page-vitae');
   if (_vp && _vp.classList.contains('active') && !document.getElementById('cv-editor')) { _renderVitaeGate(); }
   _vitaeSyncChrome();
+  try{
+    var _ps=JSON.parse(sessionStorage.getItem('hw_pending_search')||'null');
+    if(_ps){
+      sessionStorage.removeItem('hw_pending_search');
+      var _pi=document.querySelector('.hero-search-input');
+      if(_pi&&_ps.term) _pi.value=_ps.term;
+      if(_ps.cat){
+        var _cs=document.getElementById('hero-cat-select');
+        if(_cs){
+          for(var i=0;i<_cs.options.length;i++){
+            if((_cs.options[i].getAttribute('data-pt')||'')===_ps.cat){ _cs.selectedIndex=i; break; }
+          }
+        }
+      }
+      doHeroSearch();
+    }
+  }catch(x){}
 }
 
 /* ── Helpers de tipo de conta ─────────────────────────────── *
