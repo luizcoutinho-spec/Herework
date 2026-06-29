@@ -4247,6 +4247,18 @@ section { padding: 64px 0; }
   to   { transform:translateY(0);    opacity:1; }
 }
 
+/* ── Vitae: modal de limite mensal (isolado — NAO usa .overlay/.openModal) ── */
+#vitae-limit-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:9500;display:flex;align-items:center;justify-content:center;padding:20px;}
+#vitae-limit-backdrop.cv-hidden{display:none;}
+#vitae-limit-card{background:#fff;border-radius:14px;max-width:420px;width:100%;padding:28px 26px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+#vitae-limit-card .vitae-wm{font-weight:800;letter-spacing:.3px;font-size:22px;color:var(--text);margin-bottom:14px;}
+#vitae-limit-card .vitae-wm b{color:#34d8df;font-weight:800;}
+#vitae-limit-card h3{font-size:18px;margin:0 0 10px;color:var(--text);}
+#vitae-limit-card p{font-size:14px;color:#475569;line-height:1.5;margin:0 0 8px;}
+#vitae-limit-card .vitae-limit-contact{font-size:13px;color:#64748b;margin:14px 0 18px;}
+#vitae-limit-card .vitae-limit-contact a{color:#34d8df;text-decoration:none;}
+#vitae-limit-card .vitae-limit-btn{background:#34d8df;color:#fff;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;}
+
 </style>
   
   <!-- Supabase Client -->
@@ -4655,7 +4667,7 @@ async function importFile(file){
       body:JSON.stringify({content:[{type:'text',text}]}),
       signal:AbortSignal.timeout(70_000)
     });
-    if(r.status===429){toast('Limite mensal de importações atingido ('+VITAE_AI_LIMIT+'/mês).');return;}
+    if(r.status===429){var _lim=document.getElementById('vitae-limit-backdrop');if(_lim)_lim.classList.remove('cv-hidden');return;}
     if(r.status===401){toast('Sessão expirada, faça login novamente.');return;}
     if(!r.ok){console.warn('[vitae-import] status',r.status);toast('Erro ao importar (cód '+r.status+'). Tente novamente.');return;}
     let _payload;
@@ -8584,6 +8596,19 @@ return {init};
     <div id="vitae-root"></div>
   </div>
 </div><!-- /page-vitae -->
+<div id="vitae-limit-backdrop" class="cv-hidden"
+     onclick="if(event.target===this)this.classList.add('cv-hidden')">
+  <div id="vitae-limit-card">
+    <div class="vitae-wm">Vitae<b>Studio</b></div>
+    <h3>Limite mensal atingido</h3>
+    <p>Você atingiu o limite de 3 importações por IA neste mês.<br>
+       O limite renova no dia 1º.</p>
+    <p class="vitae-limit-contact">Mais informações:
+       <a href="mailto:contato@herework.com.br">contato@herework.com.br</a></p>
+    <button class="vitae-limit-btn"
+            onclick="document.getElementById('vitae-limit-backdrop').classList.add('cv-hidden')">Entendi</button>
+  </div>
+</div>
 
 <!-- ══════════════════════════════════════════════
      PÁGINA: ADMIN DASHBOARD
