@@ -4478,12 +4478,15 @@ body.vitae-active #page-vitae.vitae-fullscreen .page-banner{ display:none; }
 @media print{
   /* Condição: só afeta impressão quando o Vitae está em fullscreen.
      Nas demais páginas do app, body NÃO tem vitae-active → regras ignoradas. */
+  @page { margin:0; size:A4; }
   body.vitae-active *{visibility:hidden;}
   body.vitae-active #cv-pagewrap,
   body.vitae-active #cv-pagewrap *{visibility:visible;}
   body.vitae-active #cv-pagewrap{position:fixed;top:0;left:0;width:100%;transform:none !important;height:auto !important;}
   body.vitae-active #cv-pagewrap .cv-fit{transform:none !important;width:210mm !important;}
   body.vitae-active #cv-pagewrap .cv-page{box-shadow:none;}
+  body.vitae-active #cv-pagewrap,
+  body.vitae-active #cv-pagewrap *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
 }
   </style>
 
