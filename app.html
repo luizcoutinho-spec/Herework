@@ -4900,6 +4900,7 @@ function bindEvents(){
  const dl=$('cv-dlBtn');if(dl)dl.addEventListener('click',()=>{fitOnePage();setTimeout(()=>window.print(),60);});
  const ab=$('cv-aboutBtn');if(ab){ab.addEventListener('click',()=>{const bd=$('cv-about-backdrop');if(bd)bd.classList.remove('cv-hidden');});}
  const ib=$('cv-importBtn');if(ib){ib.addEventListener('click',()=>{const f=$('cv-file');if(f)f.click();});}
+ const nb=$('cv-newBtn');if(nb){nb.addEventListener('click',()=>{if(!confirm('Isso vai limpar o currículo atual. Continuar?'))return;S={basics:{name:'',headline:'',location:'',phone:'',email:'',linkedin:'',website:'',photo:'',summary:''},template:S.template||'exec',accent:S.accent||'#149da4',font:S.font||'Segoe UI',sections:[]};save();renderEditor();renderPreview();});}
  const fi=$('cv-file');if(fi){fi.addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value='';});}
  if(!_resizeBound){window.addEventListener('resize',fitPreview);_resizeBound=true;}
  if(!_roBound && window.ResizeObserver){
@@ -12347,6 +12348,7 @@ window._vitaeOpenBuilder = function(){
           '<div class="cv-logo">Vitae<b>Studio</b></div>' +
           '<button class="cv-tbtn" id="cv-aboutBtn" title="' + aboutTitleL + '" style="opacity:.85;font-size:13px;">' + aboutBtnLabel + '</button>' +
           '<button class="cv-tbtn" id="cv-importBtn">&#10548; Importar PDF/Word</button>' +
+          '<button class="cv-tbtn" id="cv-newBtn">&#10011; Novo</button>' +
           '<input id="cv-file" type="file" accept=".pdf,.doc,.docx" hidden>' +
           '<div class="cv-sp"></div>' +
           '<button class="cv-tbtn cv-pri" id="cv-dlBtn">&#11015; Baixar PDF</button>' +
