@@ -4404,10 +4404,29 @@ section { padding: 64px 0; }
 
   <!-- Vitae B.2 — fullscreen layout -->
   <style>
-body.vitae-active{overflow:hidden;}
-#page-vitae.vitae-fullscreen .page-banner{display:none;}
-#page-vitae.vitae-fullscreen>.container{padding:0 !important;max-width:none !important;}
-.vitae-fullscreen .vitae-wrap .cv-app{height:calc(100vh - 102px);}
+/* trava o scroll na viewport, não no conteúdo */
+html.vitae-locked, body.vitae-active{
+  height:100dvh; max-height:100dvh; overflow:hidden;
+}
+/* confina a página do Vitae à viewport — DESCENDENTE (espaço), não '>' :
+   robusto a wrappers intermediários desconhecidos */
+body.vitae-active #page-vitae.vitae-fullscreen{
+  position:fixed; inset:0; height:100dvh; overflow:hidden;
+  display:flex; flex-direction:column; z-index:50;
+}
+/* o container e o root preenchem e viram coluna flex, sem altura hardcoded */
+body.vitae-active #page-vitae.vitae-fullscreen .container,
+body.vitae-active #page-vitae.vitae-fullscreen #vitae-root,
+body.vitae-active #page-vitae.vitae-fullscreen .vitae-wrap{
+  flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+  width:100%; max-width:none; padding:0; margin:0; overflow:hidden;
+}
+/* o corpo do builder absorve o resto e rola POR DENTRO */
+body.vitae-active #page-vitae.vitae-fullscreen .cv-app{
+  flex:1 1 auto; min-height:0; height:auto; overflow:auto;
+}
+/* esconder o banner da página dentro do Vitae */
+body.vitae-active #page-vitae.vitae-fullscreen .page-banner{ display:none; }
 /* ── Vitae About page (deslogado, tela Sobre) ── */
 .cv-about-page{max-width:680px;margin:0 auto;padding:48px 20px 60px;font-family:inherit;}
 .cv-about-page .cv-about-back{display:inline-block;margin-bottom:24px;font-size:13px;color:var(--text-2,#475569);text-decoration:none;cursor:pointer;}
@@ -12213,6 +12232,7 @@ function _vitaeSyncChrome(){
   var open=pg.classList.contains('active') && !!document.getElementById('cv-editor');
   pg.classList.toggle('vitae-fullscreen', open);
   document.body.classList.toggle('vitae-active', open);
+  document.documentElement.classList.toggle('vitae-locked', open);
 }
 
 /* ── Vitae: gate de login + esqueleto ─────────────────────────── */
